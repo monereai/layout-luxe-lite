@@ -32,6 +32,7 @@ function Checkout({ priceId }: { priceId: string }) {
 }
 
 export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => void; reason?: "limit" | "upgrade" }) {
+  const { outfit } = useOutfit();
   const { user } = usePlan();
   const [plan, setPlan] = useState<string>("plus_yearly");
   const [checkout, setCheckout] = useState(false);

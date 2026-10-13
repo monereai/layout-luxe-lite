@@ -121,7 +121,7 @@ function Home() {
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             What's on your mind?
           </p>
-          <CategoryPicker value={categories} onChange={setCategories} actionLabel="Talk to Monere" />
+          <CategoryPicker value={categories} onChange={setCategories} actionLabel="Talk to Monere" wardrobe />
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
             <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>

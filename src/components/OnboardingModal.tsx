@@ -21,6 +21,7 @@ const POINTS = [
 ];
 
 export function OnboardingModal({ onDone }: { onDone: (r: { category: string[]; situation: string | undefined }) => void }) {
+  const { outfit } = useOutfit();
   const [step, setStep] = useState(0);
   const [topics, setTopics] = useState<string[]>([]);
   const [text, setText] = useState("");
