@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { OnboardingModal, ONBOARDED_KEY } from "@/components/OnboardingModal";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BookmarkPlus, MessageCircleQuestion, Share2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { BookmarkPlus, Share2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { FollowUpThread, type ChatMsg } from "@/components/FollowUpThread";
+import { followUpChat } from "@/lib/followup.functions";
 import { AppShell } from "@/components/AppShell";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
@@ -44,8 +46,9 @@ function Home() {
   const [wisdom, setWisdom] = useState<Wisdom | null>(null);
   const [crisis, setCrisis] = useState(false);
   const [safety, setSafety] = useState(false);
-  const [followOpen, setFollowOpen] = useState(false);
-  const [followUp, setFollowUp] = useState("");
+  const reply = useServerFn(followUpChat);
+  const [chat, setChat] = useState<ChatMsg[]>([]);
+  const [chatPending, setChatPending] = useState(false);
   const [saved, setSaved] = useState(false);
   const [includeSong, setIncludeSong] = useState(true);
   const userName = useUserName();
@@ -62,30 +65,45 @@ function Home() {
     if (window.localStorage.getItem(ONBOARDED_KEY) !== "true") setOnboarding(true);
   }, []);
 
-  async function run(extra?: string) {
-    const text = extra ?? situation;
+  async function run() {
+    const text = situation;
     if (text.trim().length < 3) { toast("Tell us a little about what's going on first."); return; }
     if (detectCrisis(text)) {
-      setWisdom(null); setFollowOpen(false); setSafety(true);
+      setWisdom(null); setSafety(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     if (ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
     const res = await ask({
-      data: extra
-        ? { category, situation, followUp: extra, previous: JSON.stringify(wisdom), includeSong, userName: userName || undefined }
-        : { category, situation, includeSong, userName: userName || undefined },
+      data: { category, situation, includeSong, userName: userName || undefined },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
     if (!res.ok) { toast.error(res.error); return; }
     if (!premium && !res.wisdom.personalReply) { recordQuery(); setUsed(getUsedToday()); }
     setWisdom(res.wisdom);
+    setChat([]);
     setSaved(false);
-    setFollowOpen(false);
-    setFollowUp("");
     window.scrollTo({ top: 0, behavior: "smooth" });
     return;
+  }
+
+  async function sendFollowUp(q: string) {
+    if (!wisdom) return;
+    if (detectCrisis(q)) {
+      setWisdom(null); setChat([]); setSafety(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const history: ChatMsg[] = [...chat, { role: "user", content: q }];
+    setChat(history);
+    setChatPending(true);
+    const res = await reply({
+      data: { category, situation, advice: JSON.stringify(wisdom), userName: userName || undefined, history },
+    }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
+    setChatPending(false);
+    if (!res.ok) { toast.error(res.error); setChat(chat); return; }
+    setChat([...history, { role: "assistant", content: res.reply }]);
   }
 
   async function share() {
@@ -127,17 +145,9 @@ function Home() {
               <BookmarkPlus className="h-4 w-4" /> {saved ? "Saved to Journal" : "Save to Reflection Journal"}
             </Button>
             )}
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="secondary" onClick={() => setFollowOpen((v) => !v)} className={`h-auto whitespace-normal rounded-full px-2 py-3 ${wisdom.personalReply ? "col-span-2" : ""}`}><MessageCircleQuestion /> Ask Monere</Button>
-              {!wisdom.personalReply && <Button variant="secondary" onClick={share} className="h-auto whitespace-normal rounded-full px-2 py-3"><Share2 /> Share anonymously</Button>}
-            </div>
-            {followOpen && (
-              <div className="surface-card mt-2 p-4">
-                <textarea aria-label="Your follow-up for Monere" value={followUp} onChange={(e) => setFollowUp(e.target.value)} rows={3} maxLength={1500} placeholder="e.g., What if they get mad at me for not joining in?" className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-                <Button onClick={() => run(followUp)} className="btn-gold mt-2 h-auto w-full py-2.5">Seek Wisdom</Button>
-              </div>
-            )}
+            {!wisdom.personalReply && <Button variant="secondary" onClick={share} className="h-auto whitespace-normal rounded-full px-2 py-3"><Share2 /> Share anonymously</Button>}
           </div>
+          <FollowUpThread messages={chat} pending={chatPending} onSend={sendFollowUp} />
         </>
       ) : (
         <>
