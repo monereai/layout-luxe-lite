@@ -141,7 +141,7 @@
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: dense;
   gap: 0.6rem; align-items: center;
 }
-.orbit-center { position: relative; grid-column: 2; grid-row: 2 / span 2; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+.orbit-center { position: relative; grid-column: 2; grid-row: 2 / span 3; align-self: stretch; scale: 1.25; display: flex; align-items: center; justify-content: center; }
 .orbit-halo { position: absolute; inset: 8%; border-radius: 9999px; background: radial-gradient(circle, color-mix(in oklab, var(--primary) 28%, transparent), transparent 70%); }
 .float-tile {
   position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem;
