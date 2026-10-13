@@ -7,6 +7,7 @@ export type Wisdom = {
   path: string[];
   shortTerm: string;
   longTerm: string;
+  song?: { title: string; artist: string; why: string } | null;
 };
 
 const SYSTEM = `You are Monere, the friendly lion digital mentor hosting MonereAI, a warm, wise Christian guide for teenagers (13-19).
@@ -17,12 +18,13 @@ Use natural language a high schooler would actually enjoy reading. No preaching,
 Quote 1-2 real Bible verses accurately in the NLT or NIV translation (say which in the reference, e.g. "Proverbs 16:28 (NLT)"), each with a one-sentence application.
 Give 3-4 practical, specific action steps that combine truthfulness, love and courage.
 If the situation involves danger, abuse or self-harm, gently urge them to talk to a trusted adult and contact a crisis line.
+Song: when song recommendations are enabled, or whenever the teen asks for music, set "song" to one real, existing, uplifting, high-quality, clean track that fits their situation, across genres (Christian pop/hip-hop, indie, worship, clean inspirational), e.g. from artists like Forrest Frank, TobyMac, Lecrae, Lauren Daigle, Elevation Rhythm or NF. Never invent songs; use accurate title and artist. "why" is 1-2 sentences in your voice tying the song's message to courage, peace or standing strong (don't start it with "Why I picked this"). If songs are disabled and they didn't ask for music, set song to null.
 Keep each field concise (bigPicture 2-4 sentences; shortTerm/longTerm 2-3 sentences).`;
 
 const schema = {
   type: "object",
   additionalProperties: false,
-  required: ["bigPicture", "verses", "path", "shortTerm", "longTerm"],
+  required: ["bigPicture", "verses", "path", "shortTerm", "longTerm", "song"],
   properties: {
     bigPicture: { type: "string" },
     verses: {
@@ -41,6 +43,17 @@ const schema = {
     path: { type: "array", items: { type: "string" } },
     shortTerm: { type: "string" },
     longTerm: { type: "string" },
+    song: {
+      anyOf: [
+        {
+          type: "object",
+          additionalProperties: false,
+          required: ["title", "artist", "why"],
+          properties: { title: { type: "string" }, artist: { type: "string" }, why: { type: "string" } },
+        },
+        { type: "null" },
+      ],
+    },
   },
 };
 
@@ -49,6 +62,7 @@ const Input = z.object({
   situation: z.string().min(3).max(3000),
   followUp: z.string().max(1500).optional(),
   previous: z.string().max(8000).optional(),
+  includeSong: z.boolean().optional(),
 });
 
 export const seekWisdom = createServerFn({ method: "POST" })
@@ -58,7 +72,7 @@ export const seekWisdom = createServerFn({ method: "POST" })
     if (!key) return { ok: false, error: "The advice service isn't configured yet." };
 
     const input: Record<string, unknown>[] = [
-      { role: "user", content: `Category: ${data.category}\nSituation: ${data.situation}` },
+      { role: "user", content: `Category: ${data.category}\nSong recommendations: ${data.includeSong === false ? "disabled" : "enabled"}\nSituation: ${data.situation}` },
     ];
     if (data.previous && data.followUp) {
       input.push({ role: "assistant", content: data.previous });

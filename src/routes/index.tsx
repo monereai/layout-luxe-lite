@@ -13,6 +13,7 @@ import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
 import { MonereMentor } from "@/components/MonereMentor";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,6 +41,7 @@ function Home() {
   const [followOpen, setFollowOpen] = useState(false);
   const [followUp, setFollowUp] = useState("");
   const [saved, setSaved] = useState(false);
+  const [includeSong, setIncludeSong] = useState(true);
   const [onboarding, setOnboarding] = useState(false);
   useEffect(() => {
     if (window.localStorage.getItem(ONBOARDED_KEY) !== "true") setOnboarding(true);
@@ -52,8 +54,8 @@ function Home() {
     setLoading(true);
     const res = await ask({
       data: extra
-        ? { category, situation, followUp: extra, previous: JSON.stringify(wisdom) }
-        : { category, situation },
+        ? { category, situation, followUp: extra, previous: JSON.stringify(wisdom), includeSong }
+        : { category, situation, includeSong },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
     if (!res.ok) { toast.error(res.error); return; }
@@ -110,7 +112,11 @@ function Home() {
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
             <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>
-          <Button onClick={() => run()} disabled={loading} className="btn-gold mt-5 h-auto w-full py-4"><ShieldCheck /> Talk to Monere</Button>
+          <label className="surface-card mt-3 flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm">
+            <span>🎵 Include a Song Recommendation</span>
+            <Switch checked={includeSong} onCheckedChange={setIncludeSong} aria-label="Include a Song Recommendation" />
+          </label>
+          <Button onClick={() => run()} disabled={loading} className="btn-gold mt-4 h-auto w-full py-4"><ShieldCheck /> Talk to Monere</Button>
           <p className="mt-3 text-center text-xs text-muted-foreground">AI guidance isn't a replacement for a pastor, parent or counsellor.</p>
         </>
       )}
