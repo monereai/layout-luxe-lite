@@ -1,3 +1,4 @@
+import { MonereFigure } from "@/components/MonereFigure";
 import { setUserName } from "@/lib/username";
 import { useState } from "react";
 import { Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-react";
@@ -49,7 +50,7 @@ export function OnboardingModal({ onDone }: { onDone: (r: { category: string[]; 
 
         {step === 0 && (
           <div className="text-center">
-            <img src={outfit.src} alt="Monere the lion in his navy cap" className="mentor-avatar mx-auto h-56 w-56 object-contain" />
+            <MonereFigure gesture="wave" alt="Monere the lion waving hello" className="mentor-avatar mx-auto h-56 w-56" />
             <p className="mx-auto mt-2 w-fit rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary">This week: “Courage starts with one honest step.”</p>
             <h2 className="mt-4 font-display text-2xl font-semibold">Meet Monere, Your AI Mentor 🦁</h2>
             <p className="mt-2 text-sm text-muted-foreground">Hey! I'm here to help you face life's tough choices with wisdom and courage.</p>

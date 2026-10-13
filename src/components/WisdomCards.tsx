@@ -4,7 +4,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { usePlan } from "@/hooks/usePlan";
 import { findSongPreview, type SongPreview } from "@/lib/song.functions";
 import type { ReactNode } from "react";
+import { MonereFigure } from "@/components/MonereFigure";
 import type { Wisdom } from "@/lib/wisdom.functions";
+
+function CheerBadge({ text }: { text: string }) {
+  return (
+    <div className="mt-4 flex items-center gap-3 rounded-2xl bg-primary/10 p-2 pr-4">
+      <MonereFigure gesture="thumbs" alt="Monere giving you a thumbs-up" className="gesture-pop h-14 w-14 shrink-0" />
+      <p className="text-sm font-medium text-primary">{text}</p>
+    </div>
+  );
+}
 
 function Card({ icon, title, children, delay }: { icon: ReactNode; title: string; children: ReactNode; delay: number }) {
   return (
@@ -41,12 +51,14 @@ export function WisdomCards({ w }: { w: Wisdom }) {
             </li>
           ))}
         </ol>
+        <CheerBadge text="You've got this." />
       </Card>
       <Card icon={<ShieldCheck className="h-4 w-4" />} title="The Honor Outlook" delay={360}>
         <div className="grid gap-3">
           <div className="border-l-2 border-border pl-3"><p className="text-xs font-bold text-muted-foreground">YOUR NEXT STEP</p><p className="mt-1 text-sm">{w.shortTerm}</p></div>
           <div className="border-l-2 border-primary pl-3"><p className="text-xs font-bold text-primary">THE PERSON YOU'RE BECOMING</p><p className="mt-1 text-sm">{w.longTerm}</p></div>
         </div>
+        <CheerBadge text="Proud of you for thinking this through." />
       </Card>
       {w.song && <SongCard song={w.song} />}
     </div>
