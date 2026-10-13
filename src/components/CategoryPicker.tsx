@@ -77,7 +77,7 @@ export function CategoryPicker({
     <div
       role="radiogroup"
       aria-label="Which area of life is this about?"
-      className="category-scroll mt-3 grid max-h-[32vh] gap-2 overflow-y-auto pr-1 sm:max-h-none sm:grid-cols-2 sm:overflow-visible"
+      className="category-scroll mt-3 grid max-h-[26vh] gap-2 overflow-y-auto pr-1 sm:max-h-none sm:grid-cols-2 sm:overflow-visible"
     >
       {CATEGORIES.map(({ title, blurb, icon: Icon }) => {
         const selected = title === value;
