@@ -77,3 +77,60 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       return { error: getStripeErrorMessage(error) };
     }
   });
+
+async function portalConfigId(stripe: ReturnType<typeof createStripeClient>): Promise<string> {
+  const list = await stripe.billingPortal.configurations.list({ limit: 20, active: true });
+  const existing = list.data.find((c) => c.metadata?.["app"] === "monere_plus");
+  if (existing) return existing.id;
+  const prices = await stripe.prices.list({ lookup_keys: ALLOWED_PRICES });
+  const product = prices.data[0]?.product;
+  const productId = typeof product === "string" ? product : product?.id;
+  const created = await stripe.billingPortal.configurations.create({
+    metadata: { app: "monere_plus" },
+    business_profile: { headline: "Manage your Monere Plus subscription" },
+    features: {
+      invoice_history: { enabled: true },
+      payment_method_update: { enabled: true },
+      // Cancels keep access until the end of the paid period.
+      subscription_cancel: { enabled: true, mode: "at_period_end" },
+      // Monthly <-> annual switches take effect at renewal, no proration.
+      subscription_update: {
+        enabled: true,
+        default_allowed_updates: ["price"],
+        proration_behavior: "none",
+        products: productId ? [{ product: productId, prices: prices.data.map((p) => p.id) }] : [],
+        schedule_at_period_end: { conditions: [{ type: "decreasing_item_amount" }, { type: "shortening_interval" }] },
+      },
+    },
+  } as Stripe.BillingPortal.ConfigurationCreateParams);
+  return created.id;
+}
+
+export const createPortalSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { returnUrl: string; environment: StripeEnv }) => {
+    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
+    return data;
+  })
+  .handler(async ({ data, context }): Promise<{ url: string } | { error: string }> => {
+    const { data: sub } = await context.supabase
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", context.userId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!sub?.stripe_customer_id) return { error: "No subscription found" };
+    try {
+      const stripe = createStripeClient(data.environment);
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: sub.stripe_customer_id,
+        configuration: await portalConfigId(stripe),
+        return_url: data.returnUrl,
+      });
+      return { url: portal.url };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
