@@ -186,3 +186,10 @@
 @media (prefers-reduced-motion: reduce) { .wave-bar.is-playing { animation: none; height: 60%; } }
 .song-link { display: inline-flex; align-items: center; gap: 0.375rem; border-radius: 9999px; border: 1px solid var(--border); padding: 0.375rem 0.75rem; font-size: 0.75rem; font-weight: 600; color: var(--muted-foreground); transition: color 0.2s, border-color 0.2s; }
 .song-link:hover { color: var(--primary); border-color: var(--primary); }
+
+/* Monere gesture cross-fade */
+.gesture-frame { opacity: 0; transform: scale(0.97); transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+.gesture-frame.gesture-on { opacity: 1; transform: scale(1); }
+.gesture-pop { animation: gesture-pop 0.5s ease-out both; }
+@keyframes gesture-pop { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .gesture-frame { transition: opacity 0.15s linear; transform: none !important; } .gesture-pop { animation: none; } }

@@ -47,6 +47,7 @@ function Home() {
   const [saved, setSaved] = useState(false);
   const [includeSong, setIncludeSong] = useState(true);
   const userName = useUserName();
+  const [listening, setListening] = useState(false);
   const { premium, ready } = usePlan();
   const [paywall, setPaywall] = useState<null | "limit" | "upgrade">(null);
   const [used, setUsed] = useState(0);
@@ -123,9 +124,9 @@ function Home() {
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             What's on your mind?
           </p>
-          <CategoryPicker value={categories} onChange={setCategories} actionLabel="Talk to Monere" wardrobe />
+          <CategoryPicker value={categories} onChange={setCategories} actionLabel="Talk to Monere" wardrobe listening={listening} />
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
-            <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
+            <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} onFocus={() => setListening(true)} onBlur={() => setListening(false)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>
           <label className="surface-card mt-3 flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm">
             <span>🎵 Include a Song Recommendation</span>
