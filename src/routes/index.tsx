@@ -6,6 +6,7 @@ import { BookmarkPlus, MessageCircleQuestion, Share2, ArrowLeft, Loader2 } from 
 import { AppShell } from "@/components/AppShell";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
+import { CategoryPicker, CATEGORIES } from "@/components/CategoryPicker";
 import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
@@ -24,11 +25,10 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const CATEGORIES = ["Friendship", "School & Honesty", "Social Media / Online", "Family", "Relationships & Dating", "Personal Integrity"];
 
 function Home() {
   const ask = useServerFn(seekWisdom);
-  const [category, setCategory] = useState<string>(CATEGORIES[0]!);
+  const [category, setCategory] = useState<string>(CATEGORIES[0]!.title);
   const [situation, setSituation] = useState("");
   const [loading, setLoading] = useState(false);
   const [wisdom, setWisdom] = useState<Wisdom | null>(null);
@@ -100,11 +100,10 @@ function Home() {
         <>
           <h1 className="mt-2 font-display text-4xl leading-tight">What situation are you facing?</h1>
           <p className="mt-3 text-muted-foreground">No judgement here. Just honest, grace-filled wisdom for real life.</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {CATEGORIES.map((c) => (
-              <button key={c} onClick={() => setCategory(c)} className={`rounded-full border px-3.5 py-1.5 text-sm transition ${c === category ? "border-primary bg-primary text-primary-foreground" : "border-border bg-secondary text-secondary-foreground"}`}>{c}</button>
-            ))}
-          </div>
+          <p className="mt-7 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Pick what fits best
+          </p>
+          <CategoryPicker value={category} onChange={setCategory} />
           <div className="surface-card mt-5 p-4 focus-within:border-primary">
             <textarea value={situation} onChange={(e) => setSituation(e.target.value)} rows={6} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>
