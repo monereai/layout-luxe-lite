@@ -4,6 +4,6 @@
 - [x] Verify branding on every app page.
 
 # Monere digital mentor
-- [ ] Add animated CGI-style lion artwork to Home, loading, and results.
-- [ ] Reframe intros, actions, advice cards, and mentor voice.
-- [ ] Add subtle themed motifs and verify advice and journal flow.
+- [x] Add animated CGI-style lion artwork to Home, loading, and results.
+- [x] Reframe intros, actions, advice cards, and mentor voice.
+- [x] Add subtle themed motifs and verify advice and journal flow.
