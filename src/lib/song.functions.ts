@@ -10,7 +10,7 @@ export const findSongPreview = createServerFn({ method: "POST" })
       const term = encodeURIComponent(`${data.title} ${data.artist}`);
       const res = await fetch(`https://itunes.apple.com/search?term=${term}&media=music&entity=song&limit=1`);
       if (!res.ok) return null;
-      const json = (await res.json()) as { results?: Record<string, string>[] };
+      const json = (await res.json()) as { results?: { previewUrl?: string; artworkUrl100?: string; trackName?: string; artistName?: string; collectionName?: string }[] };
       const r = json.results?.[0];
       if (!r?.previewUrl) return null;
       return {
