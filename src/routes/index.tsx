@@ -98,14 +98,14 @@ function Home() {
         </>
       ) : (
         <>
-          <h1 className="mt-2 font-display text-4xl leading-tight">What situation are you facing?</h1>
-          <p className="mt-3 text-muted-foreground">No judgement here. Just honest, grace-filled wisdom for real life.</p>
-          <p className="mt-7 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <h1 className="mt-1 font-display text-4xl leading-tight">What situation are you facing?</h1>
+          <p className="mt-2 text-muted-foreground">No judgement here. Just honest, grace-filled wisdom for real life.</p>
+          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             Pick what fits best
           </p>
           <CategoryPicker value={category} onChange={setCategory} />
-          <div className="surface-card mt-5 p-4 focus-within:border-primary">
-            <textarea value={situation} onChange={(e) => setSituation(e.target.value)} rows={6} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
+          <div className="surface-card mt-4 p-4 focus-within:border-primary">
+            <textarea value={situation} onChange={(e) => setSituation(e.target.value)} rows={5} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>
           <button onClick={() => run()} disabled={loading} className="btn-gold mt-5 flex w-full items-center justify-center gap-2 py-4">
             {loading && <Loader2 className="h-4 w-4 animate-spin" />} Seek Wisdom & Advice

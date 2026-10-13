@@ -77,7 +77,7 @@ export function CategoryPicker({
     <div
       role="radiogroup"
       aria-label="Which area of life is this about?"
-      className="category-scroll mt-6 grid max-h-[46vh] gap-2 overflow-y-auto pr-1 sm:max-h-none sm:grid-cols-2 sm:overflow-visible"
+      className="category-scroll mt-3 grid max-h-[32vh] gap-2 overflow-y-auto pr-1 sm:max-h-none sm:grid-cols-2 sm:overflow-visible"
     >
       {CATEGORIES.map(({ title, blurb, icon: Icon }) => {
         const selected = title === value;
@@ -88,7 +88,7 @@ export function CategoryPicker({
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(title)}
-            className={`flex items-start gap-3 rounded-2xl border p-3.5 text-left transition duration-200 ${
+            className={`flex items-start gap-3 rounded-2xl border p-3 text-left transition duration-200 ${
               selected
                 ? "border-primary/70 bg-primary/12 shadow-[var(--shadow-gold)]"
                 : "border-border bg-secondary/55 hover:border-primary/40 hover:bg-secondary"
