@@ -112,6 +112,16 @@
   background: var(--secondary); color: var(--foreground); font-weight: 600; font-size: 0.9rem;
 }
 @utility bg-glow { background-image: var(--glow); }
+@utility category-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--primary) 45%, transparent) transparent;
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--primary) 40%, transparent);
+    border-radius: 9999px;
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
+}
 
 @layer base {
   * {
