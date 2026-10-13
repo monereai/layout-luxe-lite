@@ -122,12 +122,14 @@ function Home() {
           </>
           )}
           <div className="mt-6 grid gap-2">
+            {!wisdom.personalReply && (
             <Button disabled={saved} onClick={() => { saveEntry({ category, situation, wisdom }); setSaved(true); toast.success("Saved to your Reflection Journal"); }} className="btn-gold h-auto whitespace-normal py-3.5 disabled:opacity-60">
               <BookmarkPlus className="h-4 w-4" /> {saved ? "Saved to Journal" : "Save to Reflection Journal"}
             </Button>
+            )}
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="secondary" onClick={() => setFollowOpen((v) => !v)} className="h-auto whitespace-normal rounded-full px-2 py-3"><MessageCircleQuestion /> Ask Monere</Button>
-              <Button variant="secondary" onClick={share} className="h-auto whitespace-normal rounded-full px-2 py-3"><Share2 /> Share anonymously</Button>
+              <Button variant="secondary" onClick={() => setFollowOpen((v) => !v)} className={`h-auto whitespace-normal rounded-full px-2 py-3 ${wisdom.personalReply ? "col-span-2" : ""}`}><MessageCircleQuestion /> Ask Monere</Button>
+              {!wisdom.personalReply && <Button variant="secondary" onClick={share} className="h-auto whitespace-normal rounded-full px-2 py-3"><Share2 /> Share anonymously</Button>}
             </div>
             {followOpen && (
               <div className="surface-card mt-2 p-4">
