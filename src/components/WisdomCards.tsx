@@ -1,4 +1,4 @@
-import { BookOpen, Footprints, ShieldCheck, Compass } from "lucide-react";
+import { BookOpen, Footprints, ShieldCheck, Compass, Music, Youtube } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Wisdom } from "@/lib/wisdom.functions";
 
@@ -44,6 +44,31 @@ export function WisdomCards({ w }: { w: Wisdom }) {
           <div className="border-l-2 border-primary pl-3"><p className="text-xs font-bold text-primary">THE PERSON YOU'RE BECOMING</p><p className="mt-1 text-sm">{w.longTerm}</p></div>
         </div>
       </Card>
+      {w.song && <SongCard song={w.song} />}
     </div>
+  );
+}
+
+function SongCard({ song }: { song: NonNullable<Wisdom["song"]> }) {
+  const q = encodeURIComponent(`${song.title} ${song.artist}`).replace(/%20/g, "+");
+  const links = [
+    { label: "Spotify", href: `https://open.spotify.com/search/${q}`, icon: <Music className="h-4 w-4" /> },
+    { label: "Apple Music", href: `https://music.apple.com/us/search?term=${q}`, icon: <Music className="h-4 w-4" /> },
+    { label: "YouTube", href: `https://www.youtube.com/results?search_query=${q}`, icon: <Youtube className="h-4 w-4" /> },
+  ];
+  return (
+    <Card icon={<Music className="h-4 w-4" />} title="Monere's Soundtrack 🎵" delay={480}>
+      <p className="font-display text-lg font-bold leading-snug">{song.title}</p>
+      <p className="text-sm font-bold text-primary">{song.artist}</p>
+      <p className="mt-3 text-sm italic text-muted-foreground">"Why I picked this for you: {song.why}"</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {links.map((l) => (
+          <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" aria-label={`Listen on ${l.label}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition hover:border-primary hover:text-primary">
+            {l.icon}{l.label}
+          </a>
+        ))}
+      </div>
+    </Card>
   );
 }
