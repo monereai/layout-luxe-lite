@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { OnboardingModal, ONBOARDED_KEY } from "@/components/OnboardingModal";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { BookmarkPlus, MessageCircleQuestion, Share2, ArrowLeft, ShieldCheck } from "lucide-react";
@@ -38,6 +39,10 @@ function Home() {
   const [followOpen, setFollowOpen] = useState(false);
   const [followUp, setFollowUp] = useState("");
   const [saved, setSaved] = useState(false);
+  const [onboarding, setOnboarding] = useState(false);
+  useEffect(() => {
+    if (window.localStorage.getItem(ONBOARDED_KEY) !== "true") setOnboarding(true);
+  }, []);
 
   async function run(extra?: string) {
     const text = extra ?? situation;
@@ -109,6 +114,15 @@ function Home() {
         </>
       )}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
+      {onboarding && (
+        <OnboardingModal
+          onDone={({ category: c, situation: s }) => {
+            setOnboarding(false);
+            if (c) setCategory(c);
+            if (s) { setSituation(s); if (detectCrisis(s)) setCrisis(true); }
+          }}
+        />
+      )}
     </AppShell>
   );
 }
