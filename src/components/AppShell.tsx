@@ -4,6 +4,9 @@ import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
 import { usePlan } from "@/hooks/usePlan";
+import { createPortalSession } from "@/utils/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
+import { toast } from "sonner";
 
 const tabs = [
   { to: "/", label: "Seek", icon: Compass },
@@ -14,6 +17,11 @@ const tabs = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { user, premium, signOut } = usePlan();
+  async function manage() {
+    const r = await createPortalSession({ data: { returnUrl: window.location.href, environment: getStripeEnvironment() } }).catch(() => ({ error: "Couldn't open billing." }));
+    if ("error" in r) { toast(r.error === "No subscription found" ? "Your Plus comes from a pass code — nothing to manage here." : r.error); return; }
+    window.open(r.url, "_blank");
+  }
   return (
     <div className="bg-glow relative isolate min-h-screen">
       <PaymentTestModeBanner />
@@ -29,6 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
           <div className="flex flex-col items-end gap-1 pt-1 text-xs">
             {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">PLUS</span>}
+            {premium && <button onClick={() => void manage()} className="text-muted-foreground hover:text-primary">Manage plan</button>}
             {user ? (
               <button onClick={() => void signOut()} className="text-muted-foreground hover:text-primary">Sign out</button>
             ) : (
