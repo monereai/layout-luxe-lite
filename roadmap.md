@@ -14,11 +14,11 @@
 
 # Wardrobe expansion
 - [x] Create and optimize all 80 outfit combinations.
-- [ ] Add category tabs, live preview, equipped states, and saved item selections.
-- [ ] Verify wardrobe behavior on a phone-sized screen.
+- [x] Add category tabs, live preview, equipped states, and saved item selections.
+- [x] Verify wardrobe behavior on a phone-sized screen.
 
 # Profile-tailored guidance
-- [ ] Add Young Man / Young Woman selection to onboarding and persist it.
-- [ ] Tailor Monere's advice prompt and response framing to the selected profile.
-- [ ] Add warm, respectful boundary guidance for questions outside the male/female framework.
-- [ ] Verify onboarding and personalized advice behavior.
+- [x] Add Young Man / Young Woman selection to onboarding and persist it.
+- [x] Tailor Monere's advice prompt and response framing to the selected profile.
+- [x] Add warm, respectful boundary guidance for questions outside the male/female framework.
+- [x] Verify onboarding and personalized advice behavior.
