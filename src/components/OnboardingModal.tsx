@@ -1,21 +1,10 @@
 import { useState } from "react";
-import { Check, Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-react";
+import { Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-react";
 import lion from "@/assets/monere-lion.png";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { Button } from "@/components/ui/button";
 
 export const ONBOARDED_KEY = "monereai-onboarded";
-
-export const ONBOARD_TOPICS = [
-  { label: "Friendship", category: "Friendship & Peer Pressure" },
-  { label: "School", category: "School, Exams & Honesty" },
-  { label: "Social Media", category: "Social Media & Digital Ethics" },
-  { label: "Family", category: "Family & Home Life" },
-  { label: "Dating", category: "Dating & Healthy Relationships" },
-  { label: "Integrity", category: "Personal Integrity & Truth" },
-  { label: "Mental Well-Being", category: "Mental Well-Being & Stress" },
-  { label: "Faith", category: "Future, Purpose & Faith" },
-] as const;
 
 const SAMPLES = [
   { text: "My friends want me to join in gossiping about someone, but it feels wrong.", category: "Friendship & Peer Pressure" },
