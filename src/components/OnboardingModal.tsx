@@ -1,3 +1,4 @@
+import { setUserName } from "@/lib/username";
 import { useState } from "react";
 import { Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-react";
 import { useOutfit } from "@/lib/outfit";
@@ -25,10 +26,12 @@ export function OnboardingModal({ onDone }: { onDone: (r: { category: string[]; 
   const [step, setStep] = useState(0);
   const [topics, setTopics] = useState<string[]>([]);
   const [text, setText] = useState("");
+  const [nameInput, setNameInput] = useState("");
   const [sampleCat, setSampleCat] = useState<string | undefined>();
 
   const finish = (situation?: string) => {
     window.localStorage.setItem(ONBOARDED_KEY, "true");
+    if (nameInput.trim()) setUserName(nameInput);
     onDone({ category: topics.length ? topics : sampleCat ? [sampleCat] : [], situation });
   };
 
@@ -50,7 +53,9 @@ export function OnboardingModal({ onDone }: { onDone: (r: { category: string[]; 
             <p className="mx-auto mt-2 w-fit rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary">This week: “Courage starts with one honest step.”</p>
             <h2 className="mt-4 font-display text-2xl font-semibold">Meet Monere, Your AI Mentor 🦁</h2>
             <p className="mt-2 text-sm text-muted-foreground">Hey! I'm here to help you face life's tough choices with wisdom and courage.</p>
-            <Button onClick={() => setStep(1)} className="btn-gold mt-6 h-auto w-full py-4">Get Started</Button>
+            <label htmlFor="onb-name" className="mt-5 block text-left text-sm font-medium">What should Monere call you?</label>
+            <input id="onb-name" value={nameInput} maxLength={30} onChange={(e) => setNameInput(e.target.value)} placeholder="e.g., Alex (or a nickname you like)" className="mt-2 w-full rounded-2xl border border-border bg-input/40 px-4 py-3 text-sm outline-none focus:border-primary" />
+            <Button onClick={() => { if (nameInput.trim()) setUserName(nameInput); setStep(1); }} className="btn-gold mt-4 h-auto w-full py-4">Get Started</Button>
           </div>
         )}
 
