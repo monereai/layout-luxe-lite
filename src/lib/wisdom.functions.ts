@@ -63,6 +63,7 @@ const Input = z.object({
   followUp: z.string().max(1500).optional(),
   previous: z.string().max(8000).optional(),
   includeSong: z.boolean().optional(),
+  userName: z.string().max(30).optional(),
 });
 
 export const seekWisdom = createServerFn({ method: "POST" })
@@ -72,7 +73,7 @@ export const seekWisdom = createServerFn({ method: "POST" })
     if (!key) return { ok: false, error: "The advice service isn't configured yet." };
 
     const input: Record<string, unknown>[] = [
-      { role: "user", content: `Category: ${data.category}\nSong recommendations: ${data.includeSong === false ? "disabled" : "enabled"}\nSituation: ${data.situation}` },
+      { role: "user", content: `${data.userName?.trim() ? `Teen's name: ${data.userName.trim()} (weave it naturally into your response once or twice, e.g. "Here's the honest truth, ${data.userName.trim()}..." — never more than twice)\n` : ""}Category: ${data.category}\nSong recommendations: ${data.includeSong === false ? "disabled" : "enabled"}\nSituation: ${data.situation}` },
     ];
     if (data.previous && data.followUp) {
       input.push({ role: "assistant", content: data.previous });

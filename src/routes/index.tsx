@@ -8,6 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
 import { CategoryPicker } from "@/components/CategoryPicker";
+import { useUserName } from "@/lib/username";
 import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
@@ -45,6 +46,7 @@ function Home() {
   const [followUp, setFollowUp] = useState("");
   const [saved, setSaved] = useState(false);
   const [includeSong, setIncludeSong] = useState(true);
+  const userName = useUserName();
   const { premium, ready } = usePlan();
   const [paywall, setPaywall] = useState<null | "limit" | "upgrade">(null);
   const [used, setUsed] = useState(0);
@@ -66,8 +68,8 @@ function Home() {
     setLoading(true);
     const res = await ask({
       data: extra
-        ? { category, situation, followUp: extra, previous: JSON.stringify(wisdom), includeSong }
-        : { category, situation, includeSong },
+        ? { category, situation, followUp: extra, previous: JSON.stringify(wisdom), includeSong, userName: userName || undefined }
+        : { category, situation, includeSong, userName: userName || undefined },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
     if (!res.ok) { toast.error(res.error); return; }

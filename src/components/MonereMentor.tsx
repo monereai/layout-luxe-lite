@@ -1,8 +1,10 @@
 import { Compass, ShieldCheck, Sparkles } from "lucide-react";
 import { useOutfit } from "@/lib/outfit";
+import { useUserName } from "@/lib/username";
 
 export function MonereMentor({ mode = "welcome", portrait = true }: { mode?: "welcome" | "insight" | "results"; portrait?: boolean }) {
   const { outfit } = useOutfit();
+  const name = useUserName();
   const thinking = mode === "insight";
   return (
     <section className={`mentor-intro text-center ${thinking ? "mentor-thinking" : ""}`} aria-label="Monere, your digital mentor">
@@ -14,10 +16,10 @@ export function MonereMentor({ mode = "welcome", portrait = true }: { mode?: "we
       </div>}
       <p className="mb-2 flex items-center justify-center gap-2 text-xs font-semibold text-primary"><ShieldCheck className="h-3.5 w-3.5" /> Wisdom. Courage. A little lionheartedness.</p>
       <h1 className="font-display text-3xl font-semibold leading-tight">
-        {thinking ? "Monere is gathering insight…" : mode === "results" ? "Let's find your brave path." : "Hey! I'm Monere."}
+        {thinking ? "Monere is gathering insight…" : mode === "results" ? "Let's find your brave path." : name ? `Hey ${name}! I'm Monere.` : "Hey! I'm Monere."}
       </h1>
       <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-        {thinking ? "I'm taking a moment to reflect on scripture and your next steps." : mode === "results" ? "I'm right here with you. Let's take this one courageous step at a time." : "Let's look at whatever you're facing today with some wisdom and courage. No judgment—just a safe space to find the strong path forward."}
+        {thinking ? "I'm taking a moment to reflect on scripture and your next steps." : mode === "results" ? `I'm right here with you${name ? `, ${name}` : ""}. Let's take this one courageous step at a time.` : name ? `Glad you're here, ${name}. What's on your mind today? Let's look at whatever you're facing with some wisdom and courage.` : "Let's look at whatever you're facing today with some wisdom and courage. No judgment—just a safe space to find the strong path forward."}
       </p>
       {thinking && <div role="status" aria-label="Gathering insight" className="mt-6 flex justify-center gap-2"><span className="insight-dot" /><span className="insight-dot" /><span className="insight-dot" /></div>}
     </section>
