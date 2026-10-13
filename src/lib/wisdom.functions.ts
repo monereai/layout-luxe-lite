@@ -52,7 +52,7 @@ const Input = z.object({
 export const seekWisdom = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }): Promise<{ ok: true; wisdom: Wisdom } | { ok: false; error: string }> => {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { ok: false, error: "The advice service isn't configured yet." };
 
     const input: Record<string, unknown>[] = [

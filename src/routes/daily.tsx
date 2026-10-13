@@ -29,7 +29,7 @@ const DAYS = [
 function Daily() {
   const [i, setI] = useState(0);
   useEffect(() => setI(Math.floor(Date.now() / 86400000) % DAYS.length), []);
-  const d = DAYS[i];
+  const d = DAYS[i] ?? DAYS[0]!;
   const date = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   return (
     <AppShell>

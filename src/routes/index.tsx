@@ -39,7 +39,7 @@ function Home() {
 
   async function run(extra?: string) {
     const text = extra ?? situation;
-    if (text.trim().length < 3) return toast("Tell us a little about what's going on first.");
+    if (text.trim().length < 3) { toast("Tell us a little about what's going on first."); return; }
     if (detectCrisis(text)) setCrisis(true);
     setLoading(true);
     const res = await ask({
@@ -48,12 +48,13 @@ function Home() {
         : { category, situation },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
-    if (!res.ok) return toast.error(res.error);
+    if (!res.ok) { toast.error(res.error); return; }
     setWisdom(res.wisdom);
     setSaved(false);
     setFollowOpen(false);
     setFollowUp("");
     window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
   }
 
   async function share() {
