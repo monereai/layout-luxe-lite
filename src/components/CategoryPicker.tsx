@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
-import monere from "@/assets/monere-lion.png";
+import { useOutfit } from "@/lib/outfit";
+import { WardrobeButton } from "@/components/Wardrobe";
 
 export type Category = { title: string; short: string; emoji: string };
 
@@ -41,11 +42,14 @@ export function CategoryPicker({
   value,
   onChange,
   actionLabel = "Continue",
+  wardrobe = false,
 }: {
   value: string[];
   onChange: (titles: string[]) => void;
   actionLabel?: string;
+  wardrobe?: boolean;
 }) {
+  const { outfit } = useOutfit();
   const toggle = (title: string) => {
     if (value.includes(title)) onChange(value.filter((t) => t !== title));
     else if (value.length < MAX_CATEGORIES) onChange([...value, title]);
@@ -53,10 +57,11 @@ export function CategoryPicker({
 
   return (
     <div className="mt-3">
+      {wardrobe && <div className="flex justify-end"><WardrobeButton /></div>}
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
         <div className="orbit-center" aria-hidden="true">
           <span className="orbit-halo" />
-          <img src={monere} alt="" className="mentor-avatar relative h-full w-full object-contain" />
+          <img src={outfit.src} alt="" className="mentor-avatar relative h-full w-full object-contain" />
         </div>
         <div className="orbit-overlay">
           {CATEGORIES.map(({ title, short, emoji }, i) => {

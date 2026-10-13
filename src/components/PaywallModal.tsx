@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { Check, X, ArrowLeft } from "lucide-react";
-import lion from "@/assets/monere-lion.png";
+import { useOutfit } from "@/lib/outfit";
 import { Button } from "@/components/ui/button";
 import { PassCodeLink } from "@/components/PassCodeDialog";
 import { usePlan } from "@/hooks/usePlan";
@@ -32,6 +32,7 @@ function Checkout({ priceId }: { priceId: string }) {
 }
 
 export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => void; reason?: "limit" | "upgrade" }) {
+  const { outfit } = useOutfit();
   const { user } = usePlan();
   const [plan, setPlan] = useState<string>("plus_yearly");
   const [checkout, setCheckout] = useState(false);
@@ -47,7 +48,7 @@ export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => voi
           </>
         ) : (
           <>
-            <img src={lion} alt="Monere the lion holding his tablet" className="mentor-avatar mx-auto h-40 w-40 object-contain" />
+            <img src={outfit.src} alt="Monere the lion holding his tablet" className="mentor-avatar mx-auto h-40 w-40 object-contain" />
             <h2 className="mt-2 text-center font-display text-xl font-semibold">
               {reason === "limit" ? "You've reached today's free limit! Upgrade to Monere Plus to keep talking with Monere." : "Upgrade to Monere Plus"}
             </h2>

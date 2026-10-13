@@ -1,7 +1,8 @@
 import { Compass, ShieldCheck, Sparkles } from "lucide-react";
-import monere from "@/assets/monere-lion.png";
+import { useOutfit } from "@/lib/outfit";
 
 export function MonereMentor({ mode = "welcome", portrait = true }: { mode?: "welcome" | "insight" | "results"; portrait?: boolean }) {
+  const { outfit } = useOutfit();
   const thinking = mode === "insight";
   return (
     <section className={`mentor-intro text-center ${thinking ? "mentor-thinking" : ""}`} aria-label="Monere, your digital mentor">
@@ -9,7 +10,7 @@ export function MonereMentor({ mode = "welcome", portrait = true }: { mode?: "we
         <Compass className="mentor-compass absolute left-2 top-9 h-16 w-16 text-primary/15" strokeWidth={0.8} aria-hidden="true" />
         <ShieldCheck className="absolute right-2 top-16 h-10 w-10 text-primary/20" strokeWidth={1} aria-hidden="true" />
         <Sparkles className="mentor-spark absolute bottom-10 left-6 h-6 w-6 text-primary/50" aria-hidden="true" />
-        <img src={monere} width={1024} height={1024} fetchPriority="high" alt="Monere the friendly lion in a navy cap and hoodie, offering guidance with his glowing tablet" className="mentor-avatar relative h-full w-full object-contain" />
+        <img src={outfit.src} width={1024} height={1024} fetchPriority="high" alt="Monere the friendly lion in a navy cap and hoodie, offering guidance with his glowing tablet" className="mentor-avatar relative h-full w-full object-contain" />
       </div>}
       <p className="mb-2 flex items-center justify-center gap-2 text-xs font-semibold text-primary"><ShieldCheck className="h-3.5 w-3.5" /> Wisdom. Courage. A little lionheartedness.</p>
       <h1 className="font-display text-3xl font-semibold leading-tight">
