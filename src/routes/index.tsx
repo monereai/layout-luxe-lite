@@ -13,10 +13,10 @@ import { saveEntry } from "@/lib/journal";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MoralSphere — Faith-grounded advice for teens" },
-      { name: "description", content: "Navigate everyday dilemmas with biblical wisdom, grace and practical next steps." },
-      { property: "og:title", content: "MoralSphere — Faith-grounded advice for teens" },
-      { property: "og:description", content: "Navigate everyday dilemmas with biblical wisdom, grace and practical next steps." },
+      { title: "MonereAI — Guided Wisdom & Decision Integrity for Teens" },
+      { name: "description", content: "MonereAI: Guided Wisdom & Decision Integrity for Teens. Navigate everyday dilemmas with biblical wisdom, grace and practical next steps." },
+      { property: "og:title", content: "MonereAI — Guided Wisdom & Decision Integrity for Teens" },
+      { property: "og:description", content: "MonereAI: Guided Wisdom & Decision Integrity for Teens. Navigate everyday dilemmas with biblical wisdom, grace and practical next steps." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -59,7 +59,7 @@ function Home() {
 
   async function share() {
     if (!wisdom) return;
-    const text = `A dilemma about ${category.toLowerCase()}:\n\n${wisdom.bigPicture}\n\n"${wisdom.verses[0]?.text}" — ${wisdom.verses[0]?.reference}\n\nvia MoralSphere`;
+    const text = `A dilemma about ${category.toLowerCase()}:\n\n${wisdom.bigPicture}\n\n"${wisdom.verses[0]?.text}" — ${wisdom.verses[0]?.reference}\n\nvia MonereAI — https://MonereAI.com`;
     if (navigator.share) await navigator.share({ text }).catch(() => {});
     else { await navigator.clipboard.writeText(text); toast.success("Copied — your situation isn't included, only the advice."); }
   }
@@ -98,7 +98,6 @@ function Home() {
         </>
       ) : (
         <>
-          <p className="text-sm font-semibold text-primary">MoralSphere</p>
           <h1 className="mt-2 font-display text-4xl leading-tight">What situation are you facing?</h1>
           <p className="mt-3 text-muted-foreground">No judgement here. Just honest, grace-filled wisdom for real life.</p>
           <div className="mt-6 flex flex-wrap gap-2">

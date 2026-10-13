@@ -63,13 +63,13 @@
 
 :root {
   --radius: 1.25rem;
-  --background: oklch(0.18 0.02 260);
+  --background: oklch(0.208 0.042 265.755);
   --foreground: oklch(0.95 0.015 80);
   --card: oklch(0.23 0.022 258);
   --card-foreground: oklch(0.95 0.015 80);
   --popover: oklch(0.23 0.022 258);
   --popover-foreground: oklch(0.95 0.015 80);
-  --primary: oklch(0.8 0.13 75);
+  --primary: oklch(0.769 0.165 70.08);
   --primary-foreground: oklch(0.2 0.03 60);
   --secondary: oklch(0.28 0.025 258);
   --secondary-foreground: oklch(0.92 0.02 80);
@@ -81,12 +81,11 @@
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.8 0.13 75);
-  --chart-1: oklch(0.8 0.13 75); --chart-2: oklch(0.7 0.1 200); --chart-3: oklch(0.7 0.12 150); --chart-4: oklch(0.75 0.12 30); --chart-5: oklch(0.7 0.1 300);
-  --sidebar: oklch(0.2 0.02 260); --sidebar-foreground: oklch(0.95 0.015 80); --sidebar-primary: oklch(0.8 0.13 75); --sidebar-primary-foreground: oklch(0.2 0.03 60); --sidebar-accent: oklch(0.28 0.025 258); --sidebar-accent-foreground: oklch(0.95 0.015 80); --sidebar-border: oklch(1 0 0 / 9%); --sidebar-ring: oklch(0.8 0.13 75);
-  --glow: radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.8 0.13 75 / 0.22), transparent 70%);
-  --gradient-gold: linear-gradient(135deg, oklch(0.84 0.13 85), oklch(0.72 0.14 55));
-  --shadow-gold: 0 12px 32px -12px oklch(0.8 0.13 75 / 0.55);
+  --ring: var(--primary);
+  --chart-1: var(--primary); --chart-2: oklch(0.7 0.1 200); --chart-3: oklch(0.7 0.12 150); --chart-4: oklch(0.75 0.12 30); --chart-5: oklch(0.7 0.1 300);
+  --sidebar: var(--background); --sidebar-foreground: var(--foreground); --sidebar-primary: var(--primary); --sidebar-primary-foreground: var(--primary-foreground); --sidebar-accent: var(--secondary); --sidebar-accent-foreground: var(--foreground); --sidebar-border: var(--border); --sidebar-ring: var(--primary);
+  --glow: none;
+  --shadow-gold: 0 12px 32px -12px color-mix(in oklab, var(--primary) 45%, transparent);
 }
 
 @theme inline {
@@ -94,14 +93,14 @@
   --font-sans: "Figtree", system-ui, sans-serif;
 }
 
-@utility font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+@utility font-display { font-family: var(--font-display); letter-spacing: 0; }
 @utility surface-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) + 4px);
 }
 @utility btn-gold {
-  background: var(--gradient-gold);
+  background: var(--primary);
   color: var(--primary-foreground);
   box-shadow: var(--shadow-gold);
   border-radius: 9999px;

@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep app-wide header, emblem, tagline, and footer in AppShell so every content page shares the same identity.
+- Keep the existing journal storage key stable through rebrands so previously saved reflections remain accessible.
