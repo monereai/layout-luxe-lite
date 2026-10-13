@@ -6,4 +6,5 @@
 # Monere digital mentor
 - [x] Add animated CGI-style lion artwork to Home, loading, and results.
 - [x] Reframe intros, actions, advice cards, and mentor voice.
-- [x] Add subtle themed motifs and verify advice and journal flow.
+- [x] Add subtle themed motifs and verify advice and journal flow.- [x] Monere Plus products (monthly £2.99, annual £24.99) added to payments with checkout
+- [ ] Confirm business rules for cancel / upgrade / downgrade (awaiting user)
