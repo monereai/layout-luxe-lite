@@ -17,6 +17,9 @@ Speak directly to the teen in your own encouraging voice, never describing yours
 The UI supplies all section headings: never repeat section names or labels inside the returned text. For bigPicture, acknowledge the weight of their specific situation before offering reassurance. For verses, offer applications about strength, truth, and peace. For path, give actionable, honorable steps with healthy boundaries. For shortTerm and longTerm, describe immediate consequences and longer-term character, faith, and peace of mind. Courage never means confronting an unsafe person; prioritize getting to safety and trusted help.
 Tone: empathetic, encouraging, non-condemning, relatable. Grace over guilt: focus on growth, forgiveness and wise choices, never shame.
 Use natural language a high schooler would actually enjoy reading. No preaching, no clichés.
+Operate within a traditional Christian understanding that humanity is male and female. For identity, relationships, and growth, use the teen's selected Young Man or Young Woman profile and tailor the guidance without reducing either profile to stereotypes.
+For a young man, naturally emphasize courage, servant leadership, steady strength, emotional honesty, and responsibility when relevant. For a young woman, naturally emphasize dignity, inner strength, wisdom, agency, and grace when relevant.
+If asked about non-binary or fluid gender identities, respond with warmth, respect, and zero hostility. Do not mock, shame, diagnose, argue, or deny the teen's feelings or experiences. Briefly and gently state your male/female Christian framework, then focus on their dignity, character, integrity, personal strength, relationships, and faith-based values. Never encourage harassment, rejection, coercion, or unsafe disclosure.
 Quote 1-2 real Bible verses accurately in the NLT or NIV translation (say which in the reference, e.g. "Proverbs 16:28 (NLT)"), each with a one-sentence application.
 Give 3-4 practical, specific action steps that combine truthfulness, love and courage.
 If the situation involves danger, abuse or self-harm, gently urge them to talk to a trusted adult and contact a crisis line.
@@ -75,6 +78,7 @@ const Input = z.object({
   previous: z.string().max(8000).optional(),
   includeSong: z.boolean().optional(),
   userName: z.string().max(30).optional(),
+  profile: z.enum(["young-man", "young-woman"]).optional(),
 });
 
 export const seekWisdom = createServerFn({ method: "POST" })
@@ -83,8 +87,13 @@ export const seekWisdom = createServerFn({ method: "POST" })
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { ok: false, error: "The advice service isn't configured yet." };
 
+    const profileGuidance = data.profile === "young-man"
+      ? "Selected profile: Young Man. Tailor relevant guidance around courage, servant leadership, steady strength, and responsibility without stereotypes."
+      : data.profile === "young-woman"
+        ? "Selected profile: Young Woman. Tailor relevant guidance around dignity, inner strength, wisdom, agency, and grace without stereotypes."
+        : "No profile selected. Do not guess or infer the teen's sex from their name or situation.";
     const input: Record<string, unknown>[] = [
-      { role: "user", content: `${data.userName?.trim() ? `Teen's name: ${data.userName.trim()} (weave it naturally into your response once or twice, e.g. "Here's the honest truth, ${data.userName.trim()}..." — never more than twice)\n` : ""}Category: ${data.category}\nSong recommendations: ${data.includeSong === false ? "disabled" : "enabled"}\nSituation: ${data.situation}` },
+      { role: "user", content: `${data.userName?.trim() ? `Teen's name: ${data.userName.trim()} (weave it naturally into your response once or twice, e.g. "Here's the honest truth, ${data.userName.trim()}..." — never more than twice)\n` : ""}${profileGuidance}\nCategory: ${data.category}\nSong recommendations: ${data.includeSong === false ? "disabled" : "enabled"}\nSituation: ${data.situation}` },
     ];
     if (data.previous && data.followUp) {
       input.push({ role: "assistant", content: data.previous });
