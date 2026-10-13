@@ -13,6 +13,7 @@ import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
 import { MonereMentor } from "@/components/MonereMentor";
+import { SafetyCard } from "@/components/SafetyCard";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PaywallModal } from "@/components/PaywallModal";
@@ -42,6 +43,7 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [wisdom, setWisdom] = useState<Wisdom | null>(null);
   const [crisis, setCrisis] = useState(false);
+  const [safety, setSafety] = useState(false);
   const [followOpen, setFollowOpen] = useState(false);
   const [followUp, setFollowUp] = useState("");
   const [saved, setSaved] = useState(false);
@@ -63,9 +65,12 @@ function Home() {
   async function run(extra?: string) {
     const text = extra ?? situation;
     if (text.trim().length < 3) { toast("Tell us a little about what's going on first."); return; }
-    const isCrisis = detectCrisis(text);
-    if (isCrisis) setCrisis(true);
-    if (!isCrisis && ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
+    if (detectCrisis(text)) {
+      setWisdom(null); setFollowOpen(false); setSafety(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
     const res = await ask({
       data: extra
@@ -92,7 +97,12 @@ function Home() {
 
   return (
     <AppShell>
-      {loading ? (
+      {safety ? (
+        <>
+          <Button variant="ghost" onClick={() => setSafety(false)} className="mb-2 w-fit px-0 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Back</Button>
+          <SafetyCard />
+        </>
+      ) : loading ? (
         <div className="flex flex-1 flex-col justify-center py-12">
           <MonereMentor mode="insight" />
         </div>
