@@ -1,4 +1,4 @@
-import { BookOpen, Footprints, Hourglass, Eye } from "lucide-react";
+import { BookOpen, Footprints, ShieldCheck, Compass } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Wisdom } from "@/lib/wisdom.functions";
 
@@ -14,10 +14,10 @@ function Card({ icon, title, children, delay }: { icon: ReactNode; title: string
 export function WisdomCards({ w }: { w: Wisdom }) {
   return (
     <div className="space-y-4">
-      <Card icon={<Eye className="h-4 w-4" />} title="The Big Picture" delay={0}>
+      <Card icon={<Compass className="h-4 w-4" />} title="Monere's Perspective" delay={0}>
         <p className="leading-relaxed">{w.bigPicture}</p>
       </Card>
-      <Card icon={<BookOpen className="h-4 w-4" />} title="Biblical Reflection" delay={120}>
+      <Card icon={<BookOpen className="h-4 w-4" />} title="Wisdom Anchor" delay={120}>
         <div className="space-y-4">
           {w.verses.map((v) => (
             <div key={v.reference}>
@@ -28,7 +28,7 @@ export function WisdomCards({ w }: { w: Wisdom }) {
           ))}
         </div>
       </Card>
-      <Card icon={<Footprints className="h-4 w-4" />} title="Grace & Integrity Path" delay={240}>
+      <Card icon={<Footprints className="h-4 w-4" />} title="Steps of Courage" delay={240}>
         <ol className="space-y-3">
           {w.path.map((s, i) => (
             <li key={i} className="flex gap-3">
@@ -38,10 +38,10 @@ export function WisdomCards({ w }: { w: Wisdom }) {
           ))}
         </ol>
       </Card>
-      <Card icon={<Hourglass className="h-4 w-4" />} title="Short-Term vs. Long-Term" delay={360}>
+      <Card icon={<ShieldCheck className="h-4 w-4" />} title="The Honor Outlook" delay={360}>
         <div className="grid gap-3">
-          <div className="rounded-xl bg-secondary p-3"><p className="text-xs font-bold text-muted-foreground">NOW</p><p className="mt-1 text-sm">{w.shortTerm}</p></div>
-          <div className="rounded-xl bg-accent p-3 text-accent-foreground"><p className="text-xs font-bold">LONG RUN</p><p className="mt-1 text-sm">{w.longTerm}</p></div>
+          <div className="border-l-2 border-border pl-3"><p className="text-xs font-bold text-muted-foreground">YOUR NEXT STEP</p><p className="mt-1 text-sm">{w.shortTerm}</p></div>
+          <div className="border-l-2 border-primary pl-3"><p className="text-xs font-bold text-primary">THE PERSON YOU'RE BECOMING</p><p className="mt-1 text-sm">{w.longTerm}</p></div>
         </div>
       </Card>
     </div>

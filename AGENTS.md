@@ -11,3 +11,4 @@
 
 - Keep app-wide header, emblem, tagline, and footer in AppShell so every content page shares the same identity.
 - Keep the existing journal storage key stable through rebrands so previously saved reflections remain accessible.
+- Keep the reusable mentor portrait and welcome/loading/results states in MonereMentor; animate the CGI-style asset with reduced-motion support rather than duplicating character layouts.
