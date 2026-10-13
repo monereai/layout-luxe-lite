@@ -1,132 +1,74 @@
-import {
-  Brain,
-  Check,
-  Compass,
-  GraduationCap,
-  Handshake,
-  House,
-  ShieldCheck,
-  Smartphone,
-  Users,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
+import { Check } from "lucide-react";
+import monere from "@/assets/monere-lion.png";
 
-export type Category = {
-  title: string;
-  blurb: string;
-  icon: LucideIcon;
-};
+export type Category = { title: string; short: string; emoji: string };
 
 export const CATEGORIES: Category[] = [
-  {
-    title: "Friendship & Peer Pressure",
-    blurb: "Navigating drama, party culture, gossip, and staying true to yourself",
-    icon: Users,
-  },
-  {
-    title: "School, Exams & Honesty",
-    blurb: "Handling academic pressure, cheating dilemmas, and teacher relations",
-    icon: GraduationCap,
-  },
-  {
-    title: "Social Media & Digital Ethics",
-    blurb: "Online privacy, screen habits, cyberbullying, and messaging boundaries",
-    icon: Smartphone,
-  },
-  {
-    title: "Family & Home Life",
-    blurb: "Resolving conflicts with parents/siblings and building mutual trust",
-    icon: House,
-  },
-  {
-    title: "Dating & Healthy Relationships",
-    blurb: "Boundaries, respect, communication, and relationship ethics",
-    icon: Handshake,
-  },
-  {
-    title: "Personal Integrity & Truth",
-    blurb: "Doing what is right when no one is watching",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Money & First Jobs",
-    blurb: "Workplace ethics, spending pressures, and financial stewardship",
-    icon: Wallet,
-  },
-  {
-    title: "Mental Well-Being & Stress",
-    blurb: "Overcoming burnout, anxiety, performance pressure, and self-care",
-    icon: Brain,
-  },
-  {
-    title: "Future, Purpose & Faith",
-    blurb: "Exploring big life questions, career paths, and living out your beliefs",
-    icon: Compass,
-  },
+  { emoji: "🤝", short: "Friendship & Peer Pressure", title: "Friendship & Peer Pressure" },
+  { emoji: "📚", short: "School & Honesty", title: "School, Exams & Honesty" },
+  { emoji: "📱", short: "Social Media & Online", title: "Social Media & Digital Ethics" },
+  { emoji: "🏠", short: "Family & Home", title: "Family & Home Life" },
+  { emoji: "💬", short: "Dating & Relationships", title: "Dating & Healthy Relationships" },
+  { emoji: "🔒", short: "Personal Integrity", title: "Personal Integrity & Truth" },
+  { emoji: "💸", short: "Money & First Jobs", title: "Money & First Jobs" },
+  { emoji: "🧠", short: "Stress & Well-Being", title: "Mental Well-Being & Stress" },
+  { emoji: "🧭", short: "Future, Purpose & Faith", title: "Future, Purpose & Faith" },
+];
+
+export const MAX_CATEGORIES = 3;
+
+// Fixed, irregular values so every tile drifts on its own rhythm (no randomness at render → no hydration mismatch).
+const DRIFT = [
+  { delay: "-0.4s", dur: "5.6s" }, { delay: "-2.1s", dur: "6.4s" }, { delay: "-1.2s", dur: "5.2s" },
+  { delay: "-3.3s", dur: "6.9s" }, { delay: "-0.9s", dur: "5.9s" }, { delay: "-2.7s", dur: "6.2s" },
+  { delay: "-1.8s", dur: "5.4s" }, { delay: "-3.9s", dur: "6.7s" }, { delay: "-0.2s", dur: "6s" },
 ];
 
 export function CategoryPicker({
   value,
   onChange,
+  actionLabel = "Continue",
 }: {
-  value: string;
-  onChange: (title: string) => void;
+  value: string[];
+  onChange: (titles: string[]) => void;
+  actionLabel?: string;
 }) {
+  const toggle = (title: string) => {
+    if (value.includes(title)) onChange(value.filter((t) => t !== title));
+    else if (value.length < MAX_CATEGORIES) onChange([...value, title]);
+  };
+
   return (
-    <div
-      role="radiogroup"
-      aria-label="Which area of life is this about?"
-      className="category-scroll mt-3 grid max-h-[21vh] gap-2 overflow-y-auto pr-1 sm:max-h-none sm:grid-cols-2 sm:overflow-visible"
-    >
-      {CATEGORIES.map(({ title, blurb, icon: Icon }) => {
-        const selected = title === value;
-        return (
-          <button
-            key={title}
-            type="button"
-            role="radio"
-            aria-checked={selected}
-            onClick={() => onChange(title)}
-            className={`flex items-start gap-3 rounded-2xl border p-3 text-left transition duration-200 ${
-              selected
-                ? "border-primary/70 bg-primary/12 shadow-[var(--shadow-gold)]"
-                : "border-border bg-secondary/55 hover:border-primary/40 hover:bg-secondary"
-            }`}
-          >
-            <span
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
-                selected
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background/70 text-primary"
-              }`}
+    <div className="mt-3">
+      <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-grid">
+        <div className="orbit-center" aria-hidden="true">
+          <span className="orbit-halo" />
+          <img src={monere} alt="" className="mentor-avatar relative h-full w-full object-contain" />
+        </div>
+        {CATEGORIES.map(({ title, short, emoji }, i) => {
+          const on = value.includes(title);
+          const full = !on && value.length >= MAX_CATEGORIES;
+          return (
+            <button
+              key={title}
+              type="button"
+              aria-pressed={on}
+              aria-label={title}
+              disabled={full}
+              onClick={() => toggle(title)}
+              style={{ animationDelay: DRIFT[i]?.delay, animationDuration: DRIFT[i]?.dur }}
+              className={`float-tile ${on ? "float-tile-on" : ""}`}
             >
-              <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="flex items-center gap-2">
-                <span
-                  className={`font-display text-[15px] font-semibold leading-snug ${
-                    selected ? "text-primary" : "text-foreground"
-                  }`}
-                >
-                  {title}
-                </span>
-                {selected && (
-                  <Check
-                    className="ml-auto h-4 w-4 shrink-0 text-primary"
-                    strokeWidth={2.5}
-                    aria-hidden="true"
-                  />
-                )}
-              </span>
-              <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-                {blurb}
-              </span>
-            </span>
-          </button>
-        );
-      })}
+              <span className="text-lg leading-none" aria-hidden="true">{emoji}</span>
+              <span className="font-display text-[13px] font-semibold leading-tight">{short}</span>
+              {on && <Check className="absolute right-1.5 top-1.5 h-3.5 w-3.5 text-primary" strokeWidth={3} aria-hidden="true" />}
+            </button>
+          );
+        })}
+      </div>
+      <p aria-live="polite" className={`float-counter mx-auto mt-4 w-fit rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${value.length ? "border-primary/50 bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>
+        {value.length ? `Selected (${value.length}) — Tap '${actionLabel}'` : `Tap up to ${MAX_CATEGORIES} topics`}
+      </p>
     </div>
   );
 }
