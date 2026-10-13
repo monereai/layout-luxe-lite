@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BookmarkPlus, MessageCircleQuestion, Share2, ArrowLeft, Loader2 } from "lucide-react";
+import { BookmarkPlus, MessageCircleQuestion, Share2, ArrowLeft, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
@@ -10,14 +10,16 @@ import { CategoryPicker, CATEGORIES } from "@/components/CategoryPicker";
 import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
+import { MonereMentor } from "@/components/MonereMentor";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MonereAI — Guided Wisdom & Decision Integrity for Teens" },
-      { name: "description", content: "MonereAI: Guided Wisdom & Decision Integrity for Teens. Navigate everyday dilemmas with biblical wisdom, grace and practical next steps." },
-      { property: "og:title", content: "MonereAI — Guided Wisdom & Decision Integrity for Teens" },
-      { property: "og:description", content: "MonereAI: Guided Wisdom & Decision Integrity for Teens. Navigate everyday dilemmas with biblical wisdom, grace and practical next steps." },
+      { title: "Talk to Monere — MonereAI" },
+      { name: "description", content: "Meet Monere, your encouraging lion mentor. Explore teen life decisions with biblical wisdom, courage, healthy boundaries, and grace." },
+      { property: "og:title", content: "Talk to Monere — MonereAI" },
+      { property: "og:description", content: "Meet Monere, your encouraging lion mentor. Explore teen life decisions with biblical wisdom, courage, healthy boundaries, and grace." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -28,7 +30,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const ask = useServerFn(seekWisdom);
-  const [category, setCategory] = useState<string>(CATEGORIES[0]!.title);
+  const [category, setCategory] = useState<string>(CATEGORIES[0]?.title ?? "Friendship & Peer Pressure");
   const [situation, setSituation] = useState("");
   const [loading, setLoading] = useState(false);
   const [wisdom, setWisdom] = useState<Wisdom | null>(null);
@@ -67,49 +69,42 @@ function Home() {
   return (
     <AppShell>
       {loading ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 py-32 text-center">
-          <div className="relative h-20 w-20">
-            <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
-            <div className="btn-gold absolute inset-3 animate-pulse" />
-          </div>
-          <p className="font-display text-xl italic text-muted-foreground">Reflecting on scripture and options…</p>
+        <div className="flex flex-1 flex-col justify-center py-12">
+          <MonereMentor mode="insight" />
         </div>
       ) : wisdom ? (
         <>
-          <button onClick={() => setWisdom(null)} className="mb-4 flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" /> New situation</button>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{category}</p>
-          <h1 className="mb-6 mt-1 font-display text-3xl">Here's some wisdom for you</h1>
+          <Button variant="ghost" onClick={() => setWisdom(null)} className="mb-2 w-fit px-0 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Talk to Monere again</Button>
+          <MonereMentor mode="results" />
+          <p className="mb-5 mt-6 text-xs font-bold uppercase text-primary">{category}</p>
           <WisdomCards w={wisdom} />
           <div className="mt-6 grid gap-2">
-            <button disabled={saved} onClick={() => { saveEntry({ category, situation, wisdom }); setSaved(true); toast.success("Saved to your Reflection Journal"); }} className="btn-gold flex items-center justify-center gap-2 py-3.5 disabled:opacity-60">
+            <Button disabled={saved} onClick={() => { saveEntry({ category, situation, wisdom }); setSaved(true); toast.success("Saved to your Reflection Journal"); }} className="btn-gold h-auto whitespace-normal py-3.5 disabled:opacity-60">
               <BookmarkPlus className="h-4 w-4" /> {saved ? "Saved to Journal" : "Save to Reflection Journal"}
-            </button>
+            </Button>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setFollowOpen((v) => !v)} className="flex items-center justify-center gap-2 rounded-full bg-secondary py-3 text-sm font-semibold"><MessageCircleQuestion className="h-4 w-4" /> Follow-up</button>
-              <button onClick={share} className="flex items-center justify-center gap-2 rounded-full bg-secondary py-3 text-sm font-semibold"><Share2 className="h-4 w-4" /> Share anonymously</button>
+              <Button variant="secondary" onClick={() => setFollowOpen((v) => !v)} className="h-auto whitespace-normal rounded-full px-2 py-3"><MessageCircleQuestion /> Ask Monere</Button>
+              <Button variant="secondary" onClick={share} className="h-auto whitespace-normal rounded-full px-2 py-3"><Share2 /> Share anonymously</Button>
             </div>
             {followOpen && (
               <div className="surface-card mt-2 p-4">
-                <textarea value={followUp} onChange={(e) => setFollowUp(e.target.value)} rows={3} placeholder="e.g., What if they get mad at me for not joining in?" className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-                <button onClick={() => run(followUp)} className="btn-gold mt-2 w-full py-2.5 text-sm">Ask</button>
+                <textarea aria-label="Your follow-up for Monere" value={followUp} onChange={(e) => setFollowUp(e.target.value)} rows={3} maxLength={1500} placeholder="e.g., What if they get mad at me for not joining in?" className="w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+                <Button onClick={() => run(followUp)} className="btn-gold mt-2 h-auto w-full py-2.5">Seek Wisdom</Button>
               </div>
             )}
           </div>
         </>
       ) : (
         <>
-          <h1 className="mt-1 font-display text-4xl leading-tight">What situation are you facing?</h1>
-          <p className="mt-2 text-muted-foreground">No judgement here. Just honest, grace-filled wisdom for real life.</p>
+          <MonereMentor />
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Pick what fits best
+            What's on your mind?
           </p>
           <CategoryPicker value={category} onChange={setCategory} />
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
-            <textarea value={situation} onChange={(e) => setSituation(e.target.value)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
+            <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>
-          <button onClick={() => run()} disabled={loading} className="btn-gold mt-5 flex w-full items-center justify-center gap-2 py-4">
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />} Seek Wisdom & Advice
-          </button>
+          <Button onClick={() => run()} disabled={loading} className="btn-gold mt-5 h-auto w-full py-4"><ShieldCheck /> Talk to Monere</Button>
           <p className="mt-3 text-center text-xs text-muted-foreground">AI guidance isn't a replacement for a pastor, parent or counsellor.</p>
         </>
       )}
