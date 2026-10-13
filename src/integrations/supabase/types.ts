@@ -14,13 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      code_redemptions: {
+        Row: {
+          code_id: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "organization_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_codes: {
+        Row: {
+          code: string
+          created_at: string
+          current_uses: number
+          expiration_date: string
+          id: string
+          is_active: boolean
+          max_uses: number
+          organization_name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          current_uses?: number
+          expiration_date: string
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          organization_name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          current_uses?: number
+          expiration_date?: string
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          organization_name?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_premium: { Args: { check_env: string }; Returns: boolean }
+      redeem_org_code: {
+        Args: { p_code: string }
+        Returns: {
+          ok: boolean
+          organization_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
