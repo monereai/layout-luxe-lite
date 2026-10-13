@@ -45,7 +45,7 @@ const schema = {
 };
 
 const Input = z.object({
-  category: z.string().max(60),
+  category: z.string().max(200),
   situation: z.string().min(3).max(3000),
   followUp: z.string().max(1500).optional(),
   previous: z.string().max(8000).optional(),

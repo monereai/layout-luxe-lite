@@ -7,7 +7,7 @@ import { BookmarkPlus, MessageCircleQuestion, Share2, ArrowLeft, ShieldCheck } f
 import { AppShell } from "@/components/AppShell";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
-import { CategoryPicker, CATEGORIES } from "@/components/CategoryPicker";
+import { CategoryPicker } from "@/components/CategoryPicker";
 import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
@@ -31,7 +31,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const ask = useServerFn(seekWisdom);
-  const [category, setCategory] = useState<string>(CATEGORIES[0]?.title ?? "Friendship & Peer Pressure");
+  const [categories, setCategories] = useState<string[]>([]);
+  const category = categories.length ? categories.join(" + ") : "General life question";
   const [situation, setSituation] = useState("");
   const [loading, setLoading] = useState(false);
   const [wisdom, setWisdom] = useState<Wisdom | null>(null);
@@ -101,11 +102,11 @@ function Home() {
         </>
       ) : (
         <>
-          <MonereMentor />
+          <MonereMentor portrait={false} />
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             What's on your mind?
           </p>
-          <CategoryPicker value={category} onChange={setCategory} />
+          <CategoryPicker value={categories} onChange={setCategories} actionLabel="Talk to Monere" />
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
             <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>
@@ -118,7 +119,7 @@ function Home() {
         <OnboardingModal
           onDone={({ category: c, situation: s }) => {
             setOnboarding(false);
-            if (c) setCategory(c);
+            if (c.length) setCategories(c);
             if (s) { setSituation(s); if (detectCrisis(s)) setCrisis(true); }
           }}
         />

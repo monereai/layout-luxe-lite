@@ -1,20 +1,10 @@
 import { useState } from "react";
-import { Check, Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-react";
+import { Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-react";
 import lion from "@/assets/monere-lion.png";
+import { CategoryPicker } from "@/components/CategoryPicker";
 import { Button } from "@/components/ui/button";
 
 export const ONBOARDED_KEY = "monereai-onboarded";
-
-export const ONBOARD_TOPICS = [
-  { label: "Friendship", category: "Friendship & Peer Pressure" },
-  { label: "School", category: "School, Exams & Honesty" },
-  { label: "Social Media", category: "Social Media & Digital Ethics" },
-  { label: "Family", category: "Family & Home Life" },
-  { label: "Dating", category: "Dating & Healthy Relationships" },
-  { label: "Integrity", category: "Personal Integrity & Truth" },
-  { label: "Mental Well-Being", category: "Mental Well-Being & Stress" },
-  { label: "Faith", category: "Future, Purpose & Faith" },
-] as const;
 
 const SAMPLES = [
   { text: "My friends want me to join in gossiping about someone, but it feels wrong.", category: "Friendship & Peer Pressure" },
@@ -29,7 +19,7 @@ const POINTS = [
   { icon: LifeBuoy, title: "Safety first", body: "Free 24/7 helplines are always one tap away." },
 ];
 
-export function OnboardingModal({ onDone }: { onDone: (r: { category: string | undefined; situation: string | undefined }) => void }) {
+export function OnboardingModal({ onDone }: { onDone: (r: { category: string[]; situation: string | undefined }) => void }) {
   const [step, setStep] = useState(0);
   const [topics, setTopics] = useState<string[]>([]);
   const [text, setText] = useState("");
@@ -37,7 +27,7 @@ export function OnboardingModal({ onDone }: { onDone: (r: { category: string | u
 
   const finish = (situation?: string) => {
     window.localStorage.setItem(ONBOARDED_KEY, "true");
-    onDone({ category: sampleCat ?? topics[0], situation });
+    onDone({ category: topics.length ? topics : sampleCat ? [sampleCat] : [], situation });
   };
 
   return (
@@ -80,18 +70,8 @@ export function OnboardingModal({ onDone }: { onDone: (r: { category: string | u
         {step === 2 && (
           <div>
             <h2 className="font-display text-2xl font-semibold">What's on your heart lately?</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Pick as many as you like.</p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {ONBOARD_TOPICS.map(({ label, category }) => {
-                const on = topics.includes(category);
-                return (
-                  <button key={label} aria-pressed={on} onClick={() => setTopics((t) => (on ? t.filter((x) => x !== category) : [...t, category]))}
-                    className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-colors ${on ? "border-primary bg-primary/15 text-primary" : "border-border text-foreground hover:border-primary/50"}`}>
-                    {on && <Check className="h-3.5 w-3.5" />}{label}
-                  </button>
-                );
-              })}
-            </div>
+            <p className="mt-1 text-sm text-muted-foreground">Tap 2–3 topics that feel closest right now.</p>
+            <CategoryPicker value={topics} onChange={setTopics} />
             <Button onClick={() => setStep(3)} className="btn-gold mt-6 h-auto w-full py-4">Continue</Button>
           </div>
         )}
