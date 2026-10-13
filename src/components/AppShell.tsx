@@ -12,8 +12,9 @@ const tabs = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="bg-glow min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-md flex-col px-5 pb-40 pt-8">
+    <div className="bg-glow relative isolate min-h-screen">
+      <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>
+      <div className="relative mx-auto flex min-h-screen max-w-md flex-col px-5 pb-40 pt-8">
         <header className="mb-7">
           <Link to="/" aria-label="MonereAI home" className="inline-flex items-center gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
