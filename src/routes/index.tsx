@@ -79,7 +79,7 @@ function Home() {
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
     if (!res.ok) { toast.error(res.error); return; }
-    if (!premium) { recordQuery(); setUsed(getUsedToday()); }
+    if (!premium && !res.wisdom.personalReply) { recordQuery(); setUsed(getUsedToday()); }
     setWisdom(res.wisdom);
     setSaved(false);
     setFollowOpen(false);
@@ -110,8 +110,17 @@ function Home() {
         <>
           <Button variant="ghost" onClick={() => setWisdom(null)} className="mb-2 w-fit px-0 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Talk to Monere again</Button>
           <MonereMentor mode="results" />
+          {wisdom.personalReply ? (
+            <div className="surface-card mt-6 p-5">
+              <p className="text-xs font-bold uppercase text-primary">Monere</p>
+              <p className="mt-2 leading-relaxed">{wisdom.personalReply}</p>
+            </div>
+          ) : (
+          <>
           <p className="mb-5 mt-6 text-xs font-bold uppercase text-primary">{category}</p>
           <WisdomCards w={wisdom} />
+          </>
+          )}
           <div className="mt-6 grid gap-2">
             <Button disabled={saved} onClick={() => { saveEntry({ category, situation, wisdom }); setSaved(true); toast.success("Saved to your Reflection Journal"); }} className="btn-gold h-auto whitespace-normal py-3.5 disabled:opacity-60">
               <BookmarkPlus className="h-4 w-4" /> {saved ? "Saved to Journal" : "Save to Reflection Journal"}
