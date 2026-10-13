@@ -11,7 +11,7 @@ function safeNext(n: unknown) {
 }
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>): { next?: string } => ({ next: typeof s["next"] === "string" ? (s["next"] as string) : undefined }),
+  validateSearch: (s: Record<string, unknown>): { next?: string | undefined } => ({ next: typeof s["next"] === "string" ? (s["next"] as string) : undefined }),
   head: () => ({
     meta: [
       { title: "Sign in — MonereAI" },

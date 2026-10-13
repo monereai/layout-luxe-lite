@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { usePlan } from "@/hooks/usePlan";
 
 export const Route = createFileRoute("/checkout/return")({
-  validateSearch: (s: Record<string, unknown>): { session_id?: string } => ({ session_id: typeof s["session_id"] === "string" ? (s["session_id"] as string) : undefined }),
+  validateSearch: (s: Record<string, unknown>): { session_id?: string | undefined } => ({ session_id: typeof s["session_id"] === "string" ? (s["session_id"] as string) : undefined }),
   head: () => ({
     meta: [
       { title: "Welcome to Monere Plus — MonereAI" },
