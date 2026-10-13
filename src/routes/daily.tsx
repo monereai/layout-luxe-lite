@@ -5,10 +5,10 @@ import { AppShell } from "@/components/AppShell";
 export const Route = createFileRoute("/daily")({
   head: () => ({
     meta: [
-      { title: "Daily Reflection — MoralSphere" },
-      { name: "description", content: "A daily verse and short thought for the real challenges of teen life." },
-      { property: "og:title", content: "Daily Reflection — MoralSphere" },
-      { property: "og:description", content: "A daily verse and short thought for the real challenges of teen life." },
+      { title: "Daily Reflection — MonereAI" },
+      { name: "description", content: "Daily reflection with MonereAI: a daily verse and short thought for the real challenges of teen life." },
+      { property: "og:title", content: "Daily Reflection — MonereAI" },
+      { property: "og:description", content: "Daily reflection with MonereAI: a daily verse and short thought for the real challenges of teen life." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

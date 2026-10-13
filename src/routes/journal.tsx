@@ -8,10 +8,10 @@ import { deleteEntry, getEntries, type Entry } from "@/lib/journal";
 export const Route = createFileRoute("/journal")({
   head: () => ({
     meta: [
-      { title: "Reflection Journal — MoralSphere" },
-      { name: "description", content: "Your saved moments of wisdom, kept privately on your device." },
-      { property: "og:title", content: "Reflection Journal — MoralSphere" },
-      { property: "og:description", content: "Your saved moments of wisdom, kept privately on your device." },
+      { title: "Reflection Journal — MonereAI" },
+      { name: "description", content: "Your MonereAI reflection journal: saved moments of wisdom, kept privately on your device." },
+      { property: "og:title", content: "Reflection Journal — MonereAI" },
+      { property: "og:description", content: "Your MonereAI reflection journal: saved moments of wisdom, kept privately on your device." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
