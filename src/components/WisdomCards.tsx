@@ -1,4 +1,7 @@
-import { BookOpen, Footprints, ShieldCheck, Compass, Music, Youtube } from "lucide-react";
+import { BookOpen, Footprints, ShieldCheck, Compass, Music, Youtube, Play, Pause } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { findSongPreview, type SongPreview } from "@/lib/song.functions";
 import type { ReactNode } from "react";
 import type { Wisdom } from "@/lib/wisdom.functions";
 
@@ -51,23 +54,59 @@ export function WisdomCards({ w }: { w: Wisdom }) {
 
 function SongCard({ song }: { song: NonNullable<Wisdom["song"]> }) {
   const q = encodeURIComponent(`${song.title} ${song.artist}`).replace(/%20/g, "+");
-  const links = [
-    { label: "Spotify", href: `https://open.spotify.com/search/${q}`, icon: <Music className="h-4 w-4" /> },
-    { label: "Apple Music", href: `https://music.apple.com/us/search?term=${q}`, icon: <Music className="h-4 w-4" /> },
-    { label: "YouTube", href: `https://www.youtube.com/results?search_query=${q}`, icon: <Youtube className="h-4 w-4" /> },
-  ];
+  const find = useServerFn(findSongPreview);
+  const [preview, setPreview] = useState<SongPreview | undefined>(undefined);
+  const [playing, setPlaying] = useState(false);
+  const audio = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    let live = true;
+    find({ data: { title: song.title, artist: song.artist } }).then((p) => live && setPreview(p)).catch(() => live && setPreview(null));
+    return () => { live = false; };
+  }, [song.title, song.artist, find]);
+  const toggle = () => {
+    const a = audio.current;
+    if (!a) return;
+    if (a.paused) void a.play(); else a.pause();
+  };
+  const title = preview?.title ?? song.title;
+  const artist = preview?.artist ?? song.artist;
   return (
     <Card icon={<Music className="h-4 w-4" />} title="Monere's Soundtrack 🎵" delay={480}>
-      <p className="font-display text-lg font-bold leading-snug">{song.title}</p>
-      <p className="text-sm font-bold text-primary">{song.artist}</p>
+      <div className="flex items-center gap-4">
+        {preview?.artwork ? (
+          <img src={preview.artwork} alt={`${preview.album || title} album art`} className="h-20 w-20 shrink-0 rounded-xl object-cover shadow-lg" />
+        ) : (
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-accent text-primary"><Music className="h-8 w-8" /></div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-lg font-bold leading-snug">{title}</p>
+          <p className="text-sm font-bold text-primary">{artist}</p>
+          {preview?.album && <p className="truncate text-xs text-muted-foreground">{preview.album}</p>}
+          {preview === undefined && <p className="mt-1 text-xs text-muted-foreground">Finding a preview…</p>}
+          {preview === null && <p className="mt-1 text-xs text-muted-foreground">No preview available — use the links below.</p>}
+        </div>
+        {preview && (
+          <button onClick={toggle} aria-label={playing ? "Pause preview" : "Play preview"}
+            className="btn-gold flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
+            {playing ? <Pause className="h-6 w-6" /> : <Play className="ml-0.5 h-6 w-6" />}
+          </button>
+        )}
+      </div>
+      {preview && (
+        <>
+          <audio ref={audio} src={preview.previewUrl} preload="none" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} />
+          <div className="mt-3 flex h-6 items-end gap-1" aria-hidden>
+            {Array.from({ length: 24 }, (_, i) => (
+              <span key={i} className={`wave-bar w-1 flex-1 rounded-full bg-primary ${playing ? "is-playing" : ""}`} style={{ animationDelay: `${(i * 97) % 700}ms` }} />
+            ))}
+          </div>
+          <p className="mt-1 text-[10px] text-muted-foreground">30-second preview courtesy of Apple Music</p>
+        </>
+      )}
       <p className="mt-3 text-sm italic text-muted-foreground">"Why I picked this for you: {song.why}"</p>
       <div className="mt-4 flex flex-wrap gap-2">
-        {links.map((l) => (
-          <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" aria-label={`Listen on ${l.label}`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground transition hover:border-primary hover:text-primary">
-            {l.icon}{l.label}
-          </a>
-        ))}
+        <a href={`https://open.spotify.com/search/${q}`} target="_blank" rel="noopener noreferrer" className="song-link"><Music className="h-3.5 w-3.5" />Open full track in Spotify</a>
+        <a href={`https://www.youtube.com/results?search_query=${q}`} target="_blank" rel="noopener noreferrer" className="song-link"><Youtube className="h-3.5 w-3.5" />Watch on YouTube</a>
       </div>
     </Card>
   );
