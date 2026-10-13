@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { Compass, Sun, BookHeart, LifeBuoy } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
+import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
+import { usePlan } from "@/hooks/usePlan";
 
 const tabs = [
   { to: "/", label: "Seek", icon: Compass },
@@ -11,17 +13,29 @@ const tabs = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { user, premium, signOut } = usePlan();
   return (
     <div className="bg-glow relative isolate min-h-screen">
+      <PaymentTestModeBanner />
       <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col px-5 pb-40 pt-8">
         <header className="mb-7">
+          <div className="flex items-start justify-between gap-3">
           <Link to="/" aria-label="MonereAI home" className="inline-flex items-center gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
               <Compass className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
             </span>
             <span className="font-display text-3xl font-semibold text-foreground">Monere<span className="text-primary">AI</span></span>
           </Link>
+          <div className="flex flex-col items-end gap-1 pt-1 text-xs">
+            {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">PLUS</span>}
+            {user ? (
+              <button onClick={() => void signOut()} className="text-muted-foreground hover:text-primary">Sign out</button>
+            ) : (
+              <Link to="/auth" className="text-muted-foreground hover:text-primary">Sign in</Link>
+            )}
+          </div>
+          </div>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">Guided Wisdom &amp; Decision Integrity for Teens</p>
         </header>
         <main className="flex flex-1 flex-col">{children}</main>
