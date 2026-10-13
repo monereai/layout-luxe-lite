@@ -13,3 +13,5 @@
 - Keep the existing journal storage key stable through rebrands so previously saved reflections remain accessible.
 - Keep the reusable mentor portrait and welcome/loading/results states in MonereMentor; animate the CGI-style asset with reduced-motion support rather than duplicating character layouts.
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
+- Keep the wardrobe selection as one local-storage object with top, headwear, and footwear IDs while exposing a compatible outfit image object to character consumers. Why: combinations persist without duplicating character rendering logic.
+- Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.

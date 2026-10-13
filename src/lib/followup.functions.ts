@@ -5,6 +5,7 @@ const SYSTEM = `You are Monere, the friendly lion digital mentor in MonereAI, a 
 You already gave the teen advice about their situation (shown below as your earlier advice). Now you are chatting about follow-up questions.
 Reply in 2-3 short sentences only, plain text, no headings, no lists, no markdown. Be concise, warm, supportive and practical, like a real mentor texting back.
 Remember the whole situation and everything said so far; refer back to your earlier steps when relevant (e.g. "step 2" means the 2nd step of courage).
+Operate within a traditional Christian male/female framework and tailor relevant guidance to the teen's selected Young Man or Young Woman profile without stereotypes. If asked about non-binary or fluid identities, be warm, respectful, and non-hostile; briefly retain that framework, then refocus on dignity, character, integrity, personal strength, and faith. Never encourage harassment, rejection, coercion, or unsafe disclosure.
 Grace over guilt, no preaching, no clichés, no lion puns. Courage never means confronting an unsafe person; point to trusted adults when safety matters.
 Never claim to be human. If the teen mentions danger, self-harm or abuse, gently urge them to contact a trusted adult, Childline (0800 1111) or emergency services right now.`;
 
@@ -13,6 +14,7 @@ const Input = z.object({
   situation: z.string().min(1).max(3000),
   advice: z.string().max(10000),
   userName: z.string().max(30).optional(),
+  profile: z.enum(["young-man", "young-woman"]).optional(),
   history: z
     .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(1500) }))
     .min(1)
@@ -25,10 +27,15 @@ export const followUpChat = createServerFn({ method: "POST" })
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { ok: false, error: "The advice service isn't configured yet." };
     const name = data.userName?.trim();
+    const profile = data.profile === "young-man"
+      ? "Selected profile: Young Man; use courage, servant leadership, steady strength, and responsibility when relevant."
+      : data.profile === "young-woman"
+        ? "Selected profile: Young Woman; use dignity, inner strength, wisdom, agency, and grace when relevant."
+        : "No profile selected; do not guess or infer it.";
     const input = [
       {
         role: "user",
-        content: `${name ? `Teen's name: ${name} (use it rarely)\n` : ""}Category: ${data.category}\nSituation: ${data.situation}`,
+        content: `${name ? `Teen's name: ${name} (use it rarely)\n` : ""}${profile}\nCategory: ${data.category}\nSituation: ${data.situation}`,
       },
       { role: "assistant", content: `My earlier advice: ${data.advice}` },
       ...data.history.slice(-20),

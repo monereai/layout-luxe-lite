@@ -11,6 +11,7 @@ import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { useUserName } from "@/lib/username";
+import { useProfile } from "@/lib/profile";
 import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
@@ -52,6 +53,7 @@ function Home() {
   const [saved, setSaved] = useState(false);
   const [includeSong, setIncludeSong] = useState(true);
   const userName = useUserName();
+  const profile = useProfile();
   const [listening, setListening] = useState(false);
   const { premium, ready } = usePlan();
   const [paywall, setPaywall] = useState<null | "limit" | "upgrade">(null);
@@ -76,7 +78,7 @@ function Home() {
     if (ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
     const res = await ask({
-      data: { category, situation, includeSong, userName: userName || undefined },
+      data: { category, situation, includeSong, userName: userName || undefined, profile },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
     if (!res.ok) { toast.error(res.error); return; }
@@ -99,7 +101,7 @@ function Home() {
     setChat(history);
     setChatPending(true);
     const res = await reply({
-      data: { category, situation, advice: JSON.stringify(wisdom), userName: userName || undefined, history },
+      data: { category, situation, advice: JSON.stringify(wisdom), userName: userName || undefined, profile, history },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setChatPending(false);
     if (!res.ok) { toast.error(res.error); setChat(chat); return; }
