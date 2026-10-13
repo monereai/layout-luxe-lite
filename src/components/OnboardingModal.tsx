@@ -2,7 +2,6 @@ import { MonereFigure } from "@/components/MonereFigure";
 import { setUserName } from "@/lib/username";
 import { useState } from "react";
 import { Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-react";
-import { useOutfit } from "@/lib/outfit";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { Button } from "@/components/ui/button";
 import { PassCodeLink } from "@/components/PassCodeDialog";
@@ -23,7 +22,6 @@ const POINTS = [
 ];
 
 export function OnboardingModal({ onDone }: { onDone: (r: { category: string[]; situation: string | undefined }) => void }) {
-  const { outfit } = useOutfit();
   const [step, setStep] = useState(0);
   const [topics, setTopics] = useState<string[]>([]);
   const [text, setText] = useState("");

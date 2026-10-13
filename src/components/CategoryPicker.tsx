@@ -51,7 +51,6 @@ export function CategoryPicker({
   wardrobe?: boolean;
   listening?: boolean;
 }) {
-  const { outfit } = useOutfit();
   const toggle = (title: string) => {
     if (value.includes(title)) onChange(value.filter((t) => t !== title));
     else if (value.length < MAX_CATEGORIES) onChange([...value, title]);
