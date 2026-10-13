@@ -29,7 +29,7 @@ const POINTS = [
   { icon: LifeBuoy, title: "Safety first", body: "Free 24/7 helplines are always one tap away." },
 ];
 
-export function OnboardingModal({ onDone }: { onDone: (r: { category?: string; situation?: string }) => void }) {
+export function OnboardingModal({ onDone }: { onDone: (r: { category: string | undefined; situation: string | undefined }) => void }) {
   const [step, setStep] = useState(0);
   const [topics, setTopics] = useState<string[]>([]);
   const [text, setText] = useState("");
