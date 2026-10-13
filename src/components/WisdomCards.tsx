@@ -1,6 +1,7 @@
 import { BookOpen, Footprints, ShieldCheck, Compass, Music, Youtube, Play, Pause } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { usePlan } from "@/hooks/usePlan";
 import { findSongPreview, type SongPreview } from "@/lib/song.functions";
 import type { ReactNode } from "react";
 import type { Wisdom } from "@/lib/wisdom.functions";
@@ -57,6 +58,7 @@ function SongCard({ song }: { song: NonNullable<Wisdom["song"]> }) {
   const find = useServerFn(findSongPreview);
   const [preview, setPreview] = useState<SongPreview | undefined>(undefined);
   const [playing, setPlaying] = useState(false);
+  const { premium } = usePlan();
   const audio = useRef<HTMLAudioElement>(null);
   useEffect(() => {
     let live = true;
@@ -85,14 +87,17 @@ function SongCard({ song }: { song: NonNullable<Wisdom["song"]> }) {
           {preview === undefined && <p className="mt-1 text-xs text-muted-foreground">Finding a preview…</p>}
           {preview === null && <p className="mt-1 text-xs text-muted-foreground">No preview available — use the links below.</p>}
         </div>
-        {preview && (
+        {preview && premium && (
           <button onClick={toggle} aria-label={playing ? "Pause preview" : "Play preview"}
             className="btn-gold flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
             {playing ? <Pause className="h-6 w-6" /> : <Play className="ml-0.5 h-6 w-6" />}
           </button>
         )}
       </div>
-      {preview && (
+      {preview && !premium && (
+        <p className="mt-3 rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-xs text-primary">🔒 Play the preview right here with Monere Plus.</p>
+      )}
+      {preview && premium && (
         <>
           <audio ref={audio} src={preview.previewUrl} preload="none" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} />
           <div className="mt-3 flex h-6 items-end gap-1" aria-hidden>

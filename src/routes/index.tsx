@@ -14,6 +14,9 @@ import { saveEntry } from "@/lib/journal";
 import { MonereMentor } from "@/components/MonereMentor";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { PaywallModal } from "@/components/PaywallModal";
+import { usePlan } from "@/hooks/usePlan";
+import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,6 +45,13 @@ function Home() {
   const [followUp, setFollowUp] = useState("");
   const [saved, setSaved] = useState(false);
   const [includeSong, setIncludeSong] = useState(true);
+  const { premium, ready } = usePlan();
+  const [paywall, setPaywall] = useState<null | "limit" | "upgrade">(null);
+  const [used, setUsed] = useState(0);
+  useEffect(() => {
+    setUsed(getUsedToday());
+    if (new URLSearchParams(window.location.search).get("upgrade") === "1") setPaywall("upgrade");
+  }, []);
   const [onboarding, setOnboarding] = useState(false);
   useEffect(() => {
     if (window.localStorage.getItem(ONBOARDED_KEY) !== "true") setOnboarding(true);
@@ -50,7 +60,9 @@ function Home() {
   async function run(extra?: string) {
     const text = extra ?? situation;
     if (text.trim().length < 3) { toast("Tell us a little about what's going on first."); return; }
-    if (detectCrisis(text)) setCrisis(true);
+    const isCrisis = detectCrisis(text);
+    if (isCrisis) setCrisis(true);
+    if (!isCrisis && ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
     const res = await ask({
       data: extra
@@ -59,6 +71,7 @@ function Home() {
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
     if (!res.ok) { toast.error(res.error); return; }
+    if (!premium) { recordQuery(); setUsed(getUsedToday()); }
     setWisdom(res.wisdom);
     setSaved(false);
     setFollowOpen(false);
@@ -117,9 +130,16 @@ function Home() {
             <Switch checked={includeSong} onCheckedChange={setIncludeSong} aria-label="Include a Song Recommendation" />
           </label>
           <Button onClick={() => run()} disabled={loading} className="btn-gold mt-4 h-auto w-full py-4"><ShieldCheck /> Talk to Monere</Button>
+          {ready && !premium && (
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {Math.max(0, FREE_DAILY_LIMIT - used)} of {FREE_DAILY_LIMIT} free chats left today ·{" "}
+              <button onClick={() => setPaywall("upgrade")} className="font-semibold text-primary hover:underline">Get Monere Plus</button>
+            </p>
+          )}
           <p className="mt-3 text-center text-xs text-muted-foreground">AI guidance isn't a replacement for a pastor, parent or counsellor.</p>
         </>
       )}
+      {paywall && <PaywallModal reason={paywall} onClose={() => setPaywall(null)} />}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
       {onboarding && (
         <OnboardingModal

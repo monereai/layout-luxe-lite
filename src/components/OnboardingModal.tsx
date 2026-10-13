@@ -3,6 +3,7 @@ import { Lock, HeartHandshake, BookOpen, LifeBuoy, ShieldCheck } from "lucide-re
 import lion from "@/assets/monere-lion.png";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { Button } from "@/components/ui/button";
+import { PassCodeLink } from "@/components/PassCodeDialog";
 
 export const ONBOARDED_KEY = "monereai-onboarded";
 
@@ -64,6 +65,7 @@ export function OnboardingModal({ onDone }: { onDone: (r: { category: string[]; 
               ))}
             </ul>
             <Button onClick={() => setStep(2)} className="btn-gold mt-6 h-auto w-full py-4">Got It, Let's Continue</Button>
+            <PassCodeLink className="mx-auto mt-4 block" />
           </div>
         )}
 

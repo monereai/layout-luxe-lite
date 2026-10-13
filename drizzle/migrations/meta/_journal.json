@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791919257347,
+      "tag": "0000_monere_plus_subscriptions_and_pass_codes",
+      "breakpoints": true
+    }
+  ]
 }
