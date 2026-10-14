@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
@@ -13,6 +13,7 @@ const tabs = [
   { to: "/", label: "seek", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
+  { to: "/find", label: "game", icon: Search },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
