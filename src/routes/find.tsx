@@ -21,7 +21,7 @@ export const Route = createFileRoute("/find")({
       { title: "Where's Monere? — MonereAI" },
       { name: "description", content: "Find Monere the Lion hidden in busy scenes, earn Wisdom Points, and unlock the Master Detective badge." },
       { property: "og:title", content: "Where's Monere? — MonereAI" },
-      { property: "og:description", content: "A hidden-object mini-game: spot Monere, beat the clock, earn Wisdom Points." },
+      { property: "og:description", content: "A hidden-object mini-game: spot Monere the Lion in busy scenes and earn Wisdom Points." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -48,17 +48,14 @@ function FindGame() {
   const scene = SCENES[idx] ?? SCENES[0]!;
   const [zoom, setZoom] = useState(2);
   const [start, setStart] = useState(() => Date.now());
-  const [now, setNow] = useState(() => Date.now());
   const [found, setFound] = useState<null | { secs: number; pts: number }>(null);
   const [hint, setHint] = useState(false);
   const [miss, setMiss] = useState(false);
   const box = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { if (found) return; const t = setInterval(() => setNow(Date.now()), 250); return () => clearInterval(t); }, [found]);
   useEffect(() => { const el = box.current; if (el) { el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2; el.scrollTop = (el.scrollHeight - el.clientHeight) / 2; } }, [idx, zoom]);
 
-  const secs = Math.floor((now - start) / 1000);
-  function reset(next = idx) { setIdx(next); setFound(null); setHint(false); setStart(Date.now()); setNow(Date.now()); }
+  function reset(next = idx) { setIdx(next); setFound(null); setHint(false); setStart(Date.now()); }
   function hit() {
     if (found) return;
     const s = (Date.now() - start) / 1000;
@@ -86,12 +83,9 @@ function FindGame() {
         ))}
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-sm">
-        <span className="font-mono text-primary">⏱ {found ? found.secs : secs}s</span>
-        <div className="flex gap-1">
-          <Button size="icon" variant="secondary" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(1, z - 0.5))}><ZoomOut /></Button>
-          <Button size="icon" variant="secondary" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(4, z + 0.5))}><ZoomIn /></Button>
-        </div>
+      <div className="mt-3 flex items-center justify-end gap-1">
+        <Button size="icon" variant="secondary" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(1, z - 0.5))}><ZoomOut /></Button>
+        <Button size="icon" variant="secondary" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(4, z + 0.5))}><ZoomIn /></Button>
       </div>
 
       <div ref={box} className={`surface-card relative mt-2 aspect-[4/3] w-full overflow-auto p-0 ${miss ? "animate-[shake_0.35s]" : ""}`} style={{ touchAction: "pan-x pan-y" }}>
