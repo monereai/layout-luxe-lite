@@ -3,12 +3,14 @@ import { Check, Footprints, GraduationCap, Shirt } from "lucide-react";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
 import { HATS, SHOES, TOPS, getOutfit, useOutfit, type HatId, type ShoeId, type TopId } from "@/lib/outfit";
 
 export function WardrobeButton({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const { selection, setOutfit } = useOutfit();
   const preview = getOutfit(selection);
+  const t = useT();
 
   return (
     <>
@@ -17,16 +19,16 @@ export function WardrobeButton({ className = "" }: { className?: string }) {
         variant="outline"
         size="sm"
         onClick={() => setOpen(true)}
-        aria-label="Customize Monere"
+        aria-label={t("customize")}
         className={`rounded-full border-primary/40 bg-background/70 text-xs font-semibold text-primary shadow-lg backdrop-blur-md ${className}`}
       >
-        <Shirt aria-hidden="true" /> Customize Monere
+        <Shirt aria-hidden="true" /> {t("customize")}
       </Button>
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerContent className="mx-auto max-h-[92dvh] max-w-md border-border bg-background">
           <DrawerHeader className="pb-2 text-center">
-            <DrawerTitle className="font-display text-xl">Monere's Wardrobe 👔</DrawerTitle>
-            <DrawerDescription>Build Monere's look one item at a time.</DrawerDescription>
+            <DrawerTitle className="font-display text-xl">{t("wardrobe")}</DrawerTitle>
+            <DrawerDescription>{t("wardrobeDesc")}</DrawerDescription>
           </DrawerHeader>
 
           <div className="min-h-0 overflow-y-auto px-4 pb-8">
@@ -36,9 +38,9 @@ export function WardrobeButton({ className = "" }: { className?: string }) {
 
             <Tabs defaultValue="tops">
               <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-lg p-1">
-                <TabsTrigger value="tops" className="min-h-11 gap-1 px-2 text-xs"><Shirt className="h-4 w-4" /> Tops &amp; Jackets</TabsTrigger>
-                <TabsTrigger value="headwear" className="min-h-11 gap-1 px-2 text-xs"><GraduationCap className="h-4 w-4" /> Headwear</TabsTrigger>
-                <TabsTrigger value="footwear" className="min-h-11 gap-1 px-2 text-xs"><Footprints className="h-4 w-4" /> Footwear</TabsTrigger>
+                <TabsTrigger value="tops" className="min-h-11 gap-1 px-2 text-xs"><Shirt className="h-4 w-4" /> {t("tops")}</TabsTrigger>
+                <TabsTrigger value="headwear" className="min-h-11 gap-1 px-2 text-xs"><GraduationCap className="h-4 w-4" /> {t("headwear")}</TabsTrigger>
+                <TabsTrigger value="footwear" className="min-h-11 gap-1 px-2 text-xs"><Footprints className="h-4 w-4" /> {t("footwear")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="tops">
@@ -89,6 +91,7 @@ function ChoiceGrid({
   image: (id: string) => string;
   onSelect: (id: string) => void;
 }) {
+  const t = useT();
   return (
     <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-3 pt-2">
       {items.map((item) => {
@@ -105,7 +108,7 @@ function ChoiceGrid({
           >
             {equipped && (
               <span className="absolute right-1.5 top-1.5 z-10 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-primary-foreground">
-                <Check className="h-3 w-3" /> Equipped
+                <Check className="h-3 w-3" /> {t("equipped")}
               </span>
             )}
             <img src={image(item.id)} alt="" loading="lazy" width={150} height={150} className="h-28 w-full object-contain" />

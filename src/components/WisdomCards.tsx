@@ -5,6 +5,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { findSongPreview, type SongPreview } from "@/lib/song.functions";
 import type { ReactNode } from "react";
 import { MonereFigure } from "@/components/MonereFigure";
+import { useT } from "@/lib/i18n";
 import type { Wisdom } from "@/lib/wisdom.functions";
 
 function CheerBadge({ text }: { text: string }) {
@@ -26,12 +27,13 @@ function Card({ icon, title, children, delay }: { icon: ReactNode; title: string
 }
 
 export function WisdomCards({ w }: { w: Wisdom }) {
+  const t = useT();
   return (
     <div className="space-y-4">
-      <Card icon={<Compass className="h-4 w-4" />} title="Monere's Perspective" delay={0}>
+      <Card icon={<Compass className="h-4 w-4" />} title={t("perspective")} delay={0}>
         <p className="leading-relaxed">{w.bigPicture}</p>
       </Card>
-      <Card icon={<BookOpen className="h-4 w-4" />} title="Wisdom Anchor" delay={120}>
+      <Card icon={<BookOpen className="h-4 w-4" />} title={t("wisdom")} delay={120}>
         <div className="space-y-4">
           {w.verses.map((v) => (
             <div key={v.reference}>
@@ -42,7 +44,7 @@ export function WisdomCards({ w }: { w: Wisdom }) {
           ))}
         </div>
       </Card>
-      <Card icon={<Footprints className="h-4 w-4" />} title="Steps of Courage" delay={240}>
+      <Card icon={<Footprints className="h-4 w-4" />} title={t("steps")} delay={240}>
         <ol className="space-y-3">
           {w.path.map((s, i) => (
             <li key={i} className="flex gap-3">
@@ -51,14 +53,14 @@ export function WisdomCards({ w }: { w: Wisdom }) {
             </li>
           ))}
         </ol>
-        <CheerBadge text="You've got this." />
+        <CheerBadge text={t("cheer1")} />
       </Card>
-      <Card icon={<ShieldCheck className="h-4 w-4" />} title="The Honor Outlook" delay={360}>
+      <Card icon={<ShieldCheck className="h-4 w-4" />} title={t("honor")} delay={360}>
         <div className="grid gap-3">
-          <div className="border-l-2 border-border pl-3"><p className="text-xs font-bold text-muted-foreground">YOUR NEXT STEP</p><p className="mt-1 text-sm">{w.shortTerm}</p></div>
-          <div className="border-l-2 border-primary pl-3"><p className="text-xs font-bold text-primary">THE PERSON YOU'RE BECOMING</p><p className="mt-1 text-sm">{w.longTerm}</p></div>
+          <div className="border-l-2 border-border pl-3"><p className="text-xs font-bold text-muted-foreground">{t("nextStep")}</p><p className="mt-1 text-sm">{w.shortTerm}</p></div>
+          <div className="border-l-2 border-primary pl-3"><p className="text-xs font-bold text-primary">{t("becoming")}</p><p className="mt-1 text-sm">{w.longTerm}</p></div>
         </div>
-        <CheerBadge text="Proud of you for thinking this through." />
+        <CheerBadge text={t("cheer2")} />
       </Card>
       {w.song && <SongCard song={w.song} />}
     </div>
@@ -72,6 +74,7 @@ function SongCard({ song }: { song: NonNullable<Wisdom["song"]> }) {
   const [playing, setPlaying] = useState(false);
   const { premium } = usePlan();
   const audio = useRef<HTMLAudioElement>(null);
+  const t = useT();
   useEffect(() => {
     let live = true;
     find({ data: { title: song.title, artist: song.artist } }).then((p) => live && setPreview(p)).catch(() => live && setPreview(null));
@@ -85,7 +88,7 @@ function SongCard({ song }: { song: NonNullable<Wisdom["song"]> }) {
   const title = preview?.title ?? song.title;
   const artist = preview?.artist ?? song.artist;
   return (
-    <Card icon={<Music className="h-4 w-4" />} title="Monere's Soundtrack 🎵" delay={480}>
+    <Card icon={<Music className="h-4 w-4" />} title={t("soundtrack")} delay={480}>
       <div className="flex items-center gap-4">
         {preview?.artwork ? (
           <img src={preview.artwork} alt={`${preview.album || title} album art`} className="h-20 w-20 shrink-0 rounded-xl object-cover shadow-lg" />
@@ -120,7 +123,7 @@ function SongCard({ song }: { song: NonNullable<Wisdom["song"]> }) {
           <p className="mt-1 text-[10px] text-muted-foreground">30-second preview courtesy of Apple Music</p>
         </>
       )}
-      <p className="mt-3 text-sm italic text-muted-foreground">"Why I picked this for you: {song.why}"</p>
+      <p className="mt-3 text-sm italic text-muted-foreground">"{t("why")} {song.why}"</p>
       <div className="mt-4 flex flex-wrap gap-2">
         <a href={`https://open.spotify.com/search/${q}`} target="_blank" rel="noopener noreferrer" className="song-link"><Music className="h-3.5 w-3.5" />Open full track in Spotify</a>
         <a href={`https://www.youtube.com/results?search_query=${q}`} target="_blank" rel="noopener noreferrer" className="song-link"><Youtube className="h-3.5 w-3.5" />Watch on YouTube</a>
