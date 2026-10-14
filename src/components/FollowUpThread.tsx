@@ -8,7 +8,6 @@ export type ChatMsg = { role: "user" | "assistant"; content: string };
 const CHIPS = ["Can you explain step 2 more?", "What if they say no?"];
 
 export function FollowUpThread({
-  const t = useT();
   messages,
   pending,
   onSend,
@@ -18,6 +17,7 @@ export function FollowUpThread({
   onSend: (text: string) => void;
 }) {
   const { outfit } = useOutfit();
+  const t = useT();
   const [text, setText] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
