@@ -12,7 +12,7 @@ export type Lang = (typeof LANGS)[number]["id"];
 export const LANG_IDS = LANGS.map((l) => l.id) as [Lang, ...Lang[]];
 
 const en = {
-  seek: "Seek", daily: "Daily", journal: "Journal", signIn: "Sign in", signOut: "Sign out", managePlan: "Manage plan",
+  seek: "Seek", daily: "Daily", journal: "Journal", game: "Find", signIn: "Sign in", signOut: "Sign out", managePlan: "Manage plan",
   tagline: "Guided Wisdom & Decision Integrity for Teens", language: "Language",
   crisisBar: "In crisis or feeling unsafe? Tap for free, confidential 24/7 help.",
   whatsOnMind: "What's on your mind?", placeholder: "e.g., My friends want me to gossip about someone, but I feel bad...",
@@ -39,7 +39,7 @@ const en = {
 type Dict = typeof en;
 
 const es: Dict = {
-  seek: "Buscar", daily: "Diario", journal: "Diario personal", signIn: "Entrar", signOut: "Salir", managePlan: "Gestionar plan",
+  seek: "Buscar", daily: "Diario", journal: "Diario personal", game: "Juego", signIn: "Entrar", signOut: "Salir", managePlan: "Gestionar plan",
   tagline: "Sabiduría guiada e integridad para adolescentes", language: "Idioma",
   crisisBar: "¿En crisis o te sientes inseguro? Toca para ayuda gratuita y confidencial 24/7.",
   whatsOnMind: "¿Qué tienes en mente?", placeholder: "p. ej., Mis amigos quieren que hable mal de alguien, pero me siento mal...",
@@ -65,7 +65,7 @@ const es: Dict = {
 };
 
 const fr: Dict = {
-  seek: "Chercher", daily: "Quotidien", journal: "Journal", signIn: "Connexion", signOut: "Déconnexion", managePlan: "Gérer l'abonnement",
+  seek: "Chercher", daily: "Quotidien", journal: "Journal", game: "Jeu", signIn: "Connexion", signOut: "Déconnexion", managePlan: "Gérer l'abonnement",
   tagline: "Sagesse guidée et intégrité pour les ados", language: "Langue",
   crisisBar: "En crise ou en danger ? Touche ici pour une aide gratuite et confidentielle 24h/24.",
   whatsOnMind: "Qu'est-ce qui te préoccupe ?", placeholder: "ex. : Mes amis veulent que je critique quelqu'un, mais je me sens mal...",
@@ -91,7 +91,7 @@ const fr: Dict = {
 };
 
 const pt: Dict = {
-  seek: "Procurar", daily: "Diário", journal: "Diário pessoal", signIn: "Entrar", signOut: "Sair", managePlan: "Gerir plano",
+  seek: "Procurar", daily: "Diário", journal: "Diário pessoal", game: "Jogo", signIn: "Entrar", signOut: "Sair", managePlan: "Gerir plano",
   tagline: "Sabedoria guiada e integridade para adolescentes", language: "Idioma",
   crisisBar: "Em crise ou a sentir-te inseguro? Toca para ajuda gratuita e confidencial 24/7.",
   whatsOnMind: "O que tens em mente?", placeholder: "ex.: Os meus amigos querem que eu fale mal de alguém, mas sinto-me mal...",
@@ -117,7 +117,7 @@ const pt: Dict = {
 };
 
 const de: Dict = {
-  seek: "Suchen", daily: "Täglich", journal: "Tagebuch", signIn: "Anmelden", signOut: "Abmelden", managePlan: "Abo verwalten",
+  seek: "Suchen", daily: "Täglich", journal: "Tagebuch", game: "Spiel", signIn: "Anmelden", signOut: "Abmelden", managePlan: "Abo verwalten",
   tagline: "Geführte Weisheit & Entscheidungsintegrität für Teens", language: "Sprache",
   crisisBar: "In einer Krise oder fühlst du dich unsicher? Tippe für kostenlose, vertrauliche Hilfe rund um die Uhr.",
   whatsOnMind: "Was beschäftigt dich?", placeholder: "z. B. Meine Freunde wollen, dass ich über jemanden lästere, aber ich fühle mich schlecht...",
