@@ -158,7 +158,7 @@ function Home() {
         <>
           <MonereMentor portrait={false} />
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            What's on your mind?
+            {t("whatsOnMind")}
           </p>
           <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} />
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
