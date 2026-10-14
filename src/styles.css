@@ -193,3 +193,5 @@
 .gesture-pop { animation: gesture-pop 0.5s ease-out both; }
 @keyframes gesture-pop { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .gesture-frame { transition: opacity 0.15s linear; transform: none !important; } .gesture-pop { animation: none; } }
+
+@keyframes shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-6px) } 75% { transform: translateX(6px) } }

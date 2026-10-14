@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Check, Footprints, GraduationCap, Shirt } from "lucide-react";
+import { useGame } from "@/lib/game";
+import { Award } from "lucide-react";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -29,6 +31,7 @@ export function WardrobeButton({ className = "" }: { className?: string }) {
           <DrawerHeader className="pb-2 text-center">
             <DrawerTitle className="font-display text-xl">{t("wardrobe")}</DrawerTitle>
             <DrawerDescription>{t("wardrobeDesc")}</DrawerDescription>
+            <DetectiveBadge />
           </DrawerHeader>
 
           <div className="min-h-0 overflow-y-auto px-4 pb-8">
@@ -118,5 +121,14 @@ function ChoiceGrid({
         );
       })}
     </div>
+  );
+}
+
+function DetectiveBadge() {
+  const { detective, points } = useGame();
+  return detective ? (
+    <p className="mx-auto mt-2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground"><Award className="h-3.5 w-3.5" />Master Detective · {points} Wisdom Points</p>
+  ) : (
+    <p className="mt-2 text-xs text-muted-foreground">Find Monere in the Find tab to unlock the Master Detective badge.</p>
   );
 }
