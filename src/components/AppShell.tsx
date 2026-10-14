@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link key={to} to={to} className="flex flex-1 flex-col items-center gap-1 py-3 text-xs text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
               <Icon className="h-5 w-5" />
-              {t(label)}
+              <span className="min-h-[2.5em] leading-tight text-center">{t(label)}</span>
             </Link>
           ))}
         </nav>

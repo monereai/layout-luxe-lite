@@ -22,3 +22,9 @@
 - [x] Tailor Monere's advice prompt and response framing to the selected profile.
 - [x] Add warm, respectful boundary guidance for questions outside the male/female framework.
 - [x] Verify onboarding and personalized advice behavior.
+
+# Where's Monere? game
+- [x] Add hidden-object scenes, zoom/pan search, hint, celebration, Wisdom Points, and badge.
+- [x] Remove the on-screen timer and rename the tab to "Find Monere" in all five languages.
+- [ ] Translate the game screen copy (currently English only).
+- [ ] Confirm the victory chime on a real phone with sound on.
