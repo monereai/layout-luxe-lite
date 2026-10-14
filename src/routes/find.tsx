@@ -45,7 +45,7 @@ function chime() {
 function FindGame() {
   const game = useGame();
   const [idx, setIdx] = useState(0);
-  const scene = SCENES[idx];
+  const scene = SCENES[idx] ?? SCENES[0]!;
   const [zoom, setZoom] = useState(2);
   const [start, setStart] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
