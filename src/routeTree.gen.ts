@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DailyRouteImport } from './routes/daily'
+import { Route as FindRouteImport } from './routes/find'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -29,6 +30,11 @@ const AuthRoute = AuthRouteImport.update({
 const DailyRoute = DailyRouteImport.update({
   id: '/daily',
   path: '/daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindRoute = FindRouteImport.update({
+  id: '/find',
+  path: '/find',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JournalRoute = JournalRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/daily': typeof DailyRoute
+  '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/daily': typeof DailyRoute
+  '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/daily': typeof DailyRoute
+  '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/checkout/return': typeof CheckoutReturnRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/daily'
+    | '/find'
     | '/journal'
     | '/checkout/return'
     | '/api/public/payments/webhook'
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/daily'
+    | '/find'
     | '/journal'
     | '/checkout/return'
     | '/api/public/payments/webhook'
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/daily'
+    | '/find'
     | '/journal'
     | '/checkout/return'
     | '/api/public/payments/webhook'
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   DailyRoute: typeof DailyRoute
+  FindRoute: typeof FindRoute
   JournalRoute: typeof JournalRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -130,6 +143,13 @@ declare module '@tanstack/react-router' {
       path: '/daily'
       fullPath: '/daily'
       preLoaderRoute: typeof DailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find': {
+      id: '/find'
+      path: '/find'
+      fullPath: '/find'
+      preLoaderRoute: typeof FindRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/journal': {
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   DailyRoute: DailyRoute,
+  FindRoute: FindRoute,
   JournalRoute: JournalRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
