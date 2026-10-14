@@ -111,7 +111,7 @@ function FindGame() {
         <div className="surface-card mt-4 p-5 text-center">
           <p className="text-3xl">🎉</p>
           <p className="mt-1 font-display text-xl font-semibold">You found Monere!</p>
-          <p className="mt-1 text-sm text-muted-foreground">Time: {found.secs}s · +{found.pts} Wisdom Points{game.best[scene.id] !== undefined && ` · Best ${game.best[scene.id]}s`}</p>
+          <p className="mt-1 text-sm text-muted-foreground">+{found.pts} Wisdom Points</p>
           <p className="mt-2 text-sm">"Sharp eyes! Noticing the small things is a big part of wisdom."</p>
           <p className="mt-2 text-xs text-primary">Master Detective badge unlocked in Monere's Wardrobe</p>
           <Button className="btn-gold mt-4 w-full" onClick={() => reset((idx + 1) % SCENES.length)}><RotateCcw /> Next scene</Button>
