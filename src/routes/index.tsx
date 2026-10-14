@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { PaywallModal } from "@/components/PaywallModal";
 import { usePlan } from "@/hooks/usePlan";
+import { useT, useLang } from "@/lib/i18n";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
 
 export const Route = createFileRoute("/")({
@@ -54,6 +55,8 @@ function Home() {
   const [includeSong, setIncludeSong] = useState(true);
   const userName = useUserName();
   const profile = useProfile();
+  const t = useT();
+  const lang = useLang();
   const [listening, setListening] = useState(false);
   const { premium, ready } = usePlan();
   const [paywall, setPaywall] = useState<null | "limit" | "upgrade">(null);
@@ -78,7 +81,7 @@ function Home() {
     if (ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
     const res = await ask({
-      data: { category, situation, includeSong, userName: userName || undefined, profile },
+      data: { category, situation, includeSong, userName: userName || undefined, profile, lang },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
     if (!res.ok) { toast.error(res.error); return; }
@@ -101,7 +104,7 @@ function Home() {
     setChat(history);
     setChatPending(true);
     const res = await reply({
-      data: { category, situation, advice: JSON.stringify(wisdom), userName: userName || undefined, profile, history },
+      data: { category, situation, advice: JSON.stringify(wisdom), userName: userName || undefined, profile, lang, history },
     }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setChatPending(false);
     if (!res.ok) { toast.error(res.error); setChat(chat); return; }
@@ -119,7 +122,7 @@ function Home() {
     <AppShell>
       {safety ? (
         <>
-          <Button variant="ghost" onClick={() => setSafety(false)} className="mb-2 w-fit px-0 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Back</Button>
+          <Button variant="ghost" onClick={() => setSafety(false)} className="mb-2 w-fit px-0 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> {t("back")}</Button>
           <SafetyCard />
         </>
       ) : loading ? (
@@ -128,7 +131,7 @@ function Home() {
         </div>
       ) : wisdom ? (
         <>
-          <Button variant="ghost" onClick={() => setWisdom(null)} className="mb-2 w-fit px-0 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Talk to Monere again</Button>
+          <Button variant="ghost" onClick={() => setWisdom(null)} className="mb-2 w-fit px-0 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> {t("talkAgain")}</Button>
           <MonereMentor mode="results" />
           {wisdom.personalReply ? (
             <div className="surface-card mt-6 p-5">
@@ -144,10 +147,10 @@ function Home() {
           <div className="mt-6 grid gap-2">
             {!wisdom.personalReply && (
             <Button disabled={saved} onClick={() => { saveEntry({ category, situation, wisdom }); setSaved(true); toast.success("Saved to your Reflection Journal"); }} className="btn-gold h-auto whitespace-normal py-3.5 disabled:opacity-60">
-              <BookmarkPlus className="h-4 w-4" /> {saved ? "Saved to Journal" : "Save to Reflection Journal"}
+              <BookmarkPlus className="h-4 w-4" /> {saved ? t("saved") : t("save")}
             </Button>
             )}
-            {!wisdom.personalReply && <Button variant="secondary" onClick={share} className="h-auto whitespace-normal rounded-full px-2 py-3"><Share2 /> Share anonymously</Button>}
+            {!wisdom.personalReply && <Button variant="secondary" onClick={share} className="h-auto whitespace-normal rounded-full px-2 py-3"><Share2 /> {t("share")}</Button>}
           </div>
           <FollowUpThread messages={chat} pending={chatPending} onSend={sendFollowUp} />
         </>
@@ -155,24 +158,24 @@ function Home() {
         <>
           <MonereMentor portrait={false} />
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            What's on your mind?
+            {t("whatsOnMind")}
           </p>
-          <CategoryPicker value={categories} onChange={setCategories} actionLabel="Talk to Monere" wardrobe listening={listening} />
+          <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} />
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
-            <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} onFocus={() => setListening(true)} onBlur={() => setListening(false)} rows={4} maxLength={3000} placeholder="e.g., My friends want me to gossip about someone, but I feel bad..." className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
+            <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} onFocus={() => setListening(true)} onBlur={() => setListening(false)} rows={4} maxLength={3000} placeholder={t("placeholder")} className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>
           <label className="surface-card mt-3 flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm">
-            <span>🎵 Include a Song Recommendation</span>
+            <span>{t("includeSong")}</span>
             <Switch checked={includeSong} onCheckedChange={setIncludeSong} aria-label="Include a Song Recommendation" />
           </label>
-          <Button onClick={() => run()} disabled={loading} className="btn-gold mt-4 h-auto w-full py-4"><ShieldCheck /> Talk to Monere</Button>
+          <Button onClick={() => run()} disabled={loading} className="btn-gold mt-4 h-auto w-full py-4"><ShieldCheck /> {t("talk")}</Button>
           {ready && !premium && (
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              {Math.max(0, FREE_DAILY_LIMIT - used)} of {FREE_DAILY_LIMIT} free chats left today ·{" "}
-              <button onClick={() => setPaywall("upgrade")} className="font-semibold text-primary hover:underline">Get Monere Plus</button>
+              {t("freeLeft", { n: Math.max(0, FREE_DAILY_LIMIT - used), max: FREE_DAILY_LIMIT })} ·{" "}
+              <button onClick={() => setPaywall("upgrade")} className="font-semibold text-primary hover:underline">{t("getPlus")}</button>
             </p>
           )}
-          <p className="mt-3 text-center text-xs text-muted-foreground">AI guidance isn't a replacement for a pastor, parent or counsellor.</p>
+          <p className="mt-3 text-center text-xs text-muted-foreground">{t("disclaimer")}</p>
         </>
       )}
       {paywall && <PaywallModal reason={paywall} onClose={() => setPaywall(null)} />}

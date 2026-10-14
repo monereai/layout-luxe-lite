@@ -1,3 +1,4 @@
+import { LANG_IDS, languageInstruction } from "@/lib/i18n";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -15,6 +16,7 @@ const Input = z.object({
   advice: z.string().max(10000),
   userName: z.string().max(30).optional(),
   profile: z.enum(["young-man", "young-woman"]).optional(),
+  lang: z.enum(LANG_IDS).optional(),
   history: z
     .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(1500) }))
     .min(1)
@@ -46,7 +48,7 @@ export const followUpChat = createServerFn({ method: "POST" })
       headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
       body: JSON.stringify({
         model: "openai/gpt-6-astra",
-        instructions: SYSTEM,
+        instructions: `${SYSTEM}\n${languageInstruction(data.lang)}`,
         input,
         stream: true,
         store: false,

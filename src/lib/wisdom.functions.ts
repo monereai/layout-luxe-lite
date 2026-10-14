@@ -1,3 +1,4 @@
+import { LANG_IDS, languageInstruction } from "@/lib/i18n";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -79,6 +80,7 @@ const Input = z.object({
   includeSong: z.boolean().optional(),
   userName: z.string().max(30).optional(),
   profile: z.enum(["young-man", "young-woman"]).optional(),
+  lang: z.enum(LANG_IDS).optional(),
 });
 
 export const seekWisdom = createServerFn({ method: "POST" })
@@ -105,7 +107,7 @@ export const seekWisdom = createServerFn({ method: "POST" })
       headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
       body: JSON.stringify({
         model: "openai/gpt-6-astra",
-        instructions: SYSTEM,
+        instructions: `${SYSTEM}\n${languageInstruction(data.lang)}`,
         input,
         stream: true,
         store: false,

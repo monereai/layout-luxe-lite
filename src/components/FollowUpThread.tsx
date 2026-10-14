@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import { useOutfit } from "@/lib/outfit";
@@ -16,6 +17,7 @@ export function FollowUpThread({
   onSend: (text: string) => void;
 }) {
   const { outfit } = useOutfit();
+  const t = useT();
   const [text, setText] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +83,7 @@ export function FollowUpThread({
           value={text}
           onChange={(e) => setText(e.target.value)}
           maxLength={1500}
-          placeholder="Ask Monere a follow-up question..."
+          placeholder={t("followPh")}
           className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
         <button type="submit" disabled={pending || !text.trim()} aria-label="Send" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-50">
