@@ -7,6 +7,7 @@ import { BookmarkPlus, Share2, ArrowLeft, ShieldCheck } from "lucide-react";
 import { FollowUpThread, type ChatMsg } from "@/components/FollowUpThread";
 import { followUpChat } from "@/lib/followup.functions";
 import { AppShell } from "@/components/AppShell";
+import { InstallBanner } from "@/components/InstallBanner";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
 import { CategoryPicker } from "@/components/CategoryPicker";
@@ -178,6 +179,7 @@ function Home() {
           <p className="mt-3 text-center text-xs text-muted-foreground">{t("disclaimer")}</p>
         </>
       )}
+      {!wisdom && !safety && !onboarding && <InstallBanner />}
       {paywall && <PaywallModal reason={paywall} onClose={() => setPaywall(null)} />}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
       {onboarding && (

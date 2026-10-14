@@ -15,3 +15,4 @@
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
 - Keep the wardrobe selection as one local-storage object with top, headwear, and footwear IDs while exposing a compatible outfit image object to character consumers. Why: combinations persist without duplicating character rendering logic.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
+- Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
