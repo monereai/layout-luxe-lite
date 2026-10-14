@@ -7,7 +7,7 @@ export function CrisisDialog({ open, onClose, triggered }: { open: boolean; onCl
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true">
-      <div className="surface-card w-full max-w-md p-6 animate-in slide-in-from-bottom-4">
+      <div className="surface-card z-40 max-h-[90dvh] w-full max-w-md overflow-y-auto overscroll-contain p-6 pb-safe animate-in slide-in-from-bottom-4">
         <div className="flex items-start justify-between">
           <HeartHandshake className="h-8 w-8 text-primary" />
           <button onClick={onClose} aria-label="Close" className="text-muted-foreground"><X className="h-5 w-5" /></button>

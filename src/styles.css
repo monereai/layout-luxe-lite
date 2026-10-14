@@ -195,3 +195,19 @@
 @media (prefers-reduced-motion: reduce) { .gesture-frame { transition: opacity 0.15s linear; transform: none !important; } .gesture-pop { animation: none; } }
 
 @keyframes shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-6px) } 75% { transform: translateX(6px) } }
+
+@utility action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-bottom: -1.5rem;
+  padding: 0.75rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+  background: color-mix(in oklab, var(--color-background) 95%, transparent);
+  backdrop-filter: blur(12px);
+}
+@utility pb-safe {
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+}

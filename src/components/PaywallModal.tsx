@@ -39,7 +39,7 @@ export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => voi
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Upgrade to Monere Plus" className="fixed inset-0 z-50 flex items-end justify-center bg-background/85 backdrop-blur-sm sm:items-center">
-      <div className="surface-card relative flex max-h-[100dvh] w-full max-w-md flex-col overflow-y-auto rounded-b-none p-6 sm:rounded-3xl">
+      <div className="surface-card relative flex z-40 max-h-[90dvh] w-full max-w-md flex-col overflow-y-auto overscroll-contain rounded-b-none p-6 sm:rounded-3xl">
         <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 z-10 text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></button>
         {checkout ? (
           <>
@@ -71,10 +71,10 @@ export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => voi
               })}
             </div>
             {user ? (
-              <Button onClick={() => setCheckout(true)} className="btn-gold mt-5 h-auto w-full py-4">Start 7-Day Free Trial</Button>
+              <div className="action-bar mt-5"><Button onClick={() => setCheckout(true)} className="btn-gold h-auto w-full py-4">Start 7-Day Free Trial</Button></div>
             ) : (
               <>
-                <Button asChild className="btn-gold mt-5 h-auto w-full py-4"><Link to="/auth" search={{ next: "/?upgrade=1" }}>Start 7-Day Free Trial</Link></Button>
+                <div className="action-bar mt-5"><Button asChild className="btn-gold h-auto w-full py-4"><Link to="/auth" search={{ next: "/?upgrade=1" }}>Start 7-Day Free Trial</Link></Button></div>
                 <p className="mt-2 text-center text-xs text-muted-foreground">You'll create a free account first so Plus stays with you.</p>
               </>
             )}

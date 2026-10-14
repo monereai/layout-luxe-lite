@@ -27,14 +27,14 @@ export function WardrobeButton({ className = "" }: { className?: string }) {
         <Shirt aria-hidden="true" /> {t("customize")}
       </Button>
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="mx-auto max-h-[92dvh] max-w-md border-border bg-background">
+        <DrawerContent className="mx-auto max-h-[90dvh] max-w-md border-border bg-background">
           <DrawerHeader className="pb-2 text-center">
             <DrawerTitle className="font-display text-xl">{t("wardrobe")}</DrawerTitle>
             <DrawerDescription>{t("wardrobeDesc")}</DrawerDescription>
             <DetectiveBadge />
           </DrawerHeader>
 
-          <div className="min-h-0 overflow-y-auto px-4 pb-8">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-safe">
             <div className="mb-3 flex h-44 items-center justify-center overflow-hidden rounded-lg border border-border bg-card/60">
               <img src={preview.src} alt={`Monere wearing ${preview.name}`} width={260} height={340} className="h-full w-full object-contain" />
             </div>

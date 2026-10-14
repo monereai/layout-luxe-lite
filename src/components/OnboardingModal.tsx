@@ -41,7 +41,7 @@ export function OnboardingModal({ onDone }: { onDone: (result: { category: strin
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Welcome to MonereAI" className="fixed inset-0 z-50 flex items-end justify-center bg-background/90 backdrop-blur-sm sm:items-center">
-      <div className="surface-card relative flex max-h-[100dvh] w-full max-w-md flex-col overflow-y-auto rounded-b-none p-6 sm:rounded-3xl">
+      <div className="surface-card relative flex z-40 max-h-[90dvh] w-full max-w-md flex-col overflow-y-auto overscroll-contain rounded-b-none p-6 sm:rounded-3xl">
         <div className="mb-5 flex items-center justify-between">
           <div className="flex gap-1.5" aria-label={`Step ${step + 1} of 5`}>
             {[0, 1, 2, 3, 4].map((index) => (
@@ -59,7 +59,7 @@ export function OnboardingModal({ onDone }: { onDone: (result: { category: strin
             <p className="mt-2 text-sm text-muted-foreground">{t("meetSub")}</p>
             <label htmlFor="onb-name" className="mt-5 block text-left text-sm font-medium">{t("nameQ")}</label>
             <input id="onb-name" value={nameInput} maxLength={30} onChange={(event) => setNameInput(event.target.value)} placeholder={t("namePh")} className="mt-2 w-full rounded-2xl border border-border bg-input/40 px-4 py-3 text-sm outline-none focus:border-primary" />
-            <Button onClick={() => { if (nameInput.trim()) setUserName(nameInput); setStep(1); }} className="btn-gold mt-4 h-auto w-full py-4">{t("getStarted")}</Button>
+            <div className="action-bar mt-5"><Button onClick={() => { if (nameInput.trim()) setUserName(nameInput); setStep(1); }} className="btn-gold h-auto w-full py-4">{t("getStarted")}</Button></div>
           </div>
         )}
 
@@ -83,7 +83,7 @@ export function OnboardingModal({ onDone }: { onDone: (result: { category: strin
                 </Button>
               ))}
             </div>
-            <Button disabled={!profileInput} onClick={() => { if (profileInput) setProfile(profileInput); setStep(2); }} className="btn-gold mt-5 h-auto w-full py-4">{t("continue")}</Button>
+            <div className="action-bar mt-5"><Button disabled={!profileInput} onClick={() => { if (profileInput) setProfile(profileInput); setStep(2); }} className="btn-gold h-auto w-full py-4">{t("continue")}</Button></div>
           </div>
         )}
 
@@ -98,7 +98,7 @@ export function OnboardingModal({ onDone }: { onDone: (result: { category: strin
                 </li>
               ))}
             </ul>
-            <Button onClick={() => setStep(3)} className="btn-gold mt-6 h-auto w-full py-4">{t("gotIt")}</Button>
+            <div className="action-bar mt-5"><Button onClick={() => setStep(3)} className="btn-gold h-auto w-full py-4">{t("gotIt")}</Button></div>
             <PassCodeLink className="mx-auto mt-4 block" />
           </div>
         )}
@@ -108,7 +108,7 @@ export function OnboardingModal({ onDone }: { onDone: (result: { category: strin
             <h2 className="font-display text-2xl font-semibold">{t("heartQ")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t("heartSub")}</p>
             <CategoryPicker value={topics} onChange={setTopics} />
-            <Button onClick={() => setStep(4)} className="btn-gold mt-6 h-auto w-full py-4">{t("continue")}</Button>
+            <div className="action-bar mt-5"><Button onClick={() => setStep(4)} className="btn-gold h-auto w-full py-4">{t("continue")}</Button></div>
           </div>
         )}
 
@@ -124,7 +124,7 @@ export function OnboardingModal({ onDone }: { onDone: (result: { category: strin
               ))}
             </div>
             <textarea aria-label="Your situation" value={text} onChange={(event) => { setText(event.target.value); setSampleCat(undefined); }} rows={3} maxLength={3000} placeholder={t("placeholder")} className="mt-3 w-full resize-none rounded-2xl border border-border bg-transparent p-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
-            <Button onClick={() => finish(text.trim() || undefined)} className="btn-gold mt-4 h-auto w-full py-4"><ShieldCheck /> {t("askMonere")}</Button>
+            <div className="action-bar mt-5"><Button onClick={() => finish(text.trim() || undefined)} className="btn-gold h-auto w-full py-4"><ShieldCheck /> {t("askMonere")}</Button></div>
           </div>
         )}
       </div>

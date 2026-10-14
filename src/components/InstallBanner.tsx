@@ -35,7 +35,7 @@ export function InstallBanner() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-44 z-40 mx-auto max-w-md px-3" role="region" aria-label="Install MonereAI">
+    <div className="fixed inset-x-0 bottom-[calc(12rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-md px-3" role="region" aria-label="Install MonereAI">
       <div className="surface-card flex items-center gap-3 border-primary/40 p-3 shadow-lg">
         <Smartphone className="h-5 w-5 shrink-0 text-primary" />
         <div className="min-w-0 flex-1 text-sm">

@@ -42,7 +42,7 @@ function PassCodeDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Enter a pass code" className="fixed inset-0 z-[60] flex items-center justify-center bg-background/85 p-5 backdrop-blur-sm">
-      <div className="surface-card relative w-full max-w-sm p-6">
+      <div className="surface-card relative max-h-[90dvh] w-full max-w-sm overflow-y-auto p-6">
         <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></button>
         <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary"><KeyRound className="h-5 w-5" /></span>
         <h2 className="mt-4 font-display text-xl font-semibold">Enter your Youth Group or School Pass Code</h2>
