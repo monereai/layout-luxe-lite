@@ -9,6 +9,28 @@ import { useProfile } from "@/lib/profile";
 import { STORY_THEMES, type StoryThemeId, type StoryTurn } from "@/lib/story";
 import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
+import { fallbackArt } from "@/lib/story-art";
+import { streamImage } from "@/lib/stream-image";
+
+type SceneImg = { src: string | null; final: boolean; fallback: boolean };
+
+function SceneFrame({ img, alt }: { img?: SceneImg; alt: string }) {
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-border bg-muted">
+      {img?.src ? (
+        <img
+          src={img.src}
+          alt={alt}
+          width={1280}
+          height={720}
+          className={`h-full w-full object-cover transition-[filter] duration-700 ${img.final ? "blur-0" : "blur-2xl"}`}
+        />
+      ) : (
+        <div className="h-full w-full animate-pulse bg-gradient-to-br from-muted via-card to-muted" aria-label="Painting the scene" />
+      )}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/story")({
   head: () => ({
@@ -37,6 +59,20 @@ function StoryMode() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
+  const [images, setImages] = useState<Record<number, SceneImg>>({});
+  const runId = useRef(0);
+
+  function paint(segment: number, scene: string, picked: StoryThemeId, id: number) {
+    const fallback = () =>
+      runId.current === id &&
+      setImages((m) => ({ ...m, [segment]: { src: fallbackArt(picked, segment), final: true, fallback: true } }));
+    setImages((m) => ({ ...m, [segment]: { src: null, final: false, fallback: false } }));
+    if (!scene) return fallback();
+    streamImage("/api/story-image", { scene }, (src, final) => {
+      if (runId.current !== id) return;
+      setImages((m) => ({ ...m, [segment]: { src, final, fallback: false } }));
+    }).catch(fallback);
+  }
 
   async function run(nextTurns: StoryTurn[], picked: StoryThemeId) {
     setBusy(true);
@@ -47,12 +83,15 @@ function StoryMode() {
     setBusy(false);
     if (res.ok) {
       setCurrent(res.story);
+      paint(nextTurns.length, res.story.scene, picked, runId.current);
       return;
     }
     setError(res.error);
   }
 
   function start(id: StoryThemeId) {
+    runId.current += 1;
+    setImages({});
     setTheme(id);
     setTurns([]);
     setCurrent(null);
@@ -68,6 +107,8 @@ function StoryMode() {
   }
 
   function reset() {
+    runId.current += 1;
+    setImages({});
     setTheme(null);
     setTurns([]);
     setCurrent(null);
@@ -122,12 +163,16 @@ function StoryMode() {
 
       <div className="flex flex-col gap-4">
         {turns.map((turn, i) => (
-          <article key={i} className="rounded-2xl border border-border/60 bg-card/60 px-4 py-3">
+          <div key={i} className="flex flex-col gap-2">
+          <SceneFrame img={images[i]} alt={`Scene ${i + 1} of the story`} />
+          <article className="rounded-2xl border border-border/60 bg-card/60 px-4 py-3">
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground">{turn.narration}</p>
             <p className="mt-2 text-xs font-semibold text-primary">→ {turn.choice}</p>
           </article>
+          </div>
         ))}
 
+        {current && <SceneFrame img={images[turns.length]} alt="Illustration of the current scene" />}
         {current && (
           <article className="rounded-2xl border border-primary/30 bg-card px-4 py-4">
             <p className="whitespace-pre-line text-[16px] leading-relaxed text-foreground">{current.narration}</p>
