@@ -68,33 +68,51 @@ function StoryMode() {
   const [images, setImages] = useState<Record<number, SceneImg>>({});
   const runId = useRef(0);
 
-  function paint(segment: number, scene: string, picked: StoryThemeId, id: number) {
-    const fallback = () =>
-      runId.current === id &&
-      setImages((m) => ({ ...m, [segment]: { src: fallbackArt(picked, segment), final: true, fallback: true } }));
-    // Show the matching ready-made picture instantly, then swap in the painted scene once it's done.
-    fallback();
-    if (!scene) return;
-    streamImage("/api/story-image", { scene }, (src, final) => {
-      if (runId.current !== id || !final) return;
-      setImages((m) => ({ ...m, [segment]: { src, final: true, fallback: false } }));
-    }).catch(() => {});
+  // Paint the scene and resolve with the finished picture (or the matching ready-made one if it's too slow / fails).
+  function paintScene(segment: number, scene: string, picked: StoryThemeId): Promise<string> {
+    const backup = fallbackArt(picked, segment);
+    if (!scene) return Promise.resolve(backup);
+    const painted = new Promise<string>((resolve) => {
+      let last: string | null = null;
+      streamImage("/api/story-image", { scene }, (src, final) => {
+        if (final) last = src;
+      })
+        .then(() => resolve(last ?? backup))
+        .catch(() => resolve(backup));
+    });
+    const timeout = new Promise<string>((resolve) => setTimeout(() => resolve(backup), 30000));
+    return Promise.race([painted, timeout]);
   }
 
   async function run(nextTurns: StoryTurn[], picked: StoryThemeId) {
+    const id = runId.current;
     setBusy(true);
     setError(null);
     const res = await tellStory({
       data: { episode: epNum, turns: nextTurns, userName: userName || undefined, profile, lang },
     });
-    setBusy(false);
-    if (res.ok) {
-      setCurrent(res.story);
-      if (res.story.isEnding) setBonus(recordChapterComplete(epNum, CHAPTER_BONUS));
-      paint(nextTurns.length, res.story.scene, picked, runId.current);
+    if (runId.current !== id) return;
+    if (!res.ok) {
+      setBusy(false);
+      setError(res.error);
       return;
     }
-    setError(res.error);
+    // Hold the text back until its illustration is ready so both appear together.
+    const segment = nextTurns.length;
+    const src = await paintScene(segment, res.story.scene, picked);
+    if (runId.current !== id) return;
+    // Make sure the browser has decoded the picture before revealing it.
+    await new Promise<void>((resolve) => {
+      const probe = new Image();
+      probe.onload = () => resolve();
+      probe.onerror = () => resolve();
+      probe.src = src;
+    });
+    if (runId.current !== id) return;
+    setImages((m) => ({ ...m, [segment]: { src, final: true, fallback: false } }));
+    setCurrent(res.story);
+    setBusy(false);
+    if (res.story.isEnding) setBonus(recordChapterComplete(epNum, CHAPTER_BONUS));
   }
 
   function start(id: StoryThemeId) {
