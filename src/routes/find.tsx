@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RotateCcw, Trophy, Award } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,9 @@ function FindGame() {
   const game = useGame();
   const [idx, setIdx] = useState(0);
   const scene = SCENES[idx] ?? SCENES[0]!;
-  const [grid, setGrid] = useState<Tile[]>(() => makeGrid(8));
+  // Server and first client render share one fixed layout; the real shuffle happens after mount.
+  const [grid, setGrid] = useState<Tile[]>(() => { let n = 7; return makeGrid(8, () => ((n = (n * 9301 + 49297) % 233280) / 233280)); });
+  useEffect(() => { setGrid(makeGrid(8)); }, []);
   const [open, setOpen] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
   const [shake, setShake] = useState<number | null>(null);
