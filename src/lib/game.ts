@@ -81,3 +81,12 @@ export function useGame() {
   useEffect(load, []);
   return s;
 }
+
+/** +100 once per weekly episode finished; returns 0 if already claimed. */
+export function recordChapterComplete(episode: number, bonus = 100) {
+  const done = (current as GameState & { episodes?: number[] }).episodes ?? [];
+  if (done.includes(episode)) return 0;
+  current = { ...current, points: current.points + bonus, episodes: [...done, episode] } as GameState;
+  save();
+  return bonus;
+}

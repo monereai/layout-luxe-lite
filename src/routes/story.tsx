@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarDays, Loader2, Sparkles, Trophy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { MonereFigure } from "@/components/MonereFigure";
 import { useLang, useT } from "@/lib/i18n";
 import { useProfile } from "@/lib/profile";
-import { STORY_THEMES, type StoryThemeId, type StoryTurn } from "@/lib/story";
+import { CHAPTER_BONUS, daysUntilNextEpisode, episodeFor, episodeNumber, type StoryThemeId, type StoryTurn } from "@/lib/story";
+import { recordChapterComplete } from "@/lib/game";
 import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
 import { fallbackArt } from "@/lib/story-art";
@@ -53,7 +54,12 @@ function StoryMode() {
   const lang = useLang();
   const profile = useProfile();
   const userName = useUserName();
+  const [epNum] = useState(() => episodeNumber());
+  const episode = episodeFor(epNum);
   const [theme, setTheme] = useState<StoryThemeId | null>(null);
+  const [bonus, setBonus] = useState<number | null>(null);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
+  useEffect(() => setDaysLeft(daysUntilNextEpisode()), []);
   const [turns, setTurns] = useState<StoryTurn[]>([]);
   const [current, setCurrent] = useState<StoryResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -79,11 +85,12 @@ function StoryMode() {
     setBusy(true);
     setError(null);
     const res = await tellStory({
-      data: { theme: picked, turns: nextTurns, userName: userName || undefined, profile, lang },
+      data: { episode: epNum, turns: nextTurns, userName: userName || undefined, profile, lang },
     });
     setBusy(false);
     if (res.ok) {
       setCurrent(res.story);
+      if (res.story.isEnding) setBonus(recordChapterComplete(epNum, CHAPTER_BONUS));
       paint(nextTurns.length, res.story.scene, picked, runId.current);
       return;
     }
@@ -93,6 +100,7 @@ function StoryMode() {
   function start(id: StoryThemeId) {
     runId.current += 1;
     setImages({});
+    setBonus(null);
     setTheme(id);
     setTurns([]);
     setCurrent(null);
@@ -127,26 +135,25 @@ function StoryMode() {
           <h1 className="font-display text-3xl font-semibold text-foreground">{t("storyTitle")}</h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("storySub")}</p>
         </header>
-        <h2 className="mb-3 font-display text-lg font-semibold text-foreground">{t("storyChoose")}</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {STORY_THEMES.map((s) => (
-            <Button
-              key={s.id}
-              variant="ghost"
-              onClick={() => start(s.id)}
-              className="flex h-auto min-h-28 flex-col items-start gap-2 whitespace-normal rounded-2xl border border-border bg-card px-5 py-5 text-left transition-colors hover:border-primary/50 hover:bg-primary/5"
-            >
-              <span className="text-3xl" aria-hidden="true">{s.emoji}</span>
-              <span className="font-display text-xl font-semibold text-foreground">{s.name}</span>
-              <span className="text-sm leading-relaxed text-muted-foreground">{s.blurb}</span>
+        <div className="overflow-hidden rounded-3xl border border-primary/40 bg-card">
+          <img src={fallbackArt(episode.theme)} alt="" width={1280} height={720} className="aspect-video w-full object-cover" />
+          <div className="flex flex-col gap-3 p-5">
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> New Episode Every Monday!
+              {daysLeft !== null && <span className="text-muted-foreground">· next in {daysLeft} {daysLeft === 1 ? "day" : "days"}</span>}
+            </span>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Weekly Episode</p>
+            <h2 className="font-display text-2xl font-semibold text-foreground">Episode {epNum}: {episode.title}</h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">{episode.blurb}</p>
+            <Button onClick={() => start(episode.theme)} className="mt-1 h-auto w-full rounded-full py-3 text-base sm:w-fit sm:px-8">
+              <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" /> Start this week's adventure
             </Button>
-          ))}
+          </div>
         </div>
       </AppShell>
     );
   }
 
-  const themeInfo = STORY_THEMES.find((s) => s.id === theme)!;
 
   return (
     <AppShell>
@@ -156,7 +163,7 @@ function StoryMode() {
         </Button>
         <div className="min-w-0">
           <h1 className="truncate font-display text-2xl font-semibold text-foreground">
-            <span aria-hidden="true">{themeInfo.emoji}</span> {themeInfo.name}
+            Episode {epNum}: {episode.title}
           </h1>
           <p className="text-xs text-muted-foreground">{t("storyTitle")}</p>
         </div>
@@ -201,7 +208,10 @@ function StoryMode() {
         {current?.isEnding && (
           <div className="flex flex-col items-center gap-4 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-7 text-center">
             <MonereFigure gesture="thumbs" className="h-40 w-40" alt="Monere cheering" />
-            <p className="font-display text-2xl font-semibold text-primary">{t("storyEnd")}</p>
+            <p className="flex items-center gap-2 font-display text-2xl font-semibold text-primary"><Trophy className="h-6 w-6" aria-hidden="true" /> Chapter Complete!</p>
+            <p className="text-sm text-foreground">
+              {bonus ? `+${bonus} bonus points added to your wallet!` : "You've already claimed this week's bonus — come back Monday for a new episode."}
+            </p>
             <div className="flex flex-wrap justify-center gap-3">
               <Button onClick={() => start(theme)} className="rounded-full px-6 py-3 text-base">
                 <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" /> {t("storyAgain")}
