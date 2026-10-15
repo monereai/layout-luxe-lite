@@ -23,6 +23,30 @@ export function fallbackArt(theme: StoryThemeId, _segment = 0): string {
   return FALLBACK_ART[THEME_ART[theme][0] ?? "space"];
 }
 
+const SCENE_WORDS: Record<FallbackArtId, RegExp> = {
+  space: /\b(space|star|stars|planet|moon|moons|comet|rocket|ship|starship|cockpit|galaxy|orbit|signal|astronaut)\b/i,
+  submarine: /\b(submarine|underwater|undersea|ocean|sea|lake|water|diving|dive|bell|boat|boathouse|ripples|sunken|fish)\b/i,
+  forest: /\b(forest|woods|woodland|trees?|jungle|path|trail|garden|greenhouse|meadow|leaves)\b/i,
+  castle: /\b(castle|kingdom|tower|bell tower|lantern|throne|palace|knight|royal|gate|courtyard)\b/i,
+  detective: /\b(clue|clues|detective|mystery|trophy|footprints?|note|map|hall|corridor|school|library|magnifying)\b/i,
+  clock: /\b(clock|time|hour|hours|letter|yesterday|tomorrow|pendulum|tick|ticking|portal|door)\b/i,
+};
+
+/**
+ * Ready-made picture for ONE story segment, chosen from that segment's own scene
+ * description (plot/choice), then from the story topic. This is never the
+ * weekly title banner's job — the banner uses fallbackArt() on the start screen only.
+ */
+export function sceneFallbackArt(theme: StoryThemeId, segment: number, scene: string): string {
+  const themed = THEME_ART[theme];
+  const ids = Object.keys(SCENE_WORDS) as FallbackArtId[];
+  const text = scene || "";
+  // Prefer matches within the story's own topic, then any topic.
+  const hit = themed.find((id) => SCENE_WORDS[id].test(text)) ?? ids.find((id) => SCENE_WORDS[id].test(text));
+  if (hit) return FALLBACK_ART[hit];
+  return FALLBACK_ART[themed[segment % themed.length] ?? "space"];
+}
+
 /** How long to wait for a painted scene before showing the ready-made picture with the chapter text. */
 export const SCENE_WAIT_MS = 10000;
 

@@ -10,7 +10,7 @@ import { CHAPTER_BONUS, daysUntilNextEpisode, episodeFor, episodeNumber, type St
 import { recordChapterComplete } from "@/lib/game";
 import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
-import { fallbackArt, raceSceneBackup } from "@/lib/story-art";
+import { fallbackArt, raceSceneBackup, sceneFallbackArt } from "@/lib/story-art";
 import { streamImage } from "@/lib/stream-image";
 import { playChime, playFanfare } from "@/lib/sound";
 
@@ -71,7 +71,7 @@ function StoryMode() {
 
   // Paint the scene and resolve with the finished picture (or the matching ready-made one if it's too slow / fails).
   function paintScene(segment: number, scene: string, picked: StoryThemeId): Promise<string> {
-    const backup = fallbackArt(picked, segment);
+    const backup = sceneFallbackArt(picked, segment, scene);
     if (!scene) return Promise.resolve(backup);
     const painted = new Promise<string>((resolve) => {
       let last: string | null = null;
