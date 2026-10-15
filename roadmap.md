@@ -66,3 +66,8 @@
 - [x] Keep a single Monere on the home screen with the faded treehouse behind him.
 - [x] Make the treehouse picture larger behind Monere.
 - [ ] Translate The Treehouse greeting (currently English only).
+
+# Points Shop sign picture
+- [x] Create a gold "Points Shop" signboard picture and use it in place of the shop title text.
+- [x] Show the sign in the side quick-actions panel instead of the "Points Shop" text link.
+- [ ] Make the sign banner larger on the shop page and in the side panel.
