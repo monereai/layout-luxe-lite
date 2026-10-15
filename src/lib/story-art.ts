@@ -20,5 +20,5 @@ export const THEME_ART: Record<StoryThemeId, FallbackArtId[]> = {
 
 export function fallbackArt(theme: StoryThemeId, segment: number): string {
   const list = THEME_ART[theme];
-  return FALLBACK_ART[list[segment % list.length]];
+  return FALLBACK_ART[list[segment % list.length] ?? list[0] ?? "space"];
 }
