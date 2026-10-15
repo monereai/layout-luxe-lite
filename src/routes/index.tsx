@@ -17,7 +17,7 @@ import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
 import { MonereMentor } from "@/components/MonereMentor";
-import { Treehouse } from "@/components/Treehouse";
+import { Treehouse, TREEHOUSE_BACKDROP } from "@/components/Treehouse";
 import { SafetyCard } from "@/components/SafetyCard";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -158,12 +158,14 @@ function Home() {
       ) : (
         <>
           <Treehouse>
-            <MonereMentor />
+            <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} backdrop={TREEHOUSE_BACKDROP} />
+            <div className="mt-4">
+              <MonereMentor portrait={false} />
+            </div>
           </Treehouse>
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t("whatsOnMind")}
           </p>
-          <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} />
           <div className="surface-card mt-3 p-4 focus-within:border-primary">
             <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} onFocus={() => setListening(true)} onBlur={() => setListening(false)} rows={4} maxLength={3000} placeholder={t("placeholder")} className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
           </div>

@@ -44,12 +44,14 @@ export function CategoryPicker({
   actionLabel = "Continue",
   wardrobe = false,
   listening = false,
+  backdrop,
 }: {
   value: string[];
   onChange: (titles: string[]) => void;
   actionLabel?: string;
   wardrobe?: boolean;
   listening?: boolean;
+  backdrop?: string;
 }) {
   const toggle = (title: string) => {
     if (value.includes(title)) onChange(value.filter((t) => t !== title));
@@ -61,8 +63,13 @@ export function CategoryPicker({
       {wardrobe && <div className="flex justify-end"><WardrobeButton /></div>}
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
         <div className="orbit-center" aria-hidden="true">
+          {backdrop && (
+            <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[135%] w-[135%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-20" />
+          )}
           <span className="orbit-halo" />
-          <MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" />
+          <div className="relative z-10 h-full w-full">
+            <MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" />
+          </div>
         </div>
         <div className="orbit-overlay">
           {CATEGORIES.map(({ title, short, emoji }, i) => {
