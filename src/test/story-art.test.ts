@@ -25,3 +25,17 @@ describe("story fallback art", () => {
     expect(await raceSceneBackup("backup.jpg", painted, 2000)).toBe("painted.jpg");
   });
 });
+
+import { sceneFallbackArt } from "@/lib/story-art";
+import { describe as d2, expect as e2, it as i2 } from "vitest";
+
+d2("sceneFallbackArt", () => {
+  i2("picks a picture from the segment's own scene, not the title picture", () => {
+    e2(sceneFallbackArt("mystery", 2, "You and Monere row toward the old boathouse as ripples spread")).toBe(FALLBACK_ART.submarine);
+    e2(sceneFallbackArt("mystery", 1, "Deep in the whispering forest, a trail of footprints")).toBe(FALLBACK_ART.forest);
+  });
+  i2("alternates themed pictures by segment when the scene has no keywords", () => {
+    e2(sceneFallbackArt("kingdom", 0, "")).toBe(FALLBACK_ART.castle);
+    e2(sceneFallbackArt("kingdom", 1, "")).toBe(FALLBACK_ART.forest);
+  });
+});
