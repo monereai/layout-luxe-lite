@@ -92,7 +92,7 @@ function StoryMode() {
               key={s.id}
               variant="ghost"
               onClick={() => start(s.id)}
-              className="flex h-auto min-h-28 flex-col items-start gap-2 rounded-2xl border border-border bg-card px-5 py-5 text-left transition-colors hover:border-primary/50 hover:bg-primary/5"
+              className="flex h-auto min-h-28 flex-col items-start gap-2 whitespace-normal rounded-2xl border border-border bg-card px-5 py-5 text-left transition-colors hover:border-primary/50 hover:bg-primary/5"
             >
               <span className="text-3xl" aria-hidden="true">{s.emoji}</span>
               <span className="font-display text-xl font-semibold text-foreground">{s.name}</span>
@@ -174,7 +174,7 @@ function StoryMode() {
                 key={label}
                 variant="ghost"
                 onClick={() => choose(label)}
-                className="flex h-auto min-h-16 w-full items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 text-left text-base font-medium text-foreground transition-colors hover:border-primary/60 hover:bg-primary/10"
+                className="flex h-auto min-h-16 w-full items-center gap-3 whitespace-normal rounded-2xl border border-border bg-card px-5 py-4 text-left text-base font-medium text-foreground transition-colors hover:border-primary/60 hover:bg-primary/10"
               >
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary/10 font-display text-sm font-bold text-primary">
                   {LETTERS[i] ?? i + 1}
