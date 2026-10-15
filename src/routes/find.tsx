@@ -95,12 +95,12 @@ function FindGame() {
 
   return (
     <AppShell>
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold">Where's Monere?</h1>
           <p className="text-sm text-muted-foreground">Tap the bushes, rocks and tents to find 10 hidden Mini-Moneres.</p>
         </div>
-        <div className="shrink-0 text-right text-xs text-muted-foreground">
+        <div className="shrink-0 text-xs text-muted-foreground sm:text-right">
           <p className="font-bold text-primary"><Trophy className="mr-1 inline h-3.5 w-3.5" />{game.points} Wisdom Points</p>
           <Link to="/shop" className="text-xs font-semibold text-primary hover:underline">Spend points in the Shop →</Link>
           {game.detective && <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 font-bold text-primary-foreground"><Award className="h-3 w-3" />Master Detective</p>}
