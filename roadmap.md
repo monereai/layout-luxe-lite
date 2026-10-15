@@ -56,3 +56,6 @@
 - [x] Add a Story Mode tab with four theme cards: Space Adventure, Mystery Detective, Magical Kingdom, Time Traveler.
 - [x] Build the interactive narrator engine: short 2-3 sentence turns with 2-3 choices, Monere as companion in the story.
 - [x] Present choices as large, easy-to-tap buttons and verify a full story turn on a phone-sized screen.
+- [x] Replace the four-story menu with one Weekly Interactive Adventure banner and a Monday episode rotation.
+- [x] Show each chapter's illustration at the same time as its text, capping the wait at 10 seconds before using the matching backup picture.
+- [ ] Translate the weekly banner and finale copy (currently English only).

@@ -10,7 +10,7 @@ import { CHAPTER_BONUS, daysUntilNextEpisode, episodeFor, episodeNumber, type St
 import { recordChapterComplete } from "@/lib/game";
 import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
-import { fallbackArt } from "@/lib/story-art";
+import { fallbackArt, raceSceneBackup } from "@/lib/story-art";
 import { streamImage } from "@/lib/stream-image";
 
 type SceneImg = { src: string | null; final: boolean; fallback: boolean };
@@ -80,8 +80,7 @@ function StoryMode() {
         .then(() => resolve(last ?? backup))
         .catch(() => resolve(backup));
     });
-    const timeout = new Promise<string>((resolve) => setTimeout(() => resolve(backup), 30000));
-    return Promise.race([painted, timeout]);
+    return raceSceneBackup(backup, painted);
   }
 
   async function run(nextTurns: StoryTurn[], picked: StoryThemeId) {

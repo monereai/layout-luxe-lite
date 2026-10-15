@@ -22,3 +22,26 @@ export const THEME_ART: Record<StoryThemeId, FallbackArtId[]> = {
 export function fallbackArt(theme: StoryThemeId, _segment = 0): string {
   return FALLBACK_ART[THEME_ART[theme][0] ?? "space"];
 }
+
+/** How long to wait for a painted scene before showing the ready-made picture with the chapter text. */
+export const SCENE_WAIT_MS = 10000;
+
+/**
+ * Resolve with the painted scene as soon as it's ready, or with the matching
+ * ready-made backup once SCENE_WAIT_MS has passed and it's still pending.
+ */
+export function raceSceneBackup(backup: string, painted: Promise<string>, waitMs = SCENE_WAIT_MS): Promise<string> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(backup), waitMs);
+    painted.then(
+      (src) => {
+        clearTimeout(timer);
+        resolve(src);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(backup);
+      },
+    );
+  });
+}
