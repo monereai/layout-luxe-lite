@@ -1,136 +1,131 @@
 import { createServerFn } from "@tanstack/react-start";
-import type Stripe from "stripe";
+import Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
-type CheckoutSessionResult = { clientSecret: string } | { error: string };
+type Env = "sandbox" | "live";
 
-const ALLOWED_PRICES = ["plus_monthly", "plus_yearly"];
-export const TRIAL_DAYS = 7;
+// Prices live in the owner's own Stripe account.
+export const PLANS = {
+  individual: { priceId: "price_1UQhOuQ94lPfyPtigN4pvW4V", trial: true },
+  group: { priceId: "price_1UQhPFQ94lPfyPtiON7xBjuU", trial: true },
+} as const;
+export type PlanKey = keyof typeof PLANS;
+export const GROUP_SEATS = 30;
+const TRIAL_DAYS = 7;
 
-async function resolveOrCreateCustomer(
-  stripe: ReturnType<typeof createStripeClient>,
-  options: { email?: string | undefined; userId?: string | undefined },
-): Promise<string> {
-  if (options.userId && !/^[a-zA-Z0-9_-]+$/.test(options.userId)) {
-    throw new Error("Invalid userId");
-  }
-  if (options.userId) {
-    const found = await stripe.customers.search({
-      query: `metadata['userId']:'${options.userId}'`,
-      limit: 1,
-    });
-    if (found.data[0]) return found.data[0].id;
-  }
-  if (options.email) {
-    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    const customer = existing.data[0];
-    if (customer) {
-      if (options.userId && customer.metadata?.["userId"] !== options.userId) {
-        await stripe.customers.update(customer.id, {
-          metadata: { ...customer.metadata, userId: options.userId },
-        });
-      }
-      return customer.id;
-    }
-  }
-  const created = await stripe.customers.create({
-    ...(options.email && { email: options.email }),
-    ...(options.userId && { metadata: { userId: options.userId } }),
-  });
-  return created.id;
+function stripe() {
+  const key = process.env["STRIPE_SECRET_KEY"];
+  if (!key) throw new Error("Stripe is not configured");
+  return new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
+}
+const msg = (e: unknown) => (e instanceof Error ? e.message : "Stripe request failed");
+
+async function findCustomer(s: Stripe, email: string, userId: string, create: boolean) {
+  const found = await s.customers.list({ email, limit: 1 });
+  if (found.data[0]) return found.data[0].id;
+  if (!create) return null;
+  return (await s.customers.create({ email, metadata: { userId } })).id;
 }
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { priceId: string; returnUrl: string; environment: StripeEnv }) => {
-    if (!ALLOWED_PRICES.includes(data.priceId)) throw new Error("Invalid priceId");
-    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
-    if (typeof data.returnUrl !== "string" || data.returnUrl.length > 500) throw new Error("Invalid returnUrl");
-    return data;
+  .inputValidator((d: { plan: PlanKey; origin: string }) => {
+    if (!(d.plan in PLANS)) throw new Error("Invalid plan");
+    if (!/^https?:\/\/[^\s]{1,200}$/.test(d.origin)) throw new Error("Invalid origin");
+    return d;
   })
-  .handler(async ({ data, context }): Promise<CheckoutSessionResult> => {
+  .handler(async ({ data, context }): Promise<{ url: string } | { error: string }> => {
     try {
-      const userId = context.userId;
-      const email = typeof context.claims?.email === "string" ? context.claims.email : undefined;
-      const stripe = createStripeClient(data.environment);
-
-      const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
-      const stripePrice = prices.data[0];
-      if (!stripePrice) throw new Error("Price not found");
-
-      const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
-
-      const session = await stripe.checkout.sessions.create({
-        line_items: [{ price: stripePrice.id, quantity: 1 }],
+      const email = typeof context.claims?.email === "string" ? context.claims.email : "";
+      if (!email) return { error: "Please sign in with email first." };
+      const s = stripe();
+      const plan = PLANS[data.plan];
+      const customer = (await findCustomer(s, email, context.userId, true))!;
+      const session = await s.checkout.sessions.create({
         mode: "subscription",
-        ui_mode: "embedded_page",
-        return_url: data.returnUrl,
-        customer: customerId,
-        metadata: { userId, managed_payments: "true" },
-        subscription_data: { metadata: { userId }, trial_period_days: TRIAL_DAYS },
-        managed_payments: { enabled: true },
-      } as Stripe.Checkout.SessionCreateParams);
-
-      return { clientSecret: session.client_secret ?? "" };
-    } catch (error) {
-      return { error: getStripeErrorMessage(error) };
+        customer,
+        line_items: [{ price: plan.priceId, quantity: 1 }],
+        subscription_data: { metadata: { userId: context.userId, plan: data.plan }, ...(plan.trial && { trial_period_days: TRIAL_DAYS }) },
+        metadata: { userId: context.userId },
+        success_url: `${data.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${data.origin}/`,
+      });
+      return { url: session.url ?? "" };
+    } catch (e) {
+      return { error: msg(e) };
     }
   });
 
-async function portalConfigId(stripe: ReturnType<typeof createStripeClient>): Promise<string> {
-  const list = await stripe.billingPortal.configurations.list({ limit: 20, active: true });
-  const existing = list.data.find((c) => c.metadata?.["app"] === "monere_plus");
-  if (existing) return existing.id;
-  const prices = await stripe.prices.list({ lookup_keys: ALLOWED_PRICES });
-  const product = prices.data[0]?.product;
-  const productId = typeof product === "string" ? product : product?.id;
-  const created = await stripe.billingPortal.configurations.create({
-    metadata: { app: "monere_plus" },
-    business_profile: { headline: "Manage your Monere Plus subscription" },
-    features: {
-      invoice_history: { enabled: true },
-      payment_method_update: { enabled: true },
-      // Cancels keep access until the end of the paid period.
-      subscription_cancel: { enabled: true, mode: "at_period_end" },
-      // Monthly <-> annual switches take effect at renewal, no proration.
-      subscription_update: {
-        enabled: true,
-        default_allowed_updates: ["price"],
-        proration_behavior: "none",
-        products: productId ? [{ product: productId, prices: prices.data.map((p) => p.id) }] : [],
-        schedule_at_period_end: { conditions: [{ type: "decreasing_item_amount" }, { type: "shortening_interval" }] },
-      },
-    },
-  } as Stripe.BillingPortal.ConfigurationCreateParams);
-  return created.id;
+function newCode() {
+  const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const b = crypto.getRandomValues(new Uint8Array(6));
+  return "GROUP-" + Array.from(b, (x) => a[x % a.length]).join("");
 }
+
+// Reads the user's latest subscription from Stripe and mirrors it into the database,
+// so is_premium stays the single source of truth.
+export const syncSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { environment: Env }) => {
+    if (d.environment !== "sandbox" && d.environment !== "live") throw new Error("Invalid environment");
+    return d;
+  })
+  .handler(async ({ data, context }): Promise<{ plan: PlanKey | null; status: string | null; groupCode: string | null; error?: string }> => {
+    try {
+      const email = typeof context.claims?.email === "string" ? context.claims.email : "";
+      const s = stripe();
+      const customer = email ? await findCustomer(s, email, context.userId, false) : null;
+      if (!customer) return { plan: null, status: null, groupCode: null };
+      const subs = await s.subscriptions.list({ customer, status: "all", limit: 5 });
+      const sub = subs.data.find((x) => ["active", "trialing", "past_due"].includes(x.status)) ?? subs.data[0];
+      if (!sub) return { plan: null, status: null, groupCode: null };
+      const item = sub.items.data[0];
+      const priceId = item?.price.id ?? "";
+      const plan = (Object.keys(PLANS) as PlanKey[]).find((k) => PLANS[k].priceId === priceId) ?? null;
+      const periodEnd = item?.current_period_end ? new Date(item.current_period_end * 1000).toISOString() : null;
+      const periodStart = item?.current_period_start ? new Date(item.current_period_start * 1000).toISOString() : null;
+      const status = sub.cancel_at_period_end && sub.status === "active" ? "canceled" : sub.status;
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("subscriptions").upsert({
+        user_id: context.userId, stripe_subscription_id: sub.id, stripe_customer_id: customer,
+        product_id: typeof item?.price.product === "string" ? item.price.product : "", price_id: priceId,
+        status, current_period_start: periodStart, current_period_end: periodEnd,
+        cancel_at_period_end: sub.cancel_at_period_end, environment: data.environment, updated_at: new Date().toISOString(),
+      }, { onConflict: "stripe_subscription_id" });
+
+      let groupCode: string | null = null;
+      if (plan === "group") {
+        const active = ["active", "trialing", "past_due"].includes(sub.status) || (periodEnd !== null && new Date(periodEnd) > new Date());
+        const { data: existing } = await supabaseAdmin.from("organization_codes").select("code").eq("stripe_subscription_id", sub.id).maybeSingle();
+        if (existing) {
+          groupCode = existing.code;
+          await supabaseAdmin.from("organization_codes").update({ is_active: active, expiration_date: periodEnd }).eq("stripe_subscription_id", sub.id);
+        } else {
+          groupCode = newCode();
+          await supabaseAdmin.from("organization_codes").insert({
+            code: groupCode, organization_name: "your youth group", max_uses: GROUP_SEATS, is_active: active,
+            expiration_date: periodEnd, owner_user_id: context.userId, stripe_subscription_id: sub.id,
+          });
+        }
+      }
+      return { plan, status: sub.status, groupCode };
+    } catch (e) {
+      return { plan: null, status: null, groupCode: null, error: msg(e) };
+    }
+  });
 
 export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { returnUrl: string; environment: StripeEnv }) => {
-    if (data.environment !== "sandbox" && data.environment !== "live") throw new Error("Invalid environment");
-    return data;
-  })
+  .inputValidator((d: { returnUrl: string; environment: Env }) => d)
   .handler(async ({ data, context }): Promise<{ url: string } | { error: string }> => {
-    const { data: sub } = await context.supabase
-      .from("subscriptions")
-      .select("stripe_customer_id")
-      .eq("user_id", context.userId)
-      .eq("environment", data.environment)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (!sub?.stripe_customer_id) return { error: "No subscription found" };
     try {
-      const stripe = createStripeClient(data.environment);
-      const portal = await stripe.billingPortal.sessions.create({
-        customer: sub.stripe_customer_id,
-        configuration: await portalConfigId(stripe),
-        return_url: data.returnUrl,
-      });
+      const email = typeof context.claims?.email === "string" ? context.claims.email : "";
+      const s = stripe();
+      const customer = email ? await findCustomer(s, email, context.userId, false) : null;
+      if (!customer) return { error: "No subscription found" };
+      const portal = await s.billingPortal.sessions.create({ customer, return_url: data.returnUrl });
       return { url: portal.url };
-    } catch (error) {
-      return { error: getStripeErrorMessage(error) };
+    } catch (e) {
+      return { error: msg(e) };
     }
   });
