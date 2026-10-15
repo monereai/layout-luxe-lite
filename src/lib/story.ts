@@ -49,3 +49,39 @@ export const STORY_MAX_TURNS = 10;
 export function storyTheme(id: StoryThemeId) {
   return STORY_THEMES.find((t) => t.id === id);
 }
+
+/** Weekly Interactive Adventure: one featured episode per week, new every Monday. */
+export type Episode = { title: string; theme: StoryThemeId; blurb: string; seed: string };
+
+/** Episode 1 aired the week starting Monday 21 Sep 2026 (UTC). */
+export const EPISODE_EPOCH = Date.UTC(2026, 8, 21);
+export const EPISODE_MIN_TURNS = 5;
+export const EPISODE_MAX_TURNS = 7;
+export const CHAPTER_BONUS = 100;
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+
+export const EPISODES: Episode[] = [
+  { title: "The Signal from Three Moons", theme: "space", blurb: "A friendly signal from an uncharted planet calls the starship Savannah's Roar.", seed: STORY_THEMES[0]!.seed },
+  { title: "The Vanished Trophy", theme: "mystery", blurb: "The golden trophy disappeared minutes before the ceremony.", seed: STORY_THEMES[1]!.seed },
+  { title: "The Fading Lantern", theme: "kingdom", blurb: "The great lantern of High Savannah is dimming — and it needs a keeper.", seed: STORY_THEMES[2]!.seed },
+  { title: "The Mystery of the Sunken Compass", theme: "mystery", blurb: "A brass compass that points to whatever you need most has sunk in Crestwood Lake.", seed: "A cosy mystery adventure. An old brass compass that always points toward what a person truly needs has been lost in the shallow, sunlit waters of Crestwood Lake. The reader and Monere follow honest, kind clues (a soggy map, a fisherman's note, ripples near the old boathouse) by rowing boat and small friendly diving bell. No danger to anyone, no villains, and the resolution is about honesty and generosity." },
+  { title: "The Clock That Ran Backwards", theme: "time", blurb: "Balthazar's grandfather clock opens a door to one hour earlier.", seed: STORY_THEMES[3]!.seed },
+  { title: "The Comet Garden", theme: "space", blurb: "A comet has left glowing seeds across the moon base greenhouse.", seed: "A space adventure on a cosy moon base greenhouse where a passing comet has scattered glowing seeds that grow into surprising plants overnight. The reader and Monere must work out what the seeds need and who they belong to. Wondrous, simple science, teamwork and patience." },
+  { title: "The Silent Bell Tower", theme: "kingdom", blurb: "The kingdom's bell has stopped ringing, and nobody knows why.", seed: "A gentle fantasy in the Kingdom of High Savannah, where the old bell tower that rings for every festival has fallen silent. The reader and Monere climb, ask and listen to discover why. Magic is warm, never scary; kindness and courage solve it." },
+  { title: "Yesterday's Letter", theme: "time", blurb: "A letter arrives postmarked tomorrow, written in the reader's own handwriting.", seed: "A time-travel adventure. A letter arrives postmarked tomorrow, in the reader's own handwriting, asking them to help someone today. The reader and Monere follow its hints. Warm and a little funny; the lesson is about the choice in front of them now." },
+];
+
+/** Episode number (1-based) for the week containing `now`. */
+export function episodeNumber(now: number = Date.now()) {
+  return Math.max(1, Math.floor((now - EPISODE_EPOCH) / WEEK) + 1);
+}
+
+export function episodeFor(num: number): Episode {
+  return EPISODES[(num - 1) % EPISODES.length]!;
+}
+
+/** Whole days until next Monday 00:00 UTC (1–7). */
+export function daysUntilNextEpisode(now: number = Date.now()) {
+  const next = EPISODE_EPOCH + episodeNumber(now) * WEEK;
+  return Math.max(1, Math.ceil((next - now) / (24 * 60 * 60 * 1000)));
+}
