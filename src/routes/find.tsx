@@ -5,8 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
-  COMPLETION_BONUS, MINI_COUNT, POINTS_PER_MINI,
-  makeSpots, recordComplete, recordMini, useGame, type Spot,
+  COMPLETION_BONUS, MAP_UNLOCK_FINDS, MINI_COUNT, POINTS_PER_MINI,
+  makeSpots, mapUnlocked, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
 import { playChime, playPop } from "@/lib/sound";
 
@@ -46,6 +46,10 @@ function FindGame() {
   const [won, setWon] = useState(false);
 
   function newRound(next = idx) {
+    if (next !== idx && !mapUnlocked(game.finds, next === 0 ? undefined : SCENES[next - 1]!.id)) {
+      setToast(`Find ${MAP_UNLOCK_FINDS} Mini-Moneres in ${SCENES[next - 1]!.name} to unlock ${SCENES[next]!.name}!`);
+      return;
+    }
     setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false);
   }
 
@@ -54,7 +58,7 @@ function FindGame() {
     const next = new Set(found).add(i);
     setFound(next);
     playPop();
-    recordMini();
+    recordMini(scene.id);
     if (next.size >= MINI_COUNT) {
       recordComplete(); setToast(null);
       setTimeout(() => { playChime("win"); setWon(true); }, 600);
@@ -78,10 +82,14 @@ function FindGame() {
       </div>
 
       <div className="mt-4 flex gap-2">
-        {SCENES.map((s, i) => (
-          <button key={s.id} onClick={() => newRound(i)} className={`flex-1 rounded-full border px-2 py-1.5 text-xs ${i === idx ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{s.name}</button>
-        ))}
+        {SCENES.map((s, i) => {
+          const open = mapUnlocked(game.finds, i === 0 ? undefined : SCENES[i - 1]!.id);
+          return (
+            <button key={s.id} onClick={() => newRound(i)} className={`flex-1 rounded-full border px-2 py-1.5 text-xs ${i === idx ? "border-primary bg-primary/15 text-primary" : open ? "border-border text-muted-foreground" : "border-border text-muted-foreground/50"}`}>{open ? s.name : `🔒 ${s.name}`}</button>
+          );
+        })}
       </div>
+      <p className="text-center text-xs text-muted-foreground/70">Find {MAP_UNLOCK_FINDS} Mini-Moneres in a map to unlock the next one.</p>
 
       <div className="sticky top-0 z-40 mt-3 flex items-center justify-between rounded-full border border-primary/40 bg-background/95 px-4 py-2 backdrop-blur" aria-live="polite">
         <p className="text-sm font-semibold text-foreground">Mini-Moneres Found: <span className="text-primary">{found.size} / {MINI_COUNT}</span></p>
