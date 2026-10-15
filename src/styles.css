@@ -90,11 +90,14 @@
 }
 
 @theme inline {
-  --font-display: "Outfit", "Trebuchet MS", system-ui, sans-serif;
-  --font-sans: "Figtree", system-ui, sans-serif;
+  --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, sans-serif;
 }
 
-@utility font-display { font-family: var(--font-display); letter-spacing: 0; }
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
 @utility surface-card {
   background: var(--card);
   border: 1px solid var(--border);
