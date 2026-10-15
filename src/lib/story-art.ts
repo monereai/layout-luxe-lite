@@ -37,14 +37,27 @@ const SCENE_WORDS: Record<FallbackArtId, RegExp> = {
  * description (plot/choice), then from the story topic. This is never the
  * weekly title banner's job — the banner uses fallbackArt() on the start screen only.
  */
-export function sceneFallbackArt(theme: StoryThemeId, segment: number, scene: string): string {
+export function sceneFallbackArt(theme: StoryThemeId, segment: number, scene: string, previous?: string): string {
   const themed = THEME_ART[theme];
   const ids = Object.keys(SCENE_WORDS) as FallbackArtId[];
   const text = scene || "";
-  // Prefer matches within the story's own topic, then any topic.
-  const hit = themed.find((id) => SCENE_WORDS[id].test(text)) ?? ids.find((id) => SCENE_WORDS[id].test(text));
-  if (hit) return FALLBACK_ART[hit];
-  return FALLBACK_ART[themed[segment % themed.length] ?? "space"];
+  // Score every picture by how many of its scene words appear; the strongest match wins
+  // (a lake scene with a "map" in it is still a water scene, not the detective hall).
+  const scored = ids
+    .map((id) => ({ id, score: (text.match(new RegExp(SCENE_WORDS[id].source, "gi")) ?? []).length }))
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score || Number(themed.includes(b.id)) - Number(themed.includes(a.id)));
+  // Avoid repeating the previous chapter's picture when another fitting one exists.
+  const fresh = scored.find((s) => FALLBACK_ART[s.id] !== previous);
+  if (fresh) return FALLBACK_ART[fresh.id];
+  if (scored[0] && !previous) return FALLBACK_ART[scored[0].id];
+  const rotation = [...themed, ...ids.filter((id) => !themed.includes(id))];
+  const start = segment % rotation.length;
+  for (let k = 0; k < rotation.length; k++) {
+    const id = rotation[(start + k) % rotation.length] ?? "space";
+    if (FALLBACK_ART[id] !== previous) return FALLBACK_ART[id];
+  }
+  return FALLBACK_ART[themed[0] ?? "space"];
 }
 
 /** How long to wait for a painted scene before showing the ready-made picture with the chapter text. */

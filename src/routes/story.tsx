@@ -70,17 +70,26 @@ function StoryMode() {
   const runId = useRef(0);
 
   // Paint the scene and resolve with the finished picture (or the matching ready-made one if it's too slow / fails).
+  // If the painting finishes after the backup was shown, it replaces the backup in place.
   function paintScene(segment: number, scene: string, picked: StoryThemeId): Promise<string> {
-    const backup = sceneFallbackArt(picked, segment, scene);
+    const previous = images[segment - 1]?.src ?? undefined;
+    const backup = sceneFallbackArt(picked, segment, scene, previous);
     if (!scene) return Promise.resolve(backup);
-    const painted = new Promise<string>((resolve) => {
-      let last: string | null = null;
+    const id = runId.current;
+    let painted_: string | null = null;
+    const painted = new Promise<string>((resolve, reject) => {
       streamImage("/api/story-image", { scene }, (src, final) => {
-        if (final) last = src;
+        if (final) painted_ = src;
       })
-        .then(() => resolve(last ?? backup))
-        .catch(() => resolve(backup));
+        .then(() => (painted_ ? resolve(painted_) : reject(new Error("no image"))))
+        .catch(reject);
     });
+    painted
+      .then((src) => {
+        if (runId.current !== id) return;
+        setImages((m) => (m[segment] && m[segment].src !== src ? { ...m, [segment]: { src, final: true, fallback: false } } : m));
+      })
+      .catch(() => {});
     return raceSceneBackup(backup, painted);
   }
 
