@@ -29,9 +29,10 @@ export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => voi
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Subscribe or upgrade" className="fixed inset-0 z-50 flex items-end justify-center bg-background/85 backdrop-blur-sm sm:items-center">
-      <div className="surface-card relative z-40 flex max-h-[90dvh] w-full max-w-md flex-col overflow-y-auto overscroll-contain rounded-b-none p-6 sm:rounded-3xl">
-        <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 z-10 text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></button>
-        <img src={outfit.src} alt="Monere the lion holding his tablet" className="mentor-avatar mx-auto h-40 w-40 object-contain" />
+      <div className="surface-card payment-modal relative z-40 max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-b-none sm:rounded-3xl">
+        <div className="relative p-6 pb-12">
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close" className="absolute right-3 top-3 z-10 text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></Button>
+        <img src={outfit.src} alt="Monere the lion holding his tablet" className="mentor-avatar mx-auto h-40 w-40 shrink-0 object-contain" />
         <h2 className="mt-2 text-center font-display text-xl font-semibold">
           {reason === "limit" ? "You've reached today's free limit! Upgrade to Monere Plus to keep talking with Monere." : "Subscribe / Upgrade"}
         </h2>
@@ -51,16 +52,17 @@ export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => voi
             );
           })}
         </div>
-        {user ? (
-          <div className="action-bar mt-5"><Button onClick={() => void go()} disabled={busy} className="btn-gold h-auto w-full py-4">{busy ? "Opening secure checkout…" : "Start 7-Day Free Trial"}</Button></div>
-        ) : (
-          <>
-            <div className="action-bar mt-5"><Button asChild className="btn-gold h-auto w-full py-4"><Link to="/auth" search={{ next: "/?upgrade=1" }}>Start 7-Day Free Trial</Link></Button></div>
-            <p className="mt-2 text-center text-xs text-muted-foreground">You'll create a free account first so Plus stays with you.</p>
-          </>
-        )}
-        <p className="mt-2 text-center text-xs text-muted-foreground">Free for 7 days, then billed. Cancel anytime.</p>
+        {!user && <p className="mt-5 text-center text-xs text-muted-foreground">You'll create a free account first so Plus stays with you.</p>}
+        <p className="mt-3 text-center text-xs text-muted-foreground">Free for 7 days, then billed. Cancel anytime.</p>
         <PassCodeLink className="mx-auto mt-4 block" />
+        </div>
+        <div className="sticky bottom-0 z-50 border-t border-border bg-background/95 px-6 pt-3 pb-safe backdrop-blur">
+          {user ? (
+            <Button onClick={() => void go()} disabled={busy} className="btn-gold h-auto w-full whitespace-normal py-4">{busy ? "Opening secure checkout…" : "Start 7-Day Free Trial"}</Button>
+          ) : (
+            <Button asChild className="btn-gold h-auto w-full whitespace-normal py-4"><Link to="/auth" search={{ next: "/?upgrade=1" }}>Start 7-Day Free Trial</Link></Button>
+          )}
+        </div>
       </div>
     </div>
   );

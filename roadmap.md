@@ -28,3 +28,9 @@
 - [x] Remove the on-screen timer and rename the tab to "Find Monere" in all five languages.
 - [ ] Translate the game screen copy (currently English only).
 - [ ] Confirm the victory chime on a real phone with sound on.
+
+# Payment window scrolling
+- [x] Cap the upgrade window at 90% viewport height with smooth vertical touch scrolling.
+- [x] Keep the trial button sticky and add bottom safe-area spacing.
+- [x] Verify plan selection and footer access on a short phone screen.
+- [x] Confirm checkout redirects to Stripe's hosted page; no embedded iframe needs resizing.
