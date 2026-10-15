@@ -54,10 +54,10 @@ export function sceneFallbackArt(theme: StoryThemeId, segment: number, scene: st
   const rotation = [...themed, ...ids.filter((id) => !themed.includes(id))];
   const start = segment % rotation.length;
   for (let k = 0; k < rotation.length; k++) {
-    const id = rotation[(start + k) % rotation.length];
+    const id = rotation[(start + k) % rotation.length] ?? "space";
     if (FALLBACK_ART[id] !== previous) return FALLBACK_ART[id];
   }
-  return FALLBACK_ART[themed[0]];
+  return FALLBACK_ART[themed[0] ?? "space"];
 }
 
 /** How long to wait for a painted scene before showing the ready-made picture with the chapter text. */
