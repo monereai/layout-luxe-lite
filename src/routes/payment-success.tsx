@@ -47,7 +47,7 @@ function Success() {
   }, [ready, user, refresh]);
 
   return (
-    <AppShell>
+    <AppShell hideCrisisBar>
       <MonereMentor mode="results" />
       <h1 className="mt-6 font-display text-2xl font-semibold">
         {!state.done ? "Confirming your subscription…" : state.active ? "You're in — welcome to Monere Plus!" : "We couldn't confirm it yet"}
