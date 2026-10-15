@@ -17,6 +17,7 @@ import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
 import { MonereMentor } from "@/components/MonereMentor";
+import { Treehouse } from "@/components/Treehouse";
 import { SafetyCard } from "@/components/SafetyCard";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -157,6 +158,7 @@ function Home() {
       ) : (
         <>
           <MonereMentor portrait={false} />
+          <Treehouse />
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t("whatsOnMind")}
           </p>
