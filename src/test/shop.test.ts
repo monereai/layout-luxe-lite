@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { buy, equip, walletBalance } from "@/lib/shop";
+import { SHOP_ITEMS, buy, equip, walletBalance } from "@/lib/shop";
 
 const empty = { spent: 0, owned: [], equipped: {} };
 
 describe("points shop", () => {
   it("wallet is game points minus spent", () => {
     expect(walletBalance(700, { ...empty, spent: 200 })).toBe(500);
+  });
+  it("stocked with exactly 10 distinct hats, each priced and imaged", () => {
+    const hats = SHOP_ITEMS.filter((i) => i.category === "hat");
+    expect(hats).toHaveLength(10);
+    expect(new Set(hats.map((h) => h.id)).size).toBe(10);
+    expect(new Set(hats.map((h) => h.name)).size).toBe(10);
+    expect(hats.every((h) => h.cost > 0 && h.src.length > 0)).toBe(true);
   });
   it("buying the 200 pt Detective Hat deducts 200 and equips it", () => {
     const s = buy(empty, 250, "detective-hat");
