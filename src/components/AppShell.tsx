@@ -60,7 +60,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             </Button>
             <nav aria-label="Main navigation" className="flex flex-col gap-2">
               {tabs.map(({ to, label, icon: Icon }) => (
-                <Button key={to} asChild variant="ghost" className={`h-auto min-h-11 whitespace-normal text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
+                <Button key={to} asChild variant="ghost" className={`h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
                   <Link to={to} title={t(label)} aria-label={t(label)} activeProps={{ className: "bg-primary/10 text-primary" }} activeOptions={{ exact: true }}>
                     <Icon className="shrink-0" />{!collapsed && <span className="min-w-0">{t(label)}</span>}
                   </Link>
@@ -68,7 +68,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               ))}
             </nav>
             {!hideCrisisBar && (
-              <Button variant="ghost" onClick={() => setOpen(true)} title={t("crisisBar")} aria-label={t("crisisBar")} className={`mt-8 h-auto min-h-11 whitespace-normal text-left text-muted-foreground ${collapsed ? "px-2" : "justify-start px-3 py-3 text-xs"}`}>
+              <Button variant="ghost" onClick={() => setOpen(true)} title={t("crisisBar")} aria-label={t("crisisBar")} className={`mt-8 h-auto min-h-11 whitespace-normal text-left text-sm font-semibold text-muted-foreground ${collapsed ? "px-2" : "justify-start px-3 py-3"}`}>
                 <LifeBuoy className="shrink-0" />{!collapsed && <span>{t("crisisBar")}</span>}
               </Button>
             )}
@@ -82,7 +82,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             </div>
             <div className="space-y-1 py-4">
               {tabs.filter(({ to }) => to !== "/").map(({ to, label, icon: Icon }) => (
-                <Button key={to} asChild variant="ghost" className="h-auto w-full justify-start whitespace-normal px-0 py-3 text-muted-foreground">
+                <Button key={to} asChild variant="ghost" className="h-auto w-full justify-start whitespace-normal px-0 py-3 text-base font-semibold text-muted-foreground">
                   <Link to={to}><Icon /><span className="min-w-0 flex-1 text-left">{t(label)}</span><ArrowUpRight /></Link>
                 </Button>
               ))}
@@ -114,7 +114,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
         </footer>
         <nav className="flex justify-around border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
           {tabs.map(({ to, label, icon: Icon }) => (
-            <Link key={to} to={to} className="flex flex-1 flex-col items-center gap-1 py-3 text-xs text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
+            <Link key={to} to={to} className="flex flex-1 flex-col items-center gap-1 px-0.5 py-3 text-sm font-semibold leading-tight text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
               <Icon className="h-5 w-5" />
               <span className="min-h-[2.5em] leading-tight text-center">{t(label)}</span>
             </Link>
