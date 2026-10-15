@@ -157,8 +157,9 @@ function Home() {
         </>
       ) : (
         <>
-          <MonereMentor portrait={false} />
-          <Treehouse />
+          <Treehouse>
+            <MonereMentor />
+          </Treehouse>
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t("whatsOnMind")}
           </p>
