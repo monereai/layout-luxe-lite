@@ -53,7 +53,7 @@ function ResetPasswordPage() {
   return (
     <AppShell>
       <h1 className="font-display text-2xl font-semibold">Choose a new password</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Pick something you'll remember — 8 characters or more.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Pick something you'll remember.</p>
       {ready === "expired" && (
         <div className="mt-4 rounded-xl border border-border bg-background/60 p-4 text-sm">
           This reset link has expired or was already used.{" "}
@@ -64,10 +64,10 @@ function ResetPasswordPage() {
         <input
           type="password"
           required
-          minLength={8}
+          minLength={6}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="New password (8+ characters)"
+          placeholder="New password (6+ characters)"
           aria-label="New password"
           autoComplete="new-password"
           className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary"
