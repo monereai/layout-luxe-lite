@@ -64,7 +64,7 @@ export function CategoryPicker({
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
         <div className="orbit-center" aria-hidden="true">
           {backdrop && (
-            <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-contain opacity-20" />
+            <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[135%] w-[135%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-20" />
           )}
           <span className="orbit-halo" />
           <div className="relative z-10 h-full w-full">
