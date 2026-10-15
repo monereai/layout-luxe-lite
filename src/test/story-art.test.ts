@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FALLBACK_ART, THEME_ART, fallbackArt } from "@/lib/story-art";
+import { FALLBACK_ART, SCENE_WAIT_MS, THEME_ART, fallbackArt, raceSceneBackup } from "@/lib/story-art";
 import { STORY_THEMES } from "@/lib/story";
 
 describe("story fallback art", () => {
