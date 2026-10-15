@@ -93,7 +93,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
               </Link>
               {game.detective && <p className="mt-3 text-xs text-primary">Master Detective</p>}
-              <Link to="/shop" className="mt-3 block text-xs font-semibold text-primary hover:underline">Points Shop →</Link>
+              <Link to="/shop" aria-label="Points Shop" className="mt-3 block w-fit transition-opacity hover:opacity-80"><img src="/shop/sign.webp" alt="Points Shop" width={1205} height={389} loading="lazy" className="h-auto w-full max-w-[11rem]" /></Link>
             </div>
             {!premium && <div className="py-5"><PassCodeLink label="Access code" className="font-semibold !text-primary" /></div>}
           </aside>
