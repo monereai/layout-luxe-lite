@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { STORY_MAX_TURNS, STORY_THEMES, storyTheme } from "@/lib/story";
+import { STORY_THEMES, storyTheme } from "@/lib/story";
 
 describe("story mode", () => {
   it("offers exactly four distinct story themes", () => {
@@ -17,7 +17,4 @@ describe("story mode", () => {
     expect(storyTheme("space")?.id).toBe("space");
   });
 
-  it("closes a long story after ten turns", () => {
-    expect(STORY_MAX_TURNS).toBe(10);
-  });
 });

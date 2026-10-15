@@ -44,7 +44,7 @@ export const STORY_THEMES: StoryTheme[] = [
 export type StoryTurn = { narration: string; choice: string };
 
 /** After this many turns the narrator is asked to bring the story to a close. */
-export const STORY_MAX_TURNS = 10;
+export const STORY_MAX_TURNS = 7;
 
 export function storyTheme(id: StoryThemeId) {
   return STORY_THEMES.find((t) => t.id === id);
