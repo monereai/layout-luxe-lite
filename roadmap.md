@@ -34,3 +34,7 @@
 - [x] Keep the trial button sticky and add bottom safe-area spacing.
 - [x] Verify plan selection and footer access on a short phone screen.
 - [x] Confirm checkout redirects to Stripe's hosted page; no embedded iframe needs resizing.
+
+# Safety bar on payment screens
+- [x] Hide the "In crisis or feeling unsafe?" floating bar on /payment-success and while the upgrade window is open.
+- [x] Verify the bar still shows everywhere else and returns after closing the upgrade window.
