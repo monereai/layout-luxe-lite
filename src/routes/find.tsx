@@ -10,6 +10,7 @@ import {
   makeGrid, recordComplete, recordMini, useGame, type Tile,
 } from "@/lib/game";
 import monere from "@/assets/monere-wave.png";
+import { playChime } from "@/lib/sound";
 
 const SCENES = [
   { id: "jungle", name: "Jungle Camp", obstacles: ["🌳", "🌿", "🪨", "⛺", "🌴", "🍃", "🌲", "🪵"] },
@@ -37,19 +38,6 @@ export const Route = createFileRoute("/find")({
   component: FindGame,
 });
 
-function chime(final = false) {
-  try {
-    const ctx = new AudioContext();
-    const notes = final ? [523.25, 659.25, 783.99, 1046.5] : [783.99, 1046.5];
-    notes.forEach((f, i) => {
-      const o = ctx.createOscillator(); const g = ctx.createGain();
-      o.frequency.value = f; o.type = "triangle";
-      const t = ctx.currentTime + i * 0.1;
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
-      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.4);
-    });
-  } catch { /* audio unavailable */ }
-}
 
 function FindGame() {
   const game = useGame();
@@ -87,9 +75,9 @@ function FindGame() {
     recordMini();
     const nowFound = found + 1;
     if (nowFound >= MINI_COUNT) {
-      chime(true); recordComplete(); setToast(null); setWon(true);
+      playChime("win"); recordComplete(); setToast(null); setWon(true);
     } else {
-      chime(); setToast(`+${POINTS_PER_MINI} Wisdom Points!`);
+      playChime("select"); setToast(`+${POINTS_PER_MINI} Wisdom Points!`);
     }
   }
 
