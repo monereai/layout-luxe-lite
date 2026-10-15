@@ -29,9 +29,15 @@ import skateClassics from "@/assets/shop/skate-classics.webp";
 import soccerCleats from "@/assets/shop/soccer-cleats.webp";
 import goldenSliders from "@/assets/shop/golden-sliders.webp";
 import knightBoots from "@/assets/shop/knight-boots.webp";
+import bowTie from "@/assets/shop/bow-tie.webp";
+import cozyScarf from "@/assets/shop/cozy-scarf.webp";
+import goldMedal from "@/assets/shop/gold-medal.webp";
+import goldChain from "@/assets/shop/gold-chain.webp";
+import bandana from "@/assets/shop/bandana.webp";
+import friendshipBeads from "@/assets/shop/friendship-beads.webp";
 
 export const SHOP_KEY = "monereai-shop";
-export type ShopCategory = "hat" | "glasses" | "costume" | "footwear";
+export type ShopCategory = "hat" | "glasses" | "costume" | "footwear" | "accessory";
 export type ShopItem = { id: string; name: string; category: ShopCategory; cost: number; src: string };
 
 export const SHOP_ITEMS: ShopItem[] = [
@@ -53,6 +59,13 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "soccer-cleats", name: "Soccer Cleats", category: "footwear", cost: 320, src: soccerCleats },
   { id: "golden-sliders", name: "Golden Sliders", category: "footwear", cost: 400, src: goldenSliders },
   { id: "knight-boots", name: "Knight's Steel Boots", category: "footwear", cost: 500, src: knightBoots },
+  // Accessories (6) — worn at the neck / chest
+  { id: "bandana", name: "Blue Paisley Bandana", category: "accessory", cost: 100, src: bandana },
+  { id: "bow-tie", name: "Red Bow Tie", category: "accessory", cost: 130, src: bowTie },
+  { id: "friendship-beads", name: "Friendship Beads", category: "accessory", cost: 180, src: friendshipBeads },
+  { id: "cozy-scarf", name: "Cozy Striped Scarf", category: "accessory", cost: 240, src: cozyScarf },
+  { id: "gold-chain", name: "Gold Cross Chain", category: "accessory", cost: 380, src: goldChain },
+  { id: "gold-medal", name: "Champion's Medal", category: "accessory", cost: 450, src: goldMedal },
   // Glasses
   { id: "sunglasses", name: "Sunglasses", category: "glasses", cost: 150, src: sunglasses },
   { id: "round-specs", name: "Scholar Specs", category: "glasses", cost: 250, src: roundSpecs },

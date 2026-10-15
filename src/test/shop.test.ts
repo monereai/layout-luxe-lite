@@ -28,6 +28,17 @@ describe("points shop", () => {
     expect(new Set(shoes.map((s) => s.name)).size).toBe(6);
     expect(shoes.every((s) => s.cost > 0 && s.src.length > 0)).toBe(true);
   });
+  it("stocked with exactly 6 distinct accessories, each priced and imaged", () => {
+    const acc = SHOP_ITEMS.filter((i) => i.category === "accessory");
+    expect(acc).toHaveLength(6);
+    expect(new Set(acc.map((a) => a.id)).size).toBe(6);
+    expect(acc.every((a) => a.cost > 0 && a.src.length > 0)).toBe(true);
+  });
+  it("buying the 130 pt Red Bow Tie equips it as an accessory", () => {
+    const s = buy(empty, 130, "bow-tie");
+    expect(s?.spent).toBe(130);
+    expect(s?.equipped.accessory).toBe("bow-tie");
+  });
   it("buying the 200 pt Detective Hat deducts 200 and equips it", () => {
     const s = buy(empty, 250, "detective-hat");
     expect(s?.spent).toBe(200);
