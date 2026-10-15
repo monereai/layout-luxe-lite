@@ -10,13 +10,13 @@ const GESTURES: Record<Gesture, string> = { wave, think, thumbs, listen };
 
 /** Accessory placement in a square box, per art type: square pose art vs portrait full-body wardrobe art. */
 const PLACE = {
-  pose: { hat: { x: 51, y: 13, w: 30 }, glasses: { x: 51, y: 20.5, w: 22 }, costume: { x: 50, y: 30, w: 74 } },
-  full: { hat: { x: 51, y: 12, w: 21 }, glasses: { x: 51, y: 14.5, w: 16 }, costume: { x: 51, y: 20, w: 66 } },
+  pose: { hat: { x: 51, y: 13, w: 30 }, glasses: { x: 51, y: 20.5, w: 22 }, costume: { x: 50, y: 30, w: 74 }, footwear: { x: 51, y: 92, w: 26 } },
+  full: { hat: { x: 51, y: 12, w: 21 }, glasses: { x: 51, y: 14.5, w: 16 }, costume: { x: 51, y: 20, w: 66 }, footwear: { x: 51, y: 94, w: 22 } },
 } as const;
 
 function Layer({ item, kind }: { item: ShopItem; kind: "pose" | "full" }) {
   const p = PLACE[kind][item.category];
-  const ty = item.category === "hat" ? "-100%" : item.category === "glasses" ? "-50%" : "0";
+  const ty = item.category === "hat" ? "-100%" : item.category === "glasses" ? "-50%" : item.category === "footwear" ? "-100%" : "0";
   return (
     <img
       src={item.src}

@@ -23,9 +23,15 @@ import shadowCloak from "@/assets/shop/shadow-cloak.webp";
 import knightCape from "@/assets/shop/knight-cape.webp";
 import phoenixWings from "@/assets/shop/phoenix-wings.webp";
 import angelWings from "@/assets/shop/angel-wings.webp";
+import crispSneakers from "@/assets/shop/crisp-sneakers.webp";
+import trailBoots from "@/assets/shop/trail-boots.webp";
+import skateClassics from "@/assets/shop/skate-classics.webp";
+import soccerCleats from "@/assets/shop/soccer-cleats.webp";
+import goldenSliders from "@/assets/shop/golden-sliders.webp";
+import knightBoots from "@/assets/shop/knight-boots.webp";
 
 export const SHOP_KEY = "monereai-shop";
-export type ShopCategory = "hat" | "glasses" | "costume";
+export type ShopCategory = "hat" | "glasses" | "costume" | "footwear";
 export type ShopItem = { id: string; name: string; category: ShopCategory; cost: number; src: string };
 
 export const SHOP_ITEMS: ShopItem[] = [
@@ -40,6 +46,13 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "top-hat", name: "Top Hat", category: "hat", cost: 400, src: topHat },
   { id: "halo", name: "Golden Halo", category: "hat", cost: 500, src: halo },
   { id: "crown", name: "Golden Crown", category: "hat", cost: 600, src: crown },
+  // Footwear (6)
+  { id: "crisp-sneakers", name: "Crisp White Sneakers", category: "footwear", cost: 140, src: crispSneakers },
+  { id: "skate-classics", name: "Retro Skate Classics", category: "footwear", cost: 200, src: skateClassics },
+  { id: "trail-boots", name: "Trail Boots", category: "footwear", cost: 260, src: trailBoots },
+  { id: "soccer-cleats", name: "Soccer Cleats", category: "footwear", cost: 320, src: soccerCleats },
+  { id: "golden-sliders", name: "Golden Sliders", category: "footwear", cost: 400, src: goldenSliders },
+  { id: "knight-boots", name: "Knight's Steel Boots", category: "footwear", cost: 500, src: knightBoots },
   // Glasses
   { id: "sunglasses", name: "Sunglasses", category: "glasses", cost: 150, src: sunglasses },
   { id: "round-specs", name: "Scholar Specs", category: "glasses", cost: 250, src: roundSpecs },

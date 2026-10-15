@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Award, Check, Glasses, GraduationCap, Lock, Sparkles } from "lucide-react";
+import { Award, Check, Footprints, Glasses, GraduationCap, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { MonereFigure } from "@/components/MonereFigure";
@@ -26,6 +26,7 @@ const CATS: { id: ShopCategory; label: string; icon: typeof Award }[] = [
   { id: "hat", label: "Hats", icon: GraduationCap },
   { id: "glasses", label: "Glasses", icon: Glasses },
   { id: "costume", label: "Costumes", icon: Sparkles },
+  { id: "footwear", label: "Footwear", icon: Footprints },
 ];
 
 function ShopPage() {
@@ -58,7 +59,7 @@ function ShopPage() {
         </div>
 
         <Tabs defaultValue="hat">
-          <TabsList className="grid h-auto w-full grid-cols-3 gap-1 p-1">
+          <TabsList className="grid h-auto w-full grid-cols-4 gap-1 p-1">
             {CATS.map(({ id, label, icon: Icon }) => (
               <TabsTrigger key={id} value={id} className="min-h-11 gap-1 text-xs"><Icon className="h-4 w-4" />{label}</TabsTrigger>
             ))}
