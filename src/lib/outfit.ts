@@ -30,14 +30,10 @@ export type ShoeId = (typeof SHOES)[number]["id"];
 export type OutfitSelection = { top: TopId; hat: HatId; shoe: ShoeId };
 
 const DEFAULT_SELECTION: OutfitSelection = { top: "navy", hat: "cap", shoe: "hightop" };
-const wardrobeImages = import.meta.glob("../assets/wardrobe/*.webp", {
-  eager: true,
-  import: "default",
-}) as Record<string, string>;
-
+// Plain static URLs (public/wardrobe) — not module imports, so one slow or failed
+// picture can never block the app from loading.
 function imageFor(selection: OutfitSelection) {
-  const key = `../assets/wardrobe/${selection.top}-${selection.hat}-${selection.shoe}.webp`;
-  return wardrobeImages[key] ?? wardrobeImages["../assets/wardrobe/base.webp"] ?? "";
+  return `/wardrobe/${selection.top}-${selection.hat}-${selection.shoe}.webp`;
 }
 
 function isTop(value: unknown): value is TopId {
