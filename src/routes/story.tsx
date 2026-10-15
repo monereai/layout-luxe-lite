@@ -124,7 +124,7 @@ function StoryMode() {
         {turns.map((turn, i) => (
           <article key={i} className="rounded-2xl border border-border/60 bg-card/60 px-4 py-3">
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground">{turn.narration}</p>
-            <p className="mt-2 text-xs font-semibold text-primary">{LETTERS[i % 3] === "?" ? "" : ""}→ {turn.choice}</p>
+            <p className="mt-2 text-xs font-semibold text-primary">→ {turn.choice}</p>
           </article>
         ))}
 
