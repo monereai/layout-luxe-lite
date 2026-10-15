@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { redeemPassCode } from "@/lib/passcode.functions";
 import { usePlan } from "@/hooks/usePlan";
 
-export function PassCodeLink({ className = "", label }: { className?: string; label?: string }) {
+export function PassCodeLink({ className = "", label }: { className?: string; label?: string | undefined }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -19,7 +19,7 @@ export function PassCodeLink({ className = "", label }: { className?: string; la
   );
 }
 
-export function PassCodeDialog({ onClose, message }: { onClose: () => void; message?: string }) {
+export function PassCodeDialog({ onClose, message }: { onClose: () => void; message?: string | undefined }) {
   const { user, refresh } = usePlan();
   const redeem = useServerFn(redeemPassCode);
   const [code, setCode] = useState("");
