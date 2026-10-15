@@ -99,12 +99,12 @@ export const syncSubscription = createServerFn({ method: "POST" })
         const { data: existing } = await supabaseAdmin.from("organization_codes").select("code").eq("stripe_subscription_id", sub.id).maybeSingle();
         if (existing) {
           groupCode = existing.code;
-          await supabaseAdmin.from("organization_codes").update({ is_active: active, expiration_date: periodEnd }).eq("stripe_subscription_id", sub.id);
+          await supabaseAdmin.from("organization_codes").update({ is_active: active, expiration_date: periodEnd ?? new Date(Date.now() + 366 * 864e5).toISOString() }).eq("stripe_subscription_id", sub.id);
         } else {
           groupCode = newCode();
           await supabaseAdmin.from("organization_codes").insert({
             code: groupCode, organization_name: "your youth group", max_uses: GROUP_SEATS, is_active: active,
-            expiration_date: periodEnd, owner_user_id: context.userId, stripe_subscription_id: sub.id,
+            expiration_date: periodEnd ?? new Date(Date.now() + 366 * 864e5).toISOString(), owner_user_id: context.userId, stripe_subscription_id: sub.id,
           });
         }
       }
