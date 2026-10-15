@@ -41,10 +41,10 @@ d2("sceneFallbackArt", () => {
 });
 
 d2("sceneFallbackArt variety", () => {
-  it2("prefers the strongest scene match over a stray clue word", () => {
+  i2("prefers the strongest scene match over a stray clue word", () => {
     e2(sceneFallbackArt("mystery", 1, "On a sunlit lake, the reader spreads a dripping map in a rowing boat as ripples shimmer by the boathouse")).toBe(FALLBACK_ART.submarine);
   });
-  it2("never repeats the previous chapter's picture", () => {
+  i2("never repeats the previous chapter's picture", () => {
     e2(sceneFallbackArt("mystery", 1, "A muddy clue on the hall floor", FALLBACK_ART.detective)).not.toBe(FALLBACK_ART.detective);
     e2(sceneFallbackArt("mystery", 2, "", FALLBACK_ART.detective)).not.toBe(FALLBACK_ART.detective);
   });
