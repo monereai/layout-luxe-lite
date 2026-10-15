@@ -15,6 +15,7 @@ import { Route as DailyRouteImport } from './routes/daily'
 import { Route as FindRouteImport } from './routes/find'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ShopRouteImport } from './routes/shop'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/shop': typeof ShopRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/shop': typeof ShopRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,12 +79,27 @@ export interface FileRoutesById {
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/shop': typeof ShopRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/daily' | '/find' | '/journal' | '/reset-password'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/daily'
+    | '/find'
+    | '/journal'
+    | '/reset-password'
+    | '/shop'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/daily' | '/find' | '/journal' | '/reset-password'
+  to:
+    | '/'
+    | '/auth'
+    | '/daily'
+    | '/find'
+    | '/journal'
+    | '/reset-password'
+    | '/shop'
   id:
     | '__root__'
     | '/'
@@ -85,6 +108,7 @@ export interface FileRouteTypes {
     | '/find'
     | '/journal'
     | '/reset-password'
+    | '/shop'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +118,7 @@ export interface RootRouteChildren {
   FindRoute: typeof FindRoute
   JournalRoute: typeof JournalRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ShopRoute: typeof ShopRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -140,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -150,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   FindRoute: FindRoute,
   JournalRoute: JournalRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ShopRoute: ShopRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -7,6 +7,8 @@ import { usePlan } from "@/hooks/usePlan";
 import { useT, useLang, setLang, LANGS, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
+import { useShop, walletBalance } from "@/lib/shop";
+import { MonereAvatar } from "./MonereFigure";
 
 const tabs = [
   { to: "/", label: "seek", icon: Compass },
@@ -19,6 +21,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const game = useGame();
+  const wallet = walletBalance(game.points, useShop());
   const { user, premium, signOut } = usePlan();
   const t = useT();
   const lang = useLang();
@@ -35,6 +38,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             <span className="truncate font-display text-3xl font-semibold text-foreground">Monere<span className="text-primary">AI</span></span>
           </Link>
           <div className="flex flex-col items-end gap-1 pt-1 text-xs">
+            <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 py-0.5 pl-0.5 pr-2 font-semibold text-primary"><MonereAvatar className="h-6 w-6" /><span className="tabular-nums">{wallet}</span> pts</Link>
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
             {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">PLUS</span>}
             {!premium && <PassCodeLink label="Access code" className="font-semibold !text-primary" />}
@@ -84,9 +88,10 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             <div className="border-y border-border py-5">
               <Link to="/find" className="flex items-center justify-between gap-3" aria-label={`${t("game")}: ${game.points} Wisdom Points`}>
                 <span className="flex items-center gap-2 text-sm text-muted-foreground"><Award className="h-4 w-4 text-primary" />Wisdom Points</span>
-                <span className="font-display text-2xl font-semibold tabular-nums text-primary">{game.points}</span>
+                <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
               </Link>
               {game.detective && <p className="mt-3 text-xs text-primary">Master Detective</p>}
+              <Link to="/shop" className="mt-3 block text-xs font-semibold text-primary hover:underline">Points Shop →</Link>
             </div>
             {!premium && <div className="py-5"><PassCodeLink label="Access code" className="font-semibold !text-primary" /></div>}
           </aside>

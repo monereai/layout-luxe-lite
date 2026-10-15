@@ -6,6 +6,8 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
+import { MonereFigure } from "@/components/MonereFigure";
+import { Link } from "@tanstack/react-router";
 import { HATS, SHOES, TOPS, getOutfit, useOutfit, type HatId, type ShoeId, type TopId } from "@/lib/outfit";
 
 export function WardrobeButton({ className = "" }: { className?: string }) {
@@ -32,11 +34,12 @@ export function WardrobeButton({ className = "" }: { className?: string }) {
             <DrawerTitle className="font-display text-xl">{t("wardrobe")}</DrawerTitle>
             <DrawerDescription>{t("wardrobeDesc")}</DrawerDescription>
             <DetectiveBadge />
+            <Link to="/shop" className="text-sm font-semibold text-primary hover:underline">Visit the Points Shop →</Link>
           </DrawerHeader>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-safe">
             <div className="mb-3 flex h-44 items-center justify-center overflow-hidden rounded-lg border border-border bg-card/60">
-              <img src={preview.src} alt={`Monere wearing ${preview.name}`} width={260} height={340} className="h-full w-full object-contain" />
+              <MonereFigure alt={`Monere wearing ${preview.name}`} className="h-full" />
             </div>
 
             <Tabs defaultValue="tops">
