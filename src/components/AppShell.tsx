@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
+import { PaywallModal } from "./PaywallModal";
 import { PaymentTestModeBanner } from "./PaymentTestModeBanner";
 import { usePlan } from "@/hooks/usePlan";
 import { createPortalSession } from "@/utils/payments.functions";
@@ -18,6 +19,7 @@ const tabs = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [pricing, setPricing] = useState(false);
   const { user, premium, signOut } = usePlan();
   const t = useT();
   const lang = useLang();
@@ -42,6 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex flex-col items-end gap-1 pt-1 text-xs">
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
             {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">PLUS</span>}
+            {!premium && <button onClick={() => setPricing(true)} className="font-semibold text-primary">Subscribe / Upgrade</button>}
             {premium && <button onClick={() => void manage()} className="text-muted-foreground hover:text-primary">{t("managePlan")}</button>}
             {user ? (
               <button onClick={() => void signOut()} className="text-muted-foreground hover:text-primary">{t("signOut")}</button>
@@ -72,6 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
       </div>
       <CrisisDialog open={open} onClose={() => setOpen(false)} />
+      {pricing && <PaywallModal reason="upgrade" onClose={() => setPricing(false)} />}
     </div>
   );
 }
