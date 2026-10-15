@@ -1,9 +1,0 @@
----
-name: Monere Plus
-description: Plus unlocked only by access/pass codes; Stripe removed
-type: feature
----
-- Stripe fully removed (Oct 2026). No paid plans, checkout or subscribe buttons — do not re-add unless asked.
-- Free: 3 queries/day; hitting limit opens the access-code box.
-- Plus comes from redeeming a youth group/school access code (is_premium).
-- Access code entry: header "Access code" link, sign-in screen, onboarding.
