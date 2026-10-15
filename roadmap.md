@@ -59,4 +59,5 @@
 - [x] Replace the four-story menu with one Weekly Interactive Adventure banner and a Monday episode rotation.
 - [x] Show each chapter's illustration at the same time as its text, capping the wait at 10 seconds before using the matching backup picture.
 - [x] Play a short chime when a new chapter is chosen, sharing one chime helper with the game.
+- [x] Play a fuller finish fanfare when this week's adventure reaches its Chapter Complete screen.
 - [ ] Translate the weekly banner and finale copy (currently English only).
