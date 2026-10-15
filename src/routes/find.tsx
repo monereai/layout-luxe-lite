@@ -1,36 +1,28 @@
-import { Link } from "@tanstack/react-router";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { RotateCcw, Trophy, Award } from "lucide-react";
+import { RotateCcw, Trophy, Award, Star } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
-  COMPLETION_BONUS, GRID_SIZE, MINI_COUNT, POINTS_PER_MINI,
-  makeGrid, recordComplete, recordMini, useGame, type Tile,
+  COMPLETION_BONUS, MINI_COUNT, POINTS_PER_MINI,
+  makeSpots, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
-const monere = "/monere/monere-wave.webp";
-import { playChime } from "@/lib/sound";
+import { playChime, playPop } from "@/lib/sound";
 
+const MINI = "/find/mini.webp";
 const SCENES = [
-  { id: "jungle", name: "Jungle Camp", obstacles: ["🌳", "🌿", "🪨", "⛺", "🌴", "🍃", "🌲", "🪵"] },
-  { id: "school", name: "School Grounds", obstacles: ["🌳", "🚲", "🎒", "🪨", "🏫", "🌷", "📚", "🌲"] },
-  { id: "sky", name: "Cloud Hills", obstacles: ["☁️", "🌥️", "🌳", "🪨", "🌫️", "⛰️", "🎈", "🌿"] },
-];
-
-const DECOYS = [
-  { emoji: "🐒", text: "Oops, just a monkey! Keep searching!" },
-  { emoji: "🍂", text: "Just rustling leaves… Keep looking!" },
-  { emoji: "🐿️", text: "A cheeky squirrel! Monere's not here." },
+  { id: "jungle", name: "Jungle Park", src: "/find/jungle.webp" },
+  { id: "space", name: "Space Station", src: "/find/space.webp" },
 ];
 
 export const Route = createFileRoute("/find")({
   head: () => ({
     meta: [
       { title: "Where's Monere? — MonereAI" },
-      { name: "description", content: "Hunt for 10 Mini-Moneres hidden under bushes, rocks and tents, dodge the decoys, and earn Wisdom Points." },
+      { name: "description", content: "Search a detailed picture for 10 hidden Mini-Moneres at your own pace and earn Wisdom Points." },
       { property: "og:title", content: "Where's Monere? — MonereAI" },
-      { property: "og:description", content: "Find all 10 hidden Mini-Moneres on a cluttered 8x8 grid and earn Wisdom Points." },
+      { property: "og:description", content: "Spot all 10 Mini-Moneres hidden in the jungle park or space station and earn Wisdom Points." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -38,46 +30,34 @@ export const Route = createFileRoute("/find")({
   component: FindGame,
 });
 
+const BURST = [0, 60, 120, 180, 240, 300];
 
 function FindGame() {
   const game = useGame();
   const [idx, setIdx] = useState(0);
   const scene = SCENES[idx] ?? SCENES[0]!;
-  // Server and first client render share one fixed layout; the real shuffle happens after mount.
-  const [grid, setGrid] = useState<Tile[]>(() => { let n = 7; return makeGrid(8, () => ((n = (n * 9301 + 49297) % 233280) / 233280)); });
-  useEffect(() => { setGrid(makeGrid(8)); }, []);
-  const [open, setOpen] = useState<Set<number>>(new Set());
+  // Spots are shuffled after mount so the server and first client render match.
+  const [spots, setSpots] = useState<Spot[]>([]);
+  useEffect(() => { setSpots(makeSpots()); }, []);
+  const [found, setFound] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
-  const [shake, setShake] = useState<number | null>(null);
   const [won, setWon] = useState(false);
 
-  const found = grid.filter((t, i) => t.kind === "mini" && open.has(i)).length;
-
   function newRound(next = idx) {
-    setIdx(next); setGrid(makeGrid(8)); setOpen(new Set()); setToast(null); setWon(false);
+    setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false);
   }
 
   function tap(i: number) {
-    const tile = grid[i];
-    if (!tile || won) return;
-    if (tile.kind === "empty" && !open.has(i)) {
-      setShake(i); setTimeout(() => setShake(null), 350);
-      setOpen((s) => new Set(s).add(i));
-      return;
-    }
-    if (open.has(i)) return;
-    setOpen((s) => new Set(s).add(i));
-    if (tile.kind === "decoy") {
-      const d = DECOYS[tile.obstacle % DECOYS.length]!;
-      setToast(d.text);
-      return;
-    }
+    if (found.has(i) || won) return;
+    const next = new Set(found).add(i);
+    setFound(next);
+    playPop();
     recordMini();
-    const nowFound = found + 1;
-    if (nowFound >= MINI_COUNT) {
-      playChime("win"); recordComplete(); setToast(null); setWon(true);
+    if (next.size >= MINI_COUNT) {
+      recordComplete(); setToast(null);
+      setTimeout(() => { playChime("win"); setWon(true); }, 600);
     } else {
-      playChime("select"); setToast(`+${POINTS_PER_MINI} Wisdom Points!`);
+      setToast(`+${POINTS_PER_MINI} Wisdom Points!`);
     }
   }
 
@@ -86,7 +66,7 @@ function FindGame() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold">Where's Monere?</h1>
-          <p className="text-sm text-muted-foreground">Tap the bushes, rocks and tents to find 10 hidden Mini-Moneres.</p>
+          <p className="text-sm text-muted-foreground">Search the picture and tap the 10 tiny Mini-Moneres hidden inside. Pinch or scroll to look closer.</p>
         </div>
         <div className="shrink-0 text-xs text-muted-foreground sm:text-right">
           <p className="font-bold text-primary"><Trophy className="mr-1 inline h-3.5 w-3.5" />{game.points} Wisdom Points</p>
@@ -101,45 +81,52 @@ function FindGame() {
         ))}
       </div>
 
-      <div className="mt-3 flex items-center justify-between rounded-full border border-primary/40 bg-primary/10 px-4 py-2" aria-live="polite">
-        <p className="text-sm font-semibold text-foreground">Mini-Moneres Found: <span className="text-primary">{found} / {MINI_COUNT}</span></p>
+      <div className="sticky top-0 z-40 mt-3 flex items-center justify-between rounded-full border border-primary/40 bg-background/95 px-4 py-2 backdrop-blur" aria-live="polite">
+        <p className="text-sm font-semibold text-foreground">Mini-Moneres Found: <span className="text-primary">{found.size} / {MINI_COUNT}</span></p>
         <div className="flex gap-0.5" aria-hidden="true">
           {Array.from({ length: MINI_COUNT }, (_, i) => (
-            <span key={i} className={`h-2 w-2 rounded-full ${i < found ? "bg-primary" : "bg-muted"}`} />
+            <span key={i} className={`h-2 w-2 rounded-full ${i < found.size ? "bg-primary" : "bg-muted"}`} />
           ))}
         </div>
       </div>
 
       <p className="mt-2 min-h-5 text-center text-sm font-medium text-primary" aria-live="polite">{toast}</p>
 
-      <div
-        className="surface-card mx-auto mt-1 grid w-full max-w-xl gap-1 p-2"
-        style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}
-      >
-        {grid.map((tile, i) => {
-          const isOpen = open.has(i);
-          const decoy = DECOYS[tile.obstacle % DECOYS.length]!;
-          return (
-            <button
-              key={i}
-              onClick={() => tap(i)}
-              aria-label={isOpen ? (tile.kind === "mini" ? "Mini-Monere found" : tile.kind === "decoy" ? "Decoy" : "Empty") : `Tile ${i + 1}`}
-              className={`relative flex aspect-square items-center justify-center rounded-md text-xl transition-colors sm:text-2xl ${
-                isOpen
-                  ? tile.kind === "mini" ? "bg-primary/25 ring-2 ring-primary" : tile.kind === "decoy" ? "bg-accent/40" : "bg-muted/30"
-                  : "bg-secondary hover:bg-secondary/70"
-              } ${shake === i ? "animate-[shake_0.35s]" : ""}`}
-            >
-              {!isOpen && <span aria-hidden="true">{scene.obstacles[tile.obstacle % scene.obstacles.length]}</span>}
-              {isOpen && tile.kind === "mini" && <img src={monere} alt="" draggable={false} className="h-4/5 w-4/5 animate-[bounce_0.6s_ease-out_1] object-contain" />}
-              {isOpen && tile.kind === "decoy" && <span aria-hidden="true">{decoy.emoji}</span>}
-              {isOpen && tile.kind === "empty" && <span aria-hidden="true" className="text-xs text-muted-foreground">·</span>}
-            </button>
-          );
-        })}
+      <div className="mt-1 overflow-auto rounded-2xl border border-border">
+        <div className="relative w-full min-w-[720px] md:min-w-0">
+          <img src={scene.src} alt={`${scene.name} hidden-object scene`} width={1536} height={1024} draggable={false} className="block w-full select-none" />
+          {spots.map((s, i) => {
+            const isFound = found.has(i);
+            return (
+              <button
+                key={`${idx}-${i}`}
+                onClick={() => tap(i)}
+                aria-label={isFound ? "Mini-Monere found" : "Hidden spot"}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${isFound ? "ring-2 ring-primary" : ""}`}
+                style={{ left: `${s.x}%`, top: `${s.y}%`, width: `${s.size}%` }}
+              >
+                <img
+                  src={MINI}
+                  alt=""
+                  draggable={false}
+                  className={`aspect-square w-full object-contain transition ${isFound ? "scale-125" : "opacity-80 saturate-75"}`}
+                  style={{ transform: `rotate(${s.rot}deg)` }}
+                />
+                {isFound && BURST.map((deg) => (
+                  <Star
+                    key={deg}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 fill-primary text-primary motion-safe:animate-[star-burst_0.7s_ease-out_forwards]"
+                    style={{ "--deg": `${deg}deg` } as React.CSSProperties}
+                  />
+                ))}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <Button variant="secondary" className="mt-4 w-full rounded-full" onClick={() => newRound()}><RotateCcw /> Shuffle a new grid</Button>
+      <Button variant="secondary" className="mt-4 w-full rounded-full" onClick={() => newRound()}><RotateCcw /> Hide them somewhere new</Button>
 
       <Dialog open={won} onOpenChange={(o) => !o && setWon(false)}>
         <DialogContent className="max-w-sm text-center">

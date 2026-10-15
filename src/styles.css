@@ -202,6 +202,7 @@
 @media (prefers-reduced-motion: reduce) { .gesture-frame { transition: opacity 0.15s linear; transform: none !important; } .gesture-pop { animation: none; } }
 
 @keyframes shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-6px) } 75% { transform: translateX(6px) } }
+@keyframes star-burst { from { transform: translate(-50%, -50%) rotate(var(--deg)) translateY(0) scale(1); opacity: 1; } to { transform: translate(-50%, -50%) rotate(var(--deg)) translateY(-28px) scale(0.4); opacity: 0; } }
 
 @utility action-bar {
   position: sticky;

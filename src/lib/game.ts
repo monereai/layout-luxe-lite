@@ -6,25 +6,23 @@ const EMPTY: GameState = { points: 0, detective: false, best: {} };
 
 let current = EMPTY;
 
-export const GRID_SIZE = 8;
 export const MINI_COUNT = 10;
-export const DECOY_COUNT = 3;
 export const POINTS_PER_MINI = 20;
 export const COMPLETION_BONUS = 100;
 
-export type TileKind = "mini" | "decoy" | "empty";
-export type Tile = { kind: TileKind; obstacle: number };
+/** A hidden Mini-Monere: x/y are % of the picture, size is % of its width. */
+export type Spot = { x: number; y: number; size: number; rot: number };
 
-/** Fresh shuffled grid: exactly MINI_COUNT minis and DECOY_COUNT decoys, rest empty; each tile gets an obstacle index. */
-export function makeGrid(obstacleCount: number, rand: () => number = Math.random): Tile[] {
-  const total = GRID_SIZE * GRID_SIZE;
-  const kinds: TileKind[] = Array.from({ length: total }, (_, i) =>
-    i < MINI_COUNT ? "mini" : i < MINI_COUNT + DECOY_COUNT ? "decoy" : "empty");
-  for (let i = kinds.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [kinds[i], kinds[j]] = [kinds[j]!, kinds[i]!];
+/** Ten random, non-overlapping spots inside the picture (kept away from the edges). */
+export function makeSpots(rand: () => number = Math.random): Spot[] {
+  const spots: Spot[] = [];
+  let tries = 0;
+  while (spots.length < MINI_COUNT && tries < 2000) {
+    tries++;
+    const s = { x: 5 + rand() * 90, y: 7 + rand() * 86, size: 3 + rand() * 1.5, rot: Math.round(rand() * 50 - 25) };
+    if (spots.every((o) => Math.hypot(o.x - s.x, (o.y - s.y) * 0.66) > 8)) spots.push(s);
   }
-  return kinds.map((kind) => ({ kind, obstacle: Math.floor(rand() * obstacleCount) }));
+  return spots;
 }
 
 function save() {

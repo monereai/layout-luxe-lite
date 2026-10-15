@@ -1,25 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { COMPLETION_BONUS, DECOY_COUNT, GRID_SIZE, MINI_COUNT, POINTS_PER_MINI, makeGrid } from "@/lib/game";
+import { COMPLETION_BONUS, MINI_COUNT, POINTS_PER_MINI, makeSpots } from "@/lib/game";
 
-describe("Find Monere grid", () => {
-  it("is 8x8 with exactly 10 minis and 3 decoys", () => {
-    const g = makeGrid(6);
-    expect(GRID_SIZE * GRID_SIZE).toBe(64);
-    expect(g).toHaveLength(64);
-    expect(g.filter((t) => t.kind === "mini")).toHaveLength(MINI_COUNT);
+describe("Find Monere picture hunt", () => {
+  it("hides exactly 10 Mini-Moneres inside the picture", () => {
+    const s = makeSpots();
     expect(MINI_COUNT).toBe(10);
-    expect(g.filter((t) => t.kind === "decoy")).toHaveLength(DECOY_COUNT);
-    expect(DECOY_COUNT).toBe(3);
+    expect(s).toHaveLength(10);
+    for (const p of s) {
+      expect(p.x).toBeGreaterThan(0);
+      expect(p.x).toBeLessThan(100);
+      expect(p.y).toBeGreaterThan(0);
+      expect(p.y).toBeLessThan(100);
+    }
   });
   it("awards 20 per mini and a 100 completion bonus", () => {
     expect(POINTS_PER_MINI).toBe(20);
     expect(COMPLETION_BONUS).toBe(100);
     expect(MINI_COUNT * POINTS_PER_MINI + COMPLETION_BONUS).toBe(300);
   });
-  it("reshuffles between rounds", () => {
-    const a = makeGrid(6).map((t) => t.kind).join();
-    const b = makeGrid(6).map((t) => t.kind).join();
-    const c = makeGrid(6).map((t) => t.kind).join();
-    expect(a === b && b === c).toBe(false);
+  it("reshuffles spots between rounds", () => {
+    expect(JSON.stringify(makeSpots())).not.toBe(JSON.stringify(makeSpots()));
   });
 });
