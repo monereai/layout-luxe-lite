@@ -115,6 +115,7 @@ function StoryMode() {
   }
 
   function start(id: StoryThemeId) {
+    playChime("select");
     runId.current += 1;
     setImages({});
     setBonus(null);
@@ -126,6 +127,7 @@ function StoryMode() {
 
   function choose(label: string) {
     if (!current || !theme) return;
+    playChime("select");
     const next = [...turns, { narration: current.narration, choice: label }];
     setTurns(next);
     setCurrent(null);
