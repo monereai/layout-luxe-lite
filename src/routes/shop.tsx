@@ -47,7 +47,7 @@ function ShopPage() {
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-semibold">Points Shop</h1>
+            <h1 className="font-display text-2xl font-semibold"><img src="/shop/sign.webp" alt="Points Shop" width={1205} height={389} loading="lazy" className="h-11 w-auto sm:h-12" /></h1>
             <p className="text-sm text-muted-foreground">Dress Monere up with points from <Link to="/find" className="text-primary underline-offset-2 hover:underline">Where's Monere?</Link></p>
           </div>
           <div className="flex shrink-0 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-primary" aria-label={`${wallet} points available`}>
