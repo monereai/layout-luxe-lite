@@ -2,6 +2,7 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import { useOutfit } from "@/lib/outfit";
+import { MonereAvatar } from "@/components/MonereFigure";
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -33,7 +34,7 @@ export function FollowUpThread({
   }
 
   const Avatar = () => (
-    <img src={outfit.src} alt="" className="h-9 w-9 shrink-0 rounded-full border border-primary/40 bg-secondary object-cover object-top" />
+    <MonereAvatar />
   );
 
   return (

@@ -17,3 +17,4 @@
 - Keep the wardrobe selection as one local-storage object with top, headwear, and footwear IDs while exposing a compatible outfit image object to character consumers. Why: combinations persist without duplicating character rendering logic.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
+- Shop accessories are transparent overlay layers drawn by MonereFigure (placement per art type); wallet = game points minus shop spend, both in local storage. Why: accessories work on every outfit without regenerating combo art.

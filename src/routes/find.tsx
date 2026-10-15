@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Lightbulb, ZoomIn, ZoomOut, RotateCcw, Trophy, Award } from "lucide-react";
@@ -73,6 +74,7 @@ function FindGame() {
         </div>
         <div className="text-right text-xs text-muted-foreground">
           <p className="font-bold text-primary"><Trophy className="mr-1 inline h-3.5 w-3.5" />{game.points} Wisdom Points</p>
+          <Link to="/shop" className="text-xs font-semibold text-primary hover:underline">Spend points in the Shop →</Link>
           {game.detective && <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 font-bold text-primary-foreground"><Award className="h-3 w-3" />Master Detective</p>}
         </div>
       </div>
