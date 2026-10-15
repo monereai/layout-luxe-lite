@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, ArrowUpRight, Award } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, ArrowUpRight, Award, Wand2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
@@ -15,6 +15,7 @@ const tabs = [
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
+  { to: "/story", label: "story", icon: Wand2 },
 ] as const;
 
 export function AppShell({ children, hideCrisisBar = false }: { children: ReactNode; hideCrisisBar?: boolean }) {

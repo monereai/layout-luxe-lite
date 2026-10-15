@@ -47,3 +47,12 @@
 - [x] Verify buying, equipping and Monere wearing items on default and alternate outfits.
 - [ ] Translate the shop copy (currently English only).
 - [ ] Sync points and purchases to the account so they follow a user between devices.
+
+# Costume library
+- [x] Expand the costume library to 12 costumes with fresh artwork and tiered prices.
+- [x] Verify buying, equipping and Monere wearing a cape on default and alternate outfits.
+
+# Story Mode
+- [x] Add a Story Mode tab with four theme cards: Space Adventure, Mystery Detective, Magical Kingdom, Time Traveler.
+- [x] Build the interactive narrator engine: short 2-3 sentence turns with 2-3 choices, Monere as companion in the story.
+- [x] Present choices as large, easy-to-tap buttons and verify a full story turn on a phone-sized screen.
