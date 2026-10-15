@@ -94,8 +94,8 @@ function AuthPage() {
             {forgot ? "Back to sign in" : mode === "up" ? "Already have an account? Sign in" : "New here? Create an account"}
           </button>
         </form>
-        <PassCodeLink className="mx-auto mt-6 block" />
       )}
+      <PassCodeLink className="mx-auto mt-6 block" />
     </AppShell>
   );
 }
