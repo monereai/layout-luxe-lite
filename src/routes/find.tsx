@@ -14,6 +14,8 @@ const MINI = "/find/mini.webp";
 const SCENES = [
   { id: "jungle", name: "Jungle Park", src: "/find/jungle.webp" },
   { id: "space", name: "Space Station", src: "/find/space.webp" },
+  { id: "school", name: "School Grounds", src: "/find/school.webp" },
+  { id: "arcade", name: "Retro Arcade", src: "/find/arcade.webp" },
 ];
 
 export const Route = createFileRoute("/find")({
@@ -22,7 +24,7 @@ export const Route = createFileRoute("/find")({
       { title: "Where's Monere? — MonereAI" },
       { name: "description", content: "Search a detailed picture for 10 hidden Mini-Moneres at your own pace and earn Wisdom Points." },
       { property: "og:title", content: "Where's Monere? — MonereAI" },
-      { property: "og:description", content: "Spot all 10 Mini-Moneres hidden in the jungle park or space station and earn Wisdom Points." },
+      { property: "og:description", content: "Spot all 10 Mini-Moneres hidden in the jungle park, space station, school grounds or retro arcade and earn Wisdom Points." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
