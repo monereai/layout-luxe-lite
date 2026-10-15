@@ -15,6 +15,7 @@ import { Route as DailyRouteImport } from './routes/daily'
 import { Route as FindRouteImport } from './routes/find'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as PaymentSuccessRouteImport } from './routes/payment-success'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
   path: '/payment-success',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/payment-success': typeof PaymentSuccessRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/payment-success': typeof PaymentSuccessRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
   '/payment-success': typeof PaymentSuccessRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/find'
     | '/journal'
     | '/payment-success'
+    | '/reset-password'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/find'
     | '/journal'
     | '/payment-success'
+    | '/reset-password'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/find'
     | '/journal'
     | '/payment-success'
+    | '/reset-password'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   FindRoute: typeof FindRoute
   JournalRoute: typeof JournalRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaymentSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   FindRoute: FindRoute,
   JournalRoute: JournalRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

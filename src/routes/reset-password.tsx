@@ -23,15 +23,9 @@ function ResetPasswordPage() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    // Recovery links arrive as /reset-password#access_token=...&type=recovery —
-    // the Supabase client picks the session up from the URL automatically.
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery") || hash.includes("access_token")) setReady(true);
-    else setReady(true);
-  }, []);
+  // Recovery links arrive as /reset-password#access_token=...&type=recovery —
+  // the Supabase client picks the session up from the URL automatically.
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
