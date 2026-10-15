@@ -12,7 +12,7 @@ import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
 import { fallbackArt, raceSceneBackup } from "@/lib/story-art";
 import { streamImage } from "@/lib/stream-image";
-import { playChime } from "@/lib/sound";
+import { playChime, playFanfare } from "@/lib/sound";
 
 type SceneImg = { src: string | null; final: boolean; fallback: boolean };
 
@@ -112,7 +112,10 @@ function StoryMode() {
     setImages((m) => ({ ...m, [segment]: { src, final: true, fallback: false } }));
     setCurrent(res.story);
     setBusy(false);
-    if (res.story.isEnding) setBonus(recordChapterComplete(epNum, CHAPTER_BONUS));
+    if (res.story.isEnding) {
+      playFanfare();
+      setBonus(recordChapterComplete(epNum, CHAPTER_BONUS));
+    }
   }
 
   function start(id: StoryThemeId) {
