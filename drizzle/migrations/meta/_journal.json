@@ -8,6 +8,13 @@
       "when": 1791919257347,
       "tag": "0000_monere_plus_subscriptions_and_pass_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792042868387,
+      "tag": "0001_migration",
+      "breakpoints": true
     }
   ]
 }
