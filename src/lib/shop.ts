@@ -142,3 +142,14 @@ export function equippedItems(state: ShopState) {
     .map((id) => SHOP_ITEMS.find((i) => i.id === id))
     .filter((i): i is ShopItem => !!i);
 }
+
+/** Categories that count as clothing for the "all maps complete" mystery reward. */
+export const MYSTERY_CATEGORIES: ShopCategory[] = ["hat", "costume", "footwear", "accessory"];
+
+/** Gives one random unowned clothing item for free and equips it; null when everything is owned. */
+export function grantMystery(state: ShopState, rand: () => number = Math.random): { state: ShopState; item: ShopItem } | null {
+  const pool = SHOP_ITEMS.filter((i) => MYSTERY_CATEGORIES.includes(i.category) && !state.owned.includes(i.id));
+  if (!pool.length) return null;
+  const item = pool[Math.min(pool.length - 1, Math.floor(rand() * pool.length))]!;
+  return { item, state: { ...state, owned: [...state.owned, item.id], equipped: { ...state.equipped, [item.category]: item.id } } };
+}

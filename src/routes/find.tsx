@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
   COMPLETION_BONUS, MAP_UNLOCK_FINDS, MINI_COUNT, POINTS_PER_MINI,
-  makeSpots, mapUnlocked, recordComplete, recordMini, useGame, type Spot,
+  allMapsComplete, makeSpots, mapUnlocked, recordMystery, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
+import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
 
 const MINI = "/find/mini.webp";
@@ -44,6 +45,8 @@ function FindGame() {
   const [found, setFound] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
   const [won, setWon] = useState(false);
+  const shop = useShop();
+  const [mystery, setMystery] = useState<ShopItem | null>(null);
 
   function newRound(next = idx) {
     if (next !== idx && !mapUnlocked(game.finds, next === 0 ? undefined : SCENES[next - 1]!.id)) {
@@ -61,6 +64,11 @@ function FindGame() {
     recordMini(scene.id);
     if (next.size >= MINI_COUNT) {
       recordComplete(); setToast(null);
+      const finds = { ...game.finds, [scene.id]: (game.finds[scene.id] ?? 0) + 1 };
+      if (!game.mystery && allMapsComplete(finds, SCENES.map((s) => s.id))) {
+        const gift = grantMystery(shop);
+        if (gift && recordMystery(gift.item.id)) { saveShop(gift.state); setMystery(gift.item); }
+      }
       setTimeout(() => { playChime("win"); setWon(true); }, 600);
     } else {
       setToast(`+${POINTS_PER_MINI} Wisdom Points!`);
@@ -146,6 +154,14 @@ function FindGame() {
             All {MINI_COUNT} Mini-Moneres collected. +{MINI_COUNT * POINTS_PER_MINI} for the finds and a +{COMPLETION_BONUS} completion bonus!
           </DialogDescription>
           <p className="text-sm">"Sharp eyes! Patience and noticing the small things are a big part of wisdom."</p>
+          {mystery && (
+            <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3">
+              <p className="text-xs font-bold uppercase tracking-wide text-primary">🎁 Mystery reward — every map complete!</p>
+              <img src={mystery.src} alt="" className="mx-auto my-2 h-20 w-20 object-contain" />
+              <p className="text-sm font-semibold">{mystery.name}</p>
+              <p className="text-xs text-muted-foreground">It's yours free and Monere is wearing it now.</p>
+            </div>
+          )}
           <Button className="btn-gold mt-2 w-full" onClick={() => newRound()}><RotateCcw /> Play again</Button>
         </DialogContent>
       </Dialog>

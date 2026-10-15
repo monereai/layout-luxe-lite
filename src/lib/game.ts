@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 export const GAME_KEY = "monereai-game";
-export type GameState = { points: number; detective: boolean; best: Record<string, number>; finds: Record<string, number> };
+export type GameState = { points: number; detective: boolean; best: Record<string, number>; finds: Record<string, number>; mystery?: string };
 const EMPTY: GameState = { points: 0, detective: false, best: {}, finds: {} };
 
 let current = EMPTY;
@@ -17,6 +17,19 @@ export const MAP_UNLOCK_FINDS = 10;
 export function mapUnlocked(finds: Record<string, number>, prevSceneId?: string) {
   if (!prevSceneId) return true;
   return (finds[prevSceneId] ?? 0) >= MAP_UNLOCK_FINDS;
+}
+
+/** True when every listed map has had all its Mini-Moneres found. */
+export function allMapsComplete(finds: Record<string, number>, sceneIds: string[]) {
+  return sceneIds.every((id) => (finds[id] ?? 0) >= MINI_COUNT);
+}
+
+/** Remembers the one-time mystery reward so it is only given once. */
+export function recordMystery(itemId: string) {
+  if (current.mystery) return false;
+  current = { ...current, mystery: itemId };
+  save();
+  return true;
 }
 
 /** A hidden Mini-Monere: x/y are % of the picture, size is % of its width. */
