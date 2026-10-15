@@ -34,6 +34,8 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const [forgot, setForgot] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const target = safeNext(next);
 
   useEffect(() => { if (ready && user) void navigate({ to: target as "/" , replace: true }); }, [ready, user, target, navigate]);
@@ -41,6 +43,13 @@ function AuthPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    if (forgot) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+      setBusy(false);
+      if (error) { toast.error(error.message); return; }
+      setResetSent(true);
+      return;
+    }
     if (mode === "up") {
       const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}${target}` } });
       setBusy(false);
@@ -55,19 +64,28 @@ function AuthPage() {
 
   return (
     <AppShell>
-      <h1 className="font-display text-2xl font-semibold">{mode === "up" ? "Create your account" : "Welcome back"}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Your account keeps Monere Plus and pass codes with you. Your journal still stays on this device.</p>
-      {sent ? (
+      <h1 className="font-display text-2xl font-semibold">{forgot ? "Reset your password" : mode === "up" ? "Create your account" : "Welcome back"}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{forgot ? "Enter your email and Monere will send you a link to choose a new password." : "Your account keeps Monere Plus and pass codes with you. Your journal still stays on this device."}</p>
+      {resetSent ? (
+        <div className="surface-card mt-6 p-5 text-sm">Check your inbox — we've sent a link to set a new password. It may take a minute or two to arrive.</div>
+      ) : sent ? (
         <div className="surface-card mt-6 p-5 text-sm">Check your email to confirm your account, then come back and sign in.</div>
       ) : (
         <form onSubmit={submit} className="mt-6 grid gap-3">
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" aria-label="Email" autoComplete="email"
             className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary" />
-          <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (8+ characters)" aria-label="Password"
-            autoComplete={mode === "up" ? "new-password" : "current-password"} className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary" />
-          <Button type="submit" disabled={busy} className="btn-gold mt-2 h-auto py-3.5">{busy ? "Please wait…" : mode === "up" ? "Create account" : "Sign in"}</Button>
-          <button type="button" onClick={() => setMode(mode === "up" ? "in" : "up")} className="mt-1 text-sm text-muted-foreground hover:text-primary">
-            {mode === "up" ? "Already have an account? Sign in" : "New here? Create an account"}
+          {!forgot && (
+            <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (8+ characters)" aria-label="Password"
+              autoComplete={mode === "up" ? "new-password" : "current-password"} className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary" />
+          )}
+          <Button type="submit" disabled={busy} className="btn-gold mt-2 h-auto py-3.5">{busy ? "Please wait…" : forgot ? "Send reset link" : mode === "up" ? "Create account" : "Sign in"}</Button>
+          {mode === "in" && !forgot && (
+            <button type="button" onClick={() => setForgot(true)} className="mt-1 text-sm text-muted-foreground hover:text-primary">
+              Forgotten password?
+            </button>
+          )}
+          <button type="button" onClick={() => { if (forgot) { setForgot(false); setResetSent(false); } else setMode(mode === "up" ? "in" : "up"); }} className="mt-1 text-sm text-muted-foreground hover:text-primary">
+            {forgot ? "Back to sign in" : mode === "up" ? "Already have an account? Sign in" : "New here? Create an account"}
           </button>
         </form>
       )}
