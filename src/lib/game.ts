@@ -11,7 +11,7 @@ export const POINTS_PER_MINI = 20;
 export const COMPLETION_BONUS = 100;
 
 /** A map unlocks after this many Mini-Moneres found in the previous map. */
-export const MAP_UNLOCK_FINDS = 5;
+export const MAP_UNLOCK_FINDS = 10;
 
 /** The first map is always open; later maps need MAP_UNLOCK_FINDS finds in the map before them. */
 export function mapUnlocked(finds: Record<string, number>, prevSceneId?: string) {
