@@ -115,3 +115,25 @@ export function recordChapterComplete(episode: number, bonus = 100) {
   save();
   return bonus;
 }
+
+export const JIGSAW_BONUS = 50;
+/** +50 Wisdom Points (shop wallet) for each finished jigsaw. */
+export function recordJigsaw() {
+  current = { ...current, points: current.points + JIGSAW_BONUS };
+  save();
+  return JIGSAW_BONUS;
+}
+
+/** True when every piece sits in its home slot. */
+export function jigsawSolved(order: number[]) {
+  return order.every((p, i) => p === i);
+}
+
+/** Random order that is never already solved. */
+export function shufflePieces(n: number, rand: () => number = Math.random) {
+  const a = Array.from({ length: n }, (_, i) => i);
+  do {
+    for (let i = n - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j]!, a[i]!]; }
+  } while (n > 1 && jigsawSolved(a));
+  return a;
+}
