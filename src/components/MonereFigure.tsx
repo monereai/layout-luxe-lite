@@ -10,8 +10,8 @@ const GESTURES: Record<Gesture, string> = { wave, think, thumbs, listen };
 
 /** Accessory placement in a square box, per art type: square pose art vs portrait full-body wardrobe art. */
 const PLACE = {
-  pose: { hat: { x: 51, y: 13, w: 36 }, glasses: { x: 51, y: 20.5, w: 22 }, costume: { x: 50, y: 30, w: 92 } },
-  full: { hat: { x: 51, y: 8.5, w: 26 }, glasses: { x: 51, y: 14.5, w: 16 }, costume: { x: 51, y: 20, w: 66 } },
+  pose: { hat: { x: 51, y: 13, w: 30 }, glasses: { x: 51, y: 20.5, w: 22 }, costume: { x: 50, y: 30, w: 74 } },
+  full: { hat: { x: 51, y: 12, w: 21 }, glasses: { x: 51, y: 14.5, w: 16 }, costume: { x: 51, y: 20, w: 66 } },
 } as const;
 
 function Layer({ item, kind }: { item: ShopItem; kind: "pose" | "full" }) {
@@ -35,7 +35,7 @@ export function MonereFigure({ gesture = "wave", className = "", alt = "" }: { g
   const items = equippedItems(useShop());
   const kind = outfit.id === "default" ? "pose" : "full";
   return (
-    <span className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
+    <span style={{ clipPath: "inset(-60% -60% 0 -60%)" }} className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       {items.filter((i) => i.category === "costume").map((i) => <Layer key={i.id} item={i} kind={kind} />)}
       {kind === "full" ? (
         <img src={outfit.src} alt="" aria-hidden="true" className="absolute inset-0 z-[1] h-full w-full object-contain" />

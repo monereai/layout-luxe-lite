@@ -54,7 +54,7 @@ function ShopPage() {
         </div>
 
         <div className="mb-5 flex justify-center rounded-lg border border-border bg-card/60 py-3">
-          <MonereFigure gesture="thumbs" alt="Monere wearing your equipped items" className="h-56 w-56" />
+          <MonereFigure gesture="thumbs" alt="Monere wearing your equipped items" className="mt-10 h-56 w-56" />
         </div>
 
         <Tabs defaultValue="hat">
