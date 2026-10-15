@@ -61,3 +61,8 @@
 - [x] Play a short chime when a new chapter is chosen, sharing one chime helper with the game.
 - [x] Play a fuller finish fanfare when this week's adventure reaches its Chapter Complete screen.
 - [ ] Translate the weekly banner and finale copy (currently English only).
+
+# The Treehouse
+- [x] Keep a single Monere on the home screen with the faded treehouse behind him.
+- [x] Make the treehouse picture larger behind Monere.
+- [ ] Translate The Treehouse greeting (currently English only).
