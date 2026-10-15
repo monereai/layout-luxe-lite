@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { playChime } from "@/lib/sound";
 
 let started: number[] = [];
-let realAudioContext: typeof AudioContext | undefined;
+let realAudioContext: unknown;
 
 class FakeAudioContext {
   currentTime = 0;
@@ -30,7 +30,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  globalThis.AudioContext = realAudioContext;
+  globalThis.AudioContext = realAudioContext as typeof AudioContext;
 });
 
 describe("chimes", () => {
