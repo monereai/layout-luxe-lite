@@ -198,3 +198,7 @@ export function languageInstruction(lang?: Lang) {
   if (!l || l.id === "en") return "";
   return `Respond to the user entirely in ${l.ai} (all text fields, greetings, verse text, application, steps, and the song "why"), maintaining Monere's warm, encouraging tone. Keep song titles and artist names in their original form.`;
 }
+
+export function signSrc(lang: Lang): string {
+  return lang === "en" ? "/shop/sign.webp" : `/shop/sign-${lang}.webp`;
+}

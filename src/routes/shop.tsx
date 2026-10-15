@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
 import { SHOP_ITEMS, buy, equip, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { signSrc, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -31,6 +32,7 @@ const CATS: { id: ShopCategory; label: string; icon: typeof Award }[] = [
 ];
 
 function ShopPage() {
+  const lang = useLang();
   const game = useGame();
   const shop = useShop();
   const wallet = walletBalance(game.points, shop);
@@ -47,7 +49,7 @@ function ShopPage() {
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <h1 className="font-display text-2xl font-semibold"><img src="/shop/sign.webp" alt="Points Shop" width={1205} height={389} loading="lazy" className="h-16 w-auto sm:h-20" /></h1>
+            <h1 className="font-display text-2xl font-semibold"><img src={signSrc(lang)} alt="Points Shop" width={1205} height={389} loading="lazy" className="h-16 w-auto sm:h-20" /></h1>
             <p className="text-sm text-muted-foreground">Dress Monere up with points from <Link to="/find" className="text-primary underline-offset-2 hover:underline">Where's Monere?</Link></p>
           </div>
           <div className="flex shrink-0 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-primary" aria-label={`${wallet} points available`}>
