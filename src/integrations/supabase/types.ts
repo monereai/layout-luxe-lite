@@ -53,6 +53,8 @@ export type Database = {
           is_active: boolean
           max_uses: number
           organization_name: string
+          owner_user_id: string | null
+          stripe_subscription_id: string | null
         }
         Insert: {
           code: string
@@ -63,6 +65,8 @@ export type Database = {
           is_active?: boolean
           max_uses?: number
           organization_name: string
+          owner_user_id?: string | null
+          stripe_subscription_id?: string | null
         }
         Update: {
           code?: string
@@ -73,6 +77,8 @@ export type Database = {
           is_active?: boolean
           max_uses?: number
           organization_name?: string
+          owner_user_id?: string | null
+          stripe_subscription_id?: string | null
         }
         Relationships: []
       }

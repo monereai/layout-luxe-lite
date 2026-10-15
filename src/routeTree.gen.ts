@@ -14,7 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DailyRouteImport } from './routes/daily'
 import { Route as FindRouteImport } from './routes/find'
 import { Route as JournalRouteImport } from './routes/journal'
-import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as PaymentSuccessRouteImport } from './routes/payment-success'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -42,9 +42,9 @@ const JournalRoute = JournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
-  id: '/checkout/return',
-  path: '/checkout/return',
+const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
+  id: '/payment-success',
+  path: '/payment-success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPaymentsWebhookRoute =
@@ -60,7 +60,7 @@ export interface FileRoutesByFullPath {
   '/daily': typeof DailyRoute
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
-  '/checkout/return': typeof CheckoutReturnRoute
+  '/payment-success': typeof PaymentSuccessRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -69,7 +69,7 @@ export interface FileRoutesByTo {
   '/daily': typeof DailyRoute
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
-  '/checkout/return': typeof CheckoutReturnRoute
+  '/payment-success': typeof PaymentSuccessRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -79,7 +79,7 @@ export interface FileRoutesById {
   '/daily': typeof DailyRoute
   '/find': typeof FindRoute
   '/journal': typeof JournalRoute
-  '/checkout/return': typeof CheckoutReturnRoute
+  '/payment-success': typeof PaymentSuccessRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -90,7 +90,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/find'
     | '/journal'
-    | '/checkout/return'
+    | '/payment-success'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,7 +99,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/find'
     | '/journal'
-    | '/checkout/return'
+    | '/payment-success'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -108,7 +108,7 @@ export interface FileRouteTypes {
     | '/daily'
     | '/find'
     | '/journal'
-    | '/checkout/return'
+    | '/payment-success'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -118,7 +118,7 @@ export interface RootRouteChildren {
   DailyRoute: typeof DailyRoute
   FindRoute: typeof FindRoute
   JournalRoute: typeof JournalRoute
-  CheckoutReturnRoute: typeof CheckoutReturnRoute
+  PaymentSuccessRoute: typeof PaymentSuccessRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -159,11 +159,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/checkout/return': {
-      id: '/checkout/return'
-      path: '/checkout/return'
-      fullPath: '/checkout/return'
-      preLoaderRoute: typeof CheckoutReturnRouteImport
+    '/payment-success': {
+      id: '/payment-success'
+      path: '/payment-success'
+      fullPath: '/payment-success'
+      preLoaderRoute: typeof PaymentSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/webhook': {
@@ -182,7 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   DailyRoute: DailyRoute,
   FindRoute: FindRoute,
   JournalRoute: JournalRoute,
-  CheckoutReturnRoute: CheckoutReturnRoute,
+  PaymentSuccessRoute: PaymentSuccessRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
