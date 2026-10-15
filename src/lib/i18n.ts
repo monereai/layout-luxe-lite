@@ -35,6 +35,8 @@ const en = {
   welcome: "Let's look at whatever you're facing today with some wisdom and courage. No judgment—just a safe space to find the strong path forward.",
   welcomeName: "Glad you're here, {name}. What's on your mind today? Let's look at whatever you're facing with some wisdom and courage.",
   followPh: "Ask Monere a follow-up question...",
+  story: "Story", storyTitle: "Story Mode", storySub: "Pick an adventure. Monere narrates a chunk, then you decide what happens next.",
+  storyChoose: "Choose your story", storyLoading: "Monere is opening the story…", storyEnd: "The End", storyAgain: "Play again", storyNew: "Pick another story",
 };
 type Dict = typeof en;
 
@@ -62,6 +64,8 @@ const es: Dict = {
   welcome: "Veamos lo que estás enfrentando hoy con sabiduría y valentía. Sin juicios: solo un espacio seguro para encontrar el camino fuerte.",
   welcomeName: "Me alegra que estés aquí, {name}. ¿Qué tienes en mente hoy? Veamos lo que enfrentas con sabiduría y valentía.",
   followPh: "Hazle a Monere otra pregunta...",
+  story: "Historias", storyTitle: "Modo Historia", storySub: "Elige una aventura. Monere narra un trozo y tú decides qué pasa después.",
+  storyChoose: "Elige tu historia", storyLoading: "Monere está abriendo la historia…", storyEnd: "Fin", storyAgain: "Jugar otra vez", storyNew: "Elegir otra historia",
 };
 
 const fr: Dict = {
@@ -88,6 +92,8 @@ const fr: Dict = {
   welcome: "Regardons ce que tu vis aujourd'hui avec sagesse et courage. Aucun jugement — juste un espace sûr pour trouver la bonne voie.",
   welcomeName: "Content que tu sois là, {name}. Qu'est-ce qui te préoccupe aujourd'hui ? Regardons ça avec sagesse et courage.",
   followPh: "Pose une autre question à Monere...",
+  story: "Histoires", storyTitle: "Mode Histoire", storySub: "Choisis une aventure. Monere raconte un passage, puis tu décides la suite.",
+  storyChoose: "Choisis ton histoire", storyLoading: "Monere ouvre l'histoire…", storyEnd: "Fin", storyAgain: "Rejouer", storyNew: "Choisir une autre histoire",
 };
 
 const pt: Dict = {
@@ -114,6 +120,8 @@ const pt: Dict = {
   welcome: "Vamos olhar para o que estás a enfrentar hoje com sabedoria e coragem. Sem julgamentos — só um espaço seguro.",
   welcomeName: "Que bom que estás aqui, {name}. O que tens em mente hoje? Vamos olhar para isso com sabedoria e coragem.",
   followPh: "Faz outra pergunta ao Monere...",
+  story: "Histórias", storyTitle: "Modo História", storySub: "Escolhe uma aventura. O Monere conta um trecho e tu decides o que acontece a seguir.",
+  storyChoose: "Escolhe a tua história", storyLoading: "O Monere está a abrir a história…", storyEnd: "Fim", storyAgain: "Jogar outra vez", storyNew: "Escolher outra história",
 };
 
 const de: Dict = {
@@ -140,6 +148,8 @@ const de: Dict = {
   welcome: "Lass uns mit Weisheit und Mut anschauen, was dich heute beschäftigt. Kein Urteil — nur ein sicherer Ort.",
   welcomeName: "Schön, dass du da bist, {name}. Was beschäftigt dich heute? Lass es uns mit Weisheit und Mut anschauen.",
   followPh: "Stell Monere eine Folgefrage...",
+  story: "Geschichten", storyTitle: "Geschichten-Modus", storySub: "Wähl ein Abenteuer. Monere erzählt einen Abschnitt, dann entscheidest du, wie es weitergeht.",
+  storyChoose: "Wähl deine Geschichte", storyLoading: "Monere öffnet die Geschichte…", storyEnd: "Das Ende", storyAgain: "Nochmal spielen", storyNew: "Andere Geschichte wählen",
 };
 
 const DICTS: Record<Lang, Dict> = { en, es, fr, pt, de };
