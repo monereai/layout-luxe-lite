@@ -40,3 +40,10 @@
 # Safety bar on payment screens
 - [x] Hide the "In crisis or feeling unsafe?" floating bar on /payment-success and while the upgrade window is open.
 - [x] Verify the bar still shows everywhere else and returns after closing the upgrade window.
+
+# Points Shop
+- [x] Link Where's Monere? points to one wallet and sell hats, glasses and costumes.
+- [x] Expand the hat library to 10 hats with fresh artwork and tiered prices.
+- [x] Verify buying, equipping and Monere wearing items on default and alternate outfits.
+- [ ] Translate the shop copy (currently English only).
+- [ ] Sync points and purchases to the account so they follow a user between devices.
