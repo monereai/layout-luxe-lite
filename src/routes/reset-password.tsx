@@ -53,7 +53,7 @@ function ResetPasswordPage() {
   return (
     <AppShell>
       <h1 className="font-display text-2xl font-semibold">Choose a new password</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Pick something you'll remember — 8 characters or more.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Pick something you'll remember.</p>
       {ready === "expired" && (
         <div className="mt-4 rounded-xl border border-border bg-background/60 p-4 text-sm">
           This reset link has expired or was already used.{" "}
