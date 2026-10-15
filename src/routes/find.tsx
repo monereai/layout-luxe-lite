@@ -1,28 +1,35 @@
 import { Link } from "@tanstack/react-router";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Lightbulb, ZoomIn, ZoomOut, RotateCcw, Trophy, Award } from "lucide-react";
+import { useState } from "react";
+import { RotateCcw, Trophy, Award } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { recordFind, useGame } from "@/lib/game";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+  COMPLETION_BONUS, GRID_SIZE, MINI_COUNT, POINTS_PER_MINI,
+  makeGrid, recordComplete, recordMini, useGame, type Tile,
+} from "@/lib/game";
 import monere from "@/assets/monere-wave.png";
-import school from "@/assets/game/school.jpg";
-import arcade from "@/assets/game/arcade.jpg";
-import jungle from "@/assets/game/jungle.jpg";
 
 const SCENES = [
-  { id: "school", name: "School Grounds", src: school, x: 0.6, y: 0.8, hint: "Monere loves a quiet spot near the bushes, not far from the bike racks." },
-  { id: "arcade", name: "Arcade", src: arcade, x: 0.06, y: 0.14, hint: "Look up high — he likes to watch the action from above the claw machines." },
-  { id: "jungle", name: "Jungle Camp", src: jungle, x: 0.57, y: 0.62, hint: "He's taking a coffee break between the campfire and the river." },
+  { id: "jungle", name: "Jungle Camp", obstacles: ["🌳", "🌿", "🪨", "⛺", "🌴", "🍃", "🌲", "🪵"] },
+  { id: "school", name: "School Grounds", obstacles: ["🌳", "🚲", "🎒", "🪨", "🏫", "🌷", "📚", "🌲"] },
+  { id: "sky", name: "Cloud Hills", obstacles: ["☁️", "🌥️", "🌳", "🪨", "🌫️", "⛰️", "🎈", "🌿"] },
+];
+
+const DECOYS = [
+  { emoji: "🐒", text: "Oops, just a monkey! Keep searching!" },
+  { emoji: "🍂", text: "Just rustling leaves… Keep looking!" },
+  { emoji: "🐿️", text: "A cheeky squirrel! Monere's not here." },
 ];
 
 export const Route = createFileRoute("/find")({
   head: () => ({
     meta: [
       { title: "Where's Monere? — MonereAI" },
-      { name: "description", content: "Find Monere the Lion hidden in busy scenes, earn Wisdom Points, and unlock the Master Detective badge." },
+      { name: "description", content: "Hunt for 10 Mini-Moneres hidden under bushes, rocks and tents, dodge the decoys, and earn Wisdom Points." },
       { property: "og:title", content: "Where's Monere? — MonereAI" },
-      { property: "og:description", content: "A hidden-object mini-game: spot Monere the Lion in busy scenes and earn Wisdom Points." },
+      { property: "og:description", content: "Find all 10 hidden Mini-Moneres on a cluttered 8x8 grid and earn Wisdom Points." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -30,15 +37,16 @@ export const Route = createFileRoute("/find")({
   component: FindGame,
 });
 
-function chime() {
+function chime(final = false) {
   try {
     const ctx = new AudioContext();
-    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+    const notes = final ? [523.25, 659.25, 783.99, 1046.5] : [783.99, 1046.5];
+    notes.forEach((f, i) => {
       const o = ctx.createOscillator(); const g = ctx.createGain();
       o.frequency.value = f; o.type = "triangle";
-      const t = ctx.currentTime + i * 0.12;
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
-      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.45);
+      const t = ctx.currentTime + i * 0.1;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.4);
     });
   } catch { /* audio unavailable */ }
 }
@@ -47,32 +55,50 @@ function FindGame() {
   const game = useGame();
   const [idx, setIdx] = useState(0);
   const scene = SCENES[idx] ?? SCENES[0]!;
-  const [zoom, setZoom] = useState(2);
-  const [start, setStart] = useState(() => Date.now());
-  const [found, setFound] = useState<null | { secs: number; pts: number }>(null);
-  const [hint, setHint] = useState(false);
-  const [miss, setMiss] = useState(false);
-  const box = useRef<HTMLDivElement>(null);
+  const [grid, setGrid] = useState<Tile[]>(() => makeGrid(8));
+  const [open, setOpen] = useState<Set<number>>(new Set());
+  const [toast, setToast] = useState<string | null>(null);
+  const [shake, setShake] = useState<number | null>(null);
+  const [won, setWon] = useState(false);
 
-  useEffect(() => { const el = box.current; if (el) { el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2; el.scrollTop = (el.scrollHeight - el.clientHeight) / 2; } }, [idx, zoom]);
+  const found = grid.filter((t, i) => t.kind === "mini" && open.has(i)).length;
 
-  function reset(next = idx) { setIdx(next); setFound(null); setHint(false); setStart(Date.now()); }
-  function hit() {
-    if (found) return;
-    const s = (Date.now() - start) / 1000;
-    chime();
-    setFound({ secs: Math.round(s), pts: recordFind(scene.id, Math.round(s), hint) });
+  function newRound(next = idx) {
+    setIdx(next); setGrid(makeGrid(8)); setOpen(new Set()); setToast(null); setWon(false);
   }
-  function missed() { if (found) return; setMiss(true); setTimeout(() => setMiss(false), 350); }
+
+  function tap(i: number) {
+    const tile = grid[i];
+    if (!tile || won) return;
+    if (tile.kind === "empty" && !open.has(i)) {
+      setShake(i); setTimeout(() => setShake(null), 350);
+      setOpen((s) => new Set(s).add(i));
+      return;
+    }
+    if (open.has(i)) return;
+    setOpen((s) => new Set(s).add(i));
+    if (tile.kind === "decoy") {
+      const d = DECOYS[tile.obstacle % DECOYS.length]!;
+      setToast(d.text);
+      return;
+    }
+    recordMini();
+    const nowFound = found + 1;
+    if (nowFound >= MINI_COUNT) {
+      chime(true); recordComplete(); setToast(null); setWon(true);
+    } else {
+      chime(); setToast(`+${POINTS_PER_MINI} Wisdom Points!`);
+    }
+  }
 
   return (
     <AppShell>
-      <div className="flex items-end justify-between">
+      <div className="flex items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold">Where's Monere?</h1>
-          <p className="text-sm text-muted-foreground">Spot the lion hiding in the crowd.</p>
+          <p className="text-sm text-muted-foreground">Tap the bushes, rocks and tents to find 10 hidden Mini-Moneres.</p>
         </div>
-        <div className="text-right text-xs text-muted-foreground">
+        <div className="shrink-0 text-right text-xs text-muted-foreground">
           <p className="font-bold text-primary"><Trophy className="mr-1 inline h-3.5 w-3.5" />{game.points} Wisdom Points</p>
           <Link to="/shop" className="text-xs font-semibold text-primary hover:underline">Spend points in the Shop →</Link>
           {game.detective && <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 font-bold text-primary-foreground"><Award className="h-3 w-3" />Master Detective</p>}
@@ -81,49 +107,61 @@ function FindGame() {
 
       <div className="mt-4 flex gap-2">
         {SCENES.map((s, i) => (
-          <button key={s.id} onClick={() => reset(i)} className={`flex-1 rounded-full border px-2 py-1.5 text-xs ${i === idx ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{s.name}</button>
+          <button key={s.id} onClick={() => newRound(i)} className={`flex-1 rounded-full border px-2 py-1.5 text-xs ${i === idx ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{s.name}</button>
         ))}
       </div>
 
-      <div className="mt-3 flex items-center justify-end gap-1">
-        <Button size="icon" variant="secondary" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(1, z - 0.5))}><ZoomOut /></Button>
-        <Button size="icon" variant="secondary" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(4, z + 0.5))}><ZoomIn /></Button>
-      </div>
-
-      <div ref={box} className={`surface-card relative mt-2 aspect-[4/3] w-full overflow-auto p-0 ${miss ? "animate-[shake_0.35s]" : ""}`} style={{ touchAction: "pan-x pan-y" }}>
-        <div className="relative" style={{ width: `${zoom * 100}%` }} onClick={missed}>
-          <img src={scene.src} alt={`${scene.name} crowd scene`} width={1536} height={1152} className="block w-full select-none" draggable={false} />
-          <button
-            aria-label="Monere"
-            onClick={(e) => { e.stopPropagation(); hit(); }}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
-            style={{ left: `${scene.x * 100}%`, top: `${scene.y * 100}%`, width: "4.5%" }}
-          >
-            <img src={monere} alt="" draggable={false} className={`w-full ${found ? "animate-bounce drop-shadow-[0_0_12px_hsl(var(--primary))]" : ""}`} />
-            {found && <span className="absolute inset-[-60%] animate-ping rounded-full border-4 border-primary" />}
-          </button>
-          {hint && !found && (
-            <span className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full border-2 border-dashed border-primary/70"
-              style={{ left: `${(scene.x + 0.05) * 100}%`, top: `${(scene.y - 0.04) * 100}%`, width: "28%", aspectRatio: "1" }} />
-          )}
+      <div className="mt-3 flex items-center justify-between rounded-full border border-primary/40 bg-primary/10 px-4 py-2" aria-live="polite">
+        <p className="text-sm font-semibold text-foreground">Mini-Moneres Found: <span className="text-primary">{found} / {MINI_COUNT}</span></p>
+        <div className="flex gap-0.5" aria-hidden="true">
+          {Array.from({ length: MINI_COUNT }, (_, i) => (
+            <span key={i} className={`h-2 w-2 rounded-full ${i < found ? "bg-primary" : "bg-muted"}`} />
+          ))}
         </div>
       </div>
 
-      {found ? (
-        <div className="surface-card mt-4 p-5 text-center">
-          <p className="text-3xl">🎉</p>
-          <p className="mt-1 font-display text-xl font-semibold">You found Monere!</p>
-          <p className="mt-1 text-sm text-muted-foreground">+{found.pts} Wisdom Points</p>
-          <p className="mt-2 text-sm">"Sharp eyes! Noticing the small things is a big part of wisdom."</p>
-          <p className="mt-2 text-xs text-primary">Master Detective badge unlocked in Monere's Wardrobe</p>
-          <Button className="btn-gold mt-4 w-full" onClick={() => reset((idx + 1) % SCENES.length)}><RotateCcw /> Next scene</Button>
-        </div>
-      ) : (
-        <>
-          <Button variant="secondary" className="mt-4 w-full rounded-full" onClick={() => setHint(true)} disabled={hint}><Lightbulb /> Monere's Hint</Button>
-          {hint && <p className="mt-2 text-center text-sm text-muted-foreground">{scene.hint} <span className="text-xs">(hints halve your points)</span></p>}
-        </>
-      )}
+      <p className="mt-2 min-h-5 text-center text-sm font-medium text-primary" aria-live="polite">{toast}</p>
+
+      <div
+        className="surface-card mx-auto mt-1 grid w-full max-w-xl gap-1 p-2"
+        style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}
+      >
+        {grid.map((tile, i) => {
+          const isOpen = open.has(i);
+          const decoy = DECOYS[tile.obstacle % DECOYS.length]!;
+          return (
+            <button
+              key={i}
+              onClick={() => tap(i)}
+              aria-label={isOpen ? (tile.kind === "mini" ? "Mini-Monere found" : tile.kind === "decoy" ? "Decoy" : "Empty") : `Tile ${i + 1}`}
+              className={`relative flex aspect-square items-center justify-center rounded-md text-xl transition-colors sm:text-2xl ${
+                isOpen
+                  ? tile.kind === "mini" ? "bg-primary/25 ring-2 ring-primary" : tile.kind === "decoy" ? "bg-accent/40" : "bg-muted/30"
+                  : "bg-secondary hover:bg-secondary/70"
+              } ${shake === i ? "animate-[shake_0.35s]" : ""}`}
+            >
+              {!isOpen && <span aria-hidden="true">{scene.obstacles[tile.obstacle % scene.obstacles.length]}</span>}
+              {isOpen && tile.kind === "mini" && <img src={monere} alt="" draggable={false} className="h-4/5 w-4/5 animate-[bounce_0.6s_ease-out_1] object-contain" />}
+              {isOpen && tile.kind === "decoy" && <span aria-hidden="true">{decoy.emoji}</span>}
+              {isOpen && tile.kind === "empty" && <span aria-hidden="true" className="text-xs text-muted-foreground">·</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      <Button variant="secondary" className="mt-4 w-full rounded-full" onClick={() => newRound()}><RotateCcw /> Shuffle a new grid</Button>
+
+      <Dialog open={won} onOpenChange={(o) => !o && setWon(false)}>
+        <DialogContent className="max-w-sm text-center">
+          <p className="text-4xl" aria-hidden="true">🎉</p>
+          <DialogTitle className="font-display text-2xl">You Found Them All!</DialogTitle>
+          <DialogDescription>
+            All {MINI_COUNT} Mini-Moneres collected. +{MINI_COUNT * POINTS_PER_MINI} for the finds and a +{COMPLETION_BONUS} completion bonus!
+          </DialogDescription>
+          <p className="text-sm">"Sharp eyes! Patience and noticing the small things are a big part of wisdom."</p>
+          <Button className="btn-gold mt-2 w-full" onClick={() => newRound()}><RotateCcw /> Play again</Button>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

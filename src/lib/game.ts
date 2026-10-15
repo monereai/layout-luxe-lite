@@ -5,6 +5,46 @@ export type GameState = { points: number; detective: boolean; best: Record<strin
 const EMPTY: GameState = { points: 0, detective: false, best: {} };
 
 let current = EMPTY;
+
+export const GRID_SIZE = 8;
+export const MINI_COUNT = 10;
+export const DECOY_COUNT = 3;
+export const POINTS_PER_MINI = 20;
+export const COMPLETION_BONUS = 100;
+
+export type TileKind = "mini" | "decoy" | "empty";
+export type Tile = { kind: TileKind; obstacle: number };
+
+/** Fresh shuffled grid: exactly MINI_COUNT minis and DECOY_COUNT decoys, rest empty; each tile gets an obstacle index. */
+export function makeGrid(obstacleCount: number, rand: () => number = Math.random): Tile[] {
+  const total = GRID_SIZE * GRID_SIZE;
+  const kinds: TileKind[] = Array.from({ length: total }, (_, i) =>
+    i < MINI_COUNT ? "mini" : i < MINI_COUNT + DECOY_COUNT ? "decoy" : "empty");
+  for (let i = kinds.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [kinds[i], kinds[j]] = [kinds[j]!, kinds[i]!];
+  }
+  return kinds.map((kind) => ({ kind, obstacle: Math.floor(rand() * obstacleCount) }));
+}
+
+function save() {
+  try { localStorage.setItem(GAME_KEY, JSON.stringify(current)); } catch { /* ignore */ }
+  listeners.forEach((l) => l());
+}
+
+/** +20 points for one Mini-Monere. */
+export function recordMini() {
+  current = { ...current, points: current.points + POINTS_PER_MINI };
+  save();
+  return POINTS_PER_MINI;
+}
+
+/** +100 bonus when all ten are found; unlocks the Master Detective badge. */
+export function recordComplete() {
+  current = { ...current, points: current.points + COMPLETION_BONUS, detective: true };
+  save();
+  return COMPLETION_BONUS;
+}
 let loaded = false;
 const listeners = new Set<() => void>();
 
