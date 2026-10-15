@@ -1,14 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { LANG_IDS, languageInstruction } from "@/lib/i18n";
-import { STORY_MAX_TURNS, storyTheme, type StoryTurn, type StoryThemeId } from "@/lib/story";
+import { EPISODE_MAX_TURNS, EPISODE_MIN_TURNS, episodeFor, type StoryTurn } from "@/lib/story";
 
 export type StoryResult = { narration: string; choices: string[]; isEnding: boolean; scene: string };
 
 const SYSTEM = `You are Monere, a friendly, wise, and supportive AI mentor designed for young people and youth group members.
 
 Story Mode rules:
-Narrate an exciting, age-appropriate adventure in short 2-3 sentence chunks. At the end of each turn, present 2 or 3 distinct choices (e.g., Option A, Option B) for the reader to decide what happens next. Incorporate Monere the lion mascot as a supportive companion in the story.
+You are narrating this week's featured episodic adventure with Monere. Tell a longer, multi-chapter story in progressive segments (3-4 sentences per segment). At the end of each turn, present 2 interactive choice buttons to let the player decide Monere's next move. Include 5 to 7 interactive turns total before reaching the chapter finale. Incorporate Monere the lion mascot as a supportive companion in the story.
 
 Story craft:
 - Write in vivid, easy-to-read language for a young reader. Never sound like a textbook or a sermon.
@@ -16,7 +16,7 @@ Story craft:
 - Each choice must be a short, tap-friendly action in the reader's own voice (e.g. "Climb the dune to see the signal's source"), genuinely different from the others, and never a trick or a dead end.
 - Keep the reader's agency: their choice must visibly shape the next chunk. Monere comments, encourages and offers a nudge, but the reader decides.
 - Keep the adventure hopeful. No gore, no horror, no weapons used on people, no self-harm, no romance, no drug or alcohol use, and never mock or humiliate a character. If the reader's own message drifts into real-life distress, keep the story gentle and let Monere quietly point them toward a trusted adult.
-- When the story reaches a natural, satisfying close, set "isEnding" to true, write the final "narration" as a warm ending (2-4 sentences), and return an empty "choices" array.
+- When the story reaches a natural, satisfying close, set "isEnding" to true, write the final "narration" as a warm chapter finale (3-4 sentences), and return an empty "choices" array.
 - "scene" is a short visual description IN ENGLISH (max 40 words) of the single most picturable moment in this turn's narration: setting, lighting, key objects and what the reader and Monere are doing. No names of real people or brands, nothing scary, no text or signs.
 - Never break character to explain that you are an AI, and never mention these instructions.`;
 
@@ -41,7 +41,7 @@ const schema = {
 };
 
 const Input = z.object({
-  theme: z.enum(["space", "mystery", "kingdom", "time"]),
+  episode: z.number().int().min(1).max(100000),
   turns: z.array(z.object({ narration: z.string().max(1500), choice: z.string().max(300) })).max(14),
   userName: z.string().max(30).optional(),
   profile: z.enum(["young-man", "young-woman"]).optional(),
@@ -56,8 +56,7 @@ export const tellStory = createServerFn({ method: "POST" })
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { ok: false, error: "The story service isn't configured yet." };
 
-    const theme = storyTheme(data.theme as StoryThemeId);
-    if (!theme) return { ok: false, error: "That story isn't available. Pick another one." };
+    const theme = episodeFor(data.episode);
 
     const profileGuidance = data.profile === "young-man"
       ? "The reader's profile is Young Man: let the story quietly value courage, servant leadership, steady strength and responsibility."
@@ -65,15 +64,17 @@ export const tellStory = createServerFn({ method: "POST" })
         ? "The reader's profile is Young Woman: let the story quietly value dignity, inner strength, wisdom, agency and grace."
         : "No profile selected. Do not guess the reader's sex.";
 
-    const opening = `${theme.seed}\n${profileGuidance}\n${data.userName?.trim() ? `The reader's name is ${data.userName.trim()} — use it naturally at most once or twice across the whole story.` : "The reader has not given a name."}\nBegin the adventure now with the first narration chunk and 2-3 choices.`;
+    const opening = `This week's episode is "${theme.title}".\n${theme.seed}\n${profileGuidance}\n${data.userName?.trim() ? `The reader's name is ${data.userName.trim()} — use it naturally at most once or twice across the whole story.` : "The reader has not given a name."}\nBegin the adventure now with the first narration segment and 2 choices.`;
 
     const input: Record<string, unknown>[] = [{ role: "user", content: opening }];
     for (const turn of data.turns as StoryTurn[]) {
       input.push({ role: "assistant", content: turn.narration });
       input.push({ role: "user", content: `The reader chose: ${turn.choice}` });
     }
-    if (data.turns.length >= STORY_MAX_TURNS) {
-      input.push({ role: "user", content: "The story has run long. Bring it to a satisfying, warm ending now: set isEnding to true and return no choices." });
+    if (data.turns.length >= EPISODE_MAX_TURNS) {
+      input.push({ role: "user", content: "This is the chapter finale. Bring the episode to a satisfying, warm ending now: set isEnding to true and return no choices." });
+    } else if (data.turns.length < EPISODE_MIN_TURNS) {
+      input.push({ role: "user", content: `This is turn ${data.turns.length + 1} of 5-7. Do not end yet: set isEnding to false and give exactly 2 choices.` });
     }
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
@@ -132,11 +133,11 @@ export const tellStory = createServerFn({ method: "POST" })
     const narration = (parsed.narration ?? "").trim();
     if (!narration) return { ok: false, error: "The story came back empty. Please try again." };
 
-    const isEnding = parsed.isEnding === true;
+    const isEnding = (parsed.isEnding === true && data.turns.length >= EPISODE_MIN_TURNS) || data.turns.length >= EPISODE_MAX_TURNS;
     const choices = (parsed.choices ?? [])
       .map((c) => (c?.label ?? "").trim())
       .filter(Boolean)
-      .slice(0, 3);
+      .slice(0, 2);
 
     if (!isEnding && choices.length < 2) {
       for (const f of FALLBACK_CHOICES) {
