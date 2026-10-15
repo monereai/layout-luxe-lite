@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { playChime } from "@/lib/sound";
+import { playChime, playFanfare } from "@/lib/sound";
 
 let started: number[] = [];
 let realAudioContext: unknown;
@@ -41,6 +41,13 @@ describe("chimes", () => {
   it("plays a four-note chime for a finished round", () => {
     playChime("win");
     expect(started.length).toBe(4);
+  });
+  it("plays a bigger fanfare than the win chime when the adventure finishes", () => {
+    playChime("win");
+    const winNotes = started.length;
+    started = [];
+    playFanfare();
+    expect(started.length).toBeGreaterThan(winNotes);
   });
   it("says nothing when the device has no audio", () => {
     globalThis.AudioContext = undefined as unknown as typeof AudioContext;
