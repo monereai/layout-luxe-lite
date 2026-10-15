@@ -32,6 +32,26 @@ export function playChime(kind: "select" | "win" = "select") {
   }
 }
 
+/** A quick bubbly pop for finding something. */
+export function playPop() {
+  try {
+    const ctx = openAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    const t = ctx.currentTime;
+    o.frequency.setValueAtTime(420, t);
+    o.frequency.exponentialRampToValueAtTime(1200, t + 0.08);
+    g.gain.setValueAtTime(0.25, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+    o.connect(g).connect(ctx.destination);
+    o.start(t);
+    o.stop(t + 0.2);
+  } catch {
+    /* audio unavailable */
+  }
+}
+
 /** A longer, brighter celebration for finishing this week's adventure. */
 export function playFanfare() {
   try {
