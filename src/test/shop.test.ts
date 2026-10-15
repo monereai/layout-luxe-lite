@@ -21,6 +21,13 @@ describe("points shop", () => {
     expect(new Set(costumes.map((c) => c.name)).size).toBe(12);
     expect(costumes.every((c) => c.cost > 0 && c.src.length > 0)).toBe(true);
   });
+  it("stocked with exactly 6 distinct footwear, each priced and imaged", () => {
+    const shoes = SHOP_ITEMS.filter((i) => i.category === "footwear");
+    expect(shoes).toHaveLength(6);
+    expect(new Set(shoes.map((s) => s.id)).size).toBe(6);
+    expect(new Set(shoes.map((s) => s.name)).size).toBe(6);
+    expect(shoes.every((s) => s.cost > 0 && s.src.length > 0)).toBe(true);
+  });
   it("buying the 200 pt Detective Hat deducts 200 and equips it", () => {
     const s = buy(empty, 250, "detective-hat");
     expect(s?.spent).toBe(200);
