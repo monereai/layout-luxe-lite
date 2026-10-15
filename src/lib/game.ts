@@ -1,14 +1,23 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 export const GAME_KEY = "monereai-game";
-export type GameState = { points: number; detective: boolean; best: Record<string, number> };
-const EMPTY: GameState = { points: 0, detective: false, best: {} };
+export type GameState = { points: number; detective: boolean; best: Record<string, number>; finds: Record<string, number> };
+const EMPTY: GameState = { points: 0, detective: false, best: {}, finds: {} };
 
 let current = EMPTY;
 
 export const MINI_COUNT = 10;
 export const POINTS_PER_MINI = 20;
 export const COMPLETION_BONUS = 100;
+
+/** A map unlocks after this many Mini-Moneres found in the previous map. */
+export const MAP_UNLOCK_FINDS = 5;
+
+/** The first map is always open; later maps need MAP_UNLOCK_FINDS finds in the map before them. */
+export function mapUnlocked(finds: Record<string, number>, prevSceneId?: string) {
+  if (!prevSceneId) return true;
+  return (finds[prevSceneId] ?? 0) >= MAP_UNLOCK_FINDS;
+}
 
 /** A hidden Mini-Monere: x/y are % of the picture, size is % of its width. */
 export type Spot = { x: number; y: number; size: number; rot: number };
@@ -30,9 +39,13 @@ function save() {
   listeners.forEach((l) => l());
 }
 
-/** +20 points for one Mini-Monere. */
-export function recordMini() {
-  current = { ...current, points: current.points + POINTS_PER_MINI };
+/** +20 points for one Mini-Monere; counts the find toward the scene it was found in. */
+export function recordMini(scene?: string) {
+  current = {
+    ...current,
+    points: current.points + POINTS_PER_MINI,
+    finds: scene ? { ...current.finds, [scene]: (current.finds[scene] ?? 0) + 1 } : current.finds,
+  };
   save();
   return POINTS_PER_MINI;
 }
@@ -58,6 +71,7 @@ export function recordFind(scene: string, seconds: number, usedHint: boolean) {
   current = {
     points: current.points + pts,
     detective: true,
+    finds: current.finds,
     best: { ...current.best, [scene]: prev === undefined ? seconds : Math.min(prev, seconds) },
   };
   try { localStorage.setItem(GAME_KEY, JSON.stringify(current)); } catch { /* ignore */ }
