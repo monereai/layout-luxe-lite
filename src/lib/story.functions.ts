@@ -85,8 +85,8 @@ export const tellStory = createServerFn({ method: "POST" })
         input,
         stream: true,
         store: false,
-        reasoning: { effort: "low", summary: "auto" },
-        include: ["reasoning.encrypted_content"],
+        reasoning: { effort: "low" },
+        max_output_tokens: 1200,
         text: { format: { type: "json_schema", name: "story_turn", strict: true, schema } },
       }),
     });
