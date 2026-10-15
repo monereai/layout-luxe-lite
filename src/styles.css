@@ -86,6 +86,7 @@
   --sidebar: var(--background); --sidebar-foreground: var(--foreground); --sidebar-primary: var(--primary); --sidebar-primary-foreground: var(--primary-foreground); --sidebar-accent: var(--secondary); --sidebar-accent-foreground: var(--foreground); --sidebar-border: var(--border); --sidebar-ring: var(--primary);
   --glow: none;
   --shadow-gold: 0 12px 32px -12px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-workspace: 0 16px 48px -20px color-mix(in oklab, var(--background) 85%, transparent);
 }
 
 @theme inline {
@@ -112,6 +113,12 @@
   background: var(--secondary); color: var(--foreground); font-weight: 600; font-size: 0.9rem;
 }
 @utility bg-glow { background-image: var(--glow); }
+@utility workspace-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-workspace);
+}
 @utility category-scroll {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in oklab, var(--primary) 45%, transparent) transparent;

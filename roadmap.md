@@ -1,4 +1,6 @@
 # MonereAI branding
+- [ ] Add a wide tablet/desktop workspace with collapsible navigation and quick actions, preserving the phone layout.
+- [ ] Verify navigation, sidebar collapse, and scrolling on phone, tablet, and desktop.
 - [x] Update shared header, emblem, tagline, and footer link.
 - [x] Update color tokens, page metadata, favicon, and advice/share branding.
 - [x] Verify branding on every app page.

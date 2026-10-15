@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Keep app-wide header, emblem, tagline, and footer in AppShell so every content page shares the same identity.
+- Keep breakpoint-based workspace navigation and companion actions in AppShell; content routes remain independent of device layout so phone and desktop share the same flows.
 - Keep the existing journal storage key stable through rebrands so previously saved reflections remain accessible.
 - Keep the reusable mentor portrait and welcome/loading/results states in MonereMentor; animate the CGI-style asset with reduced-motion support rather than duplicating character layouts.
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
