@@ -64,10 +64,10 @@ function ResetPasswordPage() {
         <input
           type="password"
           required
-          minLength={8}
+          minLength={6}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="New password (8+ characters)"
+          placeholder="New password (6+ characters)"
           aria-label="New password"
           autoComplete="new-password"
           className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary"

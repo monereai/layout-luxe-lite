@@ -81,7 +81,7 @@ function AuthPage() {
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" aria-label="Email" autoComplete="email"
             className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary" />
           {!forgot && (
-            <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (8+ characters)" aria-label="Password"
+            <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password (6+ characters)" aria-label="Password"
               autoComplete={mode === "up" ? "new-password" : "current-password"} className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary" />
           )}
           <Button type="submit" disabled={busy} className="btn-gold mt-2 h-auto py-3.5">{busy ? "Please wait…" : forgot ? "Send reset link" : mode === "up" ? "Create account" : "Sign in"}</Button>
