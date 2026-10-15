@@ -18,7 +18,13 @@ export const Route = createFileRoute("/api/story-image")({
         if (!scene) return new Response("A scene is required", { status: 400 });
         const apiKey = process.env["LOVABLE_API_KEY"];
         if (!apiKey) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
-        const upstream = await generateImage({ ...imageSettings, apiKey }, `${STYLE} ${scene}`, body.stream !== false);
+        const upstream = await generateImage(
+          { ...imageSettings, apiKey },
+          `${STYLE} ${scene}`,
+          body.stream !== false,
+          undefined,
+          { quality: "low", size: "1536x1024" },
+        );
         return new Response(upstream.body, {
           status: upstream.status,
           headers: {

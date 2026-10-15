@@ -66,12 +66,13 @@ function StoryMode() {
     const fallback = () =>
       runId.current === id &&
       setImages((m) => ({ ...m, [segment]: { src: fallbackArt(picked, segment), final: true, fallback: true } }));
-    setImages((m) => ({ ...m, [segment]: { src: null, final: false, fallback: false } }));
-    if (!scene) return fallback();
+    // Show the matching ready-made picture instantly, then swap in the painted scene once it's done.
+    fallback();
+    if (!scene) return;
     streamImage("/api/story-image", { scene }, (src, final) => {
-      if (runId.current !== id) return;
-      setImages((m) => ({ ...m, [segment]: { src, final, fallback: false } }));
-    }).catch(fallback);
+      if (runId.current !== id || !final) return;
+      setImages((m) => ({ ...m, [segment]: { src, final: true, fallback: false } }));
+    }).catch(() => {});
   }
 
   async function run(nextTurns: StoryTurn[], picked: StoryThemeId) {
