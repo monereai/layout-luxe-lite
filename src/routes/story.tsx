@@ -12,6 +12,7 @@ import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
 import { fallbackArt, raceSceneBackup } from "@/lib/story-art";
 import { streamImage } from "@/lib/stream-image";
+import { playChime } from "@/lib/sound";
 
 type SceneImg = { src: string | null; final: boolean; fallback: boolean };
 
