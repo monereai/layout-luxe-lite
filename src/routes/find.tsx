@@ -9,7 +9,7 @@ import {
   COMPLETION_BONUS, GRID_SIZE, MINI_COUNT, POINTS_PER_MINI,
   makeGrid, recordComplete, recordMini, useGame, type Tile,
 } from "@/lib/game";
-import monere from "@/assets/monere-wave.png";
+const monere = "/monere/monere-wave.webp";
 import { playChime } from "@/lib/sound";
 
 const SCENES = [
