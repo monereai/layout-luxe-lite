@@ -67,7 +67,12 @@ function AuthPage() {
       <h1 className="font-display text-2xl font-semibold">{forgot ? "Reset your password" : mode === "up" ? "Create your account" : "Welcome back"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{forgot ? "Enter your email and Monere will send you a link to choose a new password." : "Your account keeps Monere Plus and pass codes with you. Your journal still stays on this device."}</p>
       {resetSent ? (
-        <div className="surface-card mt-6 p-5 text-sm">Check your inbox — we've sent a link to set a new password. It may take a minute or two to arrive.</div>
+        <div className="mt-6 grid gap-3">
+          <div className="surface-card p-5 text-sm">Check your inbox — we've sent a link to set a new password. It may take a minute or two to arrive.</div>
+          <button type="button" onClick={() => { setForgot(false); setResetSent(false); }} className="mt-1 text-sm text-muted-foreground hover:text-primary">
+            Back to sign in
+          </button>
+        </div>
       ) : sent ? (
         <div className="surface-card mt-6 p-5 text-sm">Check your email to confirm your account, then come back and sign in.</div>
       ) : (
