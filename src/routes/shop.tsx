@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Award, Check, Footprints, Glasses, GraduationCap, Lock, Sparkles } from "lucide-react";
+import { Award, Check, Footprints, Gem, Glasses, GraduationCap, Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { MonereFigure } from "@/components/MonereFigure";
@@ -12,9 +12,9 @@ export const Route = createFileRoute("/shop")({
   head: () => ({
     meta: [
       { title: "Monere's Points Shop — MonereAI" },
-      { name: "description", content: "Spend Wisdom Points from Where's Monere? on hats, glasses and capes for Monere the lion." },
+      { name: "description", content: "Spend Wisdom Points from Where's Monere? on hats, glasses, capes and accessories for Monere the lion." },
       { property: "og:title", content: "Monere's Points Shop — MonereAI" },
-      { property: "og:description", content: "Unlock hats, glasses and capes for Monere with your Wisdom Points." },
+      { property: "og:description", content: "Unlock hats, glasses, capes and accessories for Monere with your Wisdom Points." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -27,6 +27,7 @@ const CATS: { id: ShopCategory; label: string; icon: typeof Award }[] = [
   { id: "glasses", label: "Glasses", icon: Glasses },
   { id: "costume", label: "Costumes", icon: Sparkles },
   { id: "footwear", label: "Footwear", icon: Footprints },
+  { id: "accessory", label: "Extras", icon: Gem },
 ];
 
 function ShopPage() {
@@ -59,7 +60,7 @@ function ShopPage() {
         </div>
 
         <Tabs defaultValue="hat">
-          <TabsList className="grid h-auto w-full grid-cols-4 gap-1 p-1">
+          <TabsList className="grid h-auto w-full grid-cols-5 gap-1 p-1">
             {CATS.map(({ id, label, icon: Icon }) => (
               <TabsTrigger key={id} value={id} className="min-h-11 gap-1 text-xs"><Icon className="h-4 w-4" />{label}</TabsTrigger>
             ))}
