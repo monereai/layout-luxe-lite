@@ -70,4 +70,4 @@
 # Points Shop sign picture
 - [x] Create a gold "Points Shop" signboard picture and use it in place of the shop title text.
 - [x] Show the sign in the side quick-actions panel instead of the "Points Shop" text link.
-- [ ] Make the sign banner larger on the shop page and in the side panel.
+- [x] Make the sign banner larger on the shop page and in the side panel.
