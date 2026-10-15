@@ -12,6 +12,7 @@ import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
 import { fallbackArt, raceSceneBackup } from "@/lib/story-art";
 import { streamImage } from "@/lib/stream-image";
+import { playChime } from "@/lib/sound";
 
 type SceneImg = { src: string | null; final: boolean; fallback: boolean };
 
@@ -115,6 +116,7 @@ function StoryMode() {
   }
 
   function start(id: StoryThemeId) {
+    playChime("select");
     runId.current += 1;
     setImages({});
     setBonus(null);
@@ -126,6 +128,7 @@ function StoryMode() {
 
   function choose(label: string) {
     if (!current || !theme) return;
+    playChime("select");
     const next = [...turns, { narration: current.narration, choice: label }];
     setTurns(next);
     setCurrent(null);
