@@ -18,7 +18,6 @@ import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
 import { MonereMentor } from "@/components/MonereMentor";
 import { Treehouse, TREEHOUSE_BACKDROP } from "@/components/Treehouse";
-import { JigsawGame } from "@/components/JigsawGame";
 import { SafetyCard } from "@/components/SafetyCard";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -182,7 +181,6 @@ function Home() {
             </p>
           )}
           <p className="mt-3 text-center text-xs text-muted-foreground">{t("disclaimer")}</p>
-          <JigsawGame />
         </>
       )}
       {!wisdom && !safety && !onboarding && <InstallBanner />}
