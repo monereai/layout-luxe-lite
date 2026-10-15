@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
 import { SHOP_ITEMS, buy, equip, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { signSrc, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -31,6 +32,7 @@ const CATS: { id: ShopCategory; label: string; icon: typeof Award }[] = [
 ];
 
 function ShopPage() {
+  const lang = useLang();
   const game = useGame();
   const shop = useShop();
   const wallet = walletBalance(game.points, shop);

@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
 import { usePlan } from "@/hooks/usePlan";
-import { useT, useLang, setLang, LANGS, type Lang } from "@/lib/i18n";
+import { useT, useLang, setLang, LANGS, signSrc, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { useShop, walletBalance } from "@/lib/shop";
