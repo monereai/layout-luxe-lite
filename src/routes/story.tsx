@@ -80,7 +80,7 @@ function StoryMode() {
         .then(() => resolve(last ?? backup))
         .catch(() => resolve(backup));
     });
-    const timeout = new Promise<string>((resolve) => setTimeout(() => resolve(backup), 30000));
+    const timeout = new Promise<string>((resolve) => setTimeout(() => resolve(backup), 10000));
     return Promise.race([painted, timeout]);
   }
 
