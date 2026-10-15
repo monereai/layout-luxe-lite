@@ -29,8 +29,8 @@ export function PaywallModal({ onClose, reason = "limit" }: { onClose: () => voi
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Subscribe or upgrade" className="fixed inset-0 z-50 flex items-end justify-center bg-background/85 backdrop-blur-sm sm:items-center">
-      <div className="surface-card payment-modal relative z-40 max-h-[90vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-b-none sm:rounded-3xl">
-        <div className="relative p-6 pb-12">
+      <div className="surface-card payment-modal relative z-40 max-h-[85vh] w-full max-w-md overflow-y-auto overscroll-contain rounded-b-none sm:rounded-3xl">
+        <div className="relative p-6 pb-16">
         <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close" className="absolute right-3 top-3 z-10 text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></Button>
         <img src={outfit.src} alt="Monere the lion holding his tablet" className="mentor-avatar mx-auto h-40 w-40 shrink-0 object-contain" />
         <h2 className="mt-2 text-center font-display text-xl font-semibold">
