@@ -71,6 +71,7 @@ export function recordFind(scene: string, seconds: number, usedHint: boolean) {
   current = {
     points: current.points + pts,
     detective: true,
+    finds: current.finds,
     best: { ...current.best, [scene]: prev === undefined ? seconds : Math.min(prev, seconds) },
   };
   try { localStorage.setItem(GAME_KEY, JSON.stringify(current)); } catch { /* ignore */ }
