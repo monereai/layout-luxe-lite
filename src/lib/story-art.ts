@@ -18,7 +18,7 @@ export const THEME_ART: Record<StoryThemeId, FallbackArtId[]> = {
   time: ["clock", "castle"],
 };
 
-export function fallbackArt(theme: StoryThemeId, segment: number): string {
-  const list = THEME_ART[theme];
-  return FALLBACK_ART[list[segment % list.length] ?? list[0] ?? "space"];
+/** Always the topic's own picture, so a Space story never shows a submarine. */
+export function fallbackArt(theme: StoryThemeId, _segment = 0): string {
+  return FALLBACK_ART[THEME_ART[theme][0] ?? "space"];
 }
