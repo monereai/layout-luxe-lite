@@ -1,7 +1,7 @@
-import wave from "@/assets/monere-wave.png";
-import think from "@/assets/monere-think.png";
-import thumbs from "@/assets/monere-thumbs.png";
-import listen from "@/assets/monere-listen.png";
+const wave = "/monere/monere-wave.webp";
+const think = "/monere/monere-think.webp";
+const thumbs = "/monere/monere-thumbs.webp";
+const listen = "/monere/monere-listen.webp";
 import { useOutfit } from "@/lib/outfit";
 import { equippedItems, useShop, type ShopItem } from "@/lib/shop";
 
