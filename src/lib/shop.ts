@@ -13,6 +13,16 @@ import sunglasses from "@/assets/shop/sunglasses.webp";
 import roundSpecs from "@/assets/shop/round-specs.webp";
 import heroCape from "@/assets/shop/hero-cape.webp";
 import royalCape from "@/assets/shop/royal-cape.webp";
+import stormCloak from "@/assets/shop/storm-cloak.webp";
+import crimsonCape from "@/assets/shop/crimson-cape.webp";
+import emeraldCloak from "@/assets/shop/emerald-cloak.webp";
+import galaxyCape from "@/assets/shop/galaxy-cape.webp";
+import flameCape from "@/assets/shop/flame-cape.webp";
+import arcticCloak from "@/assets/shop/arctic-cloak.webp";
+import shadowCloak from "@/assets/shop/shadow-cloak.webp";
+import knightCape from "@/assets/shop/knight-cape.webp";
+import phoenixWings from "@/assets/shop/phoenix-wings.webp";
+import angelWings from "@/assets/shop/angel-wings.webp";
 
 export const SHOP_KEY = "monereai-shop";
 export type ShopCategory = "hat" | "glasses" | "costume";
@@ -33,8 +43,18 @@ export const SHOP_ITEMS: ShopItem[] = [
   // Glasses
   { id: "sunglasses", name: "Sunglasses", category: "glasses", cost: 150, src: sunglasses },
   { id: "round-specs", name: "Scholar Specs", category: "glasses", cost: 250, src: roundSpecs },
-  // Costumes
+  // Costumes (12)
+  { id: "storm-cloak", name: "Storm Cloak", category: "costume", cost: 300, src: stormCloak },
+  { id: "crimson-cape", name: "Crimson Warrior Cape", category: "costume", cost: 350, src: crimsonCape },
+  { id: "emerald-cloak", name: "Emerald Forest Cloak", category: "costume", cost: 380, src: emeraldCloak },
+  { id: "galaxy-cape", name: "Galaxy Cape", category: "costume", cost: 420, src: galaxyCape },
+  { id: "flame-cape", name: "Flame Cape", category: "costume", cost: 450, src: flameCape },
   { id: "hero-cape", name: "Superhero Cape", category: "costume", cost: 500, src: heroCape },
+  { id: "arctic-cloak", name: "Arctic Winter Cloak", category: "costume", cost: 480, src: arcticCloak },
+  { id: "shadow-cloak", name: "Shadow Hood", category: "costume", cost: 520, src: shadowCloak },
+  { id: "knight-cape", name: "Knight's Banner Cape", category: "costume", cost: 560, src: knightCape },
+  { id: "phoenix-wings", name: "Phoenix Wings", category: "costume", cost: 620, src: phoenixWings },
+  { id: "angel-wings", name: "Angel Wings", category: "costume", cost: 700, src: angelWings },
   { id: "royal-cape", name: "Royal Cape", category: "costume", cost: 800, src: royalCape },
 ];
 
