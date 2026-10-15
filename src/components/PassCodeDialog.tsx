@@ -7,19 +7,19 @@ import { Button } from "@/components/ui/button";
 import { redeemPassCode } from "@/lib/passcode.functions";
 import { usePlan } from "@/hooks/usePlan";
 
-export function PassCodeLink({ className = "" }: { className?: string }) {
+export function PassCodeLink({ className = "", label }: { className?: string; label?: string | undefined }) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={`text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline ${className}`}>
-        Have a Church or School Pass Code? Enter it here.
+        {label ?? "Have a Church or School Pass Code? Enter it here."}
       </button>
       {open && <PassCodeDialog onClose={() => setOpen(false)} />}
     </>
   );
 }
 
-function PassCodeDialog({ onClose }: { onClose: () => void }) {
+export function PassCodeDialog({ onClose, message }: { onClose: () => void; message?: string | undefined }) {
   const { user, refresh } = usePlan();
   const redeem = useServerFn(redeemPassCode);
   const [code, setCode] = useState("");
@@ -46,6 +46,7 @@ function PassCodeDialog({ onClose }: { onClose: () => void }) {
         <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 text-muted-foreground hover:text-primary"><X className="h-5 w-5" /></button>
         <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary"><KeyRound className="h-5 w-5" /></span>
         <h2 className="mt-4 font-display text-xl font-semibold">Enter your Youth Group or School Pass Code</h2>
+        {message && <p className="mt-2 text-sm text-muted-foreground">{message}</p>}
         {!user ? (
           <>
             <p className="mt-2 text-sm text-muted-foreground">Sign in first so your pass stays with your account.</p>

@@ -20,7 +20,7 @@ import { MonereMentor } from "@/components/MonereMentor";
 import { SafetyCard } from "@/components/SafetyCard";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { PaywallModal } from "@/components/PaywallModal";
+import { PassCodeDialog } from "@/components/PassCodeDialog";
 import { usePlan } from "@/hooks/usePlan";
 import { useT, useLang } from "@/lib/i18n";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
@@ -64,7 +64,6 @@ function Home() {
   const [used, setUsed] = useState(0);
   useEffect(() => {
     setUsed(getUsedToday());
-    if (new URLSearchParams(window.location.search).get("upgrade") === "1") setPaywall("upgrade");
   }, []);
   const [onboarding, setOnboarding] = useState(false);
   useEffect(() => {
@@ -180,7 +179,7 @@ function Home() {
         </>
       )}
       {!wisdom && !safety && !onboarding && <InstallBanner />}
-      {paywall && <PaywallModal reason={paywall} onClose={() => setPaywall(null)} />}
+      {paywall && <PassCodeDialog message={paywall === "limit" ? "You've reached today's free limit. Enter your youth group or school access code to keep talking with Monere." : undefined} onClose={() => setPaywall(null)} />}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
       {onboarding && (
         <OnboardingModal

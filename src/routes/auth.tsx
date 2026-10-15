@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { PassCodeLink } from "@/components/PassCodeDialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlan } from "@/hooks/usePlan";
@@ -94,6 +95,7 @@ function AuthPage() {
           </button>
         </form>
       )}
+      <PassCodeLink className="mx-auto mt-6 block" />
     </AppShell>
   );
 }

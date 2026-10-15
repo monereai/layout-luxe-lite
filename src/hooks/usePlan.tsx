@@ -1,15 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { getStripeEnvironment } from "@/lib/stripe";
 
 type Plan = { user: User | null; premium: boolean; ready: boolean; refresh: () => Promise<boolean>; signOut: () => Promise<void> };
 
 const PlanCtx = createContext<Plan>({ user: null, premium: false, ready: false, refresh: async () => false, signOut: async () => {} });
 
-function env() {
-  try { return getStripeEnvironment(); } catch { return "live"; }
-}
 
 export function PlanProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -18,7 +14,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   const check = useCallback(async (u: User | null) => {
     if (!u) { setPremium(false); return false; }
-    const { data } = await supabase.rpc("is_premium", { check_env: env() });
+    const { data } = await supabase.rpc("is_premium", { check_env: "live" });
     const p = data === true;
     setPremium(p);
     window.localStorage.setItem("monereai-tier", p ? "premium" : "free");
