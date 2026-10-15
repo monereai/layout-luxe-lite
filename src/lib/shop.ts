@@ -1,6 +1,14 @@
 import { useEffect, useSyncExternalStore } from "react";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
+import amberSnapback from "@/assets/shop/amber-snapback.webp";
+import cozyBeanie from "@/assets/shop/cozy-beanie.webp";
+import explorerHat from "@/assets/shop/explorer-hat.webp";
+import cowboyHat from "@/assets/shop/cowboy-hat.webp";
+import scholarCap from "@/assets/shop/scholar-cap.webp";
+import wizardHat from "@/assets/shop/wizard-hat.webp";
+import topHat from "@/assets/shop/top-hat.webp";
+import halo from "@/assets/shop/halo.webp";
 import sunglasses from "@/assets/shop/sunglasses.webp";
 import roundSpecs from "@/assets/shop/round-specs.webp";
 import heroCape from "@/assets/shop/hero-cape.webp";
@@ -11,10 +19,21 @@ export type ShopCategory = "hat" | "glasses" | "costume";
 export type ShopItem = { id: string; name: string; category: ShopCategory; cost: number; src: string };
 
 export const SHOP_ITEMS: ShopItem[] = [
+  // Hats (10)
+  { id: "amber-snapback", name: "Amber Snapback", category: "hat", cost: 120, src: amberSnapback },
+  { id: "cozy-beanie", name: "Cozy Beanie", category: "hat", cost: 180, src: cozyBeanie },
   { id: "detective-hat", name: "Detective Hat", category: "hat", cost: 200, src: detectiveHat },
+  { id: "explorer-hat", name: "Explorer Hat", category: "hat", cost: 220, src: explorerHat },
+  { id: "cowboy-hat", name: "Cowboy Hat", category: "hat", cost: 260, src: cowboyHat },
+  { id: "scholar-cap", name: "Scholar Cap", category: "hat", cost: 300, src: scholarCap },
+  { id: "wizard-hat", name: "Wizard Hat", category: "hat", cost: 350, src: wizardHat },
+  { id: "top-hat", name: "Top Hat", category: "hat", cost: 400, src: topHat },
+  { id: "halo", name: "Golden Halo", category: "hat", cost: 500, src: halo },
   { id: "crown", name: "Golden Crown", category: "hat", cost: 600, src: crown },
+  // Glasses
   { id: "sunglasses", name: "Sunglasses", category: "glasses", cost: 150, src: sunglasses },
   { id: "round-specs", name: "Scholar Specs", category: "glasses", cost: 250, src: roundSpecs },
+  // Costumes
   { id: "hero-cape", name: "Superhero Cape", category: "costume", cost: 500, src: heroCape },
   { id: "royal-cape", name: "Royal Cape", category: "costume", cost: 800, src: royalCape },
 ];
