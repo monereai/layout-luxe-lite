@@ -21,18 +21,24 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       <img data-character-look={shown} data-character-frame={frame} src={activeImageSrc} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-      {extra.length > 0 && (
-        <div data-worn-badges className="pointer-events-none absolute bottom-1 right-1 z-10 flex flex-col gap-1">
-          {extra.map((item) => item && (
-            <span key={item.id} title={item.name} className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/50 bg-card/90 shadow-md">
-              <img src={item.src} alt={item.name} className="h-7 w-7 object-contain" draggable={false} />
-            </span>
-          ))}
-        </div>
-      )}
+      {[0, 1, 7].includes(frame) && extra.map((item) => item && (
+        <img key={item.id} data-worn-layer={item.category} src={item.src} alt="" aria-hidden="true" draggable={false}
+          style={{ ...WORN_POSITION[item.category], zIndex: WORN_Z[item.category] }}
+          className="pointer-events-none absolute object-contain drop-shadow-md" />
+      ))}
     </div>
   );
 }
+
+/** Where each worn item sits on the front-facing Monere picture (percent of the frame). */
+const WORN_POSITION: Record<string, React.CSSProperties> = {
+  hat: { left: "33%", top: "-2%", width: "30%", height: "16%" },
+  glasses: { left: "38%", top: "11.5%", width: "21%", height: "8%" },
+  accessory: { left: "40%", top: "27%", width: "16%", height: "12%" },
+  footwear: { left: "31%", top: "84%", width: "34%", height: "12%" },
+  costume: { left: "28%", top: "26%", width: "40%", height: "36%" },
+};
+const WORN_Z: Record<string, number> = { costume: 3, footwear: 4, accessory: 5, hat: 6, glasses: 7 };
 
 /** Round head-and-shoulders avatar for chat bubbles and the header. */
 export function MonereAvatar({ className = "h-9 w-9" }: { className?: string }) {
