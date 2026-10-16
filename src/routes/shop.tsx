@@ -8,7 +8,7 @@ import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
-import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
@@ -62,6 +62,13 @@ function ShopPage() {
     saveShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
   }
 
+  function buyCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
+    const next = buyCombination(shop, wallet, family);
+    if (!next) return;
+    saveShop(next);
+    toast.success(`${family.name} bought — Monere is wearing it!`);
+  }
+
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-3xl">
@@ -91,24 +98,24 @@ function ShopPage() {
             {COMBINATION_FAMILIES.map((family) => {
               const ids = [family.hat, family.outfit, family.footwear];
               const ready = ids.every((id) => shop.owned.includes(id));
+              const price = combinationPrice(shop, family);
+              const canBuy = !ready && wallet >= price;
               const on = shop.equipped.hat === family.hat && shop.equipped.outfit === family.outfit && shop.equipped.footwear === family.footwear;
               return <div key={family.id} className="flex flex-col rounded-lg border border-border bg-card p-3">
                 <img src={`/monere/looks/combo-${family.id}/0.webp`} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" onError={(e) => { const fallback = SHOP_ITEMS.find((item) => item.id === family.outfit)?.src; if (fallback && e.currentTarget.src !== fallback) e.currentTarget.src = fallback; }} />
                 <h3 className="text-sm font-semibold">{family.name}</h3>
                 <p className="text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
                 <p className="mb-3 text-xs font-semibold text-primary">
-                  {ready
-                    ? "Free — items owned"
-                    : `${ids.reduce((sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0), 0)} pts to own`}
+                  {ready ? "Free — items owned" : `${price} pts`}
                 </p>
                 <Button
                   className="mt-auto"
                   size="sm"
                   variant={on ? "secondary" : "outline"}
-                  disabled={!ready || on}
-                  onClick={() => wearCombo(family)}
+                  disabled={on || (!ready && !canBuy)}
+                  onClick={() => (ready ? wearCombo(family) : buyCombo(family))}
                 >
-                  {on ? <><Check /> Equipped</> : !ready ? <><Lock /> Unlock items</> : "Wear together"}
+                  {on ? <><Check /> Equipped</> : ready ? "Wear together" : canBuy ? `Buy Now · ${price} pts` : <><Lock /> Buy Now · {price} pts</>}
                 </Button>
               </div>;
             })}

@@ -130,6 +130,22 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   return equip(purchased, item.category, itemId);
 }
 
+/** Points still needed to own every piece of a combination; 0 once all are owned. */
+export function combinationPrice(state: ShopState, family: { hat: string; outfit: string; footwear: string }) {
+  return [family.hat, family.outfit, family.footwear]
+    .filter((id) => !state.owned.includes(id))
+    .reduce((sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0), 0);
+}
+
+/** Buys the combination pieces the player does not own yet, then wears all three. Null when already owned or unaffordable. */
+export function buyCombination(state: ShopState, wallet: number, family: { hat: string; outfit: string; footwear: string }): ShopState | null {
+  const price = combinationPrice(state, family);
+  if (!price || wallet < price) return null;
+  const missing = [family.hat, family.outfit, family.footwear].filter((id) => !state.owned.includes(id));
+  const purchased: ShopState = { ...state, spent: state.spent + price, owned: [...state.owned, ...missing] };
+  return equip(equip(equip(purchased, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear);
+}
+
 /** Every selection is wearable: equipping keeps all other slots; null removes just that slot. */
 export function equip(state: ShopState, category: ShopCategory, itemId: string | null): ShopState {
   const item = SHOP_ITEMS.find((item) => item.id === itemId);
