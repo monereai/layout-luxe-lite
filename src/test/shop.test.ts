@@ -4,10 +4,11 @@ import { SHOP_ITEMS, buy, equip, equippedItems, normalizeEquipment, walletBalanc
 const empty = { spent: 0, owned: [], equipped: {} };
 
 describe("points shop", () => {
-  it("replaces the hat rather than stacking two hats", () => {
+  it("equipping one item replaces the entire previous look", () => {
     const state = { spent: 0, owned: ["crown", "detective-hat", "sunglasses"], equipped: { hat: "crown", glasses: "sunglasses" } };
     const next = equip(state, "hat", "detective-hat");
-    expect(next.equipped).toEqual({ hat: "detective-hat", glasses: "sunglasses" });
+    expect(next.equipped).toEqual({ hat: "detective-hat" });
+    expect(next.owned).toEqual(state.owned);
     expect(equippedItems(next).filter((item) => item.category === "hat").map((item) => item.id)).toEqual(["detective-hat"]);
   });
   it("rejects a glasses item placed in the hat slot", () => {
@@ -19,9 +20,9 @@ describe("points shop", () => {
     expect(normalizeEquipment(state).equipped).toEqual({ outfit: "hero-cape" });
     expect(equip(state, "costume", "royal-cape").equipped).toEqual({ outfit: "royal-cape" });
   });
-  it("removes an equipped hat without altering other slots", () => {
+  it("removing an equipped item restores the default look", () => {
     const state = { ...empty, owned: ["crown", "bow-tie"], equipped: { hat: "crown", accessory: "bow-tie" } };
-    expect(equip(state, "hat", null).equipped).toEqual({ accessory: "bow-tie" });
+    expect(equip(state, "hat", null).equipped).toEqual({});
   });
   it("wallet is game points minus spent", () => {
     expect(walletBalance(700, { ...empty, spent: 200 })).toBe(500);
@@ -67,7 +68,8 @@ describe("points shop", () => {
     expect(buy(empty, 199, "detective-hat")).toBeNull();
   });
   it("cannot buy the same item twice", () => {
-    const s = buy(empty, 1000, "sunglasses")!;
+    const s = buy(empty, 1000, "sunglasses");
+    if (!s) throw new Error("Expected successful purchase");
     expect(buy(s, 1000, "sunglasses")).toBeNull();
   });
   it("cannot equip an unowned item", () => {
