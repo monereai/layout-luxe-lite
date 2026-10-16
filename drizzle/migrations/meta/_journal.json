@@ -22,6 +22,13 @@
       "when": 1792144052304,
       "tag": "0002_paypal_point_credits",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792174323451,
+      "tag": "0003_user_properties",
+      "breakpoints": true
     }
   ]
 }
