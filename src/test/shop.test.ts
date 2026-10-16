@@ -31,31 +31,31 @@ describe("points shop", () => {
   it("wallet is game points minus spent", () => {
     expect(walletBalance(700, { ...empty, spent: 200 })).toBe(500);
   });
-  it("stocked with exactly 10 distinct hats, each priced and imaged", () => {
+  it("stocked with exactly 12 distinct hats, each priced and imaged", () => {
     const hats = SHOP_ITEMS.filter((i) => i.category === "hat");
-    expect(hats).toHaveLength(10);
-    expect(new Set(hats.map((h) => h.id)).size).toBe(10);
-    expect(new Set(hats.map((h) => h.name)).size).toBe(10);
+    expect(hats).toHaveLength(12);
+    expect(new Set(hats.map((h) => h.id)).size).toBe(12);
+    expect(new Set(hats.map((h) => h.name)).size).toBe(12);
     expect(hats.every((h) => h.cost > 0 && h.src.length > 0)).toBe(true);
   });
-  it("stocked with exactly 12 distinct costumes, each priced and imaged", () => {
+  it("stocked with exactly 14 distinct costumes, each priced and imaged", () => {
     const costumes = SHOP_ITEMS.filter((i) => i.category === "costume");
-    expect(costumes).toHaveLength(12);
-    expect(new Set(costumes.map((c) => c.id)).size).toBe(12);
-    expect(new Set(costumes.map((c) => c.name)).size).toBe(12);
+    expect(costumes).toHaveLength(14);
+    expect(new Set(costumes.map((c) => c.id)).size).toBe(14);
+    expect(new Set(costumes.map((c) => c.name)).size).toBe(14);
     expect(costumes.every((c) => c.cost > 0 && c.src.length > 0)).toBe(true);
   });
-  it("stocked with exactly 6 distinct footwear, each priced and imaged", () => {
+  it("stocked with exactly 8 distinct footwear, each priced and imaged", () => {
     const shoes = SHOP_ITEMS.filter((i) => i.category === "footwear");
-    expect(shoes).toHaveLength(6);
-    expect(new Set(shoes.map((s) => s.id)).size).toBe(6);
-    expect(new Set(shoes.map((s) => s.name)).size).toBe(6);
+    expect(shoes).toHaveLength(8);
+    expect(new Set(shoes.map((s) => s.id)).size).toBe(8);
+    expect(new Set(shoes.map((s) => s.name)).size).toBe(8);
     expect(shoes.every((s) => s.cost > 0 && s.src.length > 0)).toBe(true);
   });
-  it("stocked with exactly 6 distinct accessories, each priced and imaged", () => {
+  it("stocked with exactly 7 distinct accessories, each priced and imaged", () => {
     const acc = SHOP_ITEMS.filter((i) => i.category === "accessory");
-    expect(acc).toHaveLength(6);
-    expect(new Set(acc.map((a) => a.id)).size).toBe(6);
+    expect(acc).toHaveLength(7);
+    expect(new Set(acc.map((a) => a.id)).size).toBe(7);
     expect(acc.every((a) => a.cost > 0 && a.src.length > 0)).toBe(true);
   });
   it("buying the 130 pt Red Bow Tie equips it as an accessory", () => {
@@ -80,7 +80,7 @@ describe("points shop", () => {
     expect(equip(empty, "costume", "hero-cape").equipped.costume).toBeUndefined();
   });
   it("every clothing combination is free to wear once its items are owned", () => {
-    expect(COMBINATION_FAMILIES).toHaveLength(4);
+    expect(COMBINATION_FAMILIES).toHaveLength(8);
     const state = { ...empty, owned: ["crown", "hero-cape", "crisp-sneakers"] };
     const worn = equip(equip(equip(state, "hat", "crown"), "costume", "hero-cape"), "footwear", "crisp-sneakers");
     expect(worn.spent).toBe(0);

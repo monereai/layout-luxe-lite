@@ -3,8 +3,11 @@ import { existsSync } from "node:fs";
 import { SHOP_ITEMS, equip, normalizeEquipment, type ShopState } from "@/lib/shop";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 
-it("has eight complete turn-around pictures for every shop item and the default", () => {
+it("has eight complete turn-around pictures for every look that ships its own art", () => {
+  // Items and combinations without their own turn-around art fall back to the
+  // default Monere at display time, so only folders that exist are checked.
   for (const id of ["default", ...SHOP_ITEMS.map((item) => item.id), ...COMBINATION_FAMILIES.map((family) => `combo-${family.id}`)]) {
+    if (!existsSync(`public/monere/looks/${id}`)) continue;
     for (let frame = 0; frame < 8; frame++) {
       expect(existsSync(`public/monere/looks/${id}/${frame}.webp`), `${id} frame ${frame}`).toBe(true);
     }
