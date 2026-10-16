@@ -16,7 +16,7 @@ export function hasCombinationArt(id: string) { return COMBINATION_ART_IDS.inclu
 type Selection = Partial<Record<"hat" | "outfit" | "footwear" | "glasses" | "accessory", string>>;
 
 /** Single-item looks that have their own turnaround pictures in public/monere/looks. */
-export const LOOKS_WITH_ART = new Set<string>(["amber-snapback" "angel-wings" "arctic-cloak" "bandana" "bow-tie" "cowboy-hat" "cozy-beanie" "cozy-scarf" "crimson-cape" "crisp-sneakers" "crown" "default" "detective-hat" "emerald-cloak" "explorer-hat" "flame-cape" "friendship-beads" "galaxy-cape" "gold-chain" "gold-medal" "golden-sliders" "halo" "hero-cape" "knight-boots" "knight-cape" "phoenix-wings" "round-specs" "royal-cape" "scholar-cap" "shadow-cloak" "skate-classics" "soccer-cleats" "storm-cloak" "sunglasses" "top-hat" "trail-boots" "wizard-hat"]);
+export const LOOKS_WITH_ART = new Set<string>(["amber-snapback", "angel-wings", "arctic-cloak", "bandana", "bow-tie", "cowboy-hat", "cozy-beanie", "cozy-scarf", "crimson-cape", "crisp-sneakers", "crown", "default", "detective-hat", "emerald-cloak", "explorer-hat", "flame-cape", "friendship-beads", "galaxy-cape", "gold-chain", "gold-medal", "golden-sliders", "halo", "hero-cape", "knight-boots", "knight-cape", "phoenix-wings", "round-specs", "royal-cape", "scholar-cap", "shadow-cloak", "skate-classics", "soccer-cleats", "storm-cloak", "sunglasses", "top-hat", "trail-boots", "wizard-hat"]);
 
 /**
  * Every selection is wearable. Returns the exact combination picture when one
