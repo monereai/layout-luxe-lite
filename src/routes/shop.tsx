@@ -10,6 +10,8 @@ import { useGame } from "@/lib/game";
 import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
+import { MonereStore } from "@/components/MonereStore";
+import { usePlan } from "@/hooks/usePlan";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -37,10 +39,12 @@ function ShopPage() {
   const lang = useLang();
   const game = useGame();
   const shop = useShop();
-  const wallet = walletBalance(game.points, shop);
+  const { bonusPoints } = usePlan();
+  const earned = game.points + bonusPoints;
+  const wallet = walletBalance(earned, shop);
 
   function purchase(id: string) {
-    const next = buy(shop, game.points, id);
+    const next = buy(shop, earned, id);
     if (!next) return;
     saveShop(next);
     const item = SHOP_ITEMS.find((i) => i.id === id);
@@ -78,6 +82,7 @@ function ShopPage() {
           </div>
         </div>
 
+        <MonereStore />
         <section className="mb-5">
           <h2 className="mb-3 font-display text-xl font-semibold">Clothing combinations</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

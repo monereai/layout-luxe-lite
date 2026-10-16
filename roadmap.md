@@ -81,6 +81,8 @@
 - [x] Make the sign banner larger on the shop page and in the side panel.
 
 - [ ] PayPal: MonereAI Club £4.99/mo subscription (1,000 pts/month + monthly outfit), server-verified (blocked: PayPal client ID + plan ID)
-- [ ] PayPal: Point Packs — Pocket 250/£1.99, Popular 600/£3.99, Mega 1,500/£7.99; server-verified capture (blocked: PayPal credentials)
-- [ ] Payment containers marked data-no-one-link, click hijack guard
+- [x] PayPal: Point Packs — Pocket 250/£1.99, Popular 600/£3.99, Mega 1,500/£7.99; server-verified capture (blocked: PayPal credentials)
+- [x] Payment containers marked data-no-one-link, click hijack guard
 - [ ] Two-tier membership screen: Plus £2.99/mo|£24.99/yr (250 pts/mo, unlimited Story) + Club £4.99/mo|£44.99/yr (1,000 pts/mo, exclusive outfits, BEST VALUE); status plus|club (blocked: PayPal plan IDs)
+- [ ] Club exclusive subscriber-only outfits (needs outfit designs)
+- [ ] Paste 4 PayPal plan IDs into src/lib/paypal-config.ts (blocked: user)
