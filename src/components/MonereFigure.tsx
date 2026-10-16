@@ -30,12 +30,12 @@ function Layer({ item, kind }: { item: ShopItem; kind: "pose" | "full" }) {
   const adj = item.category === "accessory" ? ACC[item.id] : undefined;
   const p = adj ? { ...base, w: base.w * adj.scale } : base;
   const ty = item.category === "hat" ? "-100%" : item.category === "glasses" ? "-50%" : item.category === "footwear" ? "-100%" : adj ? adj.ty : "0";
+  const x = p.x - p.w / 2;
+  const y = p.y + p.w * parseFloat(ty) / 100;
   return (
-    <div data-equipped-item={item.id} className={`pointer-events-none absolute inset-0 h-full w-full ${item.category === "costume" ? "z-10" : "z-20"}`}>
-      <div className="absolute aspect-square" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, transform: `translate(-50%, ${ty})` }}>
-        <img src={item.src} alt="" aria-hidden="true" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-      </div>
-    </div>
+    <svg data-equipped-item={item.id} aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" className={`pointer-events-none absolute inset-0 h-full w-full overflow-visible ${item.category === "costume" ? "z-10" : "z-20"}`}>
+      <image href={item.src} x={x} y={y} width={p.w} height={p.w} preserveAspectRatio="xMidYMid meet" className="pointer-events-none" />
+    </svg>
   );
 }
 

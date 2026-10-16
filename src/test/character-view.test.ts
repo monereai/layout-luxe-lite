@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { clampCharacterZoom, INITIAL_CHARACTER_VIEW, characterFrame, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
+import { clampCharacterZoom, INITIAL_CHARACTER_VIEW, characterFrame, characterFrameTilt, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
 
 describe("Monere view controls", () => {
+  it("shares the between-frame turn without flattening at quarter or half turns", () => {
+    expect(characterFrameTilt(15)).toBe(15);
+    expect(characterFrameTilt(60)).toBe(15);
+    expect(characterFrameTilt(90)).toBe(0);
+    expect(characterFrameTilt(180)).toBe(0);
+    expect(characterFrameTilt(-15)).toBe(-15);
+  });
   it("clamps zoom to the requested 0.7x minimum", () => {
     expect(clampCharacterZoom(0.1)).toBe(0.7);
   });

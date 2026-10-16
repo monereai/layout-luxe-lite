@@ -27,3 +27,9 @@ export function characterFrame(rotation: number) {
   const degrees = ((rotation % 360) + 360) % 360;
   return Math.round(degrees / 45) % 8;
 }
+
+// Sprites carry the full turn; the shared wrapper carries the angle between
+// sprites, so the complete dressed figure moves without ever becoming edge-on.
+export function characterFrameTilt(rotation: number) {
+  return ((rotation + 22.5) % 45 + 45) % 45 - 22.5;
+}
