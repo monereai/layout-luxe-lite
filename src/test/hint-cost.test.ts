@@ -14,10 +14,10 @@ describe("Monere's Hint cost", () => {
   });
 
   it("each clue spend deducts 20 points from the wallet", () => {
-    expect(useGameSnapshot().hintsSpent ?? 0).toBe(0);
+    expect(gameStateSnapshot().hintsSpent ?? 0).toBe(0);
     recordHintSpend();
     recordHintSpend();
-    const state = useGameSnapshot();
+    const state = gameStateSnapshot();
     expect(state.hintsSpent).toBe(40);
     expect(walletBalance(100, EMPTY_SHOP, state.hintsSpent)).toBe(60);
   });
