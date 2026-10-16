@@ -1,5 +1,4 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
 import amberSnapback from "@/assets/shop/amber-snapback.webp";
@@ -152,6 +151,11 @@ function load() {
     }
   } catch { /* ignore */ }
 }
+
+// Load saved purchases before the first render so a fast click can never
+// overwrite them with the empty starting state (which would re-charge items).
+if (typeof window !== "undefined") load();
+
 
 export function useShop() {
   const s = useSyncExternalStore((cb) => { listeners.add(cb); return () => listeners.delete(cb); }, () => current, () => EMPTY);
