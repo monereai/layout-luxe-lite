@@ -13,7 +13,7 @@ const GESTURES: Record<Gesture, string> = { wave, think, thumbs, listen };
 const PLACE = {
   pose: { hat: { x: 51, y: 13, w: 30 }, glasses: { x: 51, y: 20.5, w: 22 }, costume: { x: 50, y: 30, w: 74 }, footwear: { x: 51, y: 92, w: 26 }, accessory: { x: 51, y: 38, w: 30 } },
   full: { hat: { x: 51, y: 12, w: 21 }, glasses: { x: 51, y: 14.5, w: 16 }, costume: { x: 51, y: 20, w: 66 }, footwear: { x: 51, y: 94, w: 22 }, accessory: { x: 51, y: 30, w: 24 } },
-  bare: { hat: { x: 51, y: 16, w: 30 }, glasses: { x: 51, y: 23, w: 22 }, costume: { x: 50, y: 37, w: 70 }, footwear: { x: 51, y: 92, w: 26 }, accessory: { x: 51, y: 43, w: 30 } },
+  bare: { hat: { x: 51, y: 25, w: 26 }, glasses: { x: 51, y: 23, w: 22 }, costume: { x: 50, y: 37, w: 70 }, footwear: { x: 51, y: 92, w: 26 }, accessory: { x: 51, y: 43, w: 30 } },
 } as const;
 
 /** Per-accessory size (relative to the slot width) and vertical anchor, since the pieces differ in shape. */
