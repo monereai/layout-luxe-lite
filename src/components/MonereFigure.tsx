@@ -45,6 +45,11 @@ const WORN_POSITION: Record<string, CSSProperties> = {
   footwear: { left: "26%", top: "80%", width: "46%", height: "18%" },
   costume: { left: "28%", top: "26%", width: "40%", height: "36%" },
 };
+/** One shoe drawn over each foot. */
+const FEET: CSSProperties[] = [
+  { left: "29%", top: "82%", width: "22%", height: "16%" },
+  { left: "47%", top: "82%", width: "22%", height: "16%" },
+];
 const WORN_Z: Record<string, number> = { costume: 3, footwear: 4, accessory: 5, hat: 6, glasses: 7 };
 
 /** Round head-and-shoulders avatar for chat bubbles and the header. */
