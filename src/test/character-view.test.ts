@@ -4,10 +4,10 @@ import { clampCharacterZoom, INITIAL_CHARACTER_VIEW, characterFrame, rotateChara
 describe("Monere view controls", () => {
   it("maps every drag angle onto one of the eight centered sprites", () => {
     expect(characterFrame(15)).toBe(0);
-    expect(characterFrame(60)).toBe(2);
+    expect(characterFrame(60)).toBe(1);
     expect(characterFrame(90)).toBe(2);
     expect(characterFrame(180)).toBe(4);
-    expect(characterFrame(-15)).toBe(7);
+    expect(characterFrame(-15)).toBe(0);
   });
   it("clamps zoom to the requested 0.7x minimum", () => {
     expect(clampCharacterZoom(0.1)).toBe(0.7);
