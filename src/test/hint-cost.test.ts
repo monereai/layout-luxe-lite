@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { HINT_COST, POINTS_PER_MINI, recordHintSpend, useGameSnapshot } from "@/lib/game";
+import { HINT_COST, POINTS_PER_MINI, gameStateSnapshot, recordHintSpend } from "@/lib/game";
 import { walletBalance } from "@/lib/shop";
 import type { ShopState } from "@/lib/shop";
 

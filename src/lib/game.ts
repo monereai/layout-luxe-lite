@@ -79,6 +79,11 @@ export function recordHintSpend() {
   save();
   return HINT_COST;
 }
+
+/** Read-only snapshot of the current game state. */
+export function gameStateSnapshot(): GameState {
+  return current;
+}
 let loaded = false;
 const listeners = new Set<() => void>();
 
