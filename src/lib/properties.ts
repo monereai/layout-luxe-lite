@@ -5,9 +5,9 @@ export type Property = { id: string; name: string; cost: number; src: string | n
 
 export const PROPERTIES: Property[] = [
   { id: "treehouse", name: "Treehouse", cost: 0, src: null },
-  { id: "beach-bungalow", name: "Beach Bungalow", cost: 300, src: "/properties/beach-bungalow.jpg" },
-  { id: "cozy-bedroom", name: "Cozy Bedroom", cost: 400, src: "/properties/cozy-bedroom.jpg" },
-  { id: "space-station", name: "Space Station", cost: 600, src: "/properties/space-station.jpg" },
+  { id: "beach-bungalow", name: "Beach Bungalow", cost: 450, src: "/properties/beach-bungalow.jpg" },
+  { id: "cozy-bedroom", name: "Cozy Bedroom", cost: 600, src: "/properties/cozy-bedroom.jpg" },
+  { id: "space-station", name: "Space Station", cost: 900, src: "/properties/space-station.jpg" },
 ];
 
 export type PropertyState = { unlockedProperties: string[]; activeProperty: string; spent: number };
