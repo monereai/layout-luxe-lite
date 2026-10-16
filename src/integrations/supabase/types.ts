@@ -157,6 +157,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_properties: {
+        Row: {
+          active_property: string
+          unlocked_properties: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_property?: string
+          unlocked_properties?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_property?: string
+          unlocked_properties?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
