@@ -37,7 +37,7 @@ function Journal() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
         <div className="absolute bottom-0 left-0 p-5">
-          <h1 className="font-display text-4xl">Reflection Journal</h1>
+          <h1 className="font-display text-4xl">{name ? `${name}'s Reflection Journal` : "Reflection Journal"}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Saved privately on this device only.</p>
         </div>
       </div>
