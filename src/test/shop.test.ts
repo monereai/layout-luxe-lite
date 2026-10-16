@@ -107,6 +107,14 @@ describe("points shop", () => {
   it("Buy Now refuses when the wallet cannot cover the missing pieces", () => {
     expect(buyCombination(empty, 639, { hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" })).toBeNull();
   });
+  it("an active combination purchase still requires the full 1240 points", () => {
+    const combo = { hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" };
+    expect(buyCombination(empty, 1239, combo)).toBeNull();
+    const purchased = buyCombination(empty, 1240, combo);
+    expect(purchased?.spent).toBe(1240);
+    expect(purchased?.equipped).toEqual({ hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" });
+    expect(empty).toEqual({ spent: 0, owned: [], equipped: {} });
+  });
   it("a fully owned combination is free, so Buy Now never charges again", () => {
     const combo = { hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" };
     const owned = { ...empty, owned: ["crown", "hero-cape", "crisp-sneakers"] };
