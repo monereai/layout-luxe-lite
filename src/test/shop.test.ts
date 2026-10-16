@@ -79,4 +79,19 @@ describe("points shop", () => {
   it("cannot equip an unowned item", () => {
     expect(equip(empty, "costume", "hero-cape").equipped.costume).toBeUndefined();
   });
+  it("each clothing combination costs 150 points to wear", () => {
+    expect(COMBINATION_FAMILIES).toHaveLength(4);
+    for (const f of COMBINATION_FAMILIES) expect(f.cost).toBe(150);
+  });
+  it("wearing a combination charges its 150 points once and remembers it", () => {
+    const unlocked = unlockCombo({ ...empty, owned: ["crown", "hero-cape", "crisp-sneakers"] }, 150, "crown-hero-sneakers");
+    expect(unlocked?.spent).toBe(150);
+    expect(unlocked?.comboUnlocked).toEqual(["crown-hero-sneakers"]);
+    if (!unlocked) throw new Error("Expected successful unlock");
+    expect(unlockCombo(unlocked, 1000, "crown-hero-sneakers")).toBeNull();
+    expect(walletBalance(150, unlocked)).toBe(0);
+  });
+  it("cannot wear a combination without enough points", () => {
+    expect(unlockCombo(empty, 149, "crown-hero-sneakers")).toBeNull();
+  });
 });
