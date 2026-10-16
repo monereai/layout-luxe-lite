@@ -10,8 +10,10 @@ export function combinationLook(equipped: Selection): string | null {
   const ids = Object.values(equipped).filter((id): id is string => typeof id === "string");
   if (!ids.length) return "default";
   if (ids.length === 1) return ids[0] ?? "default";
-  const family = COMBINATION_FAMILIES.find((f) => ids.every((id) => [f.hat, f.outfit, f.footwear].some((value) => value === id)));
-  if (!family) return null;
-  const slots = (["hat", "outfit", "footwear"] as const).filter((slot) => equipped[slot]);
-  return `combo-${family.id}${slots.length === 3 ? "" : `-${slots.join("-")}`}`;
+  if (ids.length === 2) {
+    const family = COMBINATION_FAMILIES.find((f) => ids.every((id) => [f.hat, f.outfit, f.footwear].some((value) => value === id)));
+    return family ? ids[ids.length - 1] ?? null : null;
+  }
+  const family = COMBINATION_FAMILIES.find((f) => ids.length === 3 && equipped.hat === f.hat && equipped.outfit === f.outfit && equipped.footwear === f.footwear);
+  return family ? `combo-${family.id}` : null;
 }
