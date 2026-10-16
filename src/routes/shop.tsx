@@ -7,7 +7,7 @@ import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
-import { SHOP_ITEMS, buy, equip, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/shop")({
@@ -61,7 +61,7 @@ function ShopPage() {
         <div className="mb-5 flex justify-center rounded-lg border border-border bg-card/60 py-3">
           <div className="h-80 w-80 max-w-full">
             <MonereCharacterView>
-              <MonereFigure gesture="thumbs" alt="Monere wearing your equipped items" className="h-full w-full" />
+              <MonereFigure bareBase alt="Monere wearing your equipped items" className="h-full w-full" />
             </MonereCharacterView>
           </div>
         </div>
@@ -77,7 +77,7 @@ function ShopPage() {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {SHOP_ITEMS.filter((i) => i.category === id).map((item) => {
                   const owned = shop.owned.includes(item.id);
-                  const on = shop.equipped[item.category] === item.id;
+                  const on = shop.equipped[equipmentSlot(item.category)] === item.id;
                   const afford = wallet >= item.cost;
                   return (
                     <div key={item.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>

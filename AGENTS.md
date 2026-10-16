@@ -20,3 +20,5 @@
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
 - Shop accessories are transparent overlay layers drawn by MonereFigure (placement per art type); wallet = game points minus shop spend, both in local storage. Why: accessories work on every outfit without regenerating combo art.
 - Keep home and Points Shop rotation/zoom on one MonereCharacterView parent, combining sprite turns with bounded between-frame rotateY; render persistent equipment as avatar-sized SVG overlays in MonereFigure. Why: base and clothing share alignment and transforms without edge-on flattening or clearing equipment.
+
+- Use clean bare turn frames in the shop; normalize equipment to one item per slot and migrate legacy costume into outfit. Why: existing purchases survive without duplicate or pre-drawn hats.
