@@ -95,7 +95,12 @@ function ShopPage() {
               return <div key={family.id} className="flex flex-col rounded-lg border border-border bg-card p-3">
                 <img src={`/monere/looks/combo-${family.id}/0.webp`} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" onError={(e) => { const fallback = SHOP_ITEMS.find((item) => item.id === family.outfit)?.src; if (fallback && e.currentTarget.src !== fallback) e.currentTarget.src = fallback; }} />
                 <h3 className="text-sm font-semibold">{family.name}</h3>
-                <p className="mb-3 text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
+                <p className="text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
+                <p className="mb-3 text-xs font-semibold text-primary">
+                  {ready
+                    ? "Free — items owned"
+                    : `${ids.reduce((sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0), 0)} pts to own`}
+                </p>
                 <Button
                   className="mt-auto"
                   size="sm"
