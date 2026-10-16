@@ -53,6 +53,8 @@
 - [ ] Sync points and purchases to the account so they follow a user between devices.
 
 # Costume library
+- [ ] Add complete clothing combination pictures and preserve selections by category, turn-around, zoom, purchases and points.
+- [ ] Verify combination selection and persistence in the shop and home.
 - [x] Create complete character variants for every inventory item, with matching turn-around views and no accessory overlays.
 - [x] Equip one complete look at a time, preserving purchases and the existing viewer; test swapping, zoom, spin, and persistence.
 - [x] Expand the costume library to 12 costumes with fresh artwork and tiered prices.
