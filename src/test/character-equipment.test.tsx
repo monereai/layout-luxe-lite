@@ -10,11 +10,11 @@ it("has eight complete turn-around pictures for every shop item and the default"
   }
 });
 
-it("migrates combined legacy equipment to one look without losing purchases or spend", () => {
+it("keeps combined legacy equipment without losing purchases or spend", () => {
   const legacy: ShopState = { spent: 800, owned: ["crown", "hero-cape", "sunglasses"], equipped: { hat: "crown", costume: "hero-cape", glasses: "sunglasses" } };
   const migrated = normalizeEquipment(legacy);
-  expect(migrated.equipped).toEqual({ glasses: "sunglasses" });
+  expect(migrated.equipped).toEqual({ hat: "crown", outfit: "hero-cape", glasses: "sunglasses" });
   expect(migrated.owned).toEqual(legacy.owned);
   expect(migrated.spent).toBe(800);
-  expect(equip(migrated, "costume", "hero-cape").equipped).toEqual({ outfit: "hero-cape" });
+  expect(equip(migrated, "costume", null).equipped).toEqual({ hat: "crown", glasses: "sunglasses" });
 });
