@@ -117,8 +117,8 @@ export function normalizeEquipment(state: ShopState): ShopState {
 const EMPTY: ShopState = { spent: 0, owned: [], equipped: {} };
 
 /** Wallet balance = points earned in "Where's Monere?" minus points spent in the shop. */
-export function walletBalance(earned: number, state: ShopState) {
-  return Math.max(0, earned - state.spent);
+export function walletBalance(earned: number, state: ShopState, habitatSpent = 0) {
+  return Math.max(0, earned - state.spent - habitatSpent);
 }
 
 /** Pure purchase rule: returns the new state, or null when not affordable / unknown / already owned. */

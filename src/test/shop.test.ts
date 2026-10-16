@@ -31,6 +31,15 @@ describe("points shop", () => {
   it("wallet is game points minus spent", () => {
     expect(walletBalance(700, { ...empty, spent: 200 })).toBe(500);
   });
+  it("a personal balance of 1030 excludes habitat spending everywhere", () => {
+    expect(walletBalance(1030, empty, 450)).toBe(580);
+    expect(walletBalance(1030, { ...empty, spent: 200 }, 450)).toBe(380);
+  });
+  it("habitat spending cannot be spent again on clothing", () => {
+    const wallet = walletBalance(1030, empty, 900);
+    expect(wallet).toBe(130);
+    expect(buy(empty, wallet, "detective-hat")).toBeNull();
+  });
   it("stocked with exactly 12 distinct hats, each priced and imaged", () => {
     const hats = SHOP_ITEMS.filter((i) => i.category === "hat");
     expect(hats).toHaveLength(12);

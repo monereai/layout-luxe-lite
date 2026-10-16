@@ -7,7 +7,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { useT, useLang, setLang, LANGS, signSrc, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
-import { useShop, walletBalance } from "@/lib/shop";
+import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { MonereAvatar } from "./MonereFigure";
 
 const tabs = [
@@ -22,9 +22,8 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const game = useGame();
-  const shopState = useShop();
-  const { user, premium, signOut, bonusPoints, tier } = usePlan();
-  const wallet = walletBalance(game.points + bonusPoints, shopState);
+  const { user, premium, signOut, tier } = usePlan();
+  const wallet = usePointsWallet();
   const t = useT();
   const lang = useLang();
   return (
@@ -88,7 +87,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               ))}
             </div>
             <div className="border-y border-border py-5">
-              <Link to="/find" className="flex items-center justify-between gap-3" aria-label={`${t("game")}: ${game.points} Wisdom Points`}>
+              <Link to="/find" className="flex items-center justify-between gap-3" aria-label={`${t("game")}: ${wallet} Wisdom Points`}>
                 <span className="flex items-center gap-2 text-sm text-muted-foreground"><Award className="h-4 w-4 text-primary" />Wisdom Points</span>
                 <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
               </Link>
