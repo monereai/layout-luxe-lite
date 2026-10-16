@@ -1,5 +1,4 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { combinationLook } from "@/lib/shop-combinations";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
 import amberSnapback from "@/assets/shop/amber-snapback.webp";
