@@ -21,11 +21,18 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       <img data-character-look={shown} data-character-frame={frame} src={activeImageSrc} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-      {extra.filter((item) => item && (item.category === "footwear" || [0, 1, 7].includes(frame))).map((item) => item && (
-        <img key={item.id} data-worn-layer={item.category} src={item.src} alt="" aria-hidden="true" draggable={false}
-          style={{ ...WORN_POSITION[item.category], zIndex: WORN_Z[item.category] }}
-          className="pointer-events-none absolute object-contain drop-shadow-md" />
-      ))}
+      {extra.filter((item) => item && (item.category === "footwear" || [0, 1, 7].includes(frame))).flatMap((item) => !item ? [] :
+        item.category === "footwear"
+          ? FEET.map((foot, i) => (
+              <img key={`${item.id}-${i}`} data-worn-layer="footwear" src={item.src} alt="" aria-hidden="true" draggable={false}
+                style={{ ...foot, zIndex: WORN_Z.footwear, transform: i ? "scaleX(-1)" : undefined }}
+                className="pointer-events-none absolute object-contain drop-shadow-md" />
+            ))
+          : [
+              <img key={item.id} data-worn-layer={item.category} src={item.src} alt="" aria-hidden="true" draggable={false}
+                style={{ ...WORN_POSITION[item.category], zIndex: WORN_Z[item.category] }}
+                className="pointer-events-none absolute object-contain drop-shadow-md" />,
+            ])}
     </div>
   );
 }
