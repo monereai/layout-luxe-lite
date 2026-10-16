@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { MonereFigure } from "@/components/MonereFigure";
 import { WardrobeButton } from "@/components/Wardrobe";
+import { MonereCharacterView } from "@/components/MonereCharacterView";
 
 export type Category = { title: string; short: string; emoji: string };
 
@@ -62,13 +63,17 @@ export function CategoryPicker({
     <div className="mt-3">
       {wardrobe && <div className="flex justify-end"><WardrobeButton /></div>}
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
-        <div className="orbit-center" aria-hidden="true">
+        <div className="orbit-center">
           {backdrop && (
             <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[135%] w-[135%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-20" />
           )}
-          <span className="orbit-halo" />
+          <span className="orbit-halo pointer-events-none" aria-hidden="true" />
           <div className="relative z-10 h-full w-full">
+            {wardrobe ? <MonereCharacterView>
+              <MonereFigure gesture={listening ? "listen" : "wave"} alt="Monere the lion" className="mentor-avatar relative h-full w-full" />
+            </MonereCharacterView> :
             <MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" />
+            }
           </div>
         </div>
         <div className="orbit-overlay">

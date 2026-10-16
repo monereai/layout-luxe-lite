@@ -134,6 +134,9 @@
 }
 
 .mentor-portrait { width: 280px; height: 240px; max-width: 100%; }
+.character-view { touch-action: none; user-select: none; perspective: 900px; }
+.character-transform { transform-origin: center; transition: transform 150ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .character-transform { transition: none; } }
 .mentor-avatar { animation: mentor-breathe 6s ease-in-out infinite; transform-origin: bottom center; }
 .mentor-compass { animation: mentor-compass-turn 50s linear infinite; }
 .mentor-spark { animation: mentor-sparkle 4s ease-in-out infinite; }

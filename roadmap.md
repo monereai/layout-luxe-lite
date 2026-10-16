@@ -6,6 +6,7 @@
 - [x] Verify branding on every app page.
 
 # Monere digital mentor
+- [ ] Add and verify main-character drag rotation, wheel/touch pinch zoom, and reset controls.
 - [x] Add animated CGI-style lion artwork to Home, loading, and results.
 - [x] Reframe intros, actions, advice cards, and mentor voice.
 - [x] Add subtle themed motifs and verify advice and journal flow.

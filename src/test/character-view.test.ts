@@ -1,0 +1,27 @@
+import { describe, expect, it } from "vitest";
+import { clampCharacterZoom, INITIAL_CHARACTER_VIEW, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
+
+describe("Monere view controls", () => {
+  it("clamps zoom to the requested 0.7x minimum", () => {
+    expect(clampCharacterZoom(0.1)).toBe(0.7);
+  });
+  it("clamps zoom to the requested 1.6x maximum", () => {
+    expect(clampCharacterZoom(3)).toBe(1.6);
+  });
+  it("resets to 1x scale and zero rotation", () => {
+    expect(INITIAL_CHARACTER_VIEW).toEqual({ scale: 1, rotation: 0, x: 0, y: 0 });
+  });
+  it("supports a full 360 degree horizontal rotation", () => {
+    expect(rotateCharacter(0, 400, 400)).toBe(360);
+    expect(rotateCharacter(0, -400, 400)).toBe(-360);
+  });
+  it("normalizes wheel deltas and keeps small trackpad movements gentle", () => {
+    expect(wheelCharacterZoom(1, 1, 1)).toBe(wheelCharacterZoom(1, 16, 0));
+    expect(wheelCharacterZoom(1, -1, 0)).toBeLessThan(1.01);
+  });
+  it("keeps the point under the zoom cursor stationary", () => {
+    const view = zoomCharacter(INITIAL_CHARACTER_VIEW, 1.5, { x: 60, y: 40 });
+    expect(view.x + 60 * view.scale).toBe(60);
+    expect(view.y + 40 * view.scale).toBe(40);
+  });
+});
