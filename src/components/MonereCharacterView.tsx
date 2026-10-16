@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { INITIAL_CHARACTER_VIEW, tiltCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
+import { INITIAL_CHARACTER_VIEW, characterFrame, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
 import { useLang } from "@/lib/i18n";
 
 const RESET_LABELS = { en: "Reset View", es: "Restablecer vista", fr: "Réinitialiser la vue", pt: "Repor vista", de: "Ansicht zurücksetzen" };
@@ -13,6 +13,7 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
   const [view, setView] = useState(INITIAL_CHARACTER_VIEW);
   const [dragging, setDragging] = useState(false);
   const lang = useLang();
+  const frame = characterFrame(view.rotation);
 
   useEffect(() => {
     const el = surface.current;
@@ -30,21 +31,12 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
   function move(event: PointerEvent<HTMLDivElement>) {
     const previous = pointers.current.get(event.pointerId);
     const rect = event.currentTarget.getBoundingClientRect();
-    if (!previous) {
-      if (event.pointerType === "mouse" && pointers.current.size === 0) {
-        setView((current) => tiltCharacter(current,
-          ((event.clientX - rect.left) / rect.width - 0.5) * 30,
-          (0.5 - (event.clientY - rect.top) / rect.height) * 20));
-      }
-      return;
-    }
+    if (!previous) return;
     const before = [...pointers.current.values()];
     const next = { x: event.clientX, y: event.clientY };
     pointers.current.set(event.pointerId, next);
     if (pointers.current.size === 1) {
-      setView((current) => tiltCharacter(current,
-        current.rotation + (next.x - previous.x) / rect.width * 60,
-        current.tiltX - (next.y - previous.y) / rect.height * 40));
+      setView((current) => ({ ...current, rotation: rotateCharacter(current.rotation, next.x - previous.x, rect.width) }));
       return;
     }
     const after = [...pointers.current.values()];
@@ -81,25 +73,21 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
           setDragging(true);
         }}
         onPointerMove={move}
-        onPointerLeave={() => {
-          if (pointers.current.size === 0) setView((current) => tiltCharacter(current, 0, 0));
-        }}
         onPointerUp={release}
         onPointerCancel={release}
         onLostPointerCapture={release}
         onKeyDown={(event) => {
-          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "=", "-", "0"].includes(event.key)) return;
+          if (!["ArrowLeft", "ArrowRight", "+", "=", "-", "0"].includes(event.key)) return;
           event.preventDefault();
           setView((current) => event.key === "0" ? INITIAL_CHARACTER_VIEW : event.key.startsWith("Arrow")
-            ? tiltCharacter(current,
-              current.rotation + (event.key === "ArrowLeft" ? -3 : event.key === "ArrowRight" ? 3 : 0),
-              current.tiltX + (event.key === "ArrowUp" ? 2 : event.key === "ArrowDown" ? -2 : 0))
+            ? { ...current, rotation: current.rotation + (event.key === "ArrowLeft" ? -45 : 45) }
             : zoomCharacter(current, current.scale * (event.key === "-" ? 1 / 1.1 : 1.1), { x: 0, y: 0 }));
         }}
       >
-        <div aria-hidden="true" className="character-ground-shadow pointer-events-none" style={{ transform: `translate(calc(-50% - ${view.rotation * 0.8}px), ${view.tiltX * 0.8}px) scale(${view.scale})` }} />
-        <div className="character-transform pointer-events-none h-full w-full" style={{ transform: `translate(${view.x + view.rotation * 0.6}px, ${view.y - view.tiltX * 0.6}px) scale(${view.scale}) rotateX(${view.tiltX}deg) rotateY(${view.rotation}deg)` }}>
-          {children}
+        <div aria-hidden="true" className="character-ground-shadow pointer-events-none" style={{ transform: `translate(-50%, 0) scale(${view.scale})` }} />
+        <div data-frame={frame} data-rotation={view.rotation} className="character-transform pointer-events-none h-full w-full" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
+          <div className={`absolute inset-0 transition-opacity duration-150 motion-reduce:transition-none ${frame === 0 ? "opacity-100" : "opacity-0"}`}>{children}</div>
+          {Array.from({ length: 7 }, (_, index) => index + 1).map((index) => <img key={index} src={`/monere/spin/${index}.webp`} alt="" aria-hidden="true" draggable={false} className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-150 motion-reduce:transition-none ${frame === index ? "opacity-100" : "opacity-0"}`} />)}
         </div>
       </div>
       <Button type="button" variant="secondary" size="icon" title={RESET_LABELS[lang]} aria-label={RESET_LABELS[lang]} className="absolute right-2 top-2 z-20 h-9 w-9 rounded-lg border border-border" onClick={() => setView(INITIAL_CHARACTER_VIEW)}>

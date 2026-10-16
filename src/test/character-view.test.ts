@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { clampCharacterZoom, INITIAL_CHARACTER_VIEW, tiltCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
+import { clampCharacterZoom, INITIAL_CHARACTER_VIEW, characterFrame, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
 
 describe("Monere view controls", () => {
-  it("clamps zoom to the requested 0.8x minimum", () => {
-    expect(clampCharacterZoom(0.1)).toBe(0.8);
+  it("clamps zoom to the requested 0.7x minimum", () => {
+    expect(clampCharacterZoom(0.1)).toBe(0.7);
   });
   it("clamps zoom to the requested 1.5x maximum", () => {
     expect(clampCharacterZoom(3)).toBe(1.5);
@@ -11,14 +11,16 @@ describe("Monere view controls", () => {
   it("resets to 1x scale and zero rotation", () => {
     expect(INITIAL_CHARACTER_VIEW).toEqual({ scale: 1, rotation: 0, tiltX: 0, x: 0, y: 0 });
   });
-  it("limits horizontal tilt to -15 through 15 degrees", () => {
-    expect(tiltCharacter(INITIAL_CHARACTER_VIEW, 360, 0).rotation).toBe(15);
-    expect(tiltCharacter(INITIAL_CHARACTER_VIEW, -360, 0).rotation).toBe(-15);
-    expect(tiltCharacter(INITIAL_CHARACTER_VIEW, 5, 0).rotation).toBe(5);
+  it("supports a full 360 degree drag in either direction", () => {
+    expect(rotateCharacter(0, 400, 400)).toBe(360);
+    expect(rotateCharacter(0, -400, 400)).toBe(-360);
   });
-  it("limits vertical tilt to -10 through 10 degrees", () => {
-    expect(tiltCharacter(INITIAL_CHARACTER_VIEW, 0, 90).tiltX).toBe(10);
-    expect(tiltCharacter(INITIAL_CHARACTER_VIEW, 0, -90).tiltX).toBe(-10);
+  it("shows side and back frames instead of flattening at 90 and 180 degrees", () => {
+    expect(characterFrame(90)).toBe(2);
+    expect(characterFrame(180)).toBe(4);
+    expect(characterFrame(270)).toBe(6);
+    expect(characterFrame(360)).toBe(0);
+    expect(characterFrame(-90)).toBe(6);
   });
   it("normalizes wheel deltas and keeps small trackpad movements gentle", () => {
     expect(wheelCharacterZoom(1, 1, 1)).toBe(wheelCharacterZoom(1, 16, 0));

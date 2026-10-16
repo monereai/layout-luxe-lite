@@ -19,4 +19,4 @@
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
 - Shop accessories are transparent overlay layers drawn by MonereFigure (placement per art type); wallet = game points minus shop spend, both in local storage. Why: accessories work on every outfit without regenerating combo art.
-- Keep main-character bounded parallax tilt, inverse shadow, and zoom in MonereCharacterView around MonereFigure, using native non-passive wheel and pointer handling. Why: the character keeps its visual width without changing avatars or outfit layers.
+- Keep main-character full-turn sprite selection and zoom in MonereCharacterView, with plain URL turn frames and native non-passive wheel/pointer handling. Why: real side/back artwork avoids flattening the front image; MonereFigure remains the equipped front view.
