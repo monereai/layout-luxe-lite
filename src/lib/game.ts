@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 export const GAME_KEY = "monereai-game";
-export type GameState = { points: number; detective: boolean; best: Record<string, number>; finds: Record<string, number>; mystery?: string; jigsaws?: number[] };
+export type GameState = { points: number; detective: boolean; best: Record<string, number>; finds: Record<string, number>; mystery?: string; jigsaws?: number[]; hintsSpent?: number };
 const EMPTY: GameState = { points: 0, detective: false, best: {}, finds: {} };
 
 let current = EMPTY;
@@ -9,6 +9,9 @@ let current = EMPTY;
 export const MINI_COUNT = 10;
 export const POINTS_PER_MINI = 20;
 export const COMPLETION_BONUS = 100;
+
+/** Wisdom Points charged for one clue from Monere's Hint. */
+export const HINT_COST = 20;
 
 /** A map unlocks after this many Mini-Moneres found in the previous map. */
 export const MAP_UNLOCK_FINDS = 10;
@@ -68,6 +71,13 @@ export function recordComplete() {
   current = { ...current, points: current.points + COMPLETION_BONUS, detective: true };
   save();
   return COMPLETION_BONUS;
+}
+
+/** Records a clue spend against the shared wallet; the caller checks affordability first. */
+export function recordHintSpend() {
+  current = { ...current, hintsSpent: (current.hintsSpent ?? 0) + HINT_COST };
+  save();
+  return HINT_COST;
 }
 let loaded = false;
 const listeners = new Set<() => void>();
