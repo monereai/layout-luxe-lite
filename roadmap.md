@@ -79,3 +79,7 @@
 - [x] Create a gold "Points Shop" signboard picture and use it in place of the shop title text.
 - [x] Show the sign in the side quick-actions panel instead of the "Points Shop" text link.
 - [x] Make the sign banner larger on the shop page and in the side panel.
+
+- [ ] PayPal: MonereAI Club £4.99/mo subscription (1,000 pts/month + monthly outfit), server-verified (blocked: PayPal client ID + plan ID)
+- [ ] PayPal: Point Packs — Pocket 250/£1.99, Popular 600/£3.99, Mega 1,500/£7.99; server-verified capture (blocked: PayPal credentials)
+- [ ] Payment containers marked data-no-one-link, click hijack guard
