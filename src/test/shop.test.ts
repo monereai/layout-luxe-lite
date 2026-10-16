@@ -95,4 +95,22 @@ describe("points shop", () => {
     expect(back.equipped.glasses).toBe("sunglasses");
     expect(equippedItems(back).map((i) => i.id)).toEqual(["sunglasses"]);
   });
+  it("Buy Now charges only the combination pieces not owned yet", () => {
+    const combo = { hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" };
+    const state = { ...empty, owned: ["crown"] };
+    expect(combinationPrice(state, combo)).toBe(640);
+    const s = buyCombination(state, 640, combo);
+    expect(s?.spent).toBe(640);
+    expect(s?.owned).toEqual(["crown", "hero-cape", "crisp-sneakers"]);
+    expect(s?.equipped).toEqual({ hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" });
+  });
+  it("Buy Now refuses when the wallet cannot cover the missing pieces", () => {
+    expect(buyCombination(empty, 639, { hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" })).toBeNull();
+  });
+  it("a fully owned combination is free, so Buy Now never charges again", () => {
+    const combo = { hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" };
+    const owned = { ...empty, owned: ["crown", "hero-cape", "crisp-sneakers"] };
+    expect(combinationPrice(owned, combo)).toBe(0);
+    expect(buyCombination(owned, 1000, combo)).toBeNull();
+  });
 });

@@ -106,18 +106,16 @@ function ShopPage() {
                 <h3 className="text-sm font-semibold">{family.name}</h3>
                 <p className="text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
                 <p className="mb-3 text-xs font-semibold text-primary">
-                  {ready
-                    ? "Free — items owned"
-                    : `${ids.reduce((sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0), 0)} pts to own`}
+                  {ready ? "Free — items owned" : `${price} pts`}
                 </p>
                 <Button
                   className="mt-auto"
                   size="sm"
                   variant={on ? "secondary" : "outline"}
-                  disabled={!ready || on}
-                  onClick={() => wearCombo(family)}
+                  disabled={on || (!ready && !canBuy)}
+                  onClick={() => (ready ? wearCombo(family) : buyCombo(family))}
                 >
-                  {on ? <><Check /> Equipped</> : !ready ? <><Lock /> Unlock items</> : "Wear together"}
+                  {on ? <><Check /> Equipped</> : ready ? "Wear together" : canBuy ? `Buy Now · ${price} pts` : <><Lock /> Buy Now · {price} pts</>}
                 </Button>
               </div>;
             })}
