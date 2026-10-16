@@ -1,7 +1,7 @@
-export const MIN_CHARACTER_ZOOM = 0.7;
-export const MAX_CHARACTER_ZOOM = 1.6;
-export type CharacterView = { scale: number; rotation: number; x: number; y: number };
-export const INITIAL_CHARACTER_VIEW: CharacterView = { scale: 1, rotation: 0, x: 0, y: 0 };
+export const MIN_CHARACTER_ZOOM = 0.8;
+export const MAX_CHARACTER_ZOOM = 1.5;
+export type CharacterView = { scale: number; rotation: number; tiltX: number; x: number; y: number };
+export const INITIAL_CHARACTER_VIEW: CharacterView = { scale: 1, rotation: 0, tiltX: 0, x: 0, y: 0 };
 
 export function clampCharacterZoom(scale: number) {
   return Math.min(MAX_CHARACTER_ZOOM, Math.max(MIN_CHARACTER_ZOOM, scale));
@@ -19,6 +19,6 @@ export function zoomCharacter(view: CharacterView, scale: number, point: { x: nu
   return { ...view, scale: next, x: point.x - (point.x - view.x) * ratio, y: point.y - (point.y - view.y) * ratio };
 }
 
-export function rotateCharacter(rotation: number, deltaX: number, width: number) {
-  return rotation + (deltaX / Math.max(1, width)) * 360;
+export function tiltCharacter(view: CharacterView, horizontal: number, vertical: number): CharacterView {
+  return { ...view, rotation: Math.max(-15, Math.min(15, horizontal)), tiltX: Math.max(-10, Math.min(10, vertical)) };
 }
