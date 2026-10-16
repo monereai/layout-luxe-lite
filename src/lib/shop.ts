@@ -115,14 +115,6 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   return equip(purchased, item.category, itemId);
 }
 
-/** Pure combination unlock: pays the family cost once; null when unknown, already unlocked, or unaffordable. */
-export function unlockCombo(state: ShopState, earned: number, familyId: string): ShopState | null {
-  const family = COMBINATION_FAMILIES.find((f) => f.id === familyId);
-  if (!family || (state.comboUnlocked ?? []).includes(familyId)) return null;
-  if (walletBalance(earned, state) < family.cost) return null;
-  return { ...state, spent: state.spent + family.cost, comboUnlocked: [...(state.comboUnlocked ?? []), familyId] };
-}
-
 /** Every selection is wearable: equipping keeps all other slots; null removes just that slot. */
 export function equip(state: ShopState, category: ShopCategory, itemId: string | null): ShopState {
   const item = SHOP_ITEMS.find((item) => item.id === itemId);
