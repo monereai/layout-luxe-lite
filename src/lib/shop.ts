@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
 import amberSnapback from "@/assets/shop/amber-snapback.webp";
@@ -86,7 +87,7 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export type EquipmentSlot = "hat" | "outfit" | "glasses" | "accessory" | "footwear";
 export function equipmentSlot(category: ShopCategory): EquipmentSlot { return category === "costume" ? "outfit" : category; }
-export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>> };
+export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>>; comboUnlocked?: string[] };
 export function normalizeEquipment(state: ShopState): ShopState {
   const equipped: ShopState["equipped"] = {};
   for (const slot of ["hat", "outfit", "glasses", "accessory", "footwear"] as const) {
@@ -112,6 +113,14 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   if (walletBalance(earned, state) < item.cost) return null;
   const purchased = { ...state, spent: state.spent + item.cost, owned: [...state.owned, itemId] };
   return equip(purchased, item.category, itemId);
+}
+
+/** Pure combination unlock: pays the family cost once; null when unknown, already unlocked, or unaffordable. */
+export function unlockCombo(state: ShopState, earned: number, familyId: string): ShopState | null {
+  const family = COMBINATION_FAMILIES.find((f) => f.id === familyId);
+  if (!family || (state.comboUnlocked ?? []).includes(familyId)) return null;
+  if (walletBalance(earned, state) < family.cost) return null;
+  return { ...state, spent: state.spent + family.cost, comboUnlocked: [...(state.comboUnlocked ?? []), familyId] };
 }
 
 /** Every selection is wearable: equipping keeps all other slots; null removes just that slot. */
@@ -141,7 +150,12 @@ function load() {
   try {
     const p = JSON.parse(localStorage.getItem(SHOP_KEY) ?? "null");
     if (p && typeof p.spent === "number" && Array.isArray(p.owned)) {
-      current = normalizeEquipment({ spent: p.spent, owned: p.owned, equipped: p.equipped ?? {} });
+      current = normalizeEquipment({
+        spent: p.spent,
+        owned: p.owned,
+        equipped: p.equipped ?? {},
+        comboUnlocked: Array.isArray(p.comboUnlocked) ? p.comboUnlocked : [],
+      });
       listeners.forEach((l) => l());
     }
   } catch { /* ignore */ }
