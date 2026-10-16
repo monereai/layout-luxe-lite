@@ -12,7 +12,8 @@ export function combinationLook(equipped: Selection): string | null {
   if (ids.length === 1) return ids[0] ?? "default";
   if (ids.length === 2) {
     const family = COMBINATION_FAMILIES.find((f) => ids.every((id) => [f.hat, f.outfit, f.footwear].some((value) => value === id)));
-    return family ? ids[ids.length - 1] ?? null : null;
+    const slots = (["hat", "outfit", "footwear"] as const).filter((slot) => equipped[slot]);
+    return family ? `combo-${family.id}-${slots.join("-")}` : null;
   }
   const family = COMBINATION_FAMILIES.find((f) => ids.length === 3 && equipped.hat === f.hat && equipped.outfit === f.outfit && equipped.footwear === f.footwear);
   return family ? `combo-${family.id}` : null;
