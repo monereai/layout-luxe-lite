@@ -169,8 +169,16 @@ function ShopPage() {
                     ) : owned ? (
                       <Button size="sm" variant="outline" className="mt-auto" onClick={() => saveProperties(equipProperty(props, p.id))}>Equip</Button>
                     ) : (
-                      <Button size="sm" className="mt-auto" disabled={wallet < p.cost} onClick={() => { const next = buyProperty(props, wallet, p.id); if (next) { saveProperties(next); toast.success(`${p.name} unlocked and equipped!`); } }}>
-                        {wallet < p.cost && <Lock />} Buy for {p.cost} pts
+                      <Button size="sm" className={CLOTHING_BUTTON_CLASS} onClick={() => {
+                        const next = buyProperty(props, wallet, p.id);
+                        if (!next) {
+                          if (wallet < p.cost) toast.error(`You need ${p.cost - wallet} more points to buy ${p.name}.`);
+                          return;
+                        }
+                        saveProperties(next);
+                        toast.success(`${p.name} unlocked and equipped!`);
+                      }}>
+                        Buy Now for {p.cost} pts
                       </Button>
                     )}
                   </div>
