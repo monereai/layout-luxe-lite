@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PAYPAL_API, PAYPAL_CLIENT_ID, POINT_PACKS, planInfo } from "./paypal-config";
 
 async function paypal(path: string, init: RequestInit = {}) {
-  const secret = process.env.PAYPAL_CLIENT_SECRET;
+  const secret = process.env["PAYPAL_CLIENT_SECRET"];
   if (!secret) throw new Error("PayPal is not configured");
   const tok = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: "POST",
