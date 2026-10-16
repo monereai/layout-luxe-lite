@@ -5,8 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
-  COMPLETION_BONUS, MAP_UNLOCK_FINDS, MINI_COUNT, POINTS_PER_MINI,
-  allMapsComplete, makeSpots, mapUnlocked, recordMystery, recordComplete, recordMini, useGame, type Spot,
+  COMPLETION_BONUS, HINT_COST, MAP_UNLOCK_FINDS, MINI_COUNT, POINTS_PER_MINI,
+  allMapsComplete, makeSpots, mapUnlocked, recordHintSpend, recordMystery, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
 import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
