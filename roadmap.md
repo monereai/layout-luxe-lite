@@ -43,6 +43,7 @@
 - [x] Verify the bar still shows everywhere else and returns after closing the upgrade window.
 
 # Points Shop
+- [x] Keep habitat Buy Now buttons active and verify Cozy Bedroom/Space Station purchase and point-shortfall feedback.
 - [x] Match clothing combination purchase buttons to inventory buttons and verify active purchases and insufficient-points feedback.
 - [x] Verify clean base artwork, slot swapping, and saved equipment migration.
 - [x] Keep equipped clothing mounted with the character across rotation and zoom; verify with equipped items.
