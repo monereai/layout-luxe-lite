@@ -3,6 +3,7 @@ import { Award, Check, Footprints, Gem, Glasses, GraduationCap, Lock, Sparkles }
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { MonereFigure } from "@/components/MonereFigure";
+import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
@@ -58,7 +59,11 @@ function ShopPage() {
         </div>
 
         <div className="mb-5 flex justify-center rounded-lg border border-border bg-card/60 py-3">
-          <MonereFigure gesture="thumbs" alt="Monere wearing your equipped items" className="mt-10 h-56 w-56" />
+          <div className="h-80 w-80 max-w-full">
+            <MonereCharacterView>
+              <MonereFigure gesture="thumbs" alt="Monere wearing your equipped items" className="h-full w-full" />
+            </MonereCharacterView>
+          </div>
         </div>
 
         <Tabs defaultValue="hat">
