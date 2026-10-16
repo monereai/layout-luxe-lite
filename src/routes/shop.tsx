@@ -47,6 +47,8 @@ const COMBINATION_PICTURES: Record<string, string> = {
   "tophat-pirate-rain": dapperPirate,
 };
 
+const CLOTHING_BUTTON_CLASS = "mt-auto h-auto min-h-8 w-full whitespace-normal px-2 py-2 text-center leading-tight";
+
 function ShopPage() {
   const lang = useLang();
   const game = useGame();
@@ -75,7 +77,11 @@ function ShopPage() {
 
   function buyCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
     const next = buyCombination(shop, wallet, family);
-    if (!next) return;
+    if (!next) {
+      const missingPoints = combinationPrice(shop, family) - wallet;
+      if (missingPoints > 0) toast.error(`You need ${missingPoints} more points to buy ${family.name}.`);
+      return;
+    }
     saveShop(next);
     toast.success(`${family.name} bought — Monere is wearing it!`);
   }
@@ -119,7 +125,6 @@ function ShopPage() {
               const ids = [family.hat, family.outfit, family.footwear];
               const ready = ids.every((id) => shop.owned.includes(id));
               const price = combinationPrice(shop, family);
-              const canBuy = !ready && wallet >= price;
               const on = shop.equipped.hat === family.hat && shop.equipped.outfit === family.outfit && shop.equipped.footwear === family.footwear;
                const picture = COMBINATION_PICTURES[family.id] ?? (hasCombinationArt(family.id) ? `/monere/looks/combo-${family.id}/0.webp` : SHOP_ITEMS.find((item) => item.id === family.outfit)?.src ?? "");
               return <div key={family.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
@@ -128,14 +133,14 @@ function ShopPage() {
                 <p className="text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
                 <p className="mb-3 text-xs text-muted-foreground">{ready ? "Free — items owned" : `${price} pts`}</p>
                 {on ? (
-                  <Button size="sm" variant="secondary" className="mt-auto" onClick={() => takeOffCombo(family)} aria-label={`${family.name} equipped — tap to take off`}>
+                  <Button size="sm" variant="secondary" className={CLOTHING_BUTTON_CLASS} onClick={() => takeOffCombo(family)} aria-label={`${family.name} equipped — tap to take off`}>
                     <Check /> Equipped
                   </Button>
                 ) : ready ? (
-                  <Button size="sm" variant="outline" className="mt-auto" onClick={() => wearCombo(family)}>Equip</Button>
+                  <Button size="sm" variant="outline" className={CLOTHING_BUTTON_CLASS} onClick={() => wearCombo(family)}>Equip</Button>
                 ) : (
-                  <Button size="sm" className="mt-auto" disabled={!canBuy} onClick={() => buyCombo(family)}>
-                    {!canBuy && <Lock />} Buy Now for {price} pts
+                  <Button size="sm" className={CLOTHING_BUTTON_CLASS} onClick={() => buyCombo(family)}>
+                    Buy Now for {price} pts
                   </Button>
                 )}
               </div>;
@@ -188,14 +193,14 @@ function ShopPage() {
                       <p className="text-sm font-semibold">{item.name}</p>
                       <p className="mb-3 text-xs text-muted-foreground">{item.cost} pts</p>
                       {on ? (
-                          <Button size="sm" variant="secondary" className="mt-auto" onClick={() => wear(item.category, null)} aria-label={`${item.name} equipped — tap to take off`}>
+                          <Button size="sm" variant="secondary" className={CLOTHING_BUTTON_CLASS} onClick={() => wear(item.category, null)} aria-label={`${item.name} equipped — tap to take off`}>
                           <Check /> Equipped
                         </Button>
                       ) : owned ? (
-                        <Button size="sm" variant="outline" className="mt-auto" onClick={() => wear(item.category, item.id)}>Equip</Button>
+                        <Button size="sm" variant="outline" className={CLOTHING_BUTTON_CLASS} onClick={() => wear(item.category, item.id)}>Equip</Button>
                       ) : (
-                        <Button size="sm" className="mt-auto" disabled={!afford} onClick={() => purchase(item.id)}>
-                          {!afford && <Lock />} Buy for {item.cost} pts
+                        <Button size="sm" className={CLOTHING_BUTTON_CLASS} disabled={!afford} onClick={() => purchase(item.id)}>
+                          {!afford && <Lock />} Buy Now for {item.cost} pts
                         </Button>
                       )}
                     </div>
