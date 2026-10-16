@@ -7,7 +7,7 @@ export type Gesture = "wave" | "think" | "thumbs" | "listen";
 /** Placement of each layered slot, as % of the square character box (front view). */
 const PLACE = {
   footwear: { left: 32, top: 82, width: 36 },
-  accessory: { left: 41, top: 29, width: 18 },
+  accessory: { left: 42, top: 31, width: 16 },
   glasses: { left: 38, top: 14, width: 22 },
   hat: { left: 36, top: -9, width: 26 },
 } as const;
