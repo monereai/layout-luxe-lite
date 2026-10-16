@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { WisdomCards } from "@/components/WisdomCards";
 import { deleteEntry, getEntries, type Entry } from "@/lib/journal";
+import { useUserName } from "@/lib/username";
 
 export const Route = createFileRoute("/journal")({
   head: () => ({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/journal")({
 function Journal() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [open, setOpen] = useState<string | null>(null);
+  const name = useUserName();
   useEffect(() => setEntries(getEntries()), []);
   return (
     <AppShell>
@@ -35,13 +37,13 @@ function Journal() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
         <div className="absolute bottom-0 left-0 p-5">
-          <h1 className="font-display text-4xl">Reflection Journal</h1>
+          <h1 className="font-display text-4xl">{name ? `${name}'s Reflection Journal` : "Reflection Journal"}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Saved privately on this device only.</p>
         </div>
       </div>
       {entries.length === 0 ? (
         <div className="surface-card mt-8 p-8 text-center">
-          <p className="text-muted-foreground">Nothing saved yet.</p>
+          <p className="text-muted-foreground">{name ? `${name}, nothing saved yet.` : "Nothing saved yet."}</p>
           <Link to="/" className="btn-gold mt-4 inline-block px-5 py-2.5 text-sm">Seek wisdom</Link>
         </div>
       ) : (
