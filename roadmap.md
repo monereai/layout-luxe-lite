@@ -86,3 +86,13 @@
 - [ ] Two-tier membership screen: Plus £2.99/mo|£24.99/yr (250 pts/mo, unlimited Story) + Club £4.99/mo|£44.99/yr (1,000 pts/mo, exclusive outfits, BEST VALUE); status plus|club (blocked: PayPal plan IDs)
 - [ ] Club exclusive subscriber-only outfits (needs outfit designs)
 - [ ] Paste 4 PayPal plan IDs into src/lib/paypal-config.ts (blocked: user)
+
+## Batch updates (done 2026-10-16)
+- [x] Home canvas: welcome banner "Welcome to MonereAI! Choose an option to begin."
+- [x] Image backgrounds: verified all character/item art is transparent cutouts; MonereFigure falls back to default look if art missing
+- [x] "Get Monere Plus" on home now links straight to the Points Shop PayPal memberships (no passcode popup)
+- [x] Story Mode tab removed from navigation (route file kept)
+- [x] Shop expanded: +8 items (party hat, viking helmet, star shades, pirate coat, astro suit, rain boots, rocket boots, shell necklace) — 44 total
+- [x] Where's Monere: +2 scenes (Seaside Cove, Castle Courtyard) — 6 maps
+- [x] Jigsaw: Crazy Hard 6x6 (36 pieces) added, unlocks after Hard
+- [x] Combinations: +4 families (Storm Viking, Party Star, Galaxy Voyager, Dapper Pirate) — 8 total
