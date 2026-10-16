@@ -33,14 +33,14 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
       <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>
       <div className={`relative mx-auto flex min-h-screen max-w-md flex-col px-5 pt-8 md:max-w-7xl md:px-6 md:pt-6 ${hideCrisisBar ? "pb-[calc(9rem+env(safe-area-inset-bottom))]" : "pb-[calc(13rem+env(safe-area-inset-bottom))]"} md:pb-6`}>
         <header className="mb-7 md:mb-6 md:border-b md:border-border md:pb-5">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+          <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Link to="/" aria-label="MonereAI home" className="inline-flex min-w-0 items-center gap-3">
             <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl md:h-16 md:w-16 border border-primary/30 bg-primary/10 text-primary">
               <Compass className="h-8 w-8 md:h-10 md:w-10" strokeWidth={1.5} aria-hidden="true" />
             </span>
-            <span className="truncate font-display text-4xl font-semibold md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
+            <span className="truncate font-display text-4xl font-semibold sm:text-5xl md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
           </Link>
-          <div className="flex flex-col items-end gap-1 pt-1 text-xs">
+          <div className="flex flex-row flex-wrap items-center justify-end gap-x-2 gap-y-1 pt-1 text-xs sm:flex-col sm:items-end sm:gap-1">
             <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 py-0.5 pl-0.5 pr-2 font-semibold text-primary"><MonereAvatar className="h-6 w-6" /><span className="tabular-nums">{wallet}</span> pts</Link>
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
             {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">{tier === "club" ? "CLUB" : "PLUS"}</span>}
