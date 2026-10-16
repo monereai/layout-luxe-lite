@@ -1,9 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { SHOP_ITEMS, buy, equip, walletBalance } from "@/lib/shop";
+import { SHOP_ITEMS, buy, equip, equippedItems, normalizeEquipment, walletBalance } from "@/lib/shop";
 
 const empty = { spent: 0, owned: [], equipped: {} };
 
 describe("points shop", () => {
+  it("replaces the hat rather than stacking two hats", () => {
+    const state = { spent: 0, owned: ["crown", "detective-hat", "sunglasses"], equipped: { hat: "crown", glasses: "sunglasses" } };
+    const next = equip(state, "hat", "detective-hat");
+    expect(next.equipped).toEqual({ hat: "detective-hat", glasses: "sunglasses" });
+    expect(equippedItems(next).filter((item) => item.category === "hat").map((item) => item.id)).toEqual(["detective-hat"]);
+  });
+  it("rejects a glasses item placed in the hat slot", () => {
+    const state = { ...empty, owned: ["sunglasses"] };
+    expect(equip(state, "hat", "sunglasses")).toBe(state);
+  });
+  it("migrates legacy costume into the outfit slot and replaces it", () => {
+    const state = { ...empty, owned: ["hero-cape", "royal-cape"], equipped: { costume: "hero-cape" } };
+    expect(normalizeEquipment(state).equipped).toEqual({ outfit: "hero-cape" });
+    expect(equip(state, "costume", "royal-cape").equipped).toEqual({ outfit: "royal-cape" });
+  });
+  it("removes an equipped hat without altering other slots", () => {
+    const state = { ...empty, owned: ["crown", "bow-tie"], equipped: { hat: "crown", accessory: "bow-tie" } };
+    expect(equip(state, "hat", null).equipped).toEqual({ accessory: "bow-tie" });
+  });
   it("wallet is game points minus spent", () => {
     expect(walletBalance(700, { ...empty, spent: 200 })).toBe(500);
   });
