@@ -9,6 +9,10 @@ export const COMBINATION_FAMILIES = [
   { id: "tophat-pirate-rain", name: "Dapper Pirate", hat: "top-hat", outfit: "pirate-coat", footwear: "rain-boots" },
 ] as const;
 
+/** Families that have their own hand-drawn combination pictures; the rest show their outfit picture. */
+export const COMBINATION_ART_IDS = ["crown-hero-sneakers", "explorer-emerald-boots", "wizard-galaxy-skates", "beanie-arctic-sneakers"];
+export function hasCombinationArt(id: string) { return COMBINATION_ART_IDS.includes(id); }
+
 type Selection = Partial<Record<"hat" | "outfit" | "footwear" | "glasses" | "accessory", string>>;
 
 /**

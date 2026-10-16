@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
 import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
-import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
+import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
 import { usePlan } from "@/hooks/usePlan";
 
@@ -69,6 +69,15 @@ function ShopPage() {
     toast.success(`${family.name} bought — Monere is wearing it!`);
   }
 
+  function takeOffCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
+    // Taking a combination off frees its three slots; anything else stays on.
+    let next = shop;
+    if (next.equipped.hat === family.hat) next = equip(next, "hat", null);
+    if (next.equipped.outfit === family.outfit) next = equip(next, "costume", null);
+    if (next.equipped.footwear === family.footwear) next = equip(next, "footwear", null);
+    saveShop(next);
+  }
+
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-3xl">
@@ -101,22 +110,23 @@ function ShopPage() {
               const price = combinationPrice(shop, family);
               const canBuy = !ready && wallet >= price;
               const on = shop.equipped.hat === family.hat && shop.equipped.outfit === family.outfit && shop.equipped.footwear === family.footwear;
-              return <div key={family.id} className="flex flex-col rounded-lg border border-border bg-card p-3">
-                <img src={`/monere/looks/combo-${family.id}/0.webp`} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" onError={(e) => { const fallback = SHOP_ITEMS.find((item) => item.id === family.outfit)?.src; if (fallback && e.currentTarget.src !== fallback) e.currentTarget.src = fallback; }} />
+              const picture = hasCombinationArt(family.id) ? `/monere/looks/combo-${family.id}/0.webp` : SHOP_ITEMS.find((item) => item.id === family.outfit)?.src ?? "";
+              return <div key={family.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
+                <img src={picture} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" onError={(e) => { const fallback = SHOP_ITEMS.find((item) => item.id === family.outfit)?.src; if (fallback && !e.currentTarget.src.endsWith(fallback)) e.currentTarget.src = fallback; }} />
                 <h3 className="text-sm font-semibold">{family.name}</h3>
                 <p className="text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
-                <p className="mb-3 text-xs font-semibold text-primary">
-                  {ready ? "Free — items owned" : `${price} pts`}
-                </p>
-                <Button
-                  className="mt-auto"
-                  size="sm"
-                  variant={on ? "secondary" : "outline"}
-                  disabled={on || (!ready && !canBuy)}
-                  onClick={() => (ready ? wearCombo(family) : buyCombo(family))}
-                >
-                  {on ? <><Check /> Equipped</> : ready ? "Wear together" : canBuy ? `Buy Now · ${price} pts` : <><Lock /> Buy Now · {price} pts</>}
-                </Button>
+                <p className="mb-3 text-xs text-muted-foreground">{ready ? "Free — items owned" : `${price} pts`}</p>
+                {on ? (
+                  <Button size="sm" variant="secondary" className="mt-auto" onClick={() => takeOffCombo(family)} aria-label={`${family.name} equipped — tap to take off`}>
+                    <Check /> Equipped
+                  </Button>
+                ) : ready ? (
+                  <Button size="sm" variant="outline" className="mt-auto" onClick={() => wearCombo(family)}>Equip</Button>
+                ) : (
+                  <Button size="sm" className="mt-auto" disabled={!canBuy} onClick={() => buyCombo(family)}>
+                    {!canBuy && <Lock />} Buy Now for {price} pts
+                  </Button>
+                )}
               </div>;
             })}
           </div>
