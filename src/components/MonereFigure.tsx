@@ -23,9 +23,9 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
       <img data-character-look={shown} data-character-frame={frame} src={activeImageSrc} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
       {extra.filter((item) => item && (item.category === "footwear" || [0, 1, 7].includes(frame))).flatMap((item) => !item ? [] :
         item.category === "footwear"
-          ? FEET.map((foot, i) => (
+          ? FEET.map((foot, i: number) => (
               <img key={`${item.id}-${i}`} data-worn-layer="footwear" src={item.src} alt="" aria-hidden="true" draggable={false}
-                style={{ ...foot, zIndex: WORN_Z["footwear"], transform: i ? "scaleX(-1)" : undefined }}
+                style={{ ...foot, zIndex: WORN_Z["footwear"], }}
                 className="pointer-events-none absolute object-contain drop-shadow-md" />
             ))
           : [
@@ -47,8 +47,7 @@ const WORN_POSITION: Record<string, CSSProperties> = {
 };
 /** One shoe drawn over each foot. */
 const FEET: CSSProperties[] = [
-  { left: "29%", top: "82%", width: "22%", height: "16%" },
-  { left: "47%", top: "82%", width: "22%", height: "16%" },
+  { left: "29%", top: "83%", width: "40%", height: "15%" },
 ];
 const WORN_Z: Record<string, number> = { costume: 3, footwear: 4, accessory: 5, hat: 6, glasses: 7 };
 
