@@ -47,7 +47,7 @@ const WORN_POSITION: Record<string, CSSProperties> = {
 };
 /** One shoe drawn over each foot. */
 const FEET: CSSProperties[] = [
-  { left: "18%", top: "77%", width: "62%", height: "24%" },
+  { left: "21%", top: "79%", width: "56%", height: "21%" },
 ];
 const WORN_Z: Record<string, number> = { costume: 3, footwear: 4, accessory: 5, hat: 6, glasses: 7 };
 
