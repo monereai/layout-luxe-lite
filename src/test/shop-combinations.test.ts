@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
-import { COMBINATION_FAMILIES, combinationLook } from "@/lib/shop-combinations";
+import { COMBINATION_FAMILIES, combinationLook, hasCombinationArt } from "@/lib/shop-combinations";
 import { equip, type ShopState } from "@/lib/shop";
 
 describe("complete clothing pictures", () => {
@@ -44,4 +44,10 @@ describe("any selection stays equipped", () => {
     state = equip(state, "costume", null);
     expect(state.equipped).toEqual({ hat: "cowboy-hat", footwear: "golden-sliders", glasses: "sunglasses" });
   });
+});
+
+it("only points the shop at combination art that actually exists", () => {
+  for (const family of COMBINATION_FAMILIES) {
+    expect(hasCombinationArt(family.id), family.name).toBe(existsSync(`public/monere/looks/combo-${family.id}/0.webp`));
+  }
 });
