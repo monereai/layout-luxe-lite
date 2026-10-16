@@ -38,7 +38,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl md:h-16 md:w-16 border border-primary/30 bg-primary/10 text-primary">
               <Compass className="h-8 w-8 md:h-10 md:w-10" strokeWidth={1.5} aria-hidden="true" />
             </span>
-            <span className="truncate font-display text-4xl font-semibold sm:text-5xl md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
+            <span className="truncate font-display text-4xl font-semibold min-[380px]:text-5xl sm:text-5xl md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
           </Link>
           <div className="flex flex-row flex-wrap items-center justify-end gap-x-2 gap-y-1 pt-1 text-xs sm:flex-col sm:items-end sm:gap-1">
             <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 py-0.5 pl-0.5 pr-2 font-semibold text-primary"><MonereAvatar className="h-6 w-6" /><span className="tabular-nums">{wallet}</span> pts</Link>
