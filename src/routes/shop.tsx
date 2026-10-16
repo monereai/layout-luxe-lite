@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
 import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
+import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -42,7 +43,17 @@ function ShopPage() {
     const next = buy(shop, game.points, id);
     if (!next) return;
     saveShop(next);
-    toast.success(`${SHOP_ITEMS.find((i) => i.id === id)?.name} unlocked and equipped!`);
+    const item = SHOP_ITEMS.find((i) => i.id === id);
+    toast.success(`${item?.name} unlocked${item && next.equipped[equipmentSlot(item.category)] === id ? " and equipped" : " — saved to your inventory"}!`);
+  }
+
+  function wear(category: ShopCategory, id: string | null) {
+    const next = equip(shop, category, id);
+    if (next === shop && id) {
+      toast.info("No combination picture for these items yet. Take off the other items first, or choose matching items below.");
+      return;
+    }
+    saveShop(next);
   }
 
   return (
@@ -67,6 +78,22 @@ function ShopPage() {
           </div>
         </div>
 
+        <section className="mb-5">
+          <h2 className="mb-3 font-display text-xl font-semibold">Clothing combinations</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {COMBINATION_FAMILIES.map((family) => {
+              const ids = [family.hat, family.outfit, family.footwear];
+              const ready = ids.every((id) => shop.owned.includes(id));
+              const on = shop.equipped.hat === family.hat && shop.equipped.outfit === family.outfit && shop.equipped.footwear === family.footwear;
+              return <div key={family.id} className="flex flex-col rounded-lg border border-border bg-card p-3">
+                <img src={`/monere/looks/combo-${family.id}/0.webp`} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" />
+                <h3 className="text-sm font-semibold">{family.name}</h3>
+                <p className="mb-3 text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
+                <Button className="mt-auto" size="sm" variant={on ? "secondary" : "outline"} disabled={!ready || on} onClick={() => saveShop({ ...shop, equipped: { hat: family.hat, outfit: family.outfit, footwear: family.footwear } })}>{on ? <><Check /> Equipped</> : ready ? "Wear together" : <><Lock /> Unlock items</>}</Button>
+              </div>;
+            })}
+          </div>
+        </section>
         <Tabs defaultValue="hat">
           <TabsList className="grid h-auto w-full grid-cols-5 gap-1 p-1">
             {CATS.map(({ id, label, icon: Icon }) => (
@@ -88,11 +115,11 @@ function ShopPage() {
                       <p className="text-sm font-semibold">{item.name}</p>
                       <p className="mb-3 text-xs text-muted-foreground">{item.cost} pts</p>
                       {on ? (
-                        <Button size="sm" variant="secondary" className="mt-auto" onClick={() => saveShop(equip(shop, item.category, null))} aria-label={`${item.name} equipped — tap to take off`}>
+                          <Button size="sm" variant="secondary" className="mt-auto" onClick={() => wear(item.category, null)} aria-label={`${item.name} equipped — tap to take off`}>
                           <Check /> Equipped
                         </Button>
                       ) : owned ? (
-                        <Button size="sm" variant="outline" className="mt-auto" onClick={() => saveShop(equip(shop, item.category, item.id))}>Equip</Button>
+                        <Button size="sm" variant="outline" className="mt-auto" onClick={() => wear(item.category, item.id)}>Equip</Button>
                       ) : (
                         <Button size="sm" className="mt-auto" disabled={!afford} onClick={() => purchase(item.id)}>
                           {!afford && <Lock />} Buy for {item.cost} pts

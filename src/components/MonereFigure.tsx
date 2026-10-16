@@ -1,13 +1,14 @@
-import { equippedItems, useShop } from "@/lib/shop";
+import { useShop } from "@/lib/shop";
+import { combinationLook } from "@/lib/shop-combinations";
 import { useCharacterFrame } from "@/lib/character-frame";
 
 export type Gesture = "wave" | "think" | "thumbs" | "listen";
 
 /** Each frame is one complete character picture, not a base with accessory overlays. */
 export function MonereFigure({ className = "", alt = "" }: { gesture?: Gesture; className?: string; alt?: string; bareBase?: boolean }) {
-  const item = equippedItems(useShop())[0];
+  const shop = useShop();
   const frame = useCharacterFrame();
-  const look = item?.id ?? "default";
+  const look = combinationLook(shop.equipped) ?? "default";
   const activeImageSrc = `/monere/looks/${look}/${frame}.webp`;
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
