@@ -10,6 +10,7 @@ import {
 } from "@/lib/game";
 import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
+import { usePointsWallet } from "@/hooks/usePointsWallet";
 
 const MINI = "/find/mini.webp";
 const SCENES = [
@@ -39,6 +40,7 @@ const BURST = [0, 60, 120, 180, 240, 300];
 
 function FindGame() {
   const game = useGame();
+  const wallet = usePointsWallet();
   const [idx, setIdx] = useState(0);
   const scene = SCENES[idx] ?? SCENES[0]!;
   // Spots are shuffled after mount so the server and first client render match.
@@ -85,7 +87,7 @@ function FindGame() {
           <p className="text-sm text-muted-foreground">Search the picture and tap the 10 tiny Mini-Moneres hidden inside. Pinch or scroll to look closer.</p>
         </div>
         <div className="shrink-0 text-xs text-muted-foreground sm:text-right">
-          <p className="font-bold text-primary"><Trophy className="mr-1 inline h-3.5 w-3.5" />{game.points} Wisdom Points</p>
+          <p className="font-bold text-primary"><Trophy className="mr-1 inline h-3.5 w-3.5" />{wallet} Wisdom Points</p>
           <Link to="/shop" className="text-xs font-semibold text-primary hover:underline">Spend points in the Shop →</Link>
           {game.detective && <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 font-bold text-primary-foreground"><Award className="h-3 w-3" />Master Detective</p>}
         </div>

@@ -7,12 +7,11 @@ import { MonereFigure } from "@/components/MonereFigure";
 import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGame } from "@/lib/game";
-import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { usePointsWallet } from "@/hooks/usePointsWallet";
+import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equipmentSlot, saveShop, useShop, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
-import { usePlan } from "@/hooks/usePlan";
 import stormViking from "@/assets/combinations/storm-viking.png";
 import partyStar from "@/assets/combinations/party-star.png";
 import galaxyVoyager from "@/assets/combinations/galaxy-voyager.png";
@@ -51,15 +50,12 @@ const CLOTHING_BUTTON_CLASS = "mt-auto h-auto min-h-8 w-full whitespace-normal p
 
 function ShopPage() {
   const lang = useLang();
-  const game = useGame();
   const shop = useShop();
-  const { bonusPoints } = usePlan();
-  const earned = game.points + bonusPoints;
   const props = useProperties();
-  const wallet = Math.max(0, walletBalance(earned, shop) - props.spent);
+  const wallet = usePointsWallet();
 
   function purchase(id: string) {
-    const next = buy(shop, earned, id);
+    const next = buy(shop, wallet + shop.spent, id);
     if (!next) return;
     saveShop(next);
     const item = SHOP_ITEMS.find((i) => i.id === id);
