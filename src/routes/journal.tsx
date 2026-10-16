@@ -25,8 +25,20 @@ function Journal() {
   useEffect(() => setEntries(getEntries()), []);
   return (
     <AppShell>
-      <h1 className="font-display text-4xl">Reflection Journal</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Saved privately on this device only.</p>
+      <div className="surface-card relative overflow-hidden">
+        <img
+          src="/monere/journal-illustration.jpg"
+          alt="Monere reading his journal by lantern light"
+          width={1024}
+          height={640}
+          className="h-44 w-full object-cover sm:h-56"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 p-5">
+          <h1 className="font-display text-4xl">Reflection Journal</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Saved privately on this device only.</p>
+        </div>
+      </div>
       {entries.length === 0 ? (
         <div className="surface-card mt-8 p-8 text-center">
           <p className="text-muted-foreground">Nothing saved yet.</p>
