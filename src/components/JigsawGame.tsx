@@ -60,7 +60,7 @@ export function JigsawGame() {
           })}
         </div>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">Tap two pieces to swap them, or drag one onto another. Finish for +{JIGSAW_BONUS} Wisdom Points.</p>
+      <p className="mt-1 text-xs text-muted-foreground">Tap two pieces to swap them, or drag one onto another. Finish for +{JIGSAW_BONUS} Wisdom Points. Complete a puzzle to unlock the next level.</p>
 
       <div className="mt-3 flex items-center justify-between rounded-full border border-primary/40 px-4 py-1.5 text-sm font-semibold" aria-live="polite">
         <span>Pieces Placed: <span className="text-primary">{placed} / {n}</span></span>
