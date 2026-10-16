@@ -6,7 +6,7 @@ import { PayPalButton } from "./PayPalButton";
 import { usePlan } from "@/hooks/usePlan";
 import { MEMBERSHIPS, POINT_PACKS, type Interval } from "@/lib/paypal-config";
 import { activateSubscription, capturePackOrder, createPackOrder } from "@/lib/paypal.functions";
-import { playChime } from "@/lib/sound";
+import { playFanfare } from "@/lib/sound";
 
 export function MonereStore() {
   const { user, tier, refresh } = usePlan();
@@ -23,7 +23,7 @@ export function MonereStore() {
     const r = await capturePackOrder({ data: { orderId } });
     if (!r.ok) { toast.error("We couldn't confirm that payment. You haven't been charged twice — contact us if points are missing."); return; }
     await refresh();
-    try { playChime(); } catch { /* sound optional */ }
+    try { playFanfare(); } catch { /* sound optional */ }
     toast.success(`🎉 +${r.points} Wisdom Points added to your wallet!`, { duration: 6000 });
   }
 
