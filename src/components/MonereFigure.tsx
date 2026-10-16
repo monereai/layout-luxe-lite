@@ -25,7 +25,7 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
         item.category === "footwear"
           ? FEET.map((foot, i) => (
               <img key={`${item.id}-${i}`} data-worn-layer="footwear" src={item.src} alt="" aria-hidden="true" draggable={false}
-                style={{ ...foot, zIndex: WORN_Z.footwear, transform: i ? "scaleX(-1)" : undefined }}
+                style={{ ...foot, zIndex: WORN_Z["footwear"], transform: i ? "scaleX(-1)" : undefined }}
                 className="pointer-events-none absolute object-contain drop-shadow-md" />
             ))
           : [
