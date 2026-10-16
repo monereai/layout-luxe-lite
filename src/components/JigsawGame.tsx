@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Eye, EyeOff, Puzzle, RotateCcw, Star } from "lucide-react";
+import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JIGSAW_BONUS, jigsawSolved, recordJigsaw, shufflePieces } from "@/lib/game";
+import { JIGSAW_BONUS, jigsawSolved, jigsawUnlocked, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
 import { playChime, playPop } from "@/lib/sound";
 
 const IMAGE = "/find/jungle.webp";
@@ -14,6 +14,7 @@ const LEVELS = [
 type Size = (typeof LEVELS)[number]["size"];
 
 export function JigsawGame() {
+  const game = useGame();
   const [size, setSize] = useState<Size>(3);
   const n = size * size;
   // Shuffled after mount so server and first client render match.
@@ -33,7 +34,7 @@ export function JigsawGame() {
     const next = [...order];
     [next[a], next[b]] = [next[b]!, next[a]!];
     setOrder(next); setPicked(null); playPop();
-    if (jigsawSolved(next)) { setDone(true); recordJigsaw(); playChime("win"); }
+    if (jigsawSolved(next)) { setDone(true); recordJigsaw(size); playChime("win"); }
   }
 
   function tap(i: number) {
@@ -49,9 +50,14 @@ export function JigsawGame() {
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><Puzzle className="h-5 w-5 text-primary" />Monere's Jigsaw</h2>
         <div className="flex gap-1">
-          {LEVELS.map(({ size: s, label }) => (
-            <button key={s} onClick={() => reset(s)} className={`rounded-full border px-2.5 py-1 text-xs ${size === s ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{label} · {s * s}</button>
-          ))}
+          {LEVELS.map(({ size: s, label }) => {
+            const locked = !jigsawUnlocked(s, game);
+            return (
+              <button key={s} disabled={locked} onClick={() => reset(s)} title={locked ? `Finish the previous puzzle to unlock ${label}` : undefined} className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs ${size === s ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"} ${locked ? "opacity-50" : ""}`}>
+                {locked && <Lock className="h-3 w-3" />}{label} · {s * s}
+              </button>
+            );
+          })}
         </div>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">Tap two pieces to swap them, or drag one onto another. Finish for +{JIGSAW_BONUS} Wisdom Points.</p>
