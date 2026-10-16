@@ -92,7 +92,10 @@ export function normalizeEquipment(state: ShopState): ShopState {
   for (const slot of ["hat", "outfit", "glasses", "accessory", "footwear"] as const) {
     const id = state.equipped[slot] ?? (slot === "outfit" ? state.equipped.costume : undefined);
     const item = SHOP_ITEMS.find((item) => item.id === id);
-    if (item && state.owned.includes(item.id) && equipmentSlot(item.category) === slot) equipped[slot] = item.id;
+    if (item && state.owned.includes(item.id) && equipmentSlot(item.category) === slot) {
+      for (const previous of Object.keys(equipped) as EquipmentSlot[]) delete equipped[previous];
+      equipped[slot] = item.id;
+    }
   }
   return { ...state, equipped };
 }
@@ -111,14 +114,12 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   return equip({ ...state, spent: state.spent + item.cost, owned: [...state.owned, itemId] }, item.category, itemId);
 }
 
-/** Equip an owned item (one per category) or pass null to take that category off. */
+/** Equip one complete look, replacing all other slots; null restores the default. */
 export function equip(state: ShopState, category: ShopCategory, itemId: string | null): ShopState {
   const item = SHOP_ITEMS.find((item) => item.id === itemId);
   if (itemId && (!state.owned.includes(itemId) || item?.category !== category)) return state;
-  const equipped = { ...normalizeEquipment(state).equipped };
   const slot = equipmentSlot(category);
-  if (itemId) equipped[slot] = itemId;
-  else delete equipped[slot];
+  const equipped = itemId ? { [slot]: itemId } : {};
   return { ...state, equipped };
 }
 

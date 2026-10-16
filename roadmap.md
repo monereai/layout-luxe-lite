@@ -53,7 +53,8 @@
 - [ ] Sync points and purchases to the account so they follow a user between devices.
 
 # Costume library
-- [ ] Check all full-front costume drawings on Home and in the Points Shop; correct sizing and accessory alignment while retaining turn-around spin.
+- [x] Create complete character variants for every inventory item, with matching turn-around views and no accessory overlays.
+- [x] Equip one complete look at a time, preserving purchases and the existing viewer; test swapping, zoom, spin, and persistence.
 - [x] Expand the costume library to 12 costumes with fresh artwork and tiered prices.
 - [x] Verify buying, equipping and Monere wearing a cape on default and alternate outfits.
 

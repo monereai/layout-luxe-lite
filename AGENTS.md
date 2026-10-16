@@ -18,8 +18,6 @@
 - Serve the combo outfit art from public/wardrobe as plain URLs, never as eager module imports. Why: one failed image module blanked the whole app on load.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
-- Shop accessories are transparent overlay layers drawn by MonereFigure (placement per art type); wallet = game points minus shop spend, both in local storage. Why: accessories work on every outfit without regenerating combo art.
-- Keep home and Points Shop rotation/zoom on one MonereCharacterView parent, combining sprite turns with bounded between-frame rotateY; render persistent equipment as avatar-sized SVG overlays in MonereFigure. Why: base and clothing share alignment and transforms without edge-on flattening or clearing equipment.
-
-- Use clean bare turn frames in the shop; normalize equipment to one item per slot and migrate legacy costume into outfit. Why: existing purchases survive without duplicate or pre-drawn hats.
-- Keep full-front costume art unshifted in the same contained square coordinate system as equipment; anchor overlay boxes using their natural aspect ratios. Why: Home and Shop have different viewport shapes but must share accurate accessory placement.
+- Keep complete shop-look frames under public/monere/looks and render one image in MonereFigure, with no accessory layers. Why: each selected item forms one cohesive character at every angle.
+- Keep home and Points Shop rotation/zoom on the existing MonereCharacterView parent. Why: complete images share the same turn-around interaction without flattening.
+- Normalize shop equipment to one complete look, migrate legacy costume into outfit, and preserve owned items and spend in the existing storage key. Why: previous purchases remain available while selection replaces the whole look.

@@ -1,29 +1,20 @@
-import { cleanup, render } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
-import { CharacterFrameContext } from "@/lib/character-frame";
-import { MonereFigure } from "@/components/MonereFigure";
+import { expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import { SHOP_ITEMS, equip, normalizeEquipment, type ShopState } from "@/lib/shop";
 
-vi.mock("@/lib/outfit", () => ({ useOutfit: () => ({ outfit: { id: "default", src: "/monere/monere-wave.webp" } }) }));
-vi.mock("@/lib/shop", () => ({
-  useShop: () => ({ equipped: { hat: "crown", accessory: "bow-tie" } }),
-  equippedItems: () => [
-    { id: "crown", category: "hat", src: "/crown.webp" },
-    { id: "bow-tie", category: "accessory", src: "/bow-tie.webp" },
-  ],
-}));
-
-afterEach(cleanup);
-
-it("preserves the same equipped item nodes across front, side, back, and reset frames", () => {
-  const figure = (frame: number) => <CharacterFrameContext.Provider value={frame}><MonereFigure /></CharacterFrameContext.Provider>;
-  const { container, rerender } = render(figure(0));
-  const crown = container.querySelector('[data-equipped-item="crown"]');
-  const bowTie = container.querySelector('[data-equipped-item="bow-tie"]');
-  expect(crown).not.toBeNull();
-  expect(bowTie).not.toBeNull();
-  for (const frame of [2, 4, 6, 0]) {
-    rerender(figure(frame));
-    expect(container.querySelector('[data-equipped-item="crown"]')).toBe(crown);
-    expect(container.querySelector('[data-equipped-item="bow-tie"]')).toBe(bowTie);
+it("has eight complete turn-around pictures for every shop item and the default", () => {
+  for (const id of ["default", ...SHOP_ITEMS.map((item) => item.id)]) {
+    for (let frame = 0; frame < 8; frame++) {
+      expect(existsSync(`public/monere/looks/${id}/${frame}.webp`), `${id} frame ${frame}`).toBe(true);
+    }
   }
+});
+
+it("migrates combined legacy equipment to one look without losing purchases or spend", () => {
+  const legacy: ShopState = { spent: 800, owned: ["crown", "hero-cape", "sunglasses"], equipped: { hat: "crown", costume: "hero-cape", glasses: "sunglasses" } };
+  const migrated = normalizeEquipment(legacy);
+  expect(migrated.equipped).toEqual({ glasses: "sunglasses" });
+  expect(migrated.owned).toEqual(legacy.owned);
+  expect(migrated.spent).toBe(800);
+  expect(equip(migrated, "costume", "hero-cape").equipped).toEqual({ outfit: "hero-cape" });
 });
