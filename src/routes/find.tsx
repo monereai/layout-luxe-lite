@@ -127,6 +127,16 @@ function FindGame() {
         </div>
       </div>
 
+      <div className="mt-2 flex justify-center">
+        <button
+          onClick={showHint}
+          disabled={hint !== null || won || found.size >= MINI_COUNT}
+          className="rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          💡 Monere's Hint — {HINT_COST} points
+        </button>
+      </div>
+
       <p className="mt-2 min-h-5 text-center text-sm font-medium text-primary" aria-live="polite">{toast}</p>
 
       <div className="mt-1 overflow-auto rounded-2xl border border-border">
