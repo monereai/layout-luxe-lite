@@ -4,10 +4,10 @@ import { SHOP_ITEMS, buy, equip, equippedItems, normalizeEquipment, walletBalanc
 const empty = { spent: 0, owned: [], equipped: {} };
 
 describe("points shop", () => {
-  it("equipping one item replaces the entire previous look", () => {
+  it("equipping a hat swaps only the hat and keeps glasses on", () => {
     const state = { spent: 0, owned: ["crown", "detective-hat", "sunglasses"], equipped: { hat: "crown", glasses: "sunglasses" } };
     const next = equip(state, "hat", "detective-hat");
-    expect(next.equipped).toEqual({ hat: "detective-hat" });
+    expect(next.equipped).toEqual({ hat: "detective-hat", glasses: "sunglasses" });
     expect(next.owned).toEqual(state.owned);
     expect(equippedItems(next).filter((item) => item.category === "hat").map((item) => item.id)).toEqual(["detective-hat"]);
   });
@@ -20,9 +20,9 @@ describe("points shop", () => {
     expect(normalizeEquipment(state).equipped).toEqual({ outfit: "hero-cape" });
     expect(equip(state, "costume", "royal-cape").equipped).toEqual({ outfit: "royal-cape" });
   });
-  it("removing an equipped item restores the default look", () => {
+  it("taking off the hat keeps the bow tie on", () => {
     const state = { ...empty, owned: ["crown", "bow-tie"], equipped: { hat: "crown", accessory: "bow-tie" } };
-    expect(equip(state, "hat", null).equipped).toEqual({});
+    expect(equip(state, "hat", null).equipped).toEqual({ accessory: "bow-tie" });
   });
   it("wallet is game points minus spent", () => {
     expect(walletBalance(700, { ...empty, spent: 200 })).toBe(500);

@@ -18,6 +18,6 @@
 - Serve the combo outfit art from public/wardrobe as plain URLs, never as eager module imports. Why: one failed image module blanked the whole app on load.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
-- Keep complete shop-look frames under public/monere/looks and render one image in MonereFigure, with no accessory layers. Why: each selected item forms one cohesive character at every angle.
+- Keep complete outfit frames under public/monere/looks as MonereFigure's base and layer hat, glasses, extras and footwear on top inside the same box. Why: several equipped items show together and turn as one.
 - Keep home and Points Shop rotation/zoom on the existing MonereCharacterView parent. Why: complete images share the same turn-around interaction without flattening.
-- Normalize shop equipment to one complete look, migrate legacy costume into outfit, and preserve owned items and spend in the existing storage key. Why: previous purchases remain available while selection replaces the whole look.
+- Shop equipment holds one item per slot (hat, outfit, glasses, accessory, footwear); legacy costume migrates to outfit within the existing storage key. Why: purchases persist and items combine.
