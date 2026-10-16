@@ -18,7 +18,7 @@ export const CLUB_MONTHLY_PLAN_ID = "P-32C74283MR221461ENLJFCHY";
 export const CLUB_YEARLY_PLAN_ID = "P-07J4782826302621CNLJFCIA";
 
 export const MEMBERSHIPS: { tier: Tier; name: string; monthly: string; yearly: string; points: number; perks: string[]; badge?: string; plans: Record<Interval, string> }[] = [
-  { tier: "plus", name: "Monere Plus", monthly: "2.99", yearly: "24.99", points: 250, perks: ["Unlimited Storyteller access", "250 Outfit Points every month"], plans: { monthly: PLUS_MONTHLY_PLAN_ID, yearly: PLUS_YEARLY_PLAN_ID } },
+  { tier: "plus", name: "Monere Plus", monthly: "2.99", yearly: "24.99", points: 250, perks: ["250 Outfit Points every month"], plans: { monthly: PLUS_MONTHLY_PLAN_ID, yearly: PLUS_YEARLY_PLAN_ID } },
   { tier: "club", name: "MonereAI Club", monthly: "4.99", yearly: "44.99", points: 1000, perks: ["Everything in Plus", "1,000 Outfit Points every month", "Exclusive subscriber-only outfits", "Priority features"], badge: "BEST VALUE", plans: { monthly: CLUB_MONTHLY_PLAN_ID, yearly: CLUB_YEARLY_PLAN_ID } },
 ];
 
