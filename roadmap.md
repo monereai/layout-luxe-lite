@@ -88,7 +88,7 @@
 - [ ] Paste 4 PayPal plan IDs into src/lib/paypal-config.ts (blocked: user)
 
 ## Batch updates (done 2026-10-16)
-- [ ] Draw and display the four missing combination card pictures: Storm Viking, Party Star, Galaxy Voyager, Dapper Pirate.
+- [x] Draw and display the four missing combination card pictures: Storm Viking, Party Star, Galaxy Voyager, Dapper Pirate; verified in the signed-in shop.
 - [x] Home canvas: welcome banner "Welcome to MonereAI! Choose an option to begin."
 - [x] Image backgrounds: verified all character/item art is transparent cutouts; MonereFigure falls back to default look if art missing
 - [x] "Get Monere Plus" on home now links straight to the Points Shop PayPal memberships (no passcode popup)
