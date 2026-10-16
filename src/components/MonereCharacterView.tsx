@@ -3,6 +3,7 @@ import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { INITIAL_CHARACTER_VIEW, characterFrame, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
 import { useLang } from "@/lib/i18n";
+import { CharacterFrameContext } from "@/lib/character-frame";
 
 const RESET_LABELS = { en: "Reset View", es: "Restablecer vista", fr: "Réinitialiser la vue", pt: "Repor vista", de: "Ansicht zurücksetzen" };
 type Point = { x: number; y: number };
@@ -85,9 +86,8 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
         }}
       >
         <div aria-hidden="true" className="character-ground-shadow pointer-events-none" style={{ transform: `translate(-50%, 0) scale(${view.scale})` }} />
-        <div data-frame={frame} data-rotation={view.rotation} className="character-transform pointer-events-none h-full w-full" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
-          <div className={`absolute inset-0 transition-opacity duration-150 motion-reduce:transition-none ${frame === 0 ? "opacity-100" : "opacity-0"}`}>{children}</div>
-          {Array.from({ length: 7 }, (_, index) => index + 1).map((index) => <img key={index} src={`/monere/spin/${index}.webp`} alt="" aria-hidden="true" draggable={false} className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-150 motion-reduce:transition-none ${frame === index ? "opacity-100" : "opacity-0"}`} />)}
+        <div data-frame={frame} data-rotation={view.rotation} className="character-transform relative pointer-events-none h-full w-full" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
+          <CharacterFrameContext.Provider value={frame}>{children}</CharacterFrameContext.Provider>
         </div>
       </div>
       <Button type="button" variant="secondary" size="icon" title={RESET_LABELS[lang]} aria-label={RESET_LABELS[lang]} className="absolute right-2 top-2 z-20 h-9 w-9 rounded-lg border border-border" onClick={() => setView(INITIAL_CHARACTER_VIEW)}>

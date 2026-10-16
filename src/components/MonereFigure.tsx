@@ -4,6 +4,7 @@ const thumbs = "/monere/monere-thumbs.webp";
 const listen = "/monere/monere-listen.webp";
 import { useOutfit } from "@/lib/outfit";
 import { equippedItems, useShop, type ShopItem } from "@/lib/shop";
+import { useCharacterFrame } from "@/lib/character-frame";
 
 export type Gesture = "wave" | "think" | "thumbs" | "listen";
 const GESTURES: Record<Gesture, string> = { wave, think, thumbs, listen };
@@ -30,13 +31,11 @@ function Layer({ item, kind }: { item: ShopItem; kind: "pose" | "full" }) {
   const p = adj ? { ...base, w: base.w * adj.scale } : base;
   const ty = item.category === "hat" ? "-100%" : item.category === "glasses" ? "-50%" : item.category === "footwear" ? "-100%" : adj ? adj.ty : "0";
   return (
-    <img
-      src={item.src}
-      alt=""
-      aria-hidden="true"
-      className="pointer-events-none absolute h-auto"
-      style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, transform: `translate(-50%, ${ty})`, zIndex: item.category === "costume" ? 0 : 2 }}
-    />
+    <div data-equipped-item={item.id} className={`pointer-events-none absolute inset-0 h-full w-full ${item.category === "costume" ? "z-10" : "z-20"}`}>
+      <div className="absolute aspect-square" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, transform: `translate(-50%, ${ty})` }}>
+        <img src={item.src} alt="" aria-hidden="true" draggable={false} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+      </div>
+    </div>
   );
 }
 
@@ -45,12 +44,13 @@ function Layer({ item, kind }: { item: ShopItem; kind: "pose" | "full" }) {
 export function MonereFigure({ gesture = "wave", className = "", alt = "" }: { gesture?: Gesture; className?: string; alt?: string }) {
   const { outfit } = useOutfit();
   const items = equippedItems(useShop());
+  const frame = useCharacterFrame();
   const kind = outfit.id === "default" ? "pose" : "full";
   return (
-    <span style={{ clipPath: "inset(-60% -60% 0 -60%)" }} className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
+    <div style={{ clipPath: "inset(-60% -60% 0 -60%)" }} className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       {items.filter((i) => i.category === "costume").map((i) => <Layer key={i.id} item={i} kind={kind} />)}
       {kind === "full" ? (
-        <img src={outfit.src} alt="" aria-hidden="true" className="absolute inset-0 z-[1] h-full w-full object-contain" />
+        <img src={outfit.src} alt="" aria-hidden="true" className={`absolute inset-0 h-full w-full object-contain ${frame === 0 ? "opacity-100" : "opacity-0"}`} />
       ) : (
         (Object.keys(GESTURES) as Gesture[]).map((g) => (
           <img
@@ -59,12 +59,15 @@ export function MonereFigure({ gesture = "wave", className = "", alt = "" }: { g
             alt=""
             aria-hidden="true"
             decoding="async"
-            className={`gesture-frame absolute inset-0 z-[1] h-full w-full object-contain ${g === gesture ? "gesture-on" : ""}`}
+            className={`gesture-frame absolute inset-0 h-full w-full object-contain ${g === gesture && frame === 0 ? "gesture-on" : ""}`}
           />
         ))
       )}
+      {Array.from({ length: 7 }, (_, index) => index + 1).map((index) => (
+        <img key={index} src={`/monere/spin/${index}.webp`} alt="" aria-hidden="true" draggable={false} className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-150 motion-reduce:transition-none ${frame === index ? "opacity-100" : "opacity-0"}`} />
+      ))}
       {items.filter((i) => i.category !== "costume").map((i) => <Layer key={i.id} item={i} kind={kind} />)}
-    </span>
+    </div>
   );
 }
 

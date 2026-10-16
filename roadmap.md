@@ -43,6 +43,7 @@
 - [x] Verify the bar still shows everywhere else and returns after closing the upgrade window.
 
 # Points Shop
+- [ ] Keep equipped clothing mounted with the character across rotation and zoom; verify with equipped items.
 - [ ] Apply and verify the shared Monere spin, zoom, and reset controls in the shop.
 - [x] Link Where's Monere? points to one wallet and sell hats, glasses and costumes.
 - [x] Expand the hat library to 10 hats with fresh artwork and tiered prices.
