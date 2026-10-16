@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { equippedItems, useShop } from "@/lib/shop";
 import { COMBINATION_FAMILIES, combinationLook } from "@/lib/shop-combinations";
 import { useCharacterFrame } from "@/lib/character-frame";
@@ -31,7 +31,7 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
 }
 
 /** Where each worn item sits on the front-facing Monere picture (percent of the frame). */
-const WORN_POSITION: Record<string, React.CSSProperties> = {
+const WORN_POSITION: Record<string, CSSProperties> = {
   hat: { left: "33%", top: "-2%", width: "30%", height: "16%" },
   glasses: { left: "38%", top: "11.5%", width: "21%", height: "8%" },
   accessory: { left: "40%", top: "27%", width: "16%", height: "12%" },
