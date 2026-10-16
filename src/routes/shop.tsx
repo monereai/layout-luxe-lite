@@ -13,6 +13,10 @@ import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
 import { usePlan } from "@/hooks/usePlan";
+import stormViking from "@/assets/combinations/storm-viking.png";
+import partyStar from "@/assets/combinations/party-star.png";
+import galaxyVoyager from "@/assets/combinations/galaxy-voyager.png";
+import dapperPirate from "@/assets/combinations/dapper-pirate.png";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -35,6 +39,13 @@ const CATS: { id: ShopCategory; label: string; icon: typeof Award }[] = [
   { id: "footwear", label: "Footwear", icon: Footprints },
   { id: "accessory", label: "Extras", icon: Gem },
 ];
+
+const COMBINATION_PICTURES: Record<string, string> = {
+  "viking-storm-boots": stormViking,
+  "party-flame-sliders": partyStar,
+  "halo-galaxy-rocket": galaxyVoyager,
+  "tophat-pirate-rain": dapperPirate,
+};
 
 function ShopPage() {
   const lang = useLang();
@@ -110,7 +121,7 @@ function ShopPage() {
               const price = combinationPrice(shop, family);
               const canBuy = !ready && wallet >= price;
               const on = shop.equipped.hat === family.hat && shop.equipped.outfit === family.outfit && shop.equipped.footwear === family.footwear;
-              const picture = hasCombinationArt(family.id) ? `/monere/looks/combo-${family.id}/0.webp` : SHOP_ITEMS.find((item) => item.id === family.outfit)?.src ?? "";
+               const picture = COMBINATION_PICTURES[family.id] ?? (hasCombinationArt(family.id) ? `/monere/looks/combo-${family.id}/0.webp` : SHOP_ITEMS.find((item) => item.id === family.outfit)?.src ?? "");
               return <div key={family.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                 <img src={picture} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" onError={(e) => { const fallback = SHOP_ITEMS.find((item) => item.id === family.outfit)?.src; if (fallback && !e.currentTarget.src.endsWith(fallback)) e.currentTarget.src = fallback; }} />
                 <h3 className="text-sm font-semibold">{family.name}</h3>
