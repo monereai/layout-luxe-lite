@@ -35,14 +35,14 @@ export function recordMystery(itemId: string) {
 /** A hidden Mini-Monere: x/y are % of the picture, size is % of its width. */
 export type Spot = { x: number; y: number; size: number; rot: number };
 
-/** Ten random, non-overlapping spots inside the picture (kept away from the edges). */
+/** Ten random, non-overlapping spots inside the picture (kept away from the edges). Tiny sizes and full rotation keep the hunt challenging. */
 export function makeSpots(rand: () => number = Math.random): Spot[] {
   const spots: Spot[] = [];
   let tries = 0;
-  while (spots.length < MINI_COUNT && tries < 2000) {
+  while (spots.length < MINI_COUNT && tries < 4000) {
     tries++;
-    const s = { x: 5 + rand() * 90, y: 7 + rand() * 86, size: 3 + rand() * 1.5, rot: Math.round(rand() * 50 - 25) };
-    if (spots.every((o) => Math.hypot(o.x - s.x, (o.y - s.y) * 0.66) > 8)) spots.push(s);
+    const s = { x: 5 + rand() * 90, y: 7 + rand() * 86, size: 2 + rand() * 1.2, rot: Math.round(rand() * 360) };
+    if (spots.every((o) => Math.hypot(o.x - s.x, (o.y - s.y) * 0.66) > 5)) spots.push(s);
   }
   return spots;
 }

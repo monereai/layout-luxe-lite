@@ -21,4 +21,10 @@ describe("Find Monere picture hunt", () => {
   it("reshuffles spots between rounds", () => {
     expect(JSON.stringify(makeSpots())).not.toBe(JSON.stringify(makeSpots()));
   });
+  it("keeps Mini-Moneres small so they are hard to spot", () => {
+    for (const p of makeSpots()) {
+      expect(p.size).toBeGreaterThanOrEqual(2);
+      expect(p.size).toBeLessThanOrEqual(3.2);
+    }
+  });
 });
