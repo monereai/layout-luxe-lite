@@ -156,7 +156,7 @@
 .orbit-stage { position: relative; width: 100%; max-width: 28rem; margin: 0 auto; height: min(55vh, 480px); min-height: 22rem; }
 .orbit-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
 .orbit-halo { position: absolute; inset: 8%; border-radius: 9999px; background: radial-gradient(circle, color-mix(in oklab, var(--primary) 28%, transparent), transparent 70%); }
-.orbit-overlay { position: absolute; inset: 0; pointer-events: none; }
+.orbit-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
 .float-tile {
   position: absolute; pointer-events: auto; width: 31%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem;
   min-height: 4rem; padding: 0.5rem 0.4rem; text-align: center; border-radius: 1.25rem;
