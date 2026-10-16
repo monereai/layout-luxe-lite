@@ -66,11 +66,11 @@ export function CategoryPicker({
       {wardrobe && <div className="flex justify-end"><WardrobeButton /></div>}
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
         <div className="orbit-center">
-          {backdrop && (
+          {backdrop && property.activeProperty === "treehouse" && (
             <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[135%] w-[135%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-20" />
           )}
           {backdrop && PROPERTIES.filter((p) => p.src).map((p) => (
-            <img key={p.id} src={p.src!} alt="" loading="lazy" width={816} height={816} style={{ opacity: property.activeProperty === p.id ? 0.4 : 0, transition: "opacity 0.3s ease" }} className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[100%] w-[100%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none rounded-full object-cover" />
+            <img key={p.id} src={p.src!} alt="" loading="lazy" width={816} height={816} style={{ opacity: property.activeProperty === p.id ? 1 : 0, transition: "opacity 0.3s ease" }} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[110%] w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none rounded-full object-cover" />
           ))}
           <span className="orbit-halo pointer-events-none" aria-hidden="true" />
           <div className="relative z-10 h-full w-full">
