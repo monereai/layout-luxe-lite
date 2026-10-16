@@ -13,8 +13,22 @@ const GESTURES: Record<Gesture, string> = { wave, think, thumbs, listen };
 const PLACE = {
   pose: { hat: { x: 51, y: 13, w: 30 }, glasses: { x: 51, y: 20.5, w: 22 }, costume: { x: 50, y: 30, w: 74 }, footwear: { x: 51, y: 92, w: 26 }, accessory: { x: 51, y: 38, w: 30 } },
   full: { hat: { x: 51, y: 12, w: 21 }, glasses: { x: 51, y: 14.5, w: 16 }, costume: { x: 51, y: 20, w: 66 }, footwear: { x: 51, y: 94, w: 22 }, accessory: { x: 51, y: 30, w: 24 } },
-  bare: { hat: { x: 51, y: 25, w: 26 }, glasses: { x: 51, y: 23, w: 22 }, costume: { x: 50, y: 37, w: 70 }, footwear: { x: 51, y: 92, w: 26 }, accessory: { x: 51, y: 43, w: 30 } },
+  bare: { hat: { x: 56, y: 15, w: 26 }, glasses: { x: 56, y: 25, w: 20 }, costume: { x: 50, y: 37, w: 70 }, footwear: { x: 51, y: 92, w: 26 }, accessory: { x: 55, y: 47, w: 30 } },
 } as const;
+
+/** Natural height/width keeps the SVG image box and its anchor consistent. */
+const LAYER_RATIO: Record<string, number> = {
+  "amber-snapback": 0.833984, "angel-wings": 0.912109, "arctic-cloak": 0.964844,
+  bandana: 1.246875, "bow-tie": 0.584375, "cowboy-hat": 0.671875,
+  "cozy-beanie": 0.957031, "cozy-scarf": 1.259375, "crimson-cape": 0.974609,
+  crown: 0.673828, "detective-hat": 0.972656, "emerald-cloak": 0.96875,
+  "explorer-hat": 0.648438, "flame-cape": 0.978516, "friendship-beads": 1.43125,
+  "galaxy-cape": 0.957031, "gold-chain": 1.2, "gold-medal": 1.38125,
+  halo: 0.291016, "hero-cape": 1.236715, "knight-cape": 0.962891,
+  "phoenix-wings": 0.955078, "round-specs": 0.398438, "royal-cape": 1.292929,
+  "scholar-cap": 0.683594, "shadow-cloak": 1.051335, "storm-cloak": 0.994141,
+  sunglasses: 0.332031, "top-hat": 0.867188, "wizard-hat": 1.062241,
+};
 
 /** Per-accessory size (relative to the slot width) and vertical anchor, since the pieces differ in shape. */
 const ACC: Record<string, { scale: number; ty: string }> = {
@@ -31,11 +45,12 @@ function Layer({ item, kind }: { item: ShopItem; kind: "pose" | "full" | "bare" 
   const adj = item.category === "accessory" ? ACC[item.id] : undefined;
   const p = adj ? { ...base, w: base.w * adj.scale } : base;
   const ty = item.category === "hat" ? "-100%" : item.category === "glasses" ? "-50%" : item.category === "footwear" ? "-100%" : adj ? adj.ty : "0";
+  const height = p.w * (LAYER_RATIO[item.id] ?? 1);
   const x = p.x - p.w / 2;
-  const y = p.y + p.w * parseFloat(ty) / 100;
+  const y = p.y + height * parseFloat(ty) / 100;
   return (
     <svg data-equipped-item={item.id} aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" className={`pointer-events-none absolute inset-0 h-full w-full overflow-visible ${item.category === "hat" ? "z-30" : item.category === "costume" ? "z-10" : "z-20"}`}>
-      <image href={item.src} x={x} y={y} width={p.w} height={p.w} preserveAspectRatio="xMidYMid meet" className="pointer-events-none" />
+      <image href={item.src} x={x} y={y} width={p.w} height={height} preserveAspectRatio="xMidYMid meet" className="pointer-events-none" />
     </svg>
   );
 }
@@ -54,8 +69,8 @@ export function MonereFigure({ gesture = "wave", className = "", alt = "", bareB
   return (
     <div style={{ clipPath: "inset(-60% -60% 0 -60%)" }} className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       {costume && !(fullCostume && front) && <Layer key={costume.id} item={costume} kind={kind} />}
-      {fullCostume && (
-        <img data-full-costume={costume!.id} src={fullCostume} alt="" aria-hidden="true" draggable={false} className={`pointer-events-none absolute inset-0 z-10 h-full w-full object-contain ${bareBase ? "" : "scale-[0.9] translate-y-[8%]"} ${front ? "opacity-100" : "opacity-0"}`} />
+      {fullCostume && costume && (
+        <img data-full-costume={costume.id} src={fullCostume} alt="" aria-hidden="true" draggable={false} className={`pointer-events-none absolute inset-0 z-10 h-full w-full object-contain ${front ? "opacity-100" : "opacity-0"}`} />
       )}
       {bareBase ? Array.from({ length: 8 }, (_, index) => (
         <img key={index} src={`/monere/bare/${index}.webp`} alt="" aria-hidden="true" draggable={false} className={`pointer-events-none absolute inset-0 z-0 h-full w-full object-contain transition-opacity duration-150 motion-reduce:transition-none ${frame === index && !(fullCostume && index === 0) ? "opacity-100" : "opacity-0"}`} />
