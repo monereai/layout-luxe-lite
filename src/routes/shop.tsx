@@ -62,6 +62,13 @@ function ShopPage() {
     saveShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
   }
 
+  function buyCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
+    const next = buyCombination(shop, wallet, family);
+    if (!next) return;
+    saveShop(next);
+    toast.success(`${family.name} bought — Monere is wearing it!`);
+  }
+
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-3xl">
@@ -91,6 +98,8 @@ function ShopPage() {
             {COMBINATION_FAMILIES.map((family) => {
               const ids = [family.hat, family.outfit, family.footwear];
               const ready = ids.every((id) => shop.owned.includes(id));
+              const price = combinationPrice(shop, family);
+              const canBuy = !ready && wallet >= price;
               const on = shop.equipped.hat === family.hat && shop.equipped.outfit === family.outfit && shop.equipped.footwear === family.footwear;
               return <div key={family.id} className="flex flex-col rounded-lg border border-border bg-card p-3">
                 <img src={`/monere/looks/combo-${family.id}/0.webp`} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" onError={(e) => { const fallback = SHOP_ITEMS.find((item) => item.id === family.outfit)?.src; if (fallback && e.currentTarget.src !== fallback) e.currentTarget.src = fallback; }} />
