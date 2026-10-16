@@ -17,6 +17,8 @@ const SCENES = [
   { id: "space", name: "Space Station", src: "/find/space.webp" },
   { id: "school", name: "School Grounds", src: "/find/school.webp" },
   { id: "arcade", name: "Retro Arcade", src: "/find/arcade.webp" },
+  { id: "beach", name: "Seaside Cove", src: "/find/beach.jpg" },
+  { id: "castle", name: "Castle Courtyard", src: "/find/castle.jpg" },
 ];
 
 export const Route = createFileRoute("/find")({
