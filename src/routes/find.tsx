@@ -51,6 +51,21 @@ function FindGame() {
   const [won, setWon] = useState(false);
   const shop = useShop();
   const [mystery, setMystery] = useState<ShopItem | null>(null);
+  const [hint, setHint] = useState<number | null>(null);
+
+  /** Spend 20 Wisdom Points to pulse a clue ring around one unfound Mini-Monere. */
+  function showHint() {
+    if (won || hint !== null) return;
+    if (wallet < HINT_COST) {
+      setToast(`A hint costs ${HINT_COST} Wisdom Points — find more Mini-Moneres first!`);
+      return;
+    }
+    const remaining = spots.map((_, i) => i).filter((i) => !found.has(i));
+    if (!remaining.length) return;
+    recordHintSpend();
+    setHint(remaining[Math.floor(Math.random() * remaining.length)]!);
+    setTimeout(() => setHint(null), 3500);
+  }
 
   function newRound(next = idx) {
     if (next !== idx && !mapUnlocked(game.finds, next === 0 ? undefined : SCENES[next - 1]!.id)) {
