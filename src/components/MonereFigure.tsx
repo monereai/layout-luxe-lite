@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { equippedItems, useShop } from "@/lib/shop";
-import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
+import { LOOKS_WITH_ART, combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { useCharacterFrame } from "@/lib/character-frame";
 
 export type Gesture = "wave" | "think" | "thumbs" | "listen";
