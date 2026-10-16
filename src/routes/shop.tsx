@@ -7,7 +7,7 @@ import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
-import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, unlockCombo, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 
@@ -52,11 +52,8 @@ function ShopPage() {
   }
 
   function wearCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
-    const unlocked = (shop.comboUnlocked ?? []).includes(family.id);
-    const next = unlocked ? shop : unlockCombo(shop, game.points, family.id);
-    if (!next) return;
-    saveShop({ ...next, equipped: { ...next.equipped, hat: family.hat, outfit: family.outfit, footwear: family.footwear } });
-    if (!unlocked) toast.success(`${family.name} unlocked with your Wisdom Points!`);
+    // Items already bought stay wearable: combinations cost nothing extra.
+    saveShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
   }
 
   return (
