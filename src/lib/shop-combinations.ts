@@ -15,22 +15,35 @@ export function hasCombinationArt(id: string) { return COMBINATION_ART_IDS.inclu
 
 type Selection = Partial<Record<"hat" | "outfit" | "footwear" | "glasses" | "accessory", string>>;
 
+/** Single-item looks that have their own turnaround pictures in public/monere/looks. */
+export const LOOKS_WITH_ART = new Set<string>(["amber-snapback" "angel-wings" "arctic-cloak" "bandana" "bow-tie" "cowboy-hat" "cozy-beanie" "cozy-scarf" "crimson-cape" "crisp-sneakers" "crown" "default" "detective-hat" "emerald-cloak" "explorer-hat" "flame-cape" "friendship-beads" "galaxy-cape" "gold-chain" "gold-medal" "golden-sliders" "halo" "hero-cape" "knight-boots" "knight-cape" "phoenix-wings" "round-specs" "royal-cape" "scholar-cap" "shadow-cloak" "skate-classics" "soccer-cleats" "storm-cloak" "sunglasses" "top-hat" "trail-boots" "wizard-hat"]);
+
 /**
  * Every selection is wearable. Returns the exact combination picture when one
- * exists, otherwise the closest complete look: the outfit picture, then the
- * hat, then footwear, glasses, accessory, and finally the default look.
+ * exists, otherwise the closest complete look that actually has a picture: the
+ * outfit, then hat, footwear, glasses, accessory, and finally the default look.
+ * Items not drawn in that picture are layered on top by MonereFigure.
  */
 export function combinationLook(equipped: Selection): string {
   const ids = Object.values(equipped).filter((id): id is string => typeof id === "string");
   if (!ids.length) return "default";
-  if (ids.length === 1) return ids[0] ?? "default";
-  const family = COMBINATION_FAMILIES.find((f) => ids.every((id) => [f.hat, f.outfit, f.footwear].some((value) => value === id)));
-  if (family) {
+  const family = COMBINATION_FAMILIES.find((f) => hasCombinationArt(f.id) && ids.every((id) => [f.hat, f.outfit, f.footwear].some((value) => value === id)));
+  if (family && ids.length >= 2) {
     if (ids.length >= 3 && equipped.hat === family.hat && equipped.outfit === family.outfit && equipped.footwear === family.footwear) {
       return `combo-${family.id}`;
     }
     const slots = (["hat", "outfit", "footwear"] as const).filter((slot) => equipped[slot]);
     if (slots.length === 2) return `combo-${family.id}-${slots.join("-")}`;
   }
-  return equipped.outfit ?? equipped.hat ?? equipped.footwear ?? equipped.glasses ?? equipped.accessory ?? "default";
+  const order = [equipped.outfit, equipped.hat, equipped.footwear, equipped.glasses, equipped.accessory];
+  return order.find((id): id is string => !!id && LOOKS_WITH_ART.has(id)) ?? "default";
+}
+
+/** Item ids already drawn into a look picture, so they are not layered twice. */
+export function itemsDrawnIn(look: string, equipped: Selection): string[] {
+  const family = COMBINATION_FAMILIES.find((f) => look === `combo-${f.id}` || look.startsWith(`combo-${f.id}-`));
+  if (!family) return [look];
+  if (look === `combo-${family.id}`) return [family.hat, family.outfit, family.footwear];
+  const slots = look.slice(`combo-${family.id}-`.length).split("-") as ("hat" | "outfit" | "footwear")[];
+  return slots.map((slot) => equipped[slot]).filter((id): id is string => !!id);
 }

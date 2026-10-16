@@ -10,3 +10,16 @@ describe("buying keeps other equipped slots", () => {
     expect(b.equipped.footwear).toBe(shoe.id);
   });
 });
+
+import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
+describe("footwear stays visible with other items", () => {
+  it("costume + boots without combo art keeps the costume picture and layers the boots", () => {
+    const sel = { hat: "viking-helmet", outfit: "storm-cloak", footwear: "knight-boots" };
+    const look = combinationLook(sel);
+    expect(look).toBe("storm-cloak");
+    expect(itemsDrawnIn(look, sel)).not.toContain("knight-boots");
+  });
+  it("items without their own picture fall back to the default look", () => {
+    expect(combinationLook({ footwear: "rocket-boots" })).toBe("default");
+  });
+});
