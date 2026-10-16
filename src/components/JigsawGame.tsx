@@ -6,9 +6,15 @@ import { playChime, playPop } from "@/lib/sound";
 
 const IMAGE = "/find/jungle.webp";
 const BURST = [0, 45, 90, 135, 180, 225, 270, 315];
+const LEVELS = [
+  { size: 3, label: "Easy" },
+  { size: 4, label: "Medium" },
+  { size: 5, label: "Hard" },
+] as const;
+type Size = (typeof LEVELS)[number]["size"];
 
 export function JigsawGame() {
-  const [size, setSize] = useState<3 | 4>(3);
+  const [size, setSize] = useState<Size>(3);
   const n = size * size;
   // Shuffled after mount so server and first client render match.
   const [order, setOrder] = useState<number[]>(() => Array.from({ length: 9 }, (_, i) => i));
@@ -17,7 +23,7 @@ export function JigsawGame() {
   const [done, setDone] = useState(false);
   const [drag, setDrag] = useState<number | null>(null);
 
-  function reset(s: 3 | 4 = size) {
+  function reset(s: Size = size) {
     setSize(s); setOrder(shufflePieces(s * s)); setPicked(null); setDone(false);
   }
   useEffect(() => { reset(3); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -43,8 +49,8 @@ export function JigsawGame() {
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-display text-lg font-semibold"><Puzzle className="h-5 w-5 text-primary" />Monere's Jigsaw</h2>
         <div className="flex gap-1">
-          {([3, 4] as const).map((s) => (
-            <button key={s} onClick={() => reset(s)} className={`rounded-full border px-2.5 py-1 text-xs ${size === s ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{s * s} pieces</button>
+          {LEVELS.map(({ size: s, label }) => (
+            <button key={s} onClick={() => reset(s)} className={`rounded-full border px-2.5 py-1 text-xs ${size === s ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{label} · {s * s}</button>
           ))}
         </div>
       </div>
