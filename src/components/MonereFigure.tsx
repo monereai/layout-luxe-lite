@@ -38,7 +38,7 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
 export function MonereAvatar({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <span className={`relative block shrink-0 overflow-hidden rounded-full border border-primary/40 bg-secondary ${className}`}>
-      <MonereFigure gesture="wave" className="absolute left-1/2 top-0 w-[260%] -translate-x-1/2" />
+      <MonereFigure gesture="wave" showWorn={false} className="absolute left-1/2 top-0 w-[260%] -translate-x-1/2" />
     </span>
   );
 }
