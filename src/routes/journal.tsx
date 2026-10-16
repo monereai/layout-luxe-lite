@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { WisdomCards } from "@/components/WisdomCards";
 import { deleteEntry, getEntries, type Entry } from "@/lib/journal";
+import { useUserName } from "@/lib/username";
 
 export const Route = createFileRoute("/journal")({
   head: () => ({
