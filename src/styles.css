@@ -249,3 +249,10 @@
   -webkit-overflow-scrolling: touch;
   scroll-padding-bottom: calc(7rem + env(safe-area-inset-bottom));
 }
+
+/* Only for pictures that genuinely ship with a solid white background.
+   Monere's character and shop cutouts already carry real transparency, and
+   multiply against this dark canvas would turn them into a near-black silhouette. */
+@utility blend-white {
+  mix-blend-mode: multiply;
+}
