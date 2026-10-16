@@ -6,10 +6,10 @@ export type Gesture = "wave" | "think" | "thumbs" | "listen";
 
 /** Placement of each layered slot, as % of the square character box (front view). */
 const PLACE = {
-  footwear: { left: 30, top: 80, width: 40 },
-  accessory: { left: 39, top: 24, width: 22 },
-  glasses: { left: 36, top: 12, width: 24 },
-  hat: { left: 31, top: -2, width: 34 },
+  footwear: { left: 32, top: 82, width: 36 },
+  accessory: { left: 41, top: 29, width: 18 },
+  glasses: { left: 38, top: 14, width: 22 },
+  hat: { left: 36, top: -9, width: 26 },
 } as const;
 type Slot = keyof typeof PLACE;
 const ORDER: Slot[] = ["footwear", "accessory", "glasses", "hat"];
