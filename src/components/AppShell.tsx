@@ -35,10 +35,10 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
         <header className="mb-7 md:mb-6 md:border-b md:border-border md:pb-5">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <Link to="/" aria-label="MonereAI home" className="inline-flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
-              <Compass className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl md:h-16 md:w-16 border border-primary/30 bg-primary/10 text-primary">
+              <Compass className="h-8 w-8 md:h-10 md:w-10" strokeWidth={1.5} aria-hidden="true" />
             </span>
-            <span className="truncate font-display text-3xl font-semibold text-foreground">Monere<span className="text-primary">AI</span></span>
+            <span className="truncate font-display text-4xl font-semibold md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
           </Link>
           <div className="flex flex-col items-end gap-1 pt-1 text-xs">
             <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 py-0.5 pl-0.5 pr-2 font-semibold text-primary"><MonereAvatar className="h-6 w-6" /><span className="tabular-nums">{wallet}</span> pts</Link>
