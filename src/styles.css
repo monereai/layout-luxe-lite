@@ -87,6 +87,8 @@
   --glow: none;
   --shadow-gold: 0 12px 32px -12px color-mix(in oklab, var(--primary) 45%, transparent);
   --shadow-workspace: 0 16px 48px -20px color-mix(in oklab, var(--background) 85%, transparent);
+  --shadow-character: 0 18px 12px color-mix(in oklab, var(--background) 75%, transparent);
+  --character-ground: color-mix(in oklab, var(--background) 90%, transparent);
 }
 
 @theme inline {
@@ -134,9 +136,10 @@
 }
 
 .mentor-portrait { width: 280px; height: 240px; max-width: 100%; }
-.character-view { touch-action: none; user-select: none; perspective: 900px; }
-.character-transform { transform-origin: center; transition: transform 150ms ease-out; }
-@media (prefers-reduced-motion: reduce) { .character-transform { transition: none; } }
+.character-view { position: relative; touch-action: none; user-select: none; perspective: 1000px; }
+.character-transform { position: relative; transform-origin: center; transition: transform 150ms ease-out; filter: drop-shadow(var(--shadow-character)); }
+.character-ground-shadow { position: absolute; left: 50%; bottom: 3%; width: 55%; height: 8%; border-radius: 50%; background: var(--character-ground); filter: blur(12px); transition: transform 150ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .character-transform, .character-ground-shadow { transition: none; } }
 .mentor-avatar { animation: mentor-breathe 6s ease-in-out infinite; transform-origin: bottom center; }
 .mentor-compass { animation: mentor-compass-turn 50s linear infinite; }
 .mentor-spark { animation: mentor-sparkle 4s ease-in-out infinite; }
