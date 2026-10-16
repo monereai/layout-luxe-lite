@@ -3,6 +3,10 @@ export const COMBINATION_FAMILIES = [
   { id: "explorer-emerald-boots", name: "Forest Explorer", hat: "explorer-hat", outfit: "emerald-cloak", footwear: "trail-boots" },
   { id: "wizard-galaxy-skates", name: "Galaxy Wizard", hat: "wizard-hat", outfit: "galaxy-cape", footwear: "skate-classics" },
   { id: "beanie-arctic-sneakers", name: "Winter Adventurer", hat: "cozy-beanie", outfit: "arctic-cloak", footwear: "crisp-sneakers" },
+  { id: "viking-storm-boots", name: "Storm Viking", hat: "viking-helmet", outfit: "storm-cloak", footwear: "knight-boots" },
+  { id: "party-flame-sliders", name: "Party Star", hat: "party-hat", outfit: "flame-cape", footwear: "golden-sliders" },
+  { id: "halo-galaxy-rocket", name: "Galaxy Voyager", hat: "halo", outfit: "galaxy-cape", footwear: "rocket-boots" },
+  { id: "tophat-pirate-rain", name: "Dapper Pirate", hat: "top-hat", outfit: "pirate-coat", footwear: "rain-boots" },
 ] as const;
 
 type Selection = Partial<Record<"hat" | "outfit" | "footwear" | "glasses" | "accessory", string>>;

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { OnboardingModal, ONBOARDED_KEY } from "@/components/OnboardingModal";
 import { useServerFn } from "@tanstack/react-start";
@@ -157,6 +157,7 @@ function Home() {
         </>
       ) : (
         <>
+          <p className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-center font-display text-lg font-semibold text-primary">Welcome to MonereAI! Choose an option to begin.</p>
           <Treehouse>
             <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} backdrop={TREEHOUSE_BACKDROP} />
             <div className="mt-4">
@@ -177,7 +178,7 @@ function Home() {
           {ready && !premium && (
             <p className="mt-3 text-center text-xs text-muted-foreground">
               {t("freeLeft", { n: Math.max(0, FREE_DAILY_LIMIT - used), max: FREE_DAILY_LIMIT })} ·{" "}
-              <button onClick={() => setPaywall("upgrade")} className="font-semibold text-primary hover:underline">{t("getPlus")}</button>
+              <Link to="/shop" className="font-semibold text-primary hover:underline">{t("getPlus")}</Link>
             </p>
           )}
           <p className="mt-3 text-center text-xs text-muted-foreground">{t("disclaimer")}</p>

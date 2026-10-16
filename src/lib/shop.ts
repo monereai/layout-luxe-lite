@@ -35,6 +35,14 @@ import goldMedal from "@/assets/shop/gold-medal.webp";
 import goldChain from "@/assets/shop/gold-chain.webp";
 import bandana from "@/assets/shop/bandana.webp";
 import friendshipBeads from "@/assets/shop/friendship-beads.webp";
+import partyHat from "@/assets/shop/party-hat.png";
+import vikingHelmet from "@/assets/shop/viking-helmet.png";
+import starShades from "@/assets/shop/star-shades.png";
+import pirateCoat from "@/assets/shop/pirate-coat.png";
+import astroSuit from "@/assets/shop/astro-suit.png";
+import rainBoots from "@/assets/shop/rain-boots.png";
+import rocketBoots from "@/assets/shop/rocket-boots.png";
+import shellNecklace from "@/assets/shop/shell-necklace.png";
 
 export const SHOP_KEY = "monereai-shop";
 export type ShopCategory = "hat" | "glasses" | "costume" | "footwear" | "accessory";
@@ -52,6 +60,8 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "top-hat", name: "Top Hat", category: "hat", cost: 400, src: topHat },
   { id: "halo", name: "Golden Halo", category: "hat", cost: 500, src: halo },
   { id: "crown", name: "Golden Crown", category: "hat", cost: 600, src: crown },
+  { id: "party-hat", name: "Party Hat", category: "hat", cost: 90, src: partyHat },
+  { id: "viking-helmet", name: "Viking Helmet", category: "hat", cost: 450, src: vikingHelmet },
   // Footwear (6)
   { id: "crisp-sneakers", name: "Crisp White Sneakers", category: "footwear", cost: 140, src: crispSneakers },
   { id: "skate-classics", name: "Retro Skate Classics", category: "footwear", cost: 200, src: skateClassics },
@@ -59,6 +69,8 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "soccer-cleats", name: "Soccer Cleats", category: "footwear", cost: 320, src: soccerCleats },
   { id: "golden-sliders", name: "Golden Sliders", category: "footwear", cost: 400, src: goldenSliders },
   { id: "knight-boots", name: "Knight's Steel Boots", category: "footwear", cost: 500, src: knightBoots },
+  { id: "rain-boots", name: "Sunny Rain Boots", category: "footwear", cost: 160, src: rainBoots },
+  { id: "rocket-boots", name: "Rocket Boots", category: "footwear", cost: 550, src: rocketBoots },
   // Accessories (6) — worn at the neck / chest
   { id: "bandana", name: "Blue Paisley Bandana", category: "accessory", cost: 100, src: bandana },
   { id: "bow-tie", name: "Red Bow Tie", category: "accessory", cost: 130, src: bowTie },
@@ -66,9 +78,11 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "cozy-scarf", name: "Cozy Striped Scarf", category: "accessory", cost: 240, src: cozyScarf },
   { id: "gold-chain", name: "Gold Cross Chain", category: "accessory", cost: 380, src: goldChain },
   { id: "gold-medal", name: "Champion's Medal", category: "accessory", cost: 450, src: goldMedal },
+  { id: "shell-necklace", name: "Shell Necklace", category: "accessory", cost: 150, src: shellNecklace },
   // Glasses
   { id: "sunglasses", name: "Sunglasses", category: "glasses", cost: 150, src: sunglasses },
   { id: "round-specs", name: "Scholar Specs", category: "glasses", cost: 250, src: roundSpecs },
+  { id: "star-shades", name: "Star Shades", category: "glasses", cost: 200, src: starShades },
   // Costumes (12)
   { id: "storm-cloak", name: "Storm Cloak", category: "costume", cost: 300, src: stormCloak },
   { id: "crimson-cape", name: "Crimson Warrior Cape", category: "costume", cost: 350, src: crimsonCape },
@@ -82,6 +96,8 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "phoenix-wings", name: "Phoenix Wings", category: "costume", cost: 620, src: phoenixWings },
   { id: "angel-wings", name: "Angel Wings", category: "costume", cost: 700, src: angelWings },
   { id: "royal-cape", name: "Royal Cape", category: "costume", cost: 800, src: royalCape },
+  { id: "pirate-coat", name: "Pirate Captain Coat", category: "costume", cost: 480, src: pirateCoat },
+  { id: "astro-suit", name: "Astronaut Suit", category: "costume", cost: 650, src: astroSuit },
 ];
 
 export type EquipmentSlot = "hat" | "outfit" | "glasses" | "accessory" | "footwear";

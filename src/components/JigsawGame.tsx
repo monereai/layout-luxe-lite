@@ -10,6 +10,7 @@ const LEVELS = [
   { size: 3, label: "Easy" },
   { size: 4, label: "Medium" },
   { size: 5, label: "Hard" },
+  { size: 6, label: "Crazy Hard" },
 ] as const;
 type Size = (typeof LEVELS)[number]["size"];
 
