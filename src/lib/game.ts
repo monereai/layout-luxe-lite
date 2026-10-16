@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 export const GAME_KEY = "monereai-game";
-export type GameState = { points: number; detective: boolean; best: Record<string, number>; finds: Record<string, number>; mystery?: string };
+export type GameState = { points: number; detective: boolean; best: Record<string, number>; finds: Record<string, number>; mystery?: string; jigsaws?: number[] };
 const EMPTY: GameState = { points: 0, detective: false, best: {}, finds: {} };
 
 let current = EMPTY;
@@ -117,9 +117,17 @@ export function recordChapterComplete(episode: number, bonus = 100) {
 }
 
 export const JIGSAW_BONUS = 50;
-/** +50 Wisdom Points (shop wallet) for each finished jigsaw. */
-export function recordJigsaw() {
-  current = { ...current, points: current.points + JIGSAW_BONUS };
+/** Jigsaw levels unlock in order: Easy is always open; each finished level opens the next. */
+export const JIGSAW_LEVELS = [3, 4, 5] as const;
+export function jigsawUnlocked(size: number, state: GameState = current) {
+  const index = JIGSAW_LEVELS.indexOf(size as (typeof JIGSAW_LEVELS)[number]);
+  if (index <= 0) return index === 0;
+  return (state.jigsaws ?? []).includes(JIGSAW_LEVELS[index - 1]!);
+}
+/** +50 Wisdom Points (shop wallet) for each finished jigsaw; remembers the level so the next unlocks. */
+export function recordJigsaw(size?: number) {
+  const done = current.jigsaws ?? [];
+  current = { ...current, points: current.points + JIGSAW_BONUS, jigsaws: size !== undefined && !done.includes(size) ? [...done, size] : done };
   save();
   return JIGSAW_BONUS;
 }
