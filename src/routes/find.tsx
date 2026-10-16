@@ -148,8 +148,8 @@ function FindGame() {
               <button
                 key={`${idx}-${i}`}
                 onClick={() => tap(i)}
-                aria-label={isFound ? "Mini-Monere found" : "Hidden spot"}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${isFound ? "ring-2 ring-primary" : ""}`}
+                aria-label={isFound ? "Mini-Monere found" : hint === i ? "Monere's clue points here" : "Hidden spot"}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${isFound ? "ring-2 ring-primary" : ""} ${hint === i ? "ring-4 ring-primary motion-safe:animate-pulse ring-offset-4 ring-offset-background" : ""}`}
                 style={{ left: `${s.x}%`, top: `${s.y}%`, width: `${s.size}%` }}
               >
                 <img
