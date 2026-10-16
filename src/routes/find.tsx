@@ -72,7 +72,7 @@ function FindGame() {
       setToast(`Find ${MAP_UNLOCK_FINDS} Mini-Moneres in ${SCENES[next - 1]!.name} to unlock ${SCENES[next]!.name}!`);
       return;
     }
-    setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false);
+    setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false); setHint(null);
   }
 
   function tap(i: number) {
