@@ -47,13 +47,20 @@ export function MonereFigure({ gesture = "wave", className = "", alt = "", bareB
   const items = equippedItems(useShop());
   const frame = useCharacterFrame();
   const kind = bareBase ? "bare" : outfit.id === "default" ? "pose" : "full";
+  const costume = items.find((i) => i.category === "costume");
+  /** Full pre-drawn picture of Monere wearing the costume, used for the front view. */
+  const fullCostume = costume ? `/monere/costumes/${costume.id}.webp` : null;
+  const front = frame === 0;
   return (
     <div style={{ clipPath: "inset(-60% -60% 0 -60%)" }} className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
-      {items.filter((i) => i.category === "costume").map((i) => <Layer key={i.id} item={i} kind={kind} />)}
+      {costume && !(fullCostume && front) && <Layer key={costume.id} item={costume} kind={kind} />}
+      {fullCostume && (
+        <img data-full-costume={costume!.id} src={fullCostume} alt="" aria-hidden="true" draggable={false} className={`pointer-events-none absolute inset-0 z-10 h-full w-full object-contain ${bareBase ? "" : "scale-[0.9] translate-y-[8%]"} ${front ? "opacity-100" : "opacity-0"}`} />
+      )}
       {bareBase ? Array.from({ length: 8 }, (_, index) => (
-        <img key={index} src={`/monere/bare/${index}.webp`} alt="" aria-hidden="true" draggable={false} className={`pointer-events-none absolute inset-0 z-0 h-full w-full object-contain transition-opacity duration-150 motion-reduce:transition-none ${frame === index ? "opacity-100" : "opacity-0"}`} />
+        <img key={index} src={`/monere/bare/${index}.webp`} alt="" aria-hidden="true" draggable={false} className={`pointer-events-none absolute inset-0 z-0 h-full w-full object-contain transition-opacity duration-150 motion-reduce:transition-none ${frame === index && !(fullCostume && index === 0) ? "opacity-100" : "opacity-0"}`} />
       )) : kind === "full" ? (
-        <img src={outfit.src} alt="" aria-hidden="true" className={`absolute inset-0 h-full w-full object-contain ${frame === 0 ? "opacity-100" : "opacity-0"}`} />
+        <img src={outfit.src} alt="" aria-hidden="true" className={`absolute inset-0 h-full w-full object-contain ${front && !fullCostume ? "opacity-100" : "opacity-0"}`} />
       ) : (
         (Object.keys(GESTURES) as Gesture[]).map((g) => (
           <img
@@ -62,14 +69,14 @@ export function MonereFigure({ gesture = "wave", className = "", alt = "", bareB
             alt=""
             aria-hidden="true"
             decoding="async"
-            className={`gesture-frame absolute inset-0 h-full w-full object-contain ${g === gesture && frame === 0 ? "gesture-on" : ""}`}
+            className={`gesture-frame absolute inset-0 h-full w-full object-contain ${g === gesture && front && !fullCostume ? "gesture-on" : ""}`}
           />
         ))
       )}
       {!bareBase && Array.from({ length: 7 }, (_, index) => index + 1).map((index) => (
         <img key={index} src={`/monere/spin/${index}.webp`} alt="" aria-hidden="true" draggable={false} className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-150 motion-reduce:transition-none ${frame === index ? "opacity-100" : "opacity-0"}`} />
       ))}
-      {items.filter((i) => i.category !== "costume").map((i) => <Layer key={i.id} item={i} kind={kind} />)}
+      {items.filter((i) => i.category !== "costume").map((i) => <Layer key={i.id} item={i} kind={fullCostume && front ? "bare" : kind} />)}
     </div>
   );
 }
