@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { COMBINATION_FAMILIES, combinationLook } from "@/lib/shop-combinations";
+import { equip, type ShopState } from "@/lib/shop";
 
 describe("complete clothing pictures", () => {
   for (const family of COMBINATION_FAMILIES) {
@@ -21,4 +22,22 @@ describe("complete clothing pictures", () => {
       });
     });
   }
+});
+describe("any selection stays equipped", () => {
+  it("keeps unrelated items together and shows the closest complete look", () => {
+    expect(combinationLook({ hat: "cowboy-hat", outfit: "flame-cape", footwear: "golden-sliders" })).toBe("flame-cape");
+    expect(combinationLook({ hat: "top-hat", glasses: "sunglasses" })).toBe("top-hat");
+    expect(combinationLook({ glasses: "round-specs", accessory: "bow-tie" })).toBe("round-specs");
+  });
+
+  it("equipping and removing items never discards other slots", () => {
+    let state: ShopState = { spent: 0, owned: ["cowboy-hat", "flame-cape", "golden-sliders", "sunglasses"], equipped: {} };
+    state = equip(state, "hat", "cowboy-hat");
+    state = equip(state, "costume", "flame-cape");
+    state = equip(state, "footwear", "golden-sliders");
+    state = equip(state, "glasses", "sunglasses");
+    expect(state.equipped).toEqual({ hat: "cowboy-hat", outfit: "flame-cape", footwear: "golden-sliders", glasses: "sunglasses" });
+    state = equip(state, "costume", null);
+    expect(state.equipped).toEqual({ hat: "cowboy-hat", footwear: "golden-sliders", glasses: "sunglasses" });
+  });
 });

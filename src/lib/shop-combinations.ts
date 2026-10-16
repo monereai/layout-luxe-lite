@@ -6,15 +6,23 @@ export const COMBINATION_FAMILIES = [
 ] as const;
 
 type Selection = Partial<Record<"hat" | "outfit" | "footwear" | "glasses" | "accessory", string>>;
-export function combinationLook(equipped: Selection): string | null {
+
+/**
+ * Every selection is wearable. Returns the exact combination picture when one
+ * exists, otherwise the closest complete look: the outfit picture, then the
+ * hat, then footwear, glasses, accessory, and finally the default look.
+ */
+export function combinationLook(equipped: Selection): string {
   const ids = Object.values(equipped).filter((id): id is string => typeof id === "string");
   if (!ids.length) return "default";
   if (ids.length === 1) return ids[0] ?? "default";
-  if (ids.length === 2) {
-    const family = COMBINATION_FAMILIES.find((f) => ids.every((id) => [f.hat, f.outfit, f.footwear].some((value) => value === id)));
+  const family = COMBINATION_FAMILIES.find((f) => ids.every((id) => [f.hat, f.outfit, f.footwear].some((value) => value === id)));
+  if (family) {
+    if (ids.length >= 3 && equipped.hat === family.hat && equipped.outfit === family.outfit && equipped.footwear === family.footwear) {
+      return `combo-${family.id}`;
+    }
     const slots = (["hat", "outfit", "footwear"] as const).filter((slot) => equipped[slot]);
-    return family ? `combo-${family.id}-${slots.join("-")}` : null;
+    if (slots.length === 2) return `combo-${family.id}-${slots.join("-")}`;
   }
-  const family = COMBINATION_FAMILIES.find((f) => ids.length === 3 && equipped.hat === f.hat && equipped.outfit === f.outfit && equipped.footwear === f.footwear);
-  return family ? `combo-${family.id}` : null;
+  return equipped.outfit ?? equipped.hat ?? equipped.footwear ?? equipped.glasses ?? equipped.accessory ?? "default";
 }

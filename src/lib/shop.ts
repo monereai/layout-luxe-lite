@@ -1,5 +1,4 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { combinationLook } from "@/lib/shop-combinations";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
 import amberSnapback from "@/assets/shop/amber-snapback.webp";
@@ -97,10 +96,6 @@ export function normalizeEquipment(state: ShopState): ShopState {
       equipped[slot] = item.id;
     }
   }
-  if (!combinationLook(equipped)) {
-    const first = Object.entries(equipped)[0];
-    return { ...state, equipped: first ? { [first[0]]: first[1] } : {} };
-  }
   return { ...state, equipped };
 }
 const EMPTY: ShopState = { spent: 0, owned: [], equipped: {} };
@@ -119,7 +114,7 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   return equip(purchased, item.category, itemId);
 }
 
-/** Keep supported complete-picture combinations; never silently remove another slot. */
+/** Every selection is wearable: equipping keeps all other slots; null removes just that slot. */
 export function equip(state: ShopState, category: ShopCategory, itemId: string | null): ShopState {
   const item = SHOP_ITEMS.find((item) => item.id === itemId);
   if (itemId && (!state.owned.includes(itemId) || item?.category !== category)) return state;
@@ -127,7 +122,6 @@ export function equip(state: ShopState, category: ShopCategory, itemId: string |
   const equipped = { ...normalizeEquipment(state).equipped };
   if (itemId) equipped[slot] = itemId;
   else delete equipped[slot];
-  if (!combinationLook(equipped)) return state;
   return { ...state, equipped };
 }
 

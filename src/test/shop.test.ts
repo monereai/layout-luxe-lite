@@ -10,9 +10,9 @@ describe("points shop", () => {
     expect(next.equipped).toEqual({ hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" });
     expect(equippedItems(next).map((item) => item.id)).toEqual(owned);
   });
-  it("does not drop items when the combination has no picture", () => {
+  it("keeps every item equipped even when the combination has no picture", () => {
     const state = { ...empty, owned: ["crown", "royal-cape"], equipped: { hat: "crown" } };
-    expect(equip(state, "costume", "royal-cape")).toBe(state);
+    expect(equip(state, "costume", "royal-cape").equipped).toEqual({ hat: "crown", outfit: "royal-cape" });
   });
   it("rejects a glasses item placed in the hat slot", () => {
     const state = { ...empty, owned: ["sunglasses"] };

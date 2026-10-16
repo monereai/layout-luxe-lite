@@ -48,12 +48,7 @@ function ShopPage() {
   }
 
   function wear(category: ShopCategory, id: string | null) {
-    const next = equip(shop, category, id);
-    if (next === shop && id) {
-      toast.info("No combination picture for these items yet. Take off the other items first, or choose matching items below.");
-      return;
-    }
-    saveShop(next);
+    saveShop(equip(shop, category, id));
   }
 
   return (
