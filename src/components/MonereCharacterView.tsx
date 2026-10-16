@@ -86,7 +86,7 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
         }}
       >
         <div aria-hidden="true" className="character-ground-shadow pointer-events-none" style={{ transform: `translate(-50%, 0) scale(${view.scale})` }} />
-        <div data-frame={frame} data-rotation={view.rotation} className="character-transform relative pointer-events-none h-full w-full" style={{ transform: `translate(${view.x}px, ${view.y}px) rotateY(${characterFrameTilt(view.rotation)}deg) scale(${view.scale})`, transformStyle: "preserve-3d" }}>
+        <div data-frame={frame} data-rotation={view.rotation} className="character-transform relative pointer-events-none h-full w-full" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}>
           <CharacterFrameContext.Provider value={frame}>{children}</CharacterFrameContext.Provider>
         </div>
       </div>
