@@ -14,14 +14,11 @@ describe("complete clothing pictures", () => {
       ];
       const suffixes = ["-hat-outfit", "-hat-footwear", "-outfit-footwear", ""];
       selections.forEach((selection, index) => {
-        const expected = `combo-${family.id}${suffixes[index]}`;
-        expect(combinationLook(selection)).toBe(expected);
-        // Families without their own turnaround art fall back to the closest
-        // complete look at display time, so only check frames that exist.
-        if (existsSync(`public/monere/looks/${expected}`)) {
-          for (let frame = 0; frame < 8; frame++) {
-            expect(existsSync(`public/monere/looks/${expected}/${frame}.webp`)).toBe(true);
-          }
+        const look = combinationLook(selection);
+        if (hasCombinationArt(family.id)) expect(look).toBe(`combo-${family.id}${suffixes[index]}`);
+        // Every returned look must have all eight turnaround frames on disk.
+        for (let frame = 0; frame < 8; frame++) {
+          expect(existsSync(`public/monere/looks/${look}/${frame}.webp`)).toBe(true);
         }
       });
     });

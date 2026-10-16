@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { equippedItems, useShop } from "@/lib/shop";
-import { COMBINATION_FAMILIES, combinationLook } from "@/lib/shop-combinations";
+import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { useCharacterFrame } from "@/lib/character-frame";
 
 export type Gesture = "wave" | "think" | "thumbs" | "listen";
@@ -15,8 +15,7 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
   const shown = missing ? "default" : look;
   const activeImageSrc = `/monere/looks/${shown}/${frame}.webp`;
   // Items equipped but not drawn in the current complete picture still show as worn badges.
-  const family = COMBINATION_FAMILIES.find((f) => shown.startsWith(`combo-${f.id}`));
-  const drawn = new Set<string>(family ? [family.hat, family.outfit, family.footwear] : [shown]);
+  const drawn = new Set<string>(itemsDrawnIn(shown, shop.equipped));
   const extra = showWorn ? equippedItems(shop).filter((item) => item && !drawn.has(item.id)) : [];
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
