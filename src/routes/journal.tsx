@@ -43,7 +43,7 @@ function Journal() {
       </div>
       {entries.length === 0 ? (
         <div className="surface-card mt-8 p-8 text-center">
-          <p className="text-muted-foreground">Nothing saved yet.</p>
+          <p className="text-muted-foreground">{name ? `${name}, nothing saved yet.` : "Nothing saved yet."}</p>
           <Link to="/" className="btn-gold mt-4 inline-block px-5 py-2.5 text-sm">Seek wisdom</Link>
         </div>
       ) : (
