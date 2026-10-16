@@ -9,5 +9,5 @@ export function usePointsWallet() {
   const shop = useShop();
   const properties = useProperties();
   const { bonusPoints } = usePlan();
-  return walletBalance(game.points + bonusPoints, shop, properties.spent);
+  return walletBalance(game.points + bonusPoints, shop, properties.spent + (game.hintsSpent ?? 0));
 }

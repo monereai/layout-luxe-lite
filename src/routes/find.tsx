@@ -5,8 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
-  COMPLETION_BONUS, MAP_UNLOCK_FINDS, MINI_COUNT, POINTS_PER_MINI,
-  allMapsComplete, makeSpots, mapUnlocked, recordMystery, recordComplete, recordMini, useGame, type Spot,
+  COMPLETION_BONUS, HINT_COST, MAP_UNLOCK_FINDS, MINI_COUNT, POINTS_PER_MINI,
+  allMapsComplete, makeSpots, mapUnlocked, recordHintSpend, recordMystery, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
 import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
@@ -51,13 +51,28 @@ function FindGame() {
   const [won, setWon] = useState(false);
   const shop = useShop();
   const [mystery, setMystery] = useState<ShopItem | null>(null);
+  const [hint, setHint] = useState<number | null>(null);
+
+  /** Spend 20 Wisdom Points to pulse a clue ring around one unfound Mini-Monere. */
+  function showHint() {
+    if (won || hint !== null) return;
+    if (wallet < HINT_COST) {
+      setToast(`A hint costs ${HINT_COST} Wisdom Points — find more Mini-Moneres first!`);
+      return;
+    }
+    const remaining = spots.map((_, i) => i).filter((i) => !found.has(i));
+    if (!remaining.length) return;
+    recordHintSpend();
+    setHint(remaining[Math.floor(Math.random() * remaining.length)]!);
+    setTimeout(() => setHint(null), 3500);
+  }
 
   function newRound(next = idx) {
     if (next !== idx && !mapUnlocked(game.finds, next === 0 ? undefined : SCENES[next - 1]!.id)) {
       setToast(`Find ${MAP_UNLOCK_FINDS} Mini-Moneres in ${SCENES[next - 1]!.name} to unlock ${SCENES[next]!.name}!`);
       return;
     }
-    setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false);
+    setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false); setHint(null);
   }
 
   function tap(i: number) {
@@ -112,6 +127,16 @@ function FindGame() {
         </div>
       </div>
 
+      <div className="mt-2 flex justify-center">
+        <button
+          onClick={showHint}
+          disabled={hint !== null || won || found.size >= MINI_COUNT}
+          className="rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          💡 Monere's Hint — {HINT_COST} points
+        </button>
+      </div>
+
       <p className="mt-2 min-h-5 text-center text-sm font-medium text-primary" aria-live="polite">{toast}</p>
 
       <div className="mt-1 overflow-auto rounded-2xl border border-border">
@@ -123,8 +148,8 @@ function FindGame() {
               <button
                 key={`${idx}-${i}`}
                 onClick={() => tap(i)}
-                aria-label={isFound ? "Mini-Monere found" : "Hidden spot"}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${isFound ? "ring-2 ring-primary" : ""}`}
+                aria-label={isFound ? "Mini-Monere found" : hint === i ? "Monere's clue points here" : "Hidden spot"}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${isFound ? "ring-2 ring-primary" : ""} ${hint === i ? "ring-4 ring-primary motion-safe:animate-pulse ring-offset-4 ring-offset-background" : ""}`}
                 style={{ left: `${s.x}%`, top: `${s.y}%`, width: `${s.size}%` }}
               >
                 <img
