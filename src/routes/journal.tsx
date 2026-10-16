@@ -23,6 +23,7 @@ export const Route = createFileRoute("/journal")({
 function Journal() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [open, setOpen] = useState<string | null>(null);
+  const name = useUserName();
   useEffect(() => setEntries(getEntries()), []);
   return (
     <AppShell>
