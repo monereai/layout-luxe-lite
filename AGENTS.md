@@ -20,4 +20,4 @@
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
 - Keep complete shop-look frames under public/monere/looks and render one image in MonereFigure, with no accessory layers. Why: each selected item forms one cohesive character at every angle.
 - Keep home and Points Shop rotation/zoom on the existing MonereCharacterView parent. Why: complete images share the same turn-around interaction without flattening.
-- Normalize shop equipment to one complete look, migrate legacy costume into outfit, and preserve owned items and spend in the existing storage key. Why: previous purchases remain available while selection replaces the whole look.
+- Resolve shop equipment through the supported combination catalog, migrate legacy costume into outfit, and preserve owned items and spend in the existing storage key. Why: displayed complete art must match every equipped slot; unavailable combinations cannot silently discard selections.

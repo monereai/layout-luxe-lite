@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { combinationLook } from "@/lib/shop-combinations";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
 import amberSnapback from "@/assets/shop/amber-snapback.webp";
@@ -93,9 +94,12 @@ export function normalizeEquipment(state: ShopState): ShopState {
     const id = state.equipped[slot] ?? (slot === "outfit" ? state.equipped.costume : undefined);
     const item = SHOP_ITEMS.find((item) => item.id === id);
     if (item && state.owned.includes(item.id) && equipmentSlot(item.category) === slot) {
-      for (const previous of Object.keys(equipped) as EquipmentSlot[]) delete equipped[previous];
       equipped[slot] = item.id;
     }
+  }
+  if (!combinationLook(equipped)) {
+    const first = Object.entries(equipped)[0];
+    return { ...state, equipped: first ? { [first[0]]: first[1] } : {} };
   }
   return { ...state, equipped };
 }
@@ -111,15 +115,19 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   const item = SHOP_ITEMS.find((i) => i.id === itemId);
   if (!item || state.owned.includes(itemId)) return null;
   if (walletBalance(earned, state) < item.cost) return null;
-  return equip({ ...state, spent: state.spent + item.cost, owned: [...state.owned, itemId] }, item.category, itemId);
+  const purchased = { ...state, spent: state.spent + item.cost, owned: [...state.owned, itemId] };
+  return equip(purchased, item.category, itemId);
 }
 
-/** Equip one complete look, replacing all other slots; null restores the default. */
+/** Keep supported complete-picture combinations; never silently remove another slot. */
 export function equip(state: ShopState, category: ShopCategory, itemId: string | null): ShopState {
   const item = SHOP_ITEMS.find((item) => item.id === itemId);
   if (itemId && (!state.owned.includes(itemId) || item?.category !== category)) return state;
   const slot = equipmentSlot(category);
-  const equipped = itemId ? { [slot]: itemId } : {};
+  const equipped = { ...normalizeEquipment(state).equipped };
+  if (itemId) equipped[slot] = itemId;
+  else delete equipped[slot];
+  if (!combinationLook(equipped)) return state;
   return { ...state, equipped };
 }
 
