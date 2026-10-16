@@ -12,11 +12,10 @@ export const POINT_PACKS: { id: PackId; name: string; points: number; price: str
 export type Tier = "plus" | "club";
 export type Interval = "monthly" | "yearly";
 
-// Paste PayPal plan IDs (P-...) here once created in PayPal → Subscriptions → Plans.
-export const PLUS_MONTHLY_PLAN_ID = "";
-export const PLUS_YEARLY_PLAN_ID = "";
-export const CLUB_MONTHLY_PLAN_ID = "";
-export const CLUB_YEARLY_PLAN_ID = "";
+export const PLUS_MONTHLY_PLAN_ID = "P-8RF58833D7897102MNLJFCHI";
+export const PLUS_YEARLY_PLAN_ID = "P-5JH18751UE3434140NLJFCHQ";
+export const CLUB_MONTHLY_PLAN_ID = "P-32C74283MR221461ENLJFCHY";
+export const CLUB_YEARLY_PLAN_ID = "P-07J4782826302621CNLJFCIA";
 
 export const MEMBERSHIPS: { tier: Tier; name: string; monthly: string; yearly: string; points: number; perks: string[]; badge?: string; plans: Record<Interval, string> }[] = [
   { tier: "plus", name: "Monere Plus", monthly: "2.99", yearly: "24.99", points: 250, perks: ["Unlimited Storyteller access", "250 Outfit Points every month"], plans: { monthly: PLUS_MONTHLY_PLAN_ID, yearly: PLUS_YEARLY_PLAN_ID } },
