@@ -58,8 +58,9 @@ function ShopPage() {
           </div>
         </div>
 
-        <div className="mb-5 flex justify-center rounded-lg border border-border bg-card/60 py-3">
-          <div className="h-80 w-80 max-w-full">
+        <div className="relative mb-5 flex justify-center overflow-hidden rounded-lg border border-border bg-card/60 py-3">
+          <img src="/monere/shop-interior.jpg" alt="" aria-hidden="true" loading="lazy" width={1024} height={1024} className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45" />
+          <div className="relative h-80 w-80 max-w-full">
             <MonereCharacterView>
               <MonereFigure bareBase alt="Monere wearing your equipped items" className="h-full w-full" />
             </MonereCharacterView>
