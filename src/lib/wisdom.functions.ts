@@ -107,6 +107,7 @@ export const seekWisdom = createServerFn({ method: "POST" })
       input.push({ role: "user", content: `Follow-up question: ${data.followUp}` });
     }
 
+    const attempt = async (): Promise<{ ok: true; wisdom: Wisdom } | { ok: false; error: string; retry: boolean }> => {
     const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" },
@@ -116,11 +117,63 @@ export const seekWisdom = createServerFn({ method: "POST" })
         input,
         stream: true,
         store: false,
-        reasoning: { effort: "low", summary: "auto" },
-        include: ["reasoning.encrypted_content"],
+        reasoning: { effort: "low" },
         text: { format: { type: "json_schema", name: "wisdom", strict: true, schema } },
       }),
     });
+
+    if (!res.ok || !res.body) {
+      if (res.status === 429) return { ok: false, retry: false, error: "Lots of people are seeking wisdom right now. Please try again in a minute." };
+      if (res.status === 402) return { ok: false, retry: false, error: "The app has run out of AI credits for now. Please try again later." };
+      return { ok: false, retry: true, error: "Something went wrong while reflecting. Please try again." };
+    }
+
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+    let text = "";
+    let doneText = "";
+    let failed = false;
+    const handle = (line: string) => {
+      if (!line.startsWith("data:")) return;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") return;
+      try {
+        const ev = JSON.parse(payload);
+        if (ev.type === "response.output_text.delta") text += ev.delta ?? "";
+        if (ev.type === "response.output_text.done" && typeof ev.text === "string") doneText = ev.text;
+        if (ev.type === "error" || ev.type === "response.failed" || ev.type === "response.incomplete") failed = true;
+      } catch {
+        /* ignore partial */
+      }
+    };
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop() ?? "";
+      lines.forEach(handle);
+    }
+    buf += dec.decode();
+    buf.split("\n").forEach(handle);
+
+    for (const candidate of [doneText, text]) {
+      if (!candidate.trim()) continue;
+      try {
+        return { ok: true, wisdom: JSON.parse(candidate) as Wisdom };
+      } catch {
+        /* try next */
+      }
+    }
+    console.error("seekWisdom parse failed", { failed, len: text.length, tail: text.slice(-200) });
+    return { ok: false, retry: true, error: "We couldn't put that advice together. Please try again." };
+    };
+
+    let result = await attempt();
+    if (!result.ok && result.retry) result = await attempt();
+    return result.ok ? result : { ok: false, error: result.error };
+  });
 
     if (!res.ok || !res.body) {
       if (res.status === 429) return { ok: false, error: "Lots of people are seeking wisdom right now. Please try again in a minute." };
