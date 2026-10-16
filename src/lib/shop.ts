@@ -86,7 +86,7 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export type EquipmentSlot = "hat" | "outfit" | "glasses" | "accessory" | "footwear";
 export function equipmentSlot(category: ShopCategory): EquipmentSlot { return category === "costume" ? "outfit" : category; }
-export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>> };
+export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>>; comboUnlocked?: string[] };
 export function normalizeEquipment(state: ShopState): ShopState {
   const equipped: ShopState["equipped"] = {};
   for (const slot of ["hat", "outfit", "glasses", "accessory", "footwear"] as const) {
@@ -141,7 +141,12 @@ function load() {
   try {
     const p = JSON.parse(localStorage.getItem(SHOP_KEY) ?? "null");
     if (p && typeof p.spent === "number" && Array.isArray(p.owned)) {
-      current = normalizeEquipment({ spent: p.spent, owned: p.owned, equipped: p.equipped ?? {} });
+      current = normalizeEquipment({
+        spent: p.spent,
+        owned: p.owned,
+        equipped: p.equipped ?? {},
+        comboUnlocked: Array.isArray(p.comboUnlocked) ? p.comboUnlocked : [],
+      });
       listeners.forEach((l) => l());
     }
   } catch { /* ignore */ }
