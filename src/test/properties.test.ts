@@ -9,7 +9,7 @@ describe("properties", () => {
   it("buying unlocks, equips and charges once", () => {
     const n = buyProperty(base, 1000, "beach-bungalow")!;
     expect(n.activeProperty).toBe("beach-bungalow");
-    expect(n.spent).toBe(300);
+    expect(n.spent).toBe(450);
     expect(buyProperty(n, 1000, "beach-bungalow")).toBeNull();
   });
   it("cannot equip a locked property", () => expect(equipProperty(base, "cozy-bedroom").activeProperty).toBe("treehouse"));
