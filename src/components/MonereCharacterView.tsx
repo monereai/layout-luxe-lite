@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { INITIAL_CHARACTER_VIEW, characterFrame, characterFrameTilt, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
+import { INITIAL_CHARACTER_VIEW, characterFrame, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
 import { useLang } from "@/lib/i18n";
 import { CharacterFrameContext } from "@/lib/character-frame";
 
