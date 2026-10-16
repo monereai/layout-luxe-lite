@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Award, Check, Footprints, Gem, Glasses, GraduationCap, Lock, Sparkles } from "lucide-react";
+import { Award, Check, Footprints, Gem, Glasses, GraduationCap, Home, Lock, Sparkles } from "lucide-react";
+import { PROPERTIES, buyProperty, equipProperty, saveProperties, useProperties } from "@/lib/properties";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { MonereFigure } from "@/components/MonereFigure";
@@ -41,7 +42,8 @@ function ShopPage() {
   const shop = useShop();
   const { bonusPoints } = usePlan();
   const earned = game.points + bonusPoints;
-  const wallet = walletBalance(earned, shop);
+  const props = useProperties();
+  const wallet = Math.max(0, walletBalance(earned, shop) - props.spent);
 
   function purchase(id: string) {
     const next = buy(shop, earned, id);
@@ -108,11 +110,36 @@ function ShopPage() {
           </div>
         </section>
         <Tabs defaultValue="hat">
-          <TabsList className="grid h-auto w-full grid-cols-5 gap-1 p-1">
+          <TabsList className="grid h-auto w-full grid-cols-3 gap-1 p-1 sm:grid-cols-6">
             {CATS.map(({ id, label, icon: Icon }) => (
               <TabsTrigger key={id} value={id} className="min-h-11 gap-1 text-xs"><Icon className="h-4 w-4" />{label}</TabsTrigger>
             ))}
+            <TabsTrigger value="habitats" className="min-h-11 gap-1 text-xs"><Home className="h-4 w-4" />Habitats</TabsTrigger>
           </TabsList>
+          <TabsContent value="habitats">
+            <div className="grid grid-cols-2 gap-3">
+              {PROPERTIES.map((p) => {
+                const owned = props.unlockedProperties.includes(p.id);
+                const on = props.activeProperty === p.id;
+                return (
+                  <div key={p.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
+                    <img src={p.src ?? "/treehouse-watermark.webp"} alt={p.name} loading="lazy" width={816} height={816} className="mb-2 aspect-square w-full rounded-md object-cover" />
+                    <p className="text-sm font-semibold">{p.name}</p>
+                    <p className="mb-3 text-xs text-muted-foreground">{p.cost ? `${p.cost} pts` : "Free"}</p>
+                    {on ? (
+                      <Button size="sm" variant="secondary" className="mt-auto" disabled><Check /> Equipped</Button>
+                    ) : owned ? (
+                      <Button size="sm" variant="outline" className="mt-auto" onClick={() => saveProperties(equipProperty(props, p.id))}>Equip</Button>
+                    ) : (
+                      <Button size="sm" className="mt-auto" disabled={wallet < p.cost} onClick={() => { const next = buyProperty(props, wallet, p.id); if (next) { saveProperties(next); toast.success(`${p.name} unlocked and equipped!`); } }}>
+                        {wallet < p.cost && <Lock />} Buy for {p.cost} pts
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </TabsContent>
           {CATS.map(({ id }) => (
             <TabsContent key={id} value={id}>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
