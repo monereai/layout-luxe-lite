@@ -84,7 +84,18 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "royal-cape", name: "Royal Cape", category: "costume", cost: 800, src: royalCape },
 ];
 
-export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<ShopCategory, string>> };
+export type EquipmentSlot = "hat" | "outfit" | "glasses" | "accessory" | "footwear";
+export function equipmentSlot(category: ShopCategory): EquipmentSlot { return category === "costume" ? "outfit" : category; }
+export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>> };
+export function normalizeEquipment(state: ShopState): ShopState {
+  const equipped: ShopState["equipped"] = {};
+  for (const slot of ["hat", "outfit", "glasses", "accessory", "footwear"] as const) {
+    const id = state.equipped[slot] ?? (slot === "outfit" ? state.equipped.costume : undefined);
+    const item = SHOP_ITEMS.find((item) => item.id === id);
+    if (item && state.owned.includes(item.id) && equipmentSlot(item.category) === slot) equipped[slot] = item.id;
+  }
+  return { ...state, equipped };
+}
 const EMPTY: ShopState = { spent: 0, owned: [], equipped: {} };
 
 /** Wallet balance = points earned in "Where's Monere?" minus points spent in the shop. */
@@ -97,15 +108,17 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   const item = SHOP_ITEMS.find((i) => i.id === itemId);
   if (!item || state.owned.includes(itemId)) return null;
   if (walletBalance(earned, state) < item.cost) return null;
-  return { spent: state.spent + item.cost, owned: [...state.owned, itemId], equipped: { ...state.equipped, [item.category]: itemId } };
+  return equip({ ...state, spent: state.spent + item.cost, owned: [...state.owned, itemId] }, item.category, itemId);
 }
 
 /** Equip an owned item (one per category) or pass null to take that category off. */
 export function equip(state: ShopState, category: ShopCategory, itemId: string | null): ShopState {
-  if (itemId && !state.owned.includes(itemId)) return state;
-  const equipped = { ...state.equipped };
-  if (itemId) equipped[category] = itemId;
-  else delete equipped[category];
+  const item = SHOP_ITEMS.find((item) => item.id === itemId);
+  if (itemId && (!state.owned.includes(itemId) || item?.category !== category)) return state;
+  const equipped = { ...normalizeEquipment(state).equipped };
+  const slot = equipmentSlot(category);
+  if (itemId) equipped[slot] = itemId;
+  else delete equipped[slot];
   return { ...state, equipped };
 }
 
@@ -114,8 +127,8 @@ let loaded = false;
 const listeners = new Set<() => void>();
 
 export function saveShop(next: ShopState) {
-  current = next;
-  try { localStorage.setItem(SHOP_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  current = normalizeEquipment(next);
+  try { localStorage.setItem(SHOP_KEY, JSON.stringify(current)); } catch { /* ignore */ }
   listeners.forEach((l) => l());
 }
 
@@ -125,7 +138,7 @@ function load() {
   try {
     const p = JSON.parse(localStorage.getItem(SHOP_KEY) ?? "null");
     if (p && typeof p.spent === "number" && Array.isArray(p.owned)) {
-      current = { spent: p.spent, owned: p.owned, equipped: p.equipped ?? {} };
+      current = normalizeEquipment({ spent: p.spent, owned: p.owned, equipped: p.equipped ?? {} });
       listeners.forEach((l) => l());
     }
   } catch { /* ignore */ }
@@ -138,7 +151,7 @@ export function useShop() {
 }
 
 export function equippedItems(state: ShopState) {
-  return (Object.values(state.equipped).filter(Boolean) as string[])
+  return (Object.values(normalizeEquipment(state).equipped).filter(Boolean) as string[])
     .map((id) => SHOP_ITEMS.find((i) => i.id === id))
     .filter((i): i is ShopItem => !!i);
 }
@@ -150,6 +163,7 @@ export const MYSTERY_CATEGORIES: ShopCategory[] = ["hat", "costume", "footwear",
 export function grantMystery(state: ShopState, rand: () => number = Math.random): { state: ShopState; item: ShopItem } | null {
   const pool = SHOP_ITEMS.filter((i) => MYSTERY_CATEGORIES.includes(i.category) && !state.owned.includes(i.id));
   if (!pool.length) return null;
-  const item = pool[Math.min(pool.length - 1, Math.floor(rand() * pool.length))]!;
-  return { item, state: { ...state, owned: [...state.owned, item.id], equipped: { ...state.equipped, [item.category]: item.id } } };
+  const item = pool[Math.min(pool.length - 1, Math.floor(rand() * pool.length))];
+  if (!item) return null;
+  return { item, state: equip({ ...state, owned: [...state.owned, item.id] }, item.category, item.id) };
 }
