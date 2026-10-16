@@ -8,7 +8,7 @@ import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
-import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";

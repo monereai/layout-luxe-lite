@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
-import { SHOP_ITEMS, buy, equip, equippedItems, normalizeEquipment, walletBalance } from "@/lib/shop";
+import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equippedItems, normalizeEquipment, walletBalance } from "@/lib/shop";
 
 const empty = { spent: 0, owned: [], equipped: {} };
 
