@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
-import { SHOP_ITEMS, buy, equip, equippedItems, normalizeEquipment, unlockCombo, walletBalance } from "@/lib/shop";
+import { SHOP_ITEMS, buy, equip, equippedItems, normalizeEquipment, walletBalance } from "@/lib/shop";
 
 const empty = { spent: 0, owned: [], equipped: {} };
 
@@ -79,19 +79,20 @@ describe("points shop", () => {
   it("cannot equip an unowned item", () => {
     expect(equip(empty, "costume", "hero-cape").equipped.costume).toBeUndefined();
   });
-  it("each clothing combination costs 150 points to wear", () => {
+  it("every clothing combination is free to wear once its items are owned", () => {
     expect(COMBINATION_FAMILIES).toHaveLength(4);
-    for (const f of COMBINATION_FAMILIES) expect(f.cost).toBe(150);
+    const state = { ...empty, owned: ["crown", "hero-cape", "crisp-sneakers"] };
+    const worn = equip(equip(equip(state, "hat", "crown"), "costume", "hero-cape"), "footwear", "crisp-sneakers");
+    expect(worn.spent).toBe(0);
+    expect(worn.equipped).toEqual({ hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" });
   });
-  it("wearing a combination charges its 150 points once and remembers it", () => {
-    const unlocked = unlockCombo({ ...empty, owned: ["crown", "hero-cape", "crisp-sneakers"] }, 150, "crown-hero-sneakers");
-    expect(unlocked?.spent).toBe(150);
-    expect(unlocked?.comboUnlocked).toEqual(["crown-hero-sneakers"]);
-    if (!unlocked) throw new Error("Expected successful unlock");
-    expect(unlockCombo(unlocked, 1000, "crown-hero-sneakers")).toBeNull();
-    expect(walletBalance(150, unlocked)).toBe(0);
-  });
-  it("cannot wear a combination without enough points", () => {
-    expect(unlockCombo(empty, 149, "crown-hero-sneakers")).toBeNull();
+  it("an owned item never charges again when clicked, even after being taken off", () => {
+    const bought = buy(empty, 1000, "sunglasses");
+    if (!bought) throw new Error("Expected successful purchase");
+    const off = equip(bought, "glasses", null);
+    const back = equip(off, "glasses", "sunglasses");
+    expect(back.spent).toBe(bought.spent);
+    expect(back.equipped.glasses).toBe("sunglasses");
+    expect(equippedItems(back).map((i) => i.id)).toEqual(["sunglasses"]);
   });
 });

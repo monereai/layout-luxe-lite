@@ -7,7 +7,7 @@ import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGame } from "@/lib/game";
-import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, unlockCombo, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, buy, equip, equipmentSlot, saveShop, useShop, walletBalance, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 
@@ -52,11 +52,8 @@ function ShopPage() {
   }
 
   function wearCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
-    const unlocked = (shop.comboUnlocked ?? []).includes(family.id);
-    const next = unlocked ? shop : unlockCombo(shop, game.points, family.id);
-    if (!next) return;
-    saveShop({ ...next, equipped: { ...next.equipped, hat: family.hat, outfit: family.outfit, footwear: family.footwear } });
-    if (!unlocked) toast.success(`${family.name} unlocked with your Wisdom Points!`);
+    // Items already bought stay wearable: combinations cost nothing extra.
+    saveShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
   }
 
   return (
@@ -88,21 +85,18 @@ function ShopPage() {
               const ids = [family.hat, family.outfit, family.footwear];
               const ready = ids.every((id) => shop.owned.includes(id));
               const on = shop.equipped.hat === family.hat && shop.equipped.outfit === family.outfit && shop.equipped.footwear === family.footwear;
-              const unlocked = (shop.comboUnlocked ?? []).includes(family.id);
-              const afford = wallet >= family.cost;
               return <div key={family.id} className="flex flex-col rounded-lg border border-border bg-card p-3">
                 <img src={`/monere/looks/combo-${family.id}/0.webp`} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" />
                 <h3 className="text-sm font-semibold">{family.name}</h3>
-                <p className="text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
-                <p className="mb-3 text-xs font-semibold text-primary">{family.cost} pts</p>
+                <p className="mb-3 text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
                 <Button
                   className="mt-auto"
                   size="sm"
                   variant={on ? "secondary" : "outline"}
-                  disabled={!ready || on || (!unlocked && !afford)}
+                  disabled={!ready || on}
                   onClick={() => wearCombo(family)}
                 >
-                  {on ? <><Check /> Equipped</> : !ready ? <><Lock /> Unlock items</> : !unlocked ? <>Wear for {family.cost} pts</> : "Wear together"}
+                  {on ? <><Check /> Equipped</> : !ready ? <><Lock /> Unlock items</> : "Wear together"}
                 </Button>
               </div>;
             })}
