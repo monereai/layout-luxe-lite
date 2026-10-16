@@ -21,7 +21,7 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       <img data-character-look={shown} data-character-frame={frame} src={activeImageSrc} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-      {[0, 1, 7].includes(frame) && extra.map((item) => item && (
+      {extra.filter((item) => item && (item.category === "footwear" || [0, 1, 7].includes(frame))).map((item) => item && (
         <img key={item.id} data-worn-layer={item.category} src={item.src} alt="" aria-hidden="true" draggable={false}
           style={{ ...WORN_POSITION[item.category], zIndex: WORN_Z[item.category] }}
           className="pointer-events-none absolute object-contain drop-shadow-md" />
@@ -35,7 +35,7 @@ const WORN_POSITION: Record<string, CSSProperties> = {
   hat: { left: "33%", top: "-2%", width: "30%", height: "16%" },
   glasses: { left: "38%", top: "11.5%", width: "21%", height: "8%" },
   accessory: { left: "40%", top: "27%", width: "16%", height: "12%" },
-  footwear: { left: "31%", top: "84%", width: "34%", height: "12%" },
+  footwear: { left: "26%", top: "80%", width: "46%", height: "18%" },
   costume: { left: "28%", top: "26%", width: "40%", height: "36%" },
 };
 const WORN_Z: Record<string, number> = { costume: 3, footwear: 4, accessory: 5, hat: 6, glasses: 7 };
