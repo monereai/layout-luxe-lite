@@ -43,7 +43,7 @@
 - [x] Verify the bar still shows everywhere else and returns after closing the upgrade window.
 
 # Points Shop
-- [ ] Unify personal and shop balances including habitat spending; verify the 1030-point case and habitat purchase.
+- [x] Unify personal and shop balances including habitat spending; verify the 1030-point case and habitat purchase.
 - [x] Keep habitat Buy Now buttons active and verify Cozy Bedroom/Space Station purchase and point-shortfall feedback.
 - [x] Match clothing combination purchase buttons to inventory buttons and verify active purchases and insufficient-points feedback.
 - [x] Verify clean base artwork, slot swapping, and saved equipment migration.
