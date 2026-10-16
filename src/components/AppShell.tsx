@@ -23,8 +23,9 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const game = useGame();
-  const wallet = walletBalance(game.points, useShop());
-  const { user, premium, signOut } = usePlan();
+  const shopState = useShop();
+  const { user, premium, signOut, bonusPoints, tier } = usePlan();
+  const wallet = walletBalance(game.points + bonusPoints, shopState);
   const t = useT();
   const lang = useLang();
   return (
@@ -42,7 +43,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           <div className="flex flex-col items-end gap-1 pt-1 text-xs">
             <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 py-0.5 pl-0.5 pr-2 font-semibold text-primary"><MonereAvatar className="h-6 w-6" /><span className="tabular-nums">{wallet}</span> pts</Link>
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
-            {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">PLUS</span>}
+            {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">{tier === "club" ? "CLUB" : "PLUS"}</span>}
             {!premium && <PassCodeLink label="Access code" className="font-semibold !text-primary" />}
             {user ? (
               <Button variant="link" size="sm" onClick={() => void signOut()} className="h-auto p-0 text-xs text-muted-foreground hover:text-primary">{t("signOut")}</Button>

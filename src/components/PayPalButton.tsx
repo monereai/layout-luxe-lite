@@ -50,5 +50,5 @@ export function PayPalButton(props:
 
   if (failed) return <p className="text-xs text-destructive">PayPal couldn't load. Check your connection and try again.</p>;
   // Stop global click interceptors (link-routing scripts) from hijacking checkout clicks.
-  return <div ref={ref} data-no-one-link="true" className="one-link-ignore relative z-10 min-h-11" onClickCapture={(e) => e.stopPropagation()} />;
+  return <div ref={ref} data-no-one-link="true" className="one-link-ignore relative z-10 min-h-11" onClick={(e) => e.stopPropagation()} />;
 }
