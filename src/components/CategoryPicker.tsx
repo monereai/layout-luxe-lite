@@ -65,7 +65,7 @@ export function CategoryPicker({
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
         <div className="orbit-center">
           {backdrop && property.activeProperty === "treehouse" && (
-            <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[135%] w-[135%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-50" />
+            <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[160%] w-[160%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-60 sm:h-[135%] sm:w-[135%] sm:opacity-50" />
           )}
           {backdrop && PROPERTIES.filter((p) => p.src).map((p) => (
             <img key={p.id} src={p.src!} alt="" loading="lazy" width={816} height={816} style={{ opacity: property.activeProperty === p.id ? 1 : 0, transition: "opacity 0.3s ease" }} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[110%] w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none rounded-full object-cover" />
@@ -103,7 +103,7 @@ export function CategoryPicker({
           })}
         </div>
       </div>
-      <p aria-live="polite" className={`float-counter mx-auto mt-4 w-fit rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${value.length ? "border-primary/50 bg-primary/15 text-primary" : "border-border bg-card/85 text-muted-foreground"}`}>
+      <p aria-live="polite" className={`float-counter mx-auto mt-4 w-fit rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${value.length ? "border-primary/50 bg-primary/15 text-primary" : "border-border bg-card/85 text-foreground"}`}>
         {value.length ? `Selected (${value.length}) — Tap '${actionLabel}'` : `Tap up to ${MAX_CATEGORIES} topics`}
       </p>
     </div>
