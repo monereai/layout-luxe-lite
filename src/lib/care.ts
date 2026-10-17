@@ -7,8 +7,6 @@ export const GAME_ENERGY = 1;
 export const GAME_POINTS = 5;
 export const MINI_ENERGY = 1;
 export const FULL_ENERGY_BONUS = 0;
-export const SNACK_COST = 10;
-export const SNACK_ENERGY = 50;
 export const dailyAllowance = (tier: "free" | "plus" | "club") => tier === "club" ? 60 : tier === "plus" ? 40 : 20;
 export const addEnergy = (energy: number, amount: number) => Math.min(ENERGY_MAX, Math.max(0, energy + amount));
 export function drainEnergy(energy: number, lastDrain: number, now: number) {

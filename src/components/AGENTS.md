@@ -1,7 +1,6 @@
 # Character art, wardrobe & shop rules
 
-- Keep the wardrobe selection as one local-storage object with top, headwear, and footwear IDs while exposing a compatible outfit image object to character consumers. Why: combinations persist without duplicating character rendering logic.
-- Serve the combo outfit art from public/wardrobe as plain URLs, never as eager module imports. Why: one failed image module blanked the whole app on load.
+- Keep current equipment in the existing shop state and render it through MonereFigure; CategoryPicker's interactive flag controls only the character viewer. Why: retiring the old customization drawer must not remove purchases or rotation.
 - Keep complete shop-look frames under public/monere/looks and render one image in MonereFigure; compose unmatched equipped slots into that image from angle-matched art. Why: clothing must not vanish when turning or become front-facing DOM overlays.
 - Keep single-view combination card artwork separate from turnaround-frame availability. Why: a new thumbnail must not replace the working spin viewer with missing angles.
 - Share clothing-button sizing between combination cards and individual inventory cards in the shop. Why: purchase and equip controls must stay consistent and fit their cards.

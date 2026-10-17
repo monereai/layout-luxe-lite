@@ -1,7 +1,6 @@
 import { useT } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
-import { useOutfit } from "@/lib/outfit";
 import { MonereAvatar } from "@/components/MonereFigure";
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
@@ -17,7 +16,6 @@ export function FollowUpThread({
   pending: boolean;
   onSend: (text: string) => void;
 }) {
-  const { outfit } = useOutfit();
   const t = useT();
   const [text, setText] = useState("");
   const endRef = useRef<HTMLDivElement>(null);

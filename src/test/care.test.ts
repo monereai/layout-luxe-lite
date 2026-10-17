@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { INITIAL_ENERGY, MINI_ENERGY, GAME_ENERGY, GAME_POINTS, FULL_ENERGY_BONUS, SNACK_COST, SNACK_ENERGY, addEnergy, drainEnergy, canClaimCare, dailyAllowance, energyGain, careSchema } from "@/lib/care";
+import { INITIAL_ENERGY, MINI_ENERGY, GAME_ENERGY, GAME_POINTS, FULL_ENERGY_BONUS, addEnergy, drainEnergy, canClaimCare, dailyAllowance, energyGain, careSchema } from "@/lib/care";
 import { gameStateSnapshot, recordComplete, recordJigsaw, recordMini } from "@/lib/game";
 
 describe("Frugal care economy", () => {
@@ -46,10 +46,6 @@ describe("Frugal care economy", () => {
     expect(state.fullBonus).toBe(0);
     expect(() => careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 20, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17" })).toThrow();
   });
-  it("a snack costs 10 separate tokens for 50 capped energy", () => {
-    expect(SNACK_COST).toBe(10); expect(SNACK_ENERGY).toBe(50);
-    expect(addEnergy(20, SNACK_ENERGY)).toBe(70); expect(addEnergy(80, SNACK_ENERGY)).toBe(100);
-  });
   it("local game progression never duplicates account point rewards", () => {
     const before = gameStateSnapshot().points;
     recordMini("jungle"); recordComplete(); recordJigsaw(3);
@@ -62,6 +58,6 @@ describe("Frugal care economy", () => {
     expect(energyGain(50, 50)).toBe(0);            // refresh changed nothing
     expect(energyGain(50, 40)).toBe(0);            // hourly drain must not celebrate
     expect(energyGain(50, 51)).toBe(1);            // one Mini-Monere found
-    expect(energyGain(0, 50)).toBe(50);            // Super Snack
+    expect(energyGain(0, 1)).toBe(1);             // first mini-game item after draining
   });
 });
