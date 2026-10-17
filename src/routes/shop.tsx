@@ -55,7 +55,7 @@ function ShopPage() {
   const shop = useShop();
   const props = useProperties();
   const wallet = usePointsWallet();
-  const { tier } = usePlan();
+  const { tier, refresh: refreshPlan } = usePlan();
 
   function purchase(id: string) {
     const next = buy(shop, wallet + shop.spent, id);
