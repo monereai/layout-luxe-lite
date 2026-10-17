@@ -20,6 +20,6 @@ export const canClaimCare = (energy: number, claimed: boolean, claimDate: string
 export const careSchema = z.object({
   energy: z.number().int().min(0).max(100), lastDrain: z.string(), claimed: z.boolean(),
   claimDate: z.string().nullable(), tokens: z.number().int().nonnegative(),
-  allowance: z.union([z.literal(30), z.literal(60)]), pointsAwarded: z.number(), energyAwarded: z.number(), today: z.string(),
+  allowance: z.union([z.literal(30), z.literal(60)]), pointsAwarded: z.number(), energyAwarded: z.number(), today: z.string(), fullBonus: z.number(),
 });
 export type CareState = z.infer<typeof careSchema>;
