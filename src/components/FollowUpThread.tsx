@@ -2,6 +2,7 @@ import { useT } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import { MonereAvatar } from "@/components/MonereFigure";
+import { MessageResponse } from "@/components/ai-elements/message";
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -47,7 +48,7 @@ export function FollowUpThread({
             ) : (
               <div key={i} className="mr-6 flex items-end gap-2">
                 <Avatar />
-                <div className="surface-card rounded-2xl rounded-bl-md px-4 py-2.5 text-sm leading-relaxed">{m.content}</div>
+                <MessageResponse mode="static" className="min-w-0 text-sm leading-relaxed">{m.content}</MessageResponse>
               </div>
             ),
           )}

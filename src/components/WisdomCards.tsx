@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { MonereFigure } from "@/components/MonereFigure";
 import { useT } from "@/lib/i18n";
 import type { Wisdom } from "@/lib/wisdom.functions";
+import { MessageResponse } from "@/components/ai-elements/message";
 
 function CheerBadge({ text }: { text: string }) {
   return (
@@ -31,7 +32,7 @@ export function WisdomCards({ w }: { w: Wisdom }) {
   return (
     <div className="space-y-4">
       <Card icon={<Compass className="h-4 w-4" />} title={t("perspective")} delay={0}>
-        <p className="leading-relaxed">{w.bigPicture}</p>
+        <MessageResponse mode="static" className="leading-relaxed">{w.bigPicture}</MessageResponse>
       </Card>
       <Card icon={<BookOpen className="h-4 w-4" />} title={t("wisdom")} delay={120}>
         <div className="space-y-4">
@@ -39,7 +40,7 @@ export function WisdomCards({ w }: { w: Wisdom }) {
             <div key={v.reference}>
               <blockquote className="font-display text-lg italic leading-snug">"{v.text}"</blockquote>
               <p className="mt-1 text-sm font-semibold text-primary">— {v.reference}</p>
-              <p className="mt-2 text-sm text-muted-foreground">{v.application}</p>
+              <MessageResponse mode="static" className="mt-2 text-sm text-muted-foreground">{v.application}</MessageResponse>
             </div>
           ))}
         </div>
@@ -49,7 +50,7 @@ export function WisdomCards({ w }: { w: Wisdom }) {
           {w.path.map((s, i) => (
             <li key={i} className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">{i + 1}</span>
-              <span className="text-sm leading-relaxed">{s}</span>
+              <MessageResponse mode="static" className="min-w-0 text-sm leading-relaxed">{s}</MessageResponse>
             </li>
           ))}
         </ol>
@@ -57,8 +58,8 @@ export function WisdomCards({ w }: { w: Wisdom }) {
       </Card>
       <Card icon={<ShieldCheck className="h-4 w-4" />} title={t("honor")} delay={360}>
         <div className="grid gap-3">
-          <div className="border-l-2 border-border pl-3"><p className="text-xs font-bold text-muted-foreground">{t("nextStep")}</p><p className="mt-1 text-sm">{w.shortTerm}</p></div>
-          <div className="border-l-2 border-primary pl-3"><p className="text-xs font-bold text-primary">{t("becoming")}</p><p className="mt-1 text-sm">{w.longTerm}</p></div>
+          <div className="border-l-2 border-border pl-3"><p className="text-xs font-bold text-muted-foreground">{t("nextStep")}</p><MessageResponse mode="static" className="mt-1 text-sm">{w.shortTerm}</MessageResponse></div>
+          <div className="border-l-2 border-primary pl-3"><p className="text-xs font-bold text-primary">{t("becoming")}</p><MessageResponse mode="static" className="mt-1 text-sm">{w.longTerm}</MessageResponse></div>
         </div>
         <CheerBadge text={t("cheer2")} />
       </Card>
