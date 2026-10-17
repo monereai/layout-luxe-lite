@@ -121,7 +121,7 @@ function ShopPage() {
         <section className="mb-5">
           <h2 className="mb-3 font-display text-xl font-semibold">Clothing combinations</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {COMBINATION_FAMILIES.map((family) => {
+            {COMBINATIONS_BY_VALUE.map((family) => {
               const ids = [family.hat, family.outfit, family.footwear];
               const ready = ids.every((id) => shop.owned.includes(id));
               const price = combinationPrice(shop, family);
