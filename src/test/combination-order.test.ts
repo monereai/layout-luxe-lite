@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
-import { COMBINATIONS_BY_VALUE, SHOP_ITEMS, combinationValue } from "@/lib/shop";
+import { COMBINATIONS_BY_VALUE, combinationValue } from "@/lib/shop";
 
 describe("combinations listed by value", () => {
   it("shows every combination exactly once, cheapest set first", () => {
@@ -9,10 +9,16 @@ describe("combinations listed by value", () => {
     expect(values).toEqual([...values].sort((a, b) => a - b));
   });
 
-  it("prices a combination as the sum of its three pieces", () => {
-    const cost = (id: string) => SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0;
-    for (const family of COMBINATION_FAMILIES) {
-      expect(combinationValue(family), family.name).toBe(cost(family.hat) + cost(family.outfit) + cost(family.footwear));
-    }
+  it("prices every set at 25% over its pieces, rounded up to the nearest 5", () => {
+    expect(COMBINATIONS_BY_VALUE.map((f) => [f.name, combinationValue(f)])).toEqual([
+      ["Winter Adventurer", 1000],
+      ["Forest Explorer", 1075],
+      ["Party Star", 1175],
+      ["Galaxy Wizard", 1215],
+      ["Dapper Pirate", 1300],
+      ["Royal Hero", 1550],
+      ["Storm Viking", 1565],
+      ["Galaxy Voyager", 1840],
+    ]);
   });
 });
