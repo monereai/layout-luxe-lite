@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { INITIAL_ENERGY, MINI_ENERGY, GAME_ENERGY, GAME_POINTS, FULL_ENERGY_BONUS, SNACK_COST, SNACK_ENERGY, addEnergy, drainEnergy, canClaimCare, dailyAllowance, careSchema } from "@/lib/care";
+import { INITIAL_ENERGY, MINI_ENERGY, GAME_ENERGY, GAME_POINTS, FULL_ENERGY_BONUS, SNACK_COST, SNACK_ENERGY, addEnergy, drainEnergy, canClaimCare, dailyAllowance, energyGain, careSchema } from "@/lib/care";
 import { gameStateSnapshot, recordComplete, recordJigsaw, recordMini } from "@/lib/game";
 
 describe("Frugal care economy", () => {
@@ -54,5 +54,14 @@ describe("Frugal care economy", () => {
     const before = gameStateSnapshot().points;
     recordMini("jungle"); recordComplete(); recordJigsaw(3);
     expect(gameStateSnapshot().points).toBe(before);
+  });
+  it("only a real energy increase counts as a gain worth animating", () => {
+    expect(energyGain(null, 50)).toBe(0);          // first reading after sign-in
+    expect(energyGain(undefined, 50)).toBe(0);     // care state still loading
+    expect(energyGain(50, null)).toBe(0);          // signed out mid-session
+    expect(energyGain(50, 50)).toBe(0);            // refresh changed nothing
+    expect(energyGain(50, 40)).toBe(0);            // hourly drain must not celebrate
+    expect(energyGain(50, 51)).toBe(1);            // one Mini-Monere found
+    expect(energyGain(0, 50)).toBe(50);            // Super Snack
   });
 });
