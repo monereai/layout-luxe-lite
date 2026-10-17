@@ -15,6 +15,7 @@ function loadSdk(mode: Mode): Promise<any> {
     const s = document.createElement("script");
     s.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=GBP&components=buttons&${q}`;
     s.setAttribute("data-namespace", ns);
+    s.setAttribute("data-tagline", "false");
     s.setAttribute("data-no-one-link", "true");
     s.className = "one-link-ignore";
     const timeout = window.setTimeout(() => fail(), 20000);
@@ -51,7 +52,7 @@ export function PayPalButton(props:
     let cancelled = false;
     const host = document.createElement("div");
     host.setAttribute("data-no-one-link", "true");
-    host.className = "one-link-ignore";
+    host.className = "one-link-ignore paypal-compact";
     ref.current?.replaceChildren(host);
     setFailed(false);
     setLoading(true);
@@ -59,7 +60,7 @@ export function PayPalButton(props:
       if (cancelled || !ref.current) return;
       const p = latest.current;
       buttons = paypal.Buttons({
-        style: { shape: "rect", color: "gold", layout: "vertical", height: 40 },
+        style: { shape: "rect", color: "gold", layout: "vertical", height: 34, tagline: false },
         ...(p.mode === "capture"
           ? { createOrder: () => (latest.current as any).createOrder(), onApprove: (d: any) => latest.current.onApprove(d.orderID) }
           : { createSubscription: (_d: any, actions: any) => actions.subscription.create({ plan_id: (latest.current as any).planId, ...((latest.current as any).accountId ? { custom_id: (latest.current as any).accountId } : {}) }), onApprove: (d: any) => latest.current.onApprove(d.subscriptionID) }),

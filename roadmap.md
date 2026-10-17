@@ -123,3 +123,8 @@
 - [x] Fix page crash: the header language selector referenced a variable removed while swapping the banner.
 - [x] Verify the graphic, collapsed nav, localized label, shop page heading, and that the page loads without crashing.
 - [x] Move the shop graphic to the right-hand panel and enlarge it 5x (36px to 180px); verified size, alignment, and no clipping.
+
+# Compact point packs & memberships
+- [x] Shrink the point pack and membership cards (tighter padding, smaller headings/prices/perks, smaller badges and billing toggle) while keeping every line readable.
+- [x] Slim the PayPal checkout buttons from 40px to 34px tall, clip only the "Powered by PayPal" attribution row (both the PayPal and Debit or Credit Card buttons stay), and match the sign-in prompt.
+- [x] Verify in the preview: panel 598px to 450px signed out (550 to 502 signed in), pack cards 178 to 122 (199 to 175), membership cards 294 to 223 (246 to 222), no cut-off or overlapping text, build clean, all 132 tests pass.
