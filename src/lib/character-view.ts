@@ -12,11 +12,9 @@ export function wheelCharacterZoom(scale: number, delta: number, mode: number) {
   return clampCharacterZoom(scale * Math.exp(-pixels * 0.0015));
 }
 
-// Points are relative to the untransformed viewport center.
-export function zoomCharacter(view: CharacterView, scale: number, point: { x: number; y: number }): CharacterView {
-  const next = clampCharacterZoom(scale);
-  const ratio = next / view.scale;
-  return { ...view, scale: next, x: point.x - (point.x - view.x) * ratio, y: point.y - (point.y - view.y) * ratio };
+// Zoom around Monere's fixed centre, never around the pointer or pinch midpoint.
+export function zoomCharacter(view: CharacterView, scale: number): CharacterView {
+  return { ...view, scale: clampCharacterZoom(scale), x: 0, y: 0 };
 }
 
 export function rotateCharacter(rotation: number, deltaX: number, width: number) {

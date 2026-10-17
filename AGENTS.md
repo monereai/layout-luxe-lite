@@ -28,6 +28,7 @@
 - Share clothing-button sizing between combination cards and individual inventory cards in the shop. Why: purchase and equip controls must stay consistent and fit their cards.
 - Use usePointsWallet for all spendable-points displays, deducting clothing and habitat spending from game and credited points. Why: displayed points must match purchasing power everywhere.
 - Keep home and Points Shop rotation/zoom on the existing MonereCharacterView parent. Why: complete images share the same turn-around interaction without flattening.
+- Anchor character zoom to the viewer centre and do not translate on pinch gestures. Why: scrolling and turning must not drift Monere off-centre.
 - Keep every equipped slot when items are combined; combinationLook always returns a look (exact combo picture, else closest single-item look, else default). Migrate legacy costume into outfit and preserve owned items and spend in the existing storage key. Why: no selection is ever rejected or silently discarded.
 - Anything purchased stays wearable forever with no further charge: combinations of owned items are free (no combo unlock fee), and shop.ts loads saved state eagerly at module init so a fast click can never overwrite purchases with the empty state. Why: paying twice or losing purchases breaks trust in the shop.
 - Persist jigsaw item ownership and its one-time claim marker together in the existing shop state; keep equipment and spending unchanged. Why: retries cannot grant extra items or overwrite the player's outfit.

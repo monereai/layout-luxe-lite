@@ -1,3 +1,6 @@
+# Monere centring
+- [ ] Keep Monere anchored during wheel zoom, pinch and rotation; verify using isolated browser data.
+
 # Uploaded economy brief
 - [ ] Add protected canonical account wallet fields and server-maintained tier, preserving existing credits and spending.
 - [ ] Replace automatic full-energy payouts with manual daily claims and +1 energy rewards.

@@ -21,9 +21,7 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
     if (!el) return;
     const wheel = (event: WheelEvent) => {
       event.preventDefault();
-      const rect = el.getBoundingClientRect();
-      const point = { x: event.clientX - rect.left - rect.width / 2, y: event.clientY - rect.top - rect.height / 2 };
-      setView((current) => zoomCharacter(current, wheelCharacterZoom(current.scale, event.deltaY, event.deltaMode), point));
+      setView((current) => zoomCharacter(current, wheelCharacterZoom(current.scale, event.deltaY, event.deltaMode)));
     };
     el.addEventListener("wheel", wheel, { passive: false });
     return () => el.removeEventListener("wheel", wheel);
@@ -47,11 +45,7 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
     const oldDistance = Math.hypot(a.x - b.x, a.y - b.y);
     if (oldDistance < 1) return;
     const ratio = Math.hypot(c.x - d.x, c.y - d.y) / oldDistance;
-    const point = { x: (a.x + b.x) / 2 - rect.left - rect.width / 2, y: (a.y + b.y) / 2 - rect.top - rect.height / 2 };
-    setView((current) => {
-      const zoomed = zoomCharacter(current, current.scale * ratio, point);
-      return { ...zoomed, x: zoomed.x + (c.x + d.x - a.x - b.x) / 2, y: zoomed.y + (c.y + d.y - a.y - b.y) / 2 };
-    });
+    setView((current) => zoomCharacter(current, current.scale * ratio));
   }
 
   function release(event: PointerEvent<HTMLDivElement>) {
@@ -82,7 +76,7 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
           event.preventDefault();
           setView((current) => event.key === "0" ? INITIAL_CHARACTER_VIEW : event.key.startsWith("Arrow")
             ? { ...current, rotation: current.rotation + (event.key === "ArrowLeft" ? -45 : 45) }
-            : zoomCharacter(current, current.scale * (event.key === "-" ? 1 / 1.1 : 1.1), { x: 0, y: 0 }));
+            : zoomCharacter(current, current.scale * (event.key === "-" ? 1 / 1.1 : 1.1)));
         }}
       >
         <div aria-hidden="true" className="character-ground-shadow pointer-events-none" style={{ transform: `translate(-50%, 0) scale(${view.scale})` }} />
