@@ -15,6 +15,12 @@ export function useCare() {
   const key = ["monere-care", user?.id];
   const query = useQuery({ queryKey: key, queryFn: () => update({ data: { action: "sync" } }), enabled: ready && !!user, refetchInterval: 60_000, refetchOnWindowFocus: "always", staleTime: 15_000, retry: 1 });
   const bonusToasted = useRef(false);
+  const [bonus, setBonus] = useState(0);
+  const celebrate = useCallback((points: number) => {
+    if (points <= 0) return;
+    setBonus(points);
+    window.setTimeout(() => setBonus(0), 3500);
+  }, []);
   useEffect(() => {
     const state = query.data;
     if (!state) return;
@@ -25,20 +31,24 @@ export function useCare() {
         if (now - lastFullBonusToast > 5000) {
           lastFullBonusToast = now;
           toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+          celebrate(state.fullBonus);
         }
         void refresh();
       }
     } else {
       bonusToasted.current = false;
     }
-  }, [query.data, refresh]);
+  }, [query.data, refresh, celebrate]);
   const accept = async (state: CareState) => {
     client.setQueryData(key, state);
-    if (state.fullBonus) toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+    if (state.fullBonus) {
+      toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+      celebrate(state.fullBonus);
+    }
     if (state.pointsAwarded || state.fullBonus) await refresh();
   };
   const action = useMutation({ mutationFn: (action: "claim" | "snack") => update({ data: { action } }), onSuccess: accept });
-  return { ...query, user, ready, action, accept };
+  return { ...query, user, ready, action, accept, bonus };
 }
 
 export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6, roundKey: number) {
