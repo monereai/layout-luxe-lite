@@ -152,6 +152,13 @@ export function jigsawSolved(order: number[]) {
   return order.every((p, i) => p === i);
 }
 
+/** Slots whose piece already sits in its home slot; the board may not move these again. */
+export function lockedSlots(order: number[]) {
+  const locked = new Set<number>();
+  order.forEach((p, i) => { if (p === i) locked.add(i); });
+  return locked;
+}
+
 /** Random order that is never already solved. */
 export function shufflePieces(n: number, rand: () => number = Math.random) {
   const a = Array.from({ length: n }, (_, i) => i);

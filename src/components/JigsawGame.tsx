@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star, Zap } from "lucide-react";
 import { toast as notify } from "sonner";
 import { Button } from "@/components/ui/button";
-import { jigsawSolved, jigsawUnlocked, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
+import { jigsawSolved, jigsawUnlocked, lockedSlots, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
 import { playChime, playPop } from "@/lib/sound";
 import { useCareRound } from "@/hooks/useCare";
 
@@ -44,6 +44,7 @@ export function JigsawGame() {
 
   function swap(a: number, b: number) {
     if (done || a === b || !careRound.canPlay) return;
+    if (locked.has(a) || locked.has(b)) return; // Never move a locked, correct piece.
     const next = [...order];
     const first = next[a]; const second = next[b];
     if (first === undefined || second === undefined) return;
@@ -67,10 +68,12 @@ export function JigsawGame() {
 
   function tap(i: number) {
     if (done || !careRound.canPlay) return;
+    if (locked.has(i)) return; // Correct pieces are fixed to the grid.
     if (picked === null) setPicked(i);
     else swap(picked, i);
   }
 
+  const locked = useMemo(() => lockedSlots(order.slice(0, n)), [order, n]);
   const placed = order.filter((p, i) => p === i).length;
 
   return (
@@ -104,14 +107,15 @@ export function JigsawGame() {
           {order.slice(0, n).map((p, i) => (
             <Button variant="ghost"
               key={i}
-              aria-label={`Piece ${i + 1}`}
-              draggable={!done && careRound.canPlay}
+              aria-label={`Piece ${i + 1}${locked.has(i) ? ", locked in place" : ""}`}
+              title={locked.has(i) ? "Locked in place" : undefined}
+              draggable={!done && careRound.canPlay && !locked.has(i)}
               disabled={done || !careRound.canPlay}
-              onDragStart={() => setDrag(i)}
+              onDragStart={() => { if (!locked.has(i)) setDrag(i); }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => { if (drag !== null) swap(drag, i); setDrag(null); }}
               onClick={() => tap(i)}
-              className={`h-full w-full rounded-none border border-background/40 p-0 transition disabled:opacity-100 ${picked === i ? "z-10 ring-4 ring-primary" : ""} ${done ? "border-transparent" : ""}`}
+              className={`h-full w-full rounded-none border border-background/40 p-0 transition disabled:opacity-100 ${picked === i ? "z-10 ring-4 ring-primary" : ""} ${locked.has(i) ? "ring-1 ring-inset ring-primary/50" : ""} ${done ? "border-transparent" : ""}`}
               style={{
                 backgroundImage: `url(${IMAGE})`,
                 backgroundSize: `${size * 100}% ${size * 100}%`,

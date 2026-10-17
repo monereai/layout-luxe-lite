@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { JIGSAW_BONUS, jigsawSolved, shufflePieces } from "@/lib/game";
+import { JIGSAW_BONUS, jigsawSolved, lockedSlots, shufflePieces } from "@/lib/game";
 
 it("awards only 5 points per puzzle", () => expect(JIGSAW_BONUS).toBe(5));
 it("shuffle never starts solved and keeps all pieces", () => {
@@ -8,6 +8,13 @@ it("shuffle never starts solved and keeps all pieces", () => {
     expect(jigsawSolved(a)).toBe(false);
     expect([...a].sort((x, y) => x - y)).toEqual(Array.from({ length: n }, (_, i) => i));
   }
+});
+
+it("locks exactly the pieces that sit in their home slot", () => {
+  expect(lockedSlots([0, 2, 1, 3])).toEqual(new Set([0, 3]));
+  expect(lockedSlots([2, 1, 0])).toEqual(new Set([1]));
+  expect(lockedSlots([1, 0])).toEqual(new Set());
+  expect(lockedSlots([0, 1, 2])).toEqual(new Set([0, 1, 2]));
 });
 
 it("unlocks levels in order of play", async () => {
