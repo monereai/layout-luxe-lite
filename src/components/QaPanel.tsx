@@ -25,13 +25,17 @@ export function QaPanel() {
   const qc = useQueryClient();
 
   useEffect(() => {
+    let active = true;
+    setTester(false);
     const check = async () => {
+      if (!user) return;
       const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return setTester(false);
+      if (!u.user || !active) return;
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id).in("role", ["admin", "tester"]);
-      setTester(!!data?.length);
+      if (active) setTester(!!data?.length);
     };
-    check();
+    void check();
+    return () => { active = false; };
   }, [user?.id]);
 
   if (!tester) return null;

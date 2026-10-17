@@ -1,7 +1,7 @@
 # Mini-game rewards and Club Space Station
-- [ ] Verify replay-safe +1 energy/+5 points wins, immediate wallet refresh, and 20/40/60 once-per-UTC-day care claims with isolated data.
-- [ ] Enforce Club-only Space Station, locked upgrade preview, floating topics and station interactions.
-- [ ] Keep protected floating tester controls, fill energy and live Free/Plus/Club switching.
+- [x] Verify replay-safe +1 energy/+5 points wins and immediate header updates: two Find rounds and a solved Jigsaw checked on a dedicated QA account; duplicate completion pays zero. Verify 20/40/60 daily claims and repeated-claim rejection on that account.
+- [x] Enforce Club-only Space Station, including previously owned copies; verify locked upgrade previews, Club equip, floating topics and character interactions on desktop/phone.
+- [x] Keep protected floating admin/tester controls, fill energy and live Free/Plus/Club switching without touching paid subscriptions; 144 tests pass, no runtime errors, Carl's account untouched.
 
 # Legacy UI cleanup
 - [x] Remove Super Snack controls and feed bars from games and store; preserve active energy rewards and daily claims.
