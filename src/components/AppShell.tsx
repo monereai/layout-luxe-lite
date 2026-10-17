@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, BookOpen, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
@@ -28,7 +28,6 @@ const menuItems = [
   { to: "/find", label: "game", icon: Search },
   { to: "/jigsaw", label: "jigsaw", icon: Puzzle },
   { to: "/shop", label: "shop", icon: Coins },
-  { to: "/story", label: "story", icon: BookOpen },
 ] as const;
 
 export function AppShell({ children, hideCrisisBar = false }: { children: ReactNode; hideCrisisBar?: boolean }) {
