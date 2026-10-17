@@ -31,3 +31,11 @@ it("unlocks levels in order of play", async () => {
   expect(jigsawUnlocked(4)).toBe(true);
   expect(jigsawUnlocked(5)).toBe(false);
 });
+
+it("gives each jigsaw level its own illustration", async () => {
+  const { JIGSAW_IMAGES } = await import("@/components/JigsawGame");
+  expect(Object.keys(JIGSAW_IMAGES).sort()).toEqual(["3", "4", "5", "6"]);
+  const values = Object.values(JIGSAW_IMAGES);
+  expect(new Set(values).size).toBe(4);
+  expect(values.every((v) => v.startsWith("/find/"))).toBe(true);
+});

@@ -6,7 +6,13 @@ import { jigsawSolved, jigsawUnlocked, lockedSlots, recordJigsaw, shufflePieces,
 import { playChime, playPop } from "@/lib/sound";
 import { useCareRound } from "@/hooks/useCare";
 
-const IMAGE = "/find/jungle.webp";
+// Each difficulty level shows a different scene illustration.
+export const JIGSAW_IMAGES = {
+  3: "/find/jungle.webp",
+  4: "/find/castle.jpg",
+  5: "/find/space.webp",
+  6: "/find/arcade.webp",
+} as const;
 const BURST = [0, 45, 90, 135, 180, 225, 270, 315];
 const LEVELS = [
   { size: 3, label: "Easy" },
@@ -24,6 +30,7 @@ export function JigsawGame() {
   const moves = useRef<[number, number][]>([]);
   const rewarded = useRef(new Set<number>());
   const n = size * size;
+  const image = JIGSAW_IMAGES[size];
   // Shuffled after mount so server and first client render match.
   const [order, setOrder] = useState<number[]>(() => Array.from({ length: 9 }, (_, i) => i));
   const [picked, setPicked] = useState<number | null>(null);
@@ -100,7 +107,7 @@ export function JigsawGame() {
         </Button>
       </div>
 
-      {preview && <img src={IMAGE} alt="Completed puzzle preview" className="mx-auto mt-3 w-1/2 rounded-xl border border-border" />}
+      {preview && <img src={image} alt="Completed puzzle preview" className="mx-auto mt-3 w-1/2 rounded-xl border border-border" />}
 
       <div className="relative mt-3">
         <div className="grid aspect-[3/2] w-full overflow-hidden rounded-2xl border border-border" style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}>
@@ -117,7 +124,7 @@ export function JigsawGame() {
               onClick={() => tap(i)}
               className={`h-full w-full rounded-none border border-background/40 p-0 transition disabled:opacity-100 ${picked === i ? "z-10 ring-4 ring-primary" : ""} ${locked.has(i) ? "ring-1 ring-inset ring-primary/50" : ""} ${done ? "border-transparent" : ""}`}
               style={{
-                backgroundImage: `url(${IMAGE})`,
+                backgroundImage: `url(${image})`,
                 backgroundSize: `${size * 100}% ${size * 100}%`,
                 backgroundPosition: `${((p % size) / (size - 1)) * 100}% ${(Math.floor(p / size) / (size - 1)) * 100}%`,
               }}
