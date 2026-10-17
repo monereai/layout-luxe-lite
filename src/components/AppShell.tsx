@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, ArrowUpRight, Award, Puzzle } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, ArrowUpRight, Award, Puzzle, Zap } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";

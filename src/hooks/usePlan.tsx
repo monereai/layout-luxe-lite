@@ -48,7 +48,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(() => check(user), [check, user]);
   const signOut = useCallback(async () => { await supabase.auth.signOut(); }, []);
 
-  return <PlanCtx.Provider value={{ user, premium, tier, bonusPoints, ready, refresh, signOut }}>{children}</PlanCtx.Provider>;
+  return <PlanCtx.Provider value={{ user, premium, tier, bonusPoints, tokens, ready, refresh, signOut }}>{children}</PlanCtx.Provider>;
 }
 
 export const usePlan = () => useContext(PlanCtx);
