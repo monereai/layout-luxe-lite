@@ -1,3 +1,8 @@
+# Monere conversational knowledge
+- [ ] Broaden initial and follow-up answers beyond dilemmas; retain Christian guidance, honest uncertainty and safety.
+- [ ] Render readable answer formatting and include accurate platform guidance without changing access rules or AI models.
+- [ ] Verify general knowledge and follow-up answers using isolated test data.
+
 # Stripe production launch
 - [x] Configure the user-supplied public live Stripe.js key for production only; keep active live API and webhook secrets managed, never use abbreviated secret placeholders.
 - [ ] Complete Stripe readiness check in Payments (user action).
