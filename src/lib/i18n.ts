@@ -199,3 +199,8 @@ export function languageInstruction(lang?: Lang) {
   return `Respond to the user entirely in ${l.ai} (all text fields, greetings, verse text, application, steps, and the song "why"), maintaining Monere's warm, encouraging tone. Keep song titles and artist names in their original form.`;
 }
 
+
+/** Localised Points Shop sign artwork, used as the shop page heading. */
+export function signSrc(lang: Lang): string {
+  return lang === "en" ? "/shop/sign.webp" : `/shop/sign-${lang}.webp`;
+}
