@@ -7,17 +7,17 @@ import { syncStripeSubscription } from "./stripe-sync.server";
 
 const envSchema = z.enum(["sandbox", "live"]);
 
-async function resolveOrCreateCustomer(stripe: ReturnType<typeof createStripeClient>, options: { email?: string; userId?: string }): Promise<string> {
+async function resolveOrCreateCustomer(stripe: ReturnType<typeof createStripeClient>, options: { email?: string | undefined; userId?: string | undefined }): Promise<string> {
   if (options.userId && !/^[a-zA-Z0-9_-]+$/.test(options.userId)) throw new Error("Invalid userId");
   if (options.userId) {
     const found = await stripe.customers.search({ query: `metadata['userId']:'${options.userId}'`, limit: 1 });
-    if (found.data.length) return found.data[0].id;
+    const f = found.data[0]; if (f) return f.id;
   }
   if (options.email) {
     const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    if (existing.data.length) {
-      const customer = existing.data[0];
-      if (options.userId && customer.metadata?.userId !== options.userId) {
+    const customer = existing.data[0];
+    if (customer) {
+      if (options.userId && customer.metadata?.['userId'] !== options.userId) {
         await stripe.customers.update(customer.id, { metadata: { ...customer.metadata, userId: options.userId } });
       }
       return customer.id;
@@ -37,8 +37,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     try {
       const stripe = createStripeClient(data.environment as StripeEnv);
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
-      if (!prices.data.length) throw new Error("Price not found");
       const price = prices.data[0];
+      if (!price) throw new Error("Price not found");
       const recurring = price.type === "recurring";
       const email = (context.claims as any)?.email as string | undefined;
       const customer = await resolveOrCreateCustomer(stripe, { email, userId: context.userId });
@@ -72,14 +72,14 @@ export const confirmCheckout = createServerFn({ method: "POST" })
       const env = data.environment as StripeEnv;
       const stripe = createStripeClient(env);
       const session = await stripe.checkout.sessions.retrieve(data.sessionId);
-      if (session.metadata?.userId !== context.userId || session.status !== "complete" || session.payment_status === "unpaid") return { ok: false };
+      if (session.metadata?.['userId'] !== context.userId || session.status !== "complete" || session.payment_status === "unpaid") return { ok: false };
       if (session.mode === "subscription") {
         const subId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
         if (!subId) return { ok: false };
         const r = await syncStripeSubscription(stripe, subId, env, context.userId);
         return { ok: r.ok, kind: "membership", tier: r.tier };
       }
-      const pack = packPrice(session.metadata?.priceId ?? "");
+      const pack = packPrice(session.metadata?.['priceId'] ?? "");
       if (!pack || session.amount_subtotal !== Math.round(Number(pack.price) * 100) || session.currency !== "gbp") return { ok: false };
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const credit = await supabaseAdmin.from("point_credits").upsert({ user_id: context.userId, source: "pack", reference: `stripe:${session.id}`, points: pack.points }, { onConflict: "reference", ignoreDuplicates: true });

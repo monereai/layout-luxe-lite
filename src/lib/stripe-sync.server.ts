@@ -5,7 +5,7 @@ import { membershipPrice } from "./store-config";
 /** Saves a Stripe subscription for its owner and credits each elapsed month's Points + Tokens once. */
 export async function syncStripeSubscription(stripe: Stripe, subscriptionId: string, env: StripeEnv, expectedUser?: string) {
   const sub = await stripe.subscriptions.retrieve(subscriptionId);
-  const userId = sub.metadata?.userId;
+  const userId = sub.metadata?.['userId'];
   if (!userId || (expectedUser && userId !== expectedUser)) return { ok: false, tier: null as string | null };
   const item = sub.items.data[0] as any;
   const lookup = item?.price?.lookup_key || item?.price?.metadata?.lovable_external_id || "";
