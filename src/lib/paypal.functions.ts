@@ -37,8 +37,13 @@ export const capturePackOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ orderId: z.string().min(5).max(64) }).parse(d))
   .handler(async ({ data, context }): Promise<{ ok: boolean; points: number }> => {
-    let { ok, body } = await paypal(`/v2/checkout/orders/${encodeURIComponent(data.orderId)}/capture`, { method: "POST" });
-    if (!ok) ({ ok, body } = await paypal(`/v2/checkout/orders/${encodeURIComponent(data.orderId)}`)); // already captured
+    const orderPath = `/v2/checkout/orders/${encodeURIComponent(data.orderId)}`;
+    // Verify the order belongs to this account BEFORE capturing anything.
+    const pre = await paypal(orderPath);
+    const owner = String(pre.body?.purchase_units?.[0]?.custom_id ?? "").split(":")[0];
+    if (!pre.ok || owner !== context.userId) return { ok: false, points: 0 };
+    let { ok, body } = pre.body?.status === "COMPLETED" ? pre : await paypal(`${orderPath}/capture`, { method: "POST" });
+    if (!ok) ({ ok, body } = await paypal(orderPath)); // already captured
     const unit = body?.purchase_units?.[0];
     const capture = unit?.payments?.captures?.[0];
     const [uid, packId] = String(unit?.custom_id ?? "").split(":");
@@ -74,7 +79,7 @@ async function syncOne(subscriptionId: string, userId: string): Promise<{ ok: bo
   const { data: existing, error: lookupError } = await supabaseAdmin.from("subscriptions").select("user_id").eq("stripe_subscription_id", subscriptionId).maybeSingle();
   if (lookupError) throw new Error("Could not verify membership ownership");
   if (existing && existing.user_id !== userId) return { ok: false, tier: null };
-  if (!existing && body.custom_id !== userId) return { ok: false, tier: null };
+  if (body.custom_id !== userId && (!existing || body.custom_id)) return { ok: false, tier: null };
   const status = body.status === "ACTIVE" ? "active" : body.status === "CANCELLED" ? "canceled" : String(body.status).toLowerCase();
   const end = body.billing_info?.next_billing_time ?? null;
   const row = { user_id: userId, environment: "live", product_id: plan.tier, price_id: `${plan.tier}_${plan.interval}`, status, stripe_customer_id: "paypal", stripe_subscription_id: subscriptionId, current_period_end: end, current_period_start: body.billing_info?.last_payment?.time ?? body.start_time ?? null, updated_at: new Date().toISOString() };
