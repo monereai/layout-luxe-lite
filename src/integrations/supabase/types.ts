@@ -296,9 +296,17 @@ export type Database = {
         Args: { p_round: string; p_spot: number }
         Returns: Json
       }
+      care_reward_piece: {
+        Args: { p_proof?: Json; p_round: string; p_spot: number }
+        Returns: Json
+      }
       care_start_round: {
         Args: { p_kind: string; p_size?: number }
         Returns: Json
+      }
+      care_valid_order: {
+        Args: { p_order: number[]; p_proof: Json; p_size: number }
+        Returns: number[]
       }
       is_premium: { Args: { check_env: string }; Returns: boolean }
       redeem_org_code: {
