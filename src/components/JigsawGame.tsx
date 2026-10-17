@@ -107,14 +107,15 @@ export function JigsawGame() {
           {order.slice(0, n).map((p, i) => (
             <Button variant="ghost"
               key={i}
-              aria-label={`Piece ${i + 1}`}
-              draggable={!done && careRound.canPlay}
+              aria-label={`Piece ${i + 1}${locked.has(i) ? ", locked in place" : ""}`}
+              title={locked.has(i) ? "Locked in place" : undefined}
+              draggable={!done && careRound.canPlay && !locked.has(i)}
               disabled={done || !careRound.canPlay}
-              onDragStart={() => setDrag(i)}
+              onDragStart={() => { if (!locked.has(i)) setDrag(i); }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => { if (drag !== null) swap(drag, i); setDrag(null); }}
               onClick={() => tap(i)}
-              className={`h-full w-full rounded-none border border-background/40 p-0 transition disabled:opacity-100 ${picked === i ? "z-10 ring-4 ring-primary" : ""} ${done ? "border-transparent" : ""}`}
+              className={`h-full w-full rounded-none border border-background/40 p-0 transition disabled:opacity-100 ${picked === i ? "z-10 ring-4 ring-primary" : ""} ${locked.has(i) ? "ring-1 ring-inset ring-primary/50" : ""} ${done ? "border-transparent" : ""}`}
               style={{
                 backgroundImage: `url(${IMAGE})`,
                 backgroundSize: `${size * 100}% ${size * 100}%`,
