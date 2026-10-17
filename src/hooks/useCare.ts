@@ -21,7 +21,11 @@ export function useCare() {
     if (state.fullBonus) {
       if (!bonusToasted.current) {
         bonusToasted.current = true;
-        toast.success(`Monere is full of energy! +${state.fullBonus} Points`, { id: "energy-full-bonus" });
+        const now = Date.now();
+        if (now - lastFullBonusToast > 5000) {
+          lastFullBonusToast = now;
+          toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+        }
         void refresh();
       }
     } else {
@@ -30,7 +34,7 @@ export function useCare() {
   }, [query.data, refresh]);
   const accept = async (state: CareState) => {
     client.setQueryData(key, state);
-    if (state.fullBonus) toast.success(`Monere is full of energy! +${state.fullBonus} Points`, { id: "energy-full-bonus" });
+    if (state.fullBonus) toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
     if (state.pointsAwarded || state.fullBonus) await refresh();
   };
   const action = useMutation({ mutationFn: (action: "claim" | "snack") => update({ data: { action } }), onSuccess: accept });
