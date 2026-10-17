@@ -4,10 +4,11 @@ import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
 import { usePlan } from "@/hooks/usePlan";
-import { useT, useLang, setLang, LANGS, signSrc, type Lang } from "@/lib/i18n";
+import { useT, setLang, LANGS, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
+import shopMark from "@/assets/shop/store-front.png";
 
 const tabs = [
   { to: "/", label: "seek", icon: Compass },
@@ -24,7 +25,6 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   const { user, premium, signOut, tier, tokens } = usePlan();
   const wallet = usePointsWallet();
   const t = useT();
-  const lang = useLang();
   return (
     <div className="bg-glow relative isolate min-h-screen">
       <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>
@@ -66,6 +66,10 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 </Button>
               ))}
             </nav>
+            <Link to="/shop" title={t("shop")} aria-label={`${t("shop")}: ${wallet} Shop Points`} className={`mt-6 flex items-center gap-2.5 rounded-2xl border border-primary/25 bg-primary/5 p-2 transition-colors hover:border-primary/50 hover:bg-primary/10 ${collapsed ? "justify-center" : ""}`}>
+              <img src={shopMark} alt="" width={816} height={816} loading="lazy" className="h-9 w-9 shrink-0" />
+              {!collapsed && <span className="min-w-0 truncate text-sm font-semibold text-primary">{t("shop")}</span>}
+            </Link>
             {!hideCrisisBar && (
               <Button variant="ghost" onClick={() => setOpen(true)} title={t("crisisBar")} aria-label={t("crisisBar")} className={`mt-8 h-auto min-h-11 whitespace-normal text-left text-sm font-semibold text-muted-foreground ${collapsed ? "px-2" : "justify-start px-3 py-3"}`}>
                 <LifeBuoy className="shrink-0" />{!collapsed && <span>{t("crisisBar")}</span>}
@@ -85,7 +89,6 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
               </Link>
               {game.detective && <p className="mt-3 text-xs text-primary">Master Detective</p>}
-              <Link to="/shop" aria-label="Points Shop" className="mt-3 block w-fit transition-opacity hover:opacity-80"><img src={signSrc(lang)} alt="Points Shop" width={1205} height={389} loading="lazy" className="h-auto w-full max-w-[11rem]" /></Link>
             </div>
           </aside>
         </div>
