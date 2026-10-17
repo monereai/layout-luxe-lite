@@ -113,6 +113,13 @@
       "when": 1792261847241,
       "tag": "0015_stripe_memberships",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792263325451,
+      "tag": "0016_club_habitat_and_protected_qa_tiers",
+      "breakpoints": true
     }
   ]
 }
