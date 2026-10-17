@@ -65,6 +65,7 @@ function Journal() {
           ))}
         </div>
       )}
+      <OwnedInventory />
     </AppShell>
   );
 }
