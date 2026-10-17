@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, BookOpen, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
@@ -20,8 +21,19 @@ const tabs = [
   { to: "/jigsaw", label: "jigsaw", icon: Puzzle },
 ] as const;
 
+const menuItems = [
+  { to: "/", label: "seek", icon: Compass },
+  { to: "/daily", label: "daily", icon: Sun },
+  { to: "/journal", label: "journal", icon: BookHeart },
+  { to: "/find", label: "game", icon: Search },
+  { to: "/jigsaw", label: "jigsaw", icon: Puzzle },
+  { to: "/shop", label: "shop", icon: Coins },
+  { to: "/story", label: "story", icon: BookOpen },
+] as const;
+
 export function AppShell({ children, hideCrisisBar = false }: { children: ReactNode; hideCrisisBar?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const game = useGame();
   const { user, premium, signOut, tier } = usePlan();
@@ -54,6 +66,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             <span className="truncate font-display text-3xl font-semibold min-[380px]:text-4xl sm:text-5xl md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
           </Link>
           <div className="flex flex-row flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1 text-xs">
+            <Button variant="outline" size="icon" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="md:hidden shrink-0"><Menu className="h-5 w-5" aria-hidden="true" /></Button>
             <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 font-semibold text-primary"><Coins className="h-3.5 w-3.5" aria-hidden="true" /><span className="tabular-nums">{wallet}</span> pts</Link>
             {user && energy != null && <span key={gain ? `gain-${gain.id}` : "energy"} aria-label={`Monere energy: ${energy} percent`} title="Monere's energy" className={`relative flex items-center gap-1.5 rounded-full border border-primary/40 bg-accent px-3 py-1 text-base font-semibold text-accent-foreground ${gain ? "energy-pop" : ""}`}><Zap className="h-5 w-5" aria-hidden="true" /><span className="tabular-nums">{energy}</span>%{gain && <span className="energy-gain" aria-hidden="true">+{gain.amount}</span>}</span>}
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
@@ -128,6 +141,27 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           ))}
         </nav>
       </div>
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="left" className="w-72 overflow-y-auto bg-card sm:max-w-72">
+          <SheetHeader className="border-b border-border px-4 py-4">
+            <SheetTitle className="font-display text-lg text-foreground">Monere<span className="text-primary">AI</span></SheetTitle>
+          </SheetHeader>
+          <nav aria-label="Main navigation" className="flex flex-col gap-1 p-3">
+            {menuItems.map(({ to, label, icon: Icon }) => (
+              <Link key={to} to={to} onClick={() => setMenuOpen(false)} title={t(label)} aria-label={t(label)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary" activeProps={{ className: "bg-primary/10 text-primary" }} activeOptions={{ exact: true }}>
+                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span className="min-w-0">{t(label)}</span>
+              </Link>
+            ))}
+            <div className="my-2 border-t border-border" />
+            {user ? (
+              <Button variant="ghost" className="min-h-11 justify-start px-3 text-base font-semibold text-muted-foreground" onClick={() => { setMenuOpen(false); void signOut(); }}>{t("signOut")}</Button>
+            ) : (
+              <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">{t("signIn")}</Link>
+            )}
+          </nav>
+        </SheetContent>
+      </Sheet>
       <CrisisDialog open={open} onClose={() => setOpen(false)} />
     </div>
   );
