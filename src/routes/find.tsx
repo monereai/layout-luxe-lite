@@ -12,6 +12,7 @@ import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { useCareRound } from "@/hooks/useCare";
+import { toast as notify } from "sonner";
 
 const MINI = "/find/mini.webp";
 const SCENES = [
@@ -93,6 +94,7 @@ function FindGame() {
     setFound(next);
     playPop();
     recordMini(scene.id);
+    notify.success("Mini-Monere found! +1 Energy", { duration: 2000 });
     if (next.size >= MINI_COUNT) {
       recordComplete(); setToast(null);
       void careRound.complete([...next]);
