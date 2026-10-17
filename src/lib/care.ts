@@ -6,6 +6,7 @@ export const HOURLY_DRAIN = 10;
 export const GAME_ENERGY = 15;
 export const GAME_POINTS = 5;
 export const MINI_ENERGY = 1;
+export const FULL_ENERGY_BONUS = 20;
 export const SNACK_COST = 10;
 export const SNACK_ENERGY = 50;
 export const dailyAllowance = (premium: boolean) => premium ? 60 : 30;

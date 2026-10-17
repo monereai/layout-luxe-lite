@@ -145,6 +145,7 @@ export type Database = {
       profiles: {
         Row: {
           daily_care_claimed: boolean
+          full_energy_bonus: boolean
           last_care_claim_date: string | null
           last_energy_drain: string
           monere_energy: number
@@ -153,6 +154,7 @@ export type Database = {
         }
         Insert: {
           daily_care_claimed?: boolean
+          full_energy_bonus?: boolean
           last_care_claim_date?: string | null
           last_energy_drain?: string
           monere_energy?: number
@@ -161,6 +163,7 @@ export type Database = {
         }
         Update: {
           daily_care_claimed?: boolean
+          full_energy_bonus?: boolean
           last_care_claim_date?: string | null
           last_energy_drain?: string
           monere_energy?: number
@@ -248,6 +251,7 @@ export type Database = {
         Args: { p_proof: Json; p_round: string }
         Returns: Json
       }
+      care_full_bonus: { Args: never; Returns: number }
       care_reward_find: {
         Args: { p_round: string; p_spot: number }
         Returns: Json
