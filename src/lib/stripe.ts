@@ -1,4 +1,5 @@
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
+import { checkoutPublishableKey } from "./stripe-config";
 
 type StripeEnv = "sandbox" | "live";
 
@@ -15,7 +16,7 @@ let stripePromise: Promise<Stripe | null> | null = null;
 export function getStripe(): Promise<Stripe | null> {
   if (!stripePromise) {
     paymentsEnvironment();
-    stripePromise = loadStripe(clientToken as string);
+    stripePromise = loadStripe(checkoutPublishableKey(clientToken, import.meta.env.PROD));
   }
   return stripePromise;
 }

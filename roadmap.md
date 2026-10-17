@@ -1,4 +1,5 @@
 # Stripe production launch
+- [x] Configure the user-supplied public live Stripe.js key for production only; keep active live API and webhook secrets managed, never use abbreviated secret placeholders.
 - [ ] Complete Stripe readiness check in Payments (user action).
 - [ ] Restore monereai.com domain setup and publish (domain setup currently failed; app unpublished).
 - [x] Prepare same-origin home payment return; 12 focused tests pass, preview home/shop load without errors. Production token and managed live API/webhook secrets confirmed configured. Real live payment remains unverified until readiness, domain setup and publishing finish.
