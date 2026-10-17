@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { COMBINATION_FAMILIES, type CombinationFamily } from "@/lib/shop-combinations";
 import { allJigsawsComplete, type GameState } from "@/lib/game";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";

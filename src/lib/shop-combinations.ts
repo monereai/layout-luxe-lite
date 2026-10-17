@@ -1,4 +1,12 @@
-export const COMBINATION_FAMILIES = [
+export type CombinationFamily = {
+  id: string;
+  name: string;
+  hat: string;
+  outfit: string;
+  footwear: string;
+};
+
+export const COMBINATION_FAMILIES: readonly CombinationFamily[] = [
   { id: "crown-hero-sneakers", name: "Royal Hero", hat: "crown", outfit: "hero-cape", footwear: "crisp-sneakers" },
   { id: "explorer-emerald-boots", name: "Forest Explorer", hat: "explorer-hat", outfit: "emerald-cloak", footwear: "trail-boots" },
   { id: "wizard-galaxy-skates", name: "Galaxy Wizard", hat: "wizard-hat", outfit: "galaxy-cape", footwear: "skate-classics" },
@@ -7,7 +15,7 @@ export const COMBINATION_FAMILIES = [
   { id: "party-flame-sliders", name: "Party Star", hat: "party-hat", outfit: "flame-cape", footwear: "golden-sliders" },
   { id: "halo-galaxy-rocket", name: "Galaxy Voyager", hat: "halo", outfit: "galaxy-cape", footwear: "rocket-boots" },
   { id: "tophat-pirate-rain", name: "Dapper Pirate", hat: "top-hat", outfit: "pirate-coat", footwear: "rain-boots" },
-] as const;
+];
 
 /** Families that have their own hand-drawn combination pictures; the rest show their outfit picture. */
 export const COMBINATION_ART_IDS = ["crown-hero-sneakers", "explorer-emerald-boots", "wizard-galaxy-skates", "beanie-arctic-sneakers"];
