@@ -55,4 +55,13 @@ describe("Frugal care economy", () => {
     recordMini("jungle"); recordComplete(); recordJigsaw(3);
     expect(gameStateSnapshot().points).toBe(before);
   });
+  it("only a real energy increase counts as a gain worth animating", () => {
+    expect(energyGain(null, 50)).toBe(0);          // first reading after sign-in
+    expect(energyGain(undefined, 50)).toBe(0);     // care state still loading
+    expect(energyGain(50, null)).toBe(0);          // signed out mid-session
+    expect(energyGain(50, 50)).toBe(0);            // refresh changed nothing
+    expect(energyGain(50, 40)).toBe(0);            // hourly drain must not celebrate
+    expect(energyGain(50, 51)).toBe(1);            // one Mini-Monere found
+    expect(energyGain(0, 50)).toBe(50);            // Super Snack
+  });
 });
