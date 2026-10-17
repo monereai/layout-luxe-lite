@@ -64,7 +64,7 @@ export function MonereStore() {
         </div>
       </div>
 
-      <div>
+      <div id="memberships" className="scroll-mt-6">
         <div className="mb-2 flex items-center justify-between gap-2">
           <h2 className="font-display text-base font-semibold">Memberships</h2>
           <div className="flex rounded-full border border-border p-0.5 text-[11px] font-semibold" role="group" aria-label="Billing period">

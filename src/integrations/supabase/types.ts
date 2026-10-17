@@ -152,6 +152,7 @@ export type Database = {
           monere_energy: number
           monere_points: number
           monere_tokens: number
+          qa_subscription_tier: string | null
           subscription_tier: string
           tokens: number
           user_id: string
@@ -165,6 +166,7 @@ export type Database = {
           monere_energy?: number
           monere_points?: number
           monere_tokens?: number
+          qa_subscription_tier?: string | null
           subscription_tier?: string
           tokens?: number
           user_id: string
@@ -178,6 +180,7 @@ export type Database = {
           monere_energy?: number
           monere_points?: number
           monere_tokens?: number
+          qa_subscription_tier?: string | null
           subscription_tier?: string
           tokens?: number
           user_id?: string
