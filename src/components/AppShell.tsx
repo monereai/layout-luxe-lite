@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
 import { usePlan } from "@/hooks/usePlan";
@@ -27,6 +27,17 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   const wallet = usePointsWallet();
   const care = useCare();
   const energy = care.data?.energy;
+  const seenEnergy = useRef<number | null>(null);
+  const [gain, setGain] = useState<{ amount: number; id: number } | null>(null);
+  useEffect(() => {
+    const amount = energyGain(seenEnergy.current, energy);
+    seenEnergy.current = energy ?? null;
+    if (!amount) return;
+    const id = Date.now();
+    setGain({ amount, id });
+    const timer = setTimeout(() => setGain((g) => (g?.id === id ? null : g)), 1800);
+    return () => clearTimeout(timer);
+  }, [energy]);
   const t = useT();
   const lang = useLang();
   return (

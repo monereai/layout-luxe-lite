@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { INITIAL_ENERGY, MINI_ENERGY, GAME_ENERGY, GAME_POINTS, FULL_ENERGY_BONUS, SNACK_COST, SNACK_ENERGY, addEnergy, drainEnergy, canClaimCare, dailyAllowance, careSchema } from "@/lib/care";
+import { INITIAL_ENERGY, MINI_ENERGY, GAME_ENERGY, GAME_POINTS, FULL_ENERGY_BONUS, SNACK_COST, SNACK_ENERGY, addEnergy, drainEnergy, canClaimCare, dailyAllowance, energyGain, careSchema } from "@/lib/care";
 import { gameStateSnapshot, recordComplete, recordJigsaw, recordMini } from "@/lib/game";
 
 describe("Frugal care economy", () => {
