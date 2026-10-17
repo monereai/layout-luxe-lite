@@ -27,7 +27,7 @@ export function MonereStore() {
   async function subscribed(subscriptionId: string) {
     const r = await activateSubscription({ data: { subscriptionId } });
     await refresh();
-    if (r.ok) toast.success(`👑 Welcome to ${r.tier === "club" ? "MonereAI Club" : "Monere Plus"}! Your monthly points are in your wallet.`, { duration: 6000 });
+    if (r.ok) toast.success(`👑 Welcome to ${r.tier === "club" ? "Monere Club" : "Monere Plus"}! Your monthly points and tokens are in your wallet.`, { duration: 6000 });
     else toast.error("PayPal hasn't confirmed your membership yet. It'll switch on as soon as it does.");
   }
 
@@ -71,7 +71,10 @@ export function MonereStore() {
                 <ul className="my-3 space-y-1 text-sm text-muted-foreground">{m.perks.map((x) => <li key={x} className="flex gap-1.5"><Check className="h-4 w-4 shrink-0 text-primary" />{x}</li>)}</ul>
                 <div className="mt-auto">
                   {!ready ? loadingCheckout : !user ? signInCheckout : current ? <p className="rounded-md bg-primary/10 py-2 text-center text-sm font-semibold text-primary">Your current membership</p>
-                    : planId ? <PayPalButton mode="subscription" planId={planId} onApprove={subscribed} onError={() => toast.error("PayPal checkout didn't complete.")} />
+                    : planId ? <div className="space-y-1.5">
+                        <p className="text-center text-xs font-semibold text-foreground">{m.tier === "club" ? "Join" : "Subscribe to"} {m.name} – £{interval === "monthly" ? `${m.monthly}/mo` : `${m.yearly}/yr`}</p>
+                        <PayPalButton mode="subscription" planId={planId} onApprove={subscribed} onError={() => toast.error("PayPal checkout didn't complete.")} />
+                      </div>
                     : <p className="rounded-md border border-dashed border-border py-2 text-center text-xs text-muted-foreground">Coming soon</p>}
                 </div>
               </div>
