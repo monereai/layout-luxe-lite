@@ -80,7 +80,10 @@ async function syncOne(subscriptionId: string, userId: string): Promise<{ ok: bo
   if (body.status === "ACTIVE" && paidAt) {
     // Yearly plans still award points monthly: one credit per elapsed month since the last payment.
     const months = plan.interval === "yearly" ? Math.min(12, Math.floor((Date.now() - Date.parse(paidAt)) / (30 * 864e5)) + 1) : 1;
-    for (let m = 0; m < months; m++) await supabaseAdmin.from("point_credits").upsert({ user_id: userId, source: "subscription", reference: `sub:${subscriptionId}:${paidAt}:${m}`, points: plan.points }, { onConflict: "reference", ignoreDuplicates: true });
+    for (let m = 0; m < months; m++) {
+      await supabaseAdmin.from("point_credits").upsert({ user_id: userId, source: "subscription", reference: `sub:${subscriptionId}:${paidAt}:${m}`, points: plan.points }, { onConflict: "reference", ignoreDuplicates: true });
+      await supabaseAdmin.from("token_credits").upsert({ user_id: userId, source: "subscription", reference: `subtok:${subscriptionId}:${paidAt}:${m}`, tokens: plan.tokens }, { onConflict: "reference", ignoreDuplicates: true });
+    }
   }
   return { ok: body.status === "ACTIVE", tier: plan.tier };
 }
