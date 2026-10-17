@@ -8,9 +8,9 @@ const EMPTY_SHOP: ShopState = { spent: 0, owned: [], equipped: {} };
 describe("Monere's Hint cost", () => {
   beforeEach(() => { localStorage.clear(); });
 
-  it("a clue costs exactly 20 points — the same as one Mini-Monere find", () => {
+  it("a clue still costs exactly 20 points, and individual finds give no points", () => {
     expect(HINT_COST).toBe(20);
-    expect(POINTS_PER_MINI).toBe(20);
+    expect(POINTS_PER_MINI).toBe(0);
   });
 
   it("each clue spend deducts 20 points from the wallet", () => {

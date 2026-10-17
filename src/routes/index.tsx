@@ -7,6 +7,7 @@ import { BookmarkPlus, Share2, ArrowLeft, ShieldCheck } from "lucide-react";
 import { FollowUpThread, type ChatMsg } from "@/components/FollowUpThread";
 import { followUpChat } from "@/lib/followup.functions";
 import { AppShell } from "@/components/AppShell";
+import { MonereCare } from "@/components/MonereCare";
 import { InstallBanner } from "@/components/InstallBanner";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
@@ -164,6 +165,7 @@ function Home() {
               <MonereMentor portrait={false} />
             </div>
           </Treehouse>
+          <MonereCare />
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t("whatsOnMind")}
           </p>
