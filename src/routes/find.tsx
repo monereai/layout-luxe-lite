@@ -75,6 +75,7 @@ function FindGame() {
   const shop = useShop();
   const [mystery, setMystery] = useState<ShopItem | null>(null);
   const [hint, setHint] = useState<number | null>(null);
+  const [shuffling, setShuffling] = useState(false);
 
   /** Spend 20 Wisdom Points to pulse a clue ring around one unfound Mini-Monere. */
   function showHint() {
@@ -104,6 +105,16 @@ function FindGame() {
     foundRef.current = new Set();
     setRoundKey((n) => n + 1);
     setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false); setHint(null);
+  }
+
+  /** Cover the whole picture, relocate the Minis while hidden, then reveal. */
+  function hideAgain() {
+    if (shuffling || findLock.current) return;
+    setShuffling(true);
+    setTimeout(() => {
+      newRound();
+      setTimeout(() => setShuffling(false), 350);
+    }, 350);
   }
 
   async function tap(i: number) {
@@ -191,7 +202,13 @@ function FindGame() {
       <div className="mt-1 overflow-auto rounded-2xl border border-border">
         <div className="relative w-full min-w-[720px] md:min-w-0">
           <img src={scene.src} alt={`${scene.name} hidden-object scene`} width={1536} height={1024} draggable={false} className="block w-full select-none" />
-          {spots.map((s, i) => {
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-background transition-opacity duration-300 ${shuffling ? "opacity-100" : "opacity-0"}`}
+          >
+            <p className="font-display text-xl font-semibold text-primary motion-safe:animate-pulse">Hiding the Mini-Moneres…</p>
+          </div>
+          {!shuffling && spots.map((s, i) => {
             const isFound = found.has(i);
             return (
               <Button variant="ghost"
@@ -223,7 +240,7 @@ function FindGame() {
         </div>
       </div>
 
-      <Button variant="secondary" className="mt-4 w-full rounded-full" onClick={() => newRound()}><RotateCcw /> Hide them somewhere new</Button>
+      <Button variant="secondary" className="mt-4 w-full rounded-full" disabled={shuffling} onClick={hideAgain}><RotateCcw /> Hide them somewhere new</Button>
 
       <Dialog open={won} onOpenChange={(o) => !o && setWon(false)}>
         <DialogContent className="max-w-sm text-center">
