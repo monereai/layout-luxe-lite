@@ -27,11 +27,11 @@ export function useCare() {
     if (state.fullBonus) {
       if (!bonusToasted.current) {
         bonusToasted.current = true;
+        celebrate(state.fullBonus);
         const now = Date.now();
         if (now - lastFullBonusToast > 5000) {
           lastFullBonusToast = now;
           toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
-          celebrate(state.fullBonus);
         }
         void refresh();
       }
