@@ -122,3 +122,4 @@
 - [x] Replace the side-panel Points Shop banner with a small shop storefront graphic under the left navigation.
 - [x] Fix page crash: the header language selector referenced a variable removed while swapping the banner.
 - [x] Verify the graphic, collapsed nav, localized label, shop page heading, and that the page loads without crashing.
+- [x] Move the shop graphic to the right-hand panel and enlarge it 5x (36px to 180px); verified size, alignment, and no clipping.
