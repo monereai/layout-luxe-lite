@@ -92,6 +92,13 @@
       "when": 1792231090090,
       "tag": "0012_atomic_verified_membership_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792252513670,
+      "tag": "0013_tester_role_and_qa_actions",
+      "breakpoints": true
     }
   ]
 }
