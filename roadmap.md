@@ -159,3 +159,8 @@
 # Find Monere panel size
 - [x] Enlarge the Where's Monere? picture panel by 5% (105% width, centred) while keeping the rest of the page at its normal width.
 - [x] Verify in the preview at 1280, 820 and 390 px: panel exactly 1.05x its column, all 10 Mini-Moneres still inside the picture, no side-to-side page scrolling, no clipping, build clean.
+
+# Mobile hamburger menu
+- [x] Add a menu button to the phone header that opens a side panel listing every page, keeping the bottom tab bar.
+- [x] Remove Story Mode from that panel's page list; the panel now reads Seek, Daily, Journal, Find Monere, Jigsaw, Points Shop, then sign in/out.
+- [x] Verify in the preview at 393x818: panel opens, lists the six pages with no Story Mode entry, closes on pick, build clean.
