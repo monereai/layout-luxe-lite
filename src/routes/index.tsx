@@ -8,6 +8,7 @@ import { FollowUpThread, type ChatMsg } from "@/components/FollowUpThread";
 import { followUpChat } from "@/lib/followup.functions";
 import { AppShell } from "@/components/AppShell";
 import { MonereCare } from "@/components/MonereCare";
+import { QaPanel } from "@/components/QaPanel";
 import { InstallBanner } from "@/components/InstallBanner";
 import { WisdomCards } from "@/components/WisdomCards";
 import { CrisisDialog } from "@/components/CrisisDialog";
@@ -168,6 +169,7 @@ function Home() {
             </div>
           </Treehouse>
           <MonereCare />
+          <div className="mt-4"><QaPanel /></div>
           <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t("whatsOnMind")}
           </p>
