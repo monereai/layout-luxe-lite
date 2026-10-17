@@ -57,6 +57,13 @@
       "when": 1792220857609,
       "tag": "0007_full_energy_point_bonus",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792221140601,
+      "tag": "0008_full_energy_resets_bar",
+      "breakpoints": true
     }
   ]
 }
