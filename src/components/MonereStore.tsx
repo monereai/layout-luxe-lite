@@ -46,7 +46,7 @@ export function MonereStore() {
 
   return (
     <section className="mb-4 space-y-4">
-      {String(import.meta.env["VITE_PAYMENTS_CLIENT_TOKEN"] ?? "").startsWith("pk_test_") && <p className="rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-center text-xs text-primary">All payments made in the preview are in test mode. <a className="underline" target="_blank" rel="noopener noreferrer" href="https://docs.lovable.dev/features/payments#test-and-live-environments">Read more</a></p>}
+      {String(import.meta.env["VITE_PAYMENTS_CLIENT_TOKEN"] ?? "").startsWith("pk_test_") && <p className="rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-center text-xs text-primary">All payments made in the preview are Stripe test payments. <a className="underline" target="_blank" rel="noopener noreferrer" href="https://docs.lovable.dev/features/payments#test-and-live-environments">Read more</a></p>}
       <div>
         <h2 className="mb-2 font-display text-base font-semibold">Point Packs</h2>
         <div className="grid gap-2 sm:grid-cols-3">
@@ -89,7 +89,7 @@ export function MonereStore() {
             );
           })}
         </div>
-        <p className="mt-1.5 text-center text-[11px] text-muted-foreground">Under 18? Ask a parent or guardian to check out. Pay by card; cancel anytime.</p>
+        <p className="mt-1.5 text-center text-[11px] text-muted-foreground">Under 18? Ask a parent or guardian to check out. Pay securely with Stripe; cancel anytime.</p>
       </div>
       <StripeCheckoutDialog item={checkout} onClose={() => setCheckout(null)} />
     </section>
