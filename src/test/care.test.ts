@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { INITIAL_ENERGY, GAME_ENERGY, GAME_POINTS, SNACK_COST, SNACK_ENERGY, addEnergy, drainEnergy, canClaimCare, dailyAllowance } from "@/lib/care";
+import { INITIAL_ENERGY, MINI_ENERGY, GAME_ENERGY, GAME_POINTS, SNACK_COST, SNACK_ENERGY, addEnergy, drainEnergy, canClaimCare, dailyAllowance } from "@/lib/care";
 import { gameStateSnapshot, recordComplete, recordJigsaw, recordMini } from "@/lib/game";
 
 describe("Frugal care economy", () => {
   it("starts at 50 energy", () => expect(INITIAL_ENERGY).toBe(50));
+  it("each Mini-Monere gives one energy", () => {
+    expect(MINI_ENERGY).toBe(1);
+    expect(addEnergy(50, MINI_ENERGY)).toBe(51);
+  });
+  it("a Mini-Monere cannot overfill energy", () => {
+    expect(addEnergy(99, MINI_ENERGY)).toBe(100);
+    expect(addEnergy(100, MINI_ENERGY)).toBe(100);
+  });
   it("drains 10 per whole hour and preserves partial hours", () => {
     expect(drainEnergy(50, 0, 5_400_000)).toEqual({ energy: 40, lastDrain: 3_600_000 });
     expect(drainEnergy(40, 3_600_000, 7_200_000)).toEqual({ energy: 30, lastDrain: 7_200_000 });
