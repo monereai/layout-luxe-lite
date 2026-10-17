@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PAYPAL_CLIENT_ID } from "@/lib/paypal-config";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 type Mode = "capture" | "subscription";
 const loads: Partial<Record<Mode, Promise<any>>> = {};
@@ -15,8 +17,20 @@ function loadSdk(mode: Mode): Promise<any> {
     s.setAttribute("data-namespace", ns);
     s.setAttribute("data-no-one-link", "true");
     s.className = "one-link-ignore";
-    s.onload = () => resolve((window as any)[ns]);
-    s.onerror = () => { delete loads[mode]; reject(new Error("PayPal failed to load")); };
+    const timeout = window.setTimeout(() => fail(), 20000);
+    function fail() {
+      window.clearTimeout(timeout);
+      delete loads[mode];
+      s.remove();
+      reject(new Error("PayPal failed to load"));
+    }
+    s.onload = () => {
+      window.clearTimeout(timeout);
+      const sdk = (window as any)[ns];
+      if (sdk?.Buttons) resolve(sdk);
+      else fail();
+    };
+    s.onerror = fail;
     document.head.appendChild(s);
   }));
 }
@@ -28,12 +42,20 @@ export function PayPalButton(props:
   const latest = useRef(props);
   latest.current = props;
   const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
   const key = props.mode === "subscription" ? props.planId : "capture";
 
   useEffect(() => {
     let buttons: any;
     let cancelled = false;
-    loadSdk(props.mode).then((paypal) => {
+    const host = document.createElement("div");
+    host.setAttribute("data-no-one-link", "true");
+    host.className = "one-link-ignore";
+    ref.current?.replaceChildren(host);
+    setFailed(false);
+    setLoading(true);
+    loadSdk(props.mode).then(async (paypal) => {
       if (cancelled || !ref.current) return;
       const p = latest.current;
       buttons = paypal.Buttons({
@@ -41,14 +63,27 @@ export function PayPalButton(props:
         ...(p.mode === "capture"
           ? { createOrder: () => (latest.current as any).createOrder(), onApprove: (d: any) => latest.current.onApprove(d.orderID) }
           : { createSubscription: (_d: any, actions: any) => actions.subscription.create({ plan_id: (latest.current as any).planId }), onApprove: (d: any) => latest.current.onApprove(d.subscriptionID) }),
-        onError: () => latest.current.onError?.(),
+        onError: () => {
+          if (!cancelled) { setFailed(true); setLoading(false); latest.current.onError?.(); }
+        },
       });
-      void buttons.render(ref.current);
-    }).catch(() => setFailed(true));
-    return () => { cancelled = true; buttons?.close?.().catch?.(() => {}); };
-  }, [props.mode, key]);
+      await buttons.render(host);
+      if (!cancelled) setLoading(false);
+    }).catch(() => { if (!cancelled) { setFailed(true); setLoading(false); } });
+    return () => {
+      cancelled = true;
+      host.remove();
+      try { Promise.resolve(buttons?.close?.()).catch(() => {}); } catch { /* already closed */ }
+    };
+  }, [props.mode, key, attempt]);
 
-  if (failed) return <p className="text-xs text-destructive">PayPal couldn't load. Check your connection and try again.</p>;
   // Stop global click interceptors (link-routing scripts) from hijacking checkout clicks.
-  return <div ref={ref} data-no-one-link="true" className="one-link-ignore relative z-10 min-h-11" onClick={(e) => e.stopPropagation()} />;
+  return <div data-no-one-link="true" className="one-link-ignore relative z-10 min-h-11" onClick={(e) => e.stopPropagation()}>
+    {loading && <p role="status" className="py-2 text-center text-xs text-muted-foreground">Loading PayPal…</p>}
+    <div ref={ref} data-no-one-link="true" className={`one-link-ignore ${failed ? "hidden" : ""}`} />
+    {failed && <div className="space-y-2">
+      <p role="alert" className="text-xs text-destructive">PayPal couldn't load. Please try again.</p>
+      <Button variant="outline" size="sm" className="w-full" onClick={() => setAttempt((value) => value + 1)}><RefreshCw /> Retry PayPal</Button>
+    </div>}
+  </div>;
 }
