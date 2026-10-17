@@ -163,11 +163,11 @@ function ShopPage() {
                   <div key={p.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                     <img src={p.src ?? "/treehouse-watermark.webp"} alt={p.name} loading="lazy" width={816} height={816} className="mb-2 aspect-square w-full rounded-md object-cover" />
                     <p className="text-sm font-semibold">{p.name}</p>
-                    <p className="mb-3 text-xs text-muted-foreground">{p.cost ? `${p.cost} pts` : "Free"}</p>
+                    <p className="mb-3 text-xs text-muted-foreground">{clubIncluded && !props.unlockedProperties.includes(p.id) ? "Included with Monere Club" : p.cost ? `${p.cost} pts` : "Free"}</p>
                     {on ? (
                       <Button size="sm" variant="secondary" className="mt-auto" disabled><Check /> Equipped</Button>
                     ) : owned ? (
-                      <Button size="sm" variant="outline" className="mt-auto" onClick={() => saveProperties(equipProperty(props, p.id))}>Equip</Button>
+                      <Button size="sm" variant="outline" className="mt-auto" onClick={() => saveProperties(equipProperty(clubIncluded && !props.unlockedProperties.includes(p.id) ? { ...props, unlockedProperties: [...props.unlockedProperties, p.id] } : props, p.id))}>Equip</Button>
                     ) : (
                       <Button size="sm" className={CLOTHING_BUTTON_CLASS} onClick={() => {
                         const next = buyProperty(props, wallet, p.id);
