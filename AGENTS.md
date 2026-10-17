@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Persist pet-care state in the protected profiles table and use atomic authenticated SQL functions for drain, snack spending, claims, and replay-safe round rewards; local game storage tracks progression only, preventing duplicate wallet credits.
+- Persist pet-care state in the protected profiles table and use atomic authenticated SQL functions for drain, claims, and replay-safe round rewards; local game storage tracks progression only, preventing duplicate wallet credits.
 - Reward unique spots on owned rounds; validate jigsaw moves against the saved initial order. Update care only after atomic success. Why: retries and fabricated placement must not pay.
 - Fund separate token and point ledgers only through verified payments; profile totals project ledger inserts while usePointsWallet preserves local spending. Why: retries cannot duplicate paid grants.
 - Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
