@@ -142,3 +142,4 @@
 - [x] Put Monere's current energy level in the header where the token counter was, reading the same account energy as the care bar.
 - [x] Verify signed in: chip matches the care bar (0% at energy 0, then 50% after feeding a Super Snack), shows on every page, hidden when signed out, build clean.
 - [x] Enlarge the energy chip (16px text, 20px symbol, 34px tall vs the 12px points chip) and replace the heart with a lightning bolt; verified in the preview.
+- [x] Animate the marker whenever energy is added: the chip pops with an amber glow and floats the amount gained ("+50") for 1.8s; nothing fires on page load, the hourly drain, or a refresh that changes nothing. Verified in the preview after a Super Snack; reduced-motion users get a still badge that fades out.
