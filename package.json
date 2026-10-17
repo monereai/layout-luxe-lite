@@ -47,7 +47,6 @@
     "@streamdown/cjk": "^1.0.4",
     "@streamdown/code": "^2.0.0",
     "@streamdown/math": "^1.0.3",
-    "@streamdown/mermaid": "^1.0.3",
     "@stripe/react-stripe-js": "6.2.0",
     "@stripe/stripe-js": "9.2.0",
     "@supabase/supabase-js": "^2.117.3",
