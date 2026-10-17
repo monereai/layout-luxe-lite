@@ -1,5 +1,40 @@
 import { it, expect } from "vitest";
 import { JIGSAW_BONUS, jigsawSolved, lockedSlots, shufflePieces } from "@/lib/game";
+import { grantJigsawReward } from "@/lib/shop";
+
+const rewardGame = { points: 0, detective: false, best: {}, finds: {}, jigsaws: [3, 4, 5, 6] };
+const rewardShop = { spent: 120, owned: ["amber-snapback"], equipped: { hat: "amber-snapback" } };
+
+it("requires all four completed jigsaw levels before granting a shop item", () => {
+  for (const missing of [3, 4, 5, 6]) {
+    expect(grantJigsawReward(rewardShop, { ...rewardGame, jigsaws: rewardGame.jigsaws.filter((size) => size !== missing) })).toBeNull();
+  }
+  const gift = grantJigsawReward(rewardShop, rewardGame, () => 0);
+  expect(gift?.item?.id).toBe("cozy-beanie");
+  expect(gift?.state.owned).toEqual(["amber-snapback", "cozy-beanie"]);
+});
+
+it("awards the item free without replacing equipped clothing", () => {
+  const gift = grantJigsawReward(rewardShop, rewardGame, () => 0);
+  expect(gift?.state.spent).toBe(120);
+  expect(gift?.state.equipped).toEqual({ hat: "amber-snapback" });
+});
+
+it("does not grant another item after replay or saved-state reload", () => {
+  const gift = grantJigsawReward(rewardShop, rewardGame, () => 0);
+  expect(gift).not.toBeNull();
+  if (!gift) throw new Error("Expected a completion reward");
+  expect(grantJigsawReward(JSON.parse(JSON.stringify(gift.state)), rewardGame)).toBeNull();
+});
+
+it("handles a fully owned inventory without duplicate items", async () => {
+  const { SHOP_ITEMS } = await import("@/lib/shop");
+  const owned = SHOP_ITEMS.map((item) => item.id);
+  const gift = grantJigsawReward({ ...rewardShop, owned }, rewardGame);
+  expect(gift?.item).toBeNull();
+  expect(gift?.state.owned).toEqual(owned);
+  expect(gift?.state.jigsawReward).toBe("all-owned");
+});
 
 it("awards only 5 points per puzzle", () => expect(JIGSAW_BONUS).toBe(5));
 it("shuffle never starts solved and keeps all pieces", () => {

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star, Zap } from "lucide-react";
+import { Eye, EyeOff, Gift, Lock, Puzzle, RotateCcw, Star, Zap } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast as notify } from "sonner";
 import { Button } from "@/components/ui/button";
 import { jigsawSolved, jigsawUnlocked, lockedSlots, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
 import { playChime, playPop } from "@/lib/sound";
 import { useCareRound } from "@/hooks/useCare";
+import { claimJigsawReward, SHOP_ITEMS, useShop } from "@/lib/shop";
 
 // Each difficulty level shows a different scene illustration.
 export const JIGSAW_IMAGES = {
@@ -24,6 +26,12 @@ type Size = (typeof LEVELS)[number]["size"];
 
 export function JigsawGame() {
   const game = useGame();
+  const shop = useShop();
+  const prize = SHOP_ITEMS.find((item) => item.id === shop.jigsawReward);
+  useEffect(() => {
+    const gift = claimJigsawReward(game);
+    if (gift?.item) notify.success(`All four puzzles complete! ${gift.item.name} unlocked in Points Shop.`, { duration: 5000 });
+  }, [game]);
   const [size, setSize] = useState<Size>(3);
   const [roundKey, setRoundKey] = useState(0);
   const careRound = useCareRound("jigsaw", size, roundKey);
@@ -99,6 +107,17 @@ export function JigsawGame() {
         </div>
       </div>
       {careRound.error && <div className="my-2"><p role="alert" className="text-sm text-muted-foreground">{careRound.error}</p><Button variant="outline" disabled={careRound.pending} onClick={careRound.retry}>{done ? "Retry reward" : "Try again"}</Button></div>}
+
+      {shop.jigsawReward && (
+        <div role="status" className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-primary/40 bg-primary/10 p-3">
+          {prize ? <img src={prize.src} alt={prize.name} className="h-16 w-16 shrink-0 object-contain" /> : <Gift className="h-6 w-6 text-primary" />}
+          <div className="min-w-0 flex-1">
+            <p className="font-display font-semibold text-primary">All four levels complete!</p>
+            <p className="text-sm">{prize ? `${prize.name} unlocked — yours to keep!` : "You already own every reward item!"}</p>
+          </div>
+          <Button variant="outline" asChild><Link to="/shop"><Gift />Points Shop</Link></Button>
+        </div>
+      )}
 
       <div className="mt-3 flex items-center justify-between rounded-full border border-primary/40 px-4 py-1.5 text-sm font-semibold" aria-live="polite">
         <span>Pieces Placed: <span className="text-primary">{placed} / {n}</span></span>

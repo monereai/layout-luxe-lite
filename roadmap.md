@@ -1,4 +1,5 @@
 # Pet care economy
+- [x] Award a one-time free Points Shop item after all four jigsaw levels; verified all puzzles, inventory persistence, unchanged spending/outfit, and replay protection.
 - [x] Save replay-safe +1 Energy per Mini-Monere find and verify the home energy bar updates (50→51, persisted after reload).
 - [x] Store account energy, passive drain, daily claims, separate tokens, and replay-safe game rewards.
 - [x] Show home energy/mood bar and daily reward action; add token-priced Super Snack in shop.
