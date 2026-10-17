@@ -6,6 +6,8 @@ import { usePlan } from "@/hooks/usePlan";
 import { updateCare, startCareRound, finishCareRound, rewardCareFind } from "@/lib/care.functions";
 import type { CareState } from "@/lib/care";
 
+let lastFullBonusToast = 0;
+
 export function useCare() {
   const { user, ready, refresh } = usePlan();
   const client = useQueryClient();
