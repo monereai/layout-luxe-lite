@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, ArrowUpRight, Award, Puzzle, Zap, Coins } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
@@ -73,28 +73,20 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             )}
           </aside>
           <main className="relative z-0 flex min-w-0 flex-1 flex-col md:workspace-panel md:min-h-[calc(100dvh-14rem)] md:p-6 lg:p-8">{children}</main>
-          <aside aria-label="Quick actions" className="sticky top-6 hidden min-w-0 xl:block">
+          <aside aria-label="Points Shop" className="sticky top-6 hidden min-w-0 xl:block">
             <div className="flex items-center gap-2 border-b border-border pb-4 text-primary">
               <Compass className="h-5 w-5 shrink-0" />
               <h2 className="font-display text-lg font-semibold">MonereAI</h2>
               {premium && <span className="ml-auto text-xs font-bold">PLUS</span>}
             </div>
-            <div className="space-y-1 py-4">
-              {tabs.filter(({ to }) => to !== "/").map(({ to, label, icon: Icon }) => (
-                <Button key={to} asChild variant="ghost" className="h-auto w-full justify-start whitespace-normal px-0 py-3 text-base font-semibold text-muted-foreground">
-                  <Link to={to}><Icon /><span className="min-w-0 flex-1 text-left">{t(label)}</span><ArrowUpRight /></Link>
-                </Button>
-              ))}
-            </div>
-            <div className="border-y border-border py-5">
-              <Link to="/find" className="flex items-center justify-between gap-3" aria-label={`${t("game")}: ${wallet} Shop Points`}>
+            <div className="border-b border-border py-5">
+              <Link to="/shop" className="flex items-center justify-between gap-3" aria-label={`Points Shop: ${wallet} Shop Points`}>
                 <span className="flex items-center gap-2 text-sm text-muted-foreground"><Award className="h-4 w-4 text-primary" />Shop Points</span>
                 <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
               </Link>
               {game.detective && <p className="mt-3 text-xs text-primary">Master Detective</p>}
               <Link to="/shop" aria-label="Points Shop" className="mt-3 block w-fit transition-opacity hover:opacity-80"><img src={signSrc(lang)} alt="Points Shop" width={1205} height={389} loading="lazy" className="h-auto w-full max-w-[11rem]" /></Link>
             </div>
-            {!premium && <div className="py-5"><PassCodeLink label="Access code" className="font-semibold !text-primary" /></div>}
           </aside>
         </div>
         <footer className="hidden pt-6 text-center md:block">
