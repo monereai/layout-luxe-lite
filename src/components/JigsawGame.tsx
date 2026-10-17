@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star } from "lucide-react";
+import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star, Zap } from "lucide-react";
+import { toast as notify } from "sonner";
 import { Button } from "@/components/ui/button";
 import { jigsawSolved, jigsawUnlocked, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
 import { playChime, playPop } from "@/lib/sound";
@@ -21,6 +22,7 @@ export function JigsawGame() {
   const [roundKey, setRoundKey] = useState(0);
   const careRound = useCareRound("jigsaw", size, roundKey);
   const moves = useRef<[number, number][]>([]);
+  const rewarded = useRef(new Set<number>());
   const n = size * size;
   // Shuffled after mount so server and first client render match.
   const [order, setOrder] = useState<number[]>(() => Array.from({ length: 9 }, (_, i) => i));
