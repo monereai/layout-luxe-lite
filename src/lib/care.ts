@@ -8,7 +8,6 @@ export const GAME_POINTS = 5;
 export const MINI_ENERGY = 1;
 export const FULL_ENERGY_BONUS = 20;
 export const SNACK_COST = 10;
-export const SNACK_COST = 10;
 export const SNACK_ENERGY = 50;
 export const dailyAllowance = (premium: boolean) => premium ? 60 : 30;
 export const addEnergy = (energy: number, amount: number) => Math.min(ENERGY_MAX, Math.max(0, energy + amount));
