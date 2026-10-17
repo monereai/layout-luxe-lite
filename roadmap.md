@@ -1,7 +1,7 @@
 # Monere conversational knowledge
-- [ ] Broaden initial and follow-up answers beyond dilemmas; retain Christian guidance, honest uncertainty and safety.
-- [ ] Render readable answer formatting and include accurate platform guidance without changing access rules or AI models.
-- [ ] Verify general knowledge and follow-up answers using isolated test data.
+- [x] Broaden initial and follow-up answers beyond dilemmas; retain Christian guidance, honest uncertainty and safety.
+- [x] Render readable answer formatting and include accurate platform guidance without changing access rules or AI models.
+- [x] Verify general knowledge and follow-up answers using isolated test data: Moon phases and membership/care guidance render as readable lists, 10 focused tests pass, no browser errors, build OK.
 
 # Stripe production launch
 - [x] Configure the user-supplied public live Stripe.js key for production only; keep active live API and webhook secrets managed, never use abbreviated secret placeholders.
