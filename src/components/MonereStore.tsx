@@ -10,12 +10,14 @@ import { confirmCheckout } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { playFanfare } from "@/lib/sound";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StripeCheckoutDialog } from "./StripeCheckoutDialog";
 
 export function MonereStore() {
   const { user, tier, ready, refresh } = usePlan();
   const [interval, setInterval] = useState<Interval>("monthly");
   const [checkout, setCheckout] = useState<{ priceId: string; title: string } | null>(null);
+  const [upgrade, setUpgrade] = useState<{ priceId: string; title: string; name: string; price: string; points: number; tokens: number } | null>(null);
   const confirm = useServerFn(confirmCheckout);
   const queryClient = useQueryClient();
   const handled = useRef(false);
@@ -83,7 +85,7 @@ export function MonereStore() {
                 <div className="mt-auto">
                   {!ready ? loading : !user ? signIn : tier === m.tier
                     ? <p className="rounded-md bg-primary/10 py-1.5 text-center text-xs font-semibold text-primary">Your current membership</p>
-                    : payButton(m.prices[interval], `${m.name} — ${price}`, `${m.tier === "club" ? "Join" : "Subscribe"} – ${price}`)}
+                    : <Button size="sm" className="h-auto min-h-8 w-full whitespace-normal px-2 py-1.5 text-xs" onClick={() => setUpgrade({ priceId: m.prices[interval], title: `${m.name} — ${price}`, name: m.name, price, points: m.points, tokens: m.tokens })}><CreditCard className="h-3.5 w-3.5" />{m.tier === "club" ? "Join" : "Subscribe"} – {price}</Button>}
                 </div>
               </div>
             );
@@ -91,6 +93,20 @@ export function MonereStore() {
         </div>
         <p className="mt-1.5 text-center text-[11px] text-muted-foreground">Under 18? Ask a parent or guardian to check out. Pay securely with Stripe; cancel anytime.</p>
       </div>
+      <Dialog open={!!upgrade} onOpenChange={(open) => { if (!open) setUpgrade(null); }}>
+        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Confirm upgrade to {upgrade?.name}?</DialogTitle>
+            <DialogDescription>{upgrade?.price}, renewed automatically. Cancel anytime. Your membership starts after successful Stripe payment.</DialogDescription>
+          </DialogHeader>
+          <p className="text-sm text-foreground">Your first payment adds {upgrade?.points} Shop Points and {upgrade?.tokens} Tokens immediately, with the same allowance every month.</p>
+          <p className="text-xs text-muted-foreground">Under 18? Ask a parent or guardian before continuing.</p>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setUpgrade(null)}>Cancel</Button>
+            <Button onClick={() => { if (!upgrade) return; setCheckout({ priceId: upgrade.priceId, title: upgrade.title }); setUpgrade(null); }}><CreditCard className="h-4 w-4" />Confirm and pay</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <StripeCheckoutDialog item={checkout} onClose={() => setCheckout(null)} />
     </section>
   );
