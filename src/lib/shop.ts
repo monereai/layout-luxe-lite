@@ -132,19 +132,28 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
   return equip(purchased, item.category, itemId);
 }
 
-/** Points still needed to own every piece of a combination; 0 once all are owned. */
-export function combinationPrice(state: ShopState, family: CombinationPieces) {
-  return [family.hat, family.outfit, family.footwear]
-    .filter((id) => !state.owned.includes(id))
-    .reduce((sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0), 0);
+/** A ready-made set costs a quarter more than buying its pieces one by one. */
+export const COMBINATION_UPLIFT = 1.25;
+
+const pieceCost = (id: string) => SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0;
+
+/** Set price: the pieces' combined cost plus 25%, rounded up to the nearest 5 points. */
+function setPrice(piecesCost: number) {
+  return piecesCost ? Math.ceil((piecesCost * COMBINATION_UPLIFT) / 5) * 5 : 0;
 }
 
-/** What a combination is worth in full: every piece's cost, owned or not. */
-export function combinationValue(family: CombinationPieces) {
-  return [family.hat, family.outfit, family.footwear].reduce(
-    (sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0),
-    0,
+/** Points still needed for a combination: its unowned pieces plus 25%; 0 once all are owned. */
+export function combinationPrice(state: ShopState, family: CombinationPieces) {
+  return setPrice(
+    [family.hat, family.outfit, family.footwear]
+      .filter((id) => !state.owned.includes(id))
+      .reduce((sum, id) => sum + pieceCost(id), 0),
   );
+}
+
+/** What a combination is worth: every piece's cost plus 25%, rounded up to the nearest 5. */
+export function combinationValue(family: CombinationPieces) {
+  return setPrice([family.hat, family.outfit, family.footwear].reduce((sum, id) => sum + pieceCost(id), 0));
 }
 
 /** Combinations listed by value, cheapest set first. */
