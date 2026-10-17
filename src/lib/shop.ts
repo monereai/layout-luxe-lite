@@ -133,11 +133,22 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
 }
 
 /** Points still needed to own every piece of a combination; 0 once all are owned. */
-export function combinationPrice(state: ShopState, family: { hat: string; outfit: string; footwear: string }) {
+export function combinationPrice(state: ShopState, family: CombinationFamily) {
   return [family.hat, family.outfit, family.footwear]
     .filter((id) => !state.owned.includes(id))
     .reduce((sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0), 0);
 }
+
+/** What a combination is worth in full: every piece's cost, owned or not. */
+export function combinationValue(family: CombinationFamily) {
+  return [family.hat, family.outfit, family.footwear].reduce(
+    (sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0),
+    0,
+  );
+}
+
+/** Combinations listed by value, cheapest set first. */
+export const COMBINATIONS_BY_VALUE = [...COMBINATION_FAMILIES].sort((a, b) => combinationValue(a) - combinationValue(b));
 
 /** Buys the combination pieces the player does not own yet, then wears all three. Null when already owned or unaffordable. */
 export function buyCombination(state: ShopState, wallet: number, family: { hat: string; outfit: string; footwear: string }): ShopState | null {
