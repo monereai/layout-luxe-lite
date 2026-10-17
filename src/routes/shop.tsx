@@ -170,7 +170,7 @@ function ShopPage() {
                     ) : owned ? (
                       <Button size="sm" variant="outline" className="mt-auto" onClick={async () => {
                         const r = await propertyAction("equip", p.id);
-                        if (!r.ok) return toast.error(r.error ?? "Could not equip that habitat.");
+                        if (!r.ok) { toast.error(r.error ?? "Could not equip that habitat."); return; }
                         if (!r.serverSide) saveProperties(equipProperty(clubIncluded && !props.unlockedProperties.includes(p.id) ? { ...props, unlockedProperties: [...props.unlockedProperties, p.id] } : props, p.id));
                       }}>Equip</Button>
                     ) : (
@@ -181,7 +181,7 @@ function ShopPage() {
                           return;
                         }
                         const r = await propertyAction("buy", p.id);
-                        if (!r.ok) return toast.error(r.error === "Not enough points" ? `Your saved account balance is too low for ${p.name}.` : r.error ?? "Purchase failed.");
+                        if (!r.ok) { toast.error(r.error === "Not enough points" ? `Your saved account balance is too low for ${p.name}.` : r.error ?? "Purchase failed."); return; }
                         if (r.serverSide) await refreshPlan(); else saveProperties(next);
                         toast.success(`${p.name} unlocked and equipped!`);
                       }}>
