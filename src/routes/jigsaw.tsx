@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { JigsawGame } from "@/components/JigsawGame";
+import { MonereCare } from "@/components/MonereCare";
 
 export const Route = createFileRoute("/jigsaw")({
   head: () => ({
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/jigsaw")({
 function JigsawPage() {
   return (
     <AppShell>
+      <MonereCare snack />
       <JigsawGame />
     </AppShell>
   );

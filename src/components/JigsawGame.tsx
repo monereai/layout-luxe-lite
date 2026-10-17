@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star } from "lucide-react";
+import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star, Zap } from "lucide-react";
+import { toast as notify } from "sonner";
 import { Button } from "@/components/ui/button";
 import { jigsawSolved, jigsawUnlocked, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
 import { playChime, playPop } from "@/lib/sound";
@@ -21,6 +22,7 @@ export function JigsawGame() {
   const [roundKey, setRoundKey] = useState(0);
   const careRound = useCareRound("jigsaw", size, roundKey);
   const moves = useRef<[number, number][]>([]);
+  const rewarded = useRef(new Set<number>());
   const n = size * size;
   // Shuffled after mount so server and first client render match.
   const [order, setOrder] = useState<number[]>(() => Array.from({ length: 9 }, (_, i) => i));
@@ -31,6 +33,7 @@ export function JigsawGame() {
 
   function reset(s: Size = size) {
     moves.current = [];
+    rewarded.current = new Set();
     setRoundKey((k) => k + 1);
     setSize(s); setOrder(shufflePieces(s * s)); setPicked(null); setDone(false);
   }
@@ -47,6 +50,18 @@ export function JigsawGame() {
     [next[a], next[b]] = [second, first];
     moves.current.push([a, b]);
     setOrder(next); setPicked(null); playPop();
+    // Award +1 Energy the first time each piece lands in its correct slot.
+    for (let i = 0; i < next.length; i++) {
+      if (next[i] === i && !rewarded.current.has(i)) {
+        rewarded.current.add(i);
+        void careRound.rewardFind(i).then((state) => {
+          if (state) notify.success(
+            <span className="flex items-center gap-1.5"><Zap aria-hidden="true" className="h-4 w-4 shrink-0 fill-primary text-primary" /><span>Piece placed! +{state.energyAwarded ?? 0}</span></span>,
+            { duration: 2000 },
+          );
+        }).catch(() => { rewarded.current.delete(i); });
+      }
+    }
     if (jigsawSolved(next)) { setDone(true); recordJigsaw(size); playChime("win"); void careRound.complete(moves.current); }
   }
 
