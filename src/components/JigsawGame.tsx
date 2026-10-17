@@ -44,6 +44,7 @@ export function JigsawGame() {
 
   function swap(a: number, b: number) {
     if (done || a === b || !careRound.canPlay) return;
+    if (locked.has(a) || locked.has(b)) return; // Never move a locked, correct piece.
     const next = [...order];
     const first = next[a]; const second = next[b];
     if (first === undefined || second === undefined) return;
@@ -67,10 +68,12 @@ export function JigsawGame() {
 
   function tap(i: number) {
     if (done || !careRound.canPlay) return;
+    if (locked.has(i)) return; // Correct pieces are fixed to the grid.
     if (picked === null) setPicked(i);
     else swap(picked, i);
   }
 
+  const locked = useMemo(() => lockedSlots(order.slice(0, n)), [order, n]);
   const placed = order.filter((p, i) => p === i).length;
 
   return (
