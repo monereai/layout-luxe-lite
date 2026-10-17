@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -5,15 +6,36 @@ import { usePlan } from "@/hooks/usePlan";
 import { updateCare, startCareRound, finishCareRound, rewardCareFind } from "@/lib/care.functions";
 import type { CareState } from "@/lib/care";
 
+let lastFullBonusToast = 0;
+
 export function useCare() {
   const { user, ready, refresh } = usePlan();
   const client = useQueryClient();
   const update = useServerFn(updateCare);
   const key = ["monere-care", user?.id];
   const query = useQuery({ queryKey: key, queryFn: () => update({ data: { action: "sync" } }), enabled: ready && !!user, refetchInterval: 60_000, refetchOnWindowFocus: "always", staleTime: 15_000, retry: 1 });
+  const bonusToasted = useRef(false);
+  useEffect(() => {
+    const state = query.data;
+    if (!state) return;
+    if (state.fullBonus) {
+      if (!bonusToasted.current) {
+        bonusToasted.current = true;
+        const now = Date.now();
+        if (now - lastFullBonusToast > 5000) {
+          lastFullBonusToast = now;
+          toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+        }
+        void refresh();
+      }
+    } else {
+      bonusToasted.current = false;
+    }
+  }, [query.data, refresh]);
   const accept = async (state: CareState) => {
     client.setQueryData(key, state);
-    if (state.pointsAwarded) await refresh();
+    if (state.fullBonus) toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+    if (state.pointsAwarded || state.fullBonus) await refresh();
   };
   const action = useMutation({ mutationFn: (action: "claim" | "snack") => update({ data: { action } }), onSuccess: accept });
   return { ...query, user, ready, action, accept };
