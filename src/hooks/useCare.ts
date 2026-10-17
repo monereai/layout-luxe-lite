@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -6,7 +5,6 @@ import { usePlan } from "@/hooks/usePlan";
 import { updateCare, startCareRound, finishCareRound, rewardCareFind } from "@/lib/care.functions";
 import type { CareState } from "@/lib/care";
 
-let lastFullBonusToast = 0;
 
 export function useCare() {
   const { user, ready, refresh } = usePlan();
@@ -14,41 +12,12 @@ export function useCare() {
   const update = useServerFn(updateCare);
   const key = ["monere-care", user?.id];
   const query = useQuery({ queryKey: key, queryFn: () => update({ data: { action: "sync" } }), enabled: ready && !!user, refetchInterval: 60_000, refetchOnWindowFocus: "always", staleTime: 15_000, retry: 1 });
-  const bonusToasted = useRef(false);
-  const [bonus, setBonus] = useState(0);
-  const celebrate = useCallback((points: number) => {
-    if (points <= 0) return;
-    setBonus(points);
-    window.setTimeout(() => setBonus(0), 3500);
-  }, []);
-  useEffect(() => {
-    const state = query.data;
-    if (!state) return;
-    if (state.fullBonus) {
-      if (!bonusToasted.current) {
-        bonusToasted.current = true;
-        celebrate(state.fullBonus);
-        const now = Date.now();
-        if (now - lastFullBonusToast > 5000) {
-          lastFullBonusToast = now;
-          toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
-        }
-        void refresh();
-      }
-    } else {
-      bonusToasted.current = false;
-    }
-  }, [query.data, refresh, celebrate]);
   const accept = async (state: CareState) => {
     client.setQueryData(key, state);
-    if (state.fullBonus) {
-      toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
-      celebrate(state.fullBonus);
-    }
-    if (state.pointsAwarded || state.fullBonus) await refresh();
+    if (state.pointsAwarded) await refresh();
   };
   const action = useMutation({ mutationFn: (action: "claim" | "snack") => update({ data: { action } }), onSuccess: accept });
-  return { ...query, user, ready, action, accept, bonus };
+  return { ...query, user, ready, action, accept };
 }
 
 export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6, roundKey: number) {
@@ -89,10 +58,10 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6, round
       lock.current = false;
     } finally { if (version === generation.current) setPending(false); }
   }, [user?.id, round, finish, accept]);
-  const rewardFind = async (spot: number) => {
+  const rewardFind = async (spot: number, moves?: [number, number][]) => {
     if (!user) return null;
     if (!round) throw new Error("Wait for the game to start.");
-    const state = await find({ data: { round: round.id, spot } });
+    const state = await find({ data: { round: round.id, spot, proof: moves ?? [] } });
     await accept(state);
     return state;
   };

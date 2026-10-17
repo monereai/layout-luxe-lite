@@ -20,14 +20,14 @@ describe("Frugal care economy", () => {
     expect(drainEnergy(5, 0, 3_600_000).energy).toBe(0);
     expect(drainEnergy(50, 0, 3_599_999).energy).toBe(50);
   });
-  it("a win gives 15 energy and only 5 points", () => {
-    expect(GAME_ENERGY).toBe(15); expect(GAME_POINTS).toBe(5);
-    expect(addEnergy(50, GAME_ENERGY)).toBe(65);
+  it("a completion gives exactly 1 energy and a win gives 5 points", () => {
+    expect(GAME_ENERGY).toBe(1); expect(GAME_POINTS).toBe(5);
+    expect(addEnergy(50, GAME_ENERGY)).toBe(51);
   });
   it("caps energy at 100 without banking excess", () => {
-    expect(addEnergy(95, GAME_ENERGY)).toBe(100);
+    expect(addEnergy(99, GAME_ENERGY)).toBe(100);
     expect(addEnergy(100, GAME_ENERGY)).toBe(100);
-    expect(addEnergy(drainEnergy(100, 0, 3_600_000).energy, GAME_ENERGY)).toBe(100);
+    expect(addEnergy(drainEnergy(100, 0, 3_600_000).energy, GAME_ENERGY)).toBe(91);
   });
   it("requires full energy to claim", () => {
     expect(canClaimCare(99, false, null, "2026-10-17")).toBe(false);
@@ -40,10 +40,10 @@ describe("Frugal care economy", () => {
   it("pays exactly 20 free, 40 plus or 60 club", () => {
     expect(dailyAllowance("free")).toBe(20); expect(dailyAllowance("plus")).toBe(40); expect(dailyAllowance("club")).toBe(60);
   });
-  it("reaching full energy credits a 20 point bonus", () => {
-    expect(FULL_ENERGY_BONUS).toBe(20);
-    const state = careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 20, pointsAwarded: 20, energyAwarded: 0, today: "2026-10-17", fullBonus: 20 });
-    expect(state.fullBonus).toBe(20);
+  it("full energy retains 100 without automatic points", () => {
+    expect(FULL_ENERGY_BONUS).toBe(0);
+    const state = careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 20, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17", fullBonus: 0 });
+    expect(state.fullBonus).toBe(0);
     expect(() => careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 20, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17" })).toThrow();
   });
   it("a snack costs 10 separate tokens for 50 capped energy", () => {
