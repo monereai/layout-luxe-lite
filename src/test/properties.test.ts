@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buyProperty, equipProperty, propertyName } from "@/lib/properties";
+import { buyProperty, equipProperty, propertyName, canEnterProperty } from "@/lib/properties";
 
 const base = { unlockedProperties: ["treehouse"], activeProperty: "treehouse", spent: 0 };
 
@@ -21,12 +21,17 @@ describe("properties", () => {
     expect(next?.activeProperty).toBe("cozy-bedroom");
     expect(next?.unlockedProperties).toContain("cozy-bedroom");
   });
-  it("Space Station purchases with exactly 900 available points", () => {
-    expect(buyProperty(base, 899, "space-station")).toBeNull();
-    const next = buyProperty(base, 900, "space-station");
-    expect(next?.spent).toBe(900);
-    expect(next?.activeProperty).toBe("space-station");
-    expect(next?.unlockedProperties).toContain("space-station");
+  it("Space Station cannot be bought with points", () => {
+    expect(buyProperty(base, 99999, "space-station")).toBeNull();
+  });
+  it.each(["free", "plus"])("%s cannot enter an old owned Space Station", (tier) => {
+    const owned = { ...base, unlockedProperties: ["treehouse", "space-station"] };
+    expect(canEnterProperty("space-station", tier)).toBe(false);
+    expect(equipProperty(owned, "space-station", tier).activeProperty).toBe("treehouse");
+  });
+  it("Club enters Space Station without spending points", () => {
+    expect(canEnterProperty("space-station", "club")).toBe(true);
+    expect(equipProperty(base, "space-station", "club")).toEqual({ ...base, activeProperty: "space-station" });
   });
   it("names every habitat for welcome copy", () => {
     expect(propertyName("cozy-bedroom")).toBe("Cozy Bedroom");

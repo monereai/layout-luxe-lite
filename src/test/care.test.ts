@@ -37,6 +37,9 @@ describe("Frugal care economy", () => {
     expect(canClaimCare(100, true, "2026-10-17", "2026-10-17")).toBe(false);
     expect(canClaimCare(100, true, "2026-10-17", "2026-10-18")).toBe(true);
   });
+  it("claim date still blocks a reward when a stale claimed flag is false", () => {
+    expect(canClaimCare(100, false, "2026-10-17", "2026-10-17")).toBe(false);
+  });
   it("pays exactly 20 free, 40 plus or 60 club", () => {
     expect(dailyAllowance("free")).toBe(20); expect(dailyAllowance("plus")).toBe(40); expect(dailyAllowance("club")).toBe(60);
   });

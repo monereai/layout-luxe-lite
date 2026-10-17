@@ -17,6 +17,9 @@ import stormViking from "@/assets/combinations/storm-viking.png";
 import partyStar from "@/assets/combinations/party-star.png";
 import galaxyVoyager from "@/assets/combinations/galaxy-voyager.png";
 import dapperPirate from "@/assets/combinations/dapper-pirate.png";
+import { SpaceStationPreview } from "@/components/SpaceStationPreview";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -50,6 +53,7 @@ const COMBINATION_PICTURES: Record<string, string> = {
 const CLOTHING_BUTTON_CLASS = "mt-auto h-auto min-h-8 w-full whitespace-normal px-2 py-2 text-center leading-tight";
 
 function ShopPage() {
+  const [stationPreview, setStationPreview] = useState(false);
   const lang = useLang();
   const shop = useShop();
   const props = useProperties();
@@ -157,19 +161,20 @@ function ShopPage() {
               {PROPERTIES.map((p) => {
                 const clubIncluded = p.id === "space-station" && tier === "club";
                 const owned = props.unlockedProperties.includes(p.id) || clubIncluded;
-                const on = props.activeProperty === p.id;
+                const clubLocked = p.id === "space-station" && tier !== "club";
+                const on = props.activeProperty === p.id && !clubLocked;
                 return (
                   <div key={p.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                     <img src={p.src ?? "/treehouse-watermark.webp"} alt={p.name} loading="lazy" width={816} height={816} className="mb-2 aspect-square w-full rounded-md object-cover" />
                     <p className="text-sm font-semibold">{p.name}</p>
-                    <p className="mb-3 text-xs text-muted-foreground">{clubIncluded && !props.unlockedProperties.includes(p.id) ? "Included with Monere Club" : p.cost ? `${p.cost} pts` : "Free"}</p>
-                    {on ? (
+                    <p className="mb-3 text-xs text-muted-foreground">{p.id === "space-station" ? "Monere Club exclusive" : p.cost ? `${p.cost} pts` : "Free"}</p>
+                    {clubLocked ? <Button variant="outline" size="sm" className={CLOTHING_BUTTON_CLASS} onClick={() => setStationPreview(true)}><Lock />Preview Space Station</Button> : on ? (
                       <Button size="sm" variant="secondary" className="mt-auto" disabled><Check /> Equipped</Button>
                     ) : owned ? (
                       <Button size="sm" variant="outline" className="mt-auto" onClick={async () => {
                         const r = await propertyAction("equip", p.id);
                         if (!r.ok) { toast.error(r.error ?? "Could not equip that habitat."); return; }
-                        if (!r.serverSide) saveProperties(equipProperty(clubIncluded && !props.unlockedProperties.includes(p.id) ? { ...props, unlockedProperties: [...props.unlockedProperties, p.id] } : props, p.id));
+                        if (!r.serverSide) saveProperties(equipProperty(props, p.id, tier));
                       }}>Equip</Button>
                     ) : (
                       <Button size="sm" className={CLOTHING_BUTTON_CLASS} onClick={async () => {
@@ -223,6 +228,7 @@ function ShopPage() {
             </TabsContent>
           ))}
         </Tabs>
+        <Dialog open={stationPreview} onOpenChange={setStationPreview}><DialogContent className="max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Space Station · Monere Club</DialogTitle></DialogHeader><div onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setStationPreview(false); }}><SpaceStationPreview /></div></DialogContent></Dialog>
         <p className="mt-4 text-center text-xs text-muted-foreground">Tap "Equipped" to take an item off. Find Monere to earn more points.</p>
       </div>
     </AppShell>

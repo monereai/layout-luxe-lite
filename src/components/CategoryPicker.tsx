@@ -2,6 +2,12 @@ import { Check } from "lucide-react";
 import { PROPERTIES, useProperties } from "@/lib/properties";
 import { MonereFigure } from "@/components/MonereFigure";
 import { MonereCharacterView } from "@/components/MonereCharacterView";
+import { usePlan } from "@/hooks/usePlan";
+import { canEnterProperty } from "@/lib/properties";
+import { SpaceStationPreview } from "@/components/SpaceStationPreview";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Compass, MessageCircle, RotateCcw } from "lucide-react";
 
 export type Category = { title: string; short: string; emoji: string };
 
@@ -60,32 +66,41 @@ export function CategoryPicker({
   };
 
   const property = useProperties();
+  const { tier } = usePlan();
+  const [stationView, setStationView] = useState("topics");
+  const [viewKey, setViewKey] = useState(0);
+  const station = property.activeProperty === "space-station";
+  if (!canEnterProperty(property.activeProperty, tier)) return <SpaceStationPreview />;
   return (
     <div className="mt-3">
+      {station && <nav aria-label="Space Station navigation" className="mb-3 flex flex-wrap justify-center gap-2">
+        <Button variant={stationView === "topics" ? "default" : "outline"} size="sm" onClick={() => setStationView("topics")}><Compass />Mission topics</Button>
+        <Button variant={stationView === "character" ? "default" : "outline"} size="sm" onClick={() => setStationView("character")}><MessageCircle />Monere controls</Button>
+      </nav>}
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
         <div className="orbit-center">
           {backdrop && property.activeProperty === "treehouse" && (
             <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[160%] w-[160%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-60 sm:h-[135%] sm:w-[135%] sm:opacity-50" />
           )}
           {backdrop && PROPERTIES.filter((p) => p.src).map((p) => (
-            <img key={p.id} src={p.src!} alt="" loading="lazy" width={816} height={816} style={{ opacity: property.activeProperty === p.id ? 1 : 0, transition: "opacity 0.3s ease" }} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[110%] w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none rounded-full object-cover" />
+            <img key={p.id} src={p.src ?? ""} alt="" loading="lazy" width={816} height={816} className={`pointer-events-none absolute left-1/2 top-1/2 z-0 h-[110%] w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none rounded-full object-cover transition-opacity ${property.activeProperty === p.id ? "opacity-100" : "opacity-0"}`} />
           ))}
           <span className="orbit-halo pointer-events-none" aria-hidden="true" />
           <div className="relative z-10 h-full w-full">
-            {interactive ? <MonereCharacterView>
+            {interactive ? <MonereCharacterView key={viewKey}>
               <MonereFigure gesture={listening ? "listen" : "wave"} alt="Monere the lion" className="relative h-full w-full" />
             </MonereCharacterView> :
             <MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" />
             }
           </div>
         </div>
-        <div className="orbit-overlay">
+        <div className={`orbit-overlay ${station && stationView === "character" ? "hidden" : ""}`}>
           {CATEGORIES.map(({ title, short, emoji }, i) => {
             const on = value.includes(title);
             const full = !on && value.length >= MAX_CATEGORIES;
-            const slot = SLOTS[i] ?? SLOTS[0]!;
+            const slot = SLOTS[i] ?? { left: "0%", top: "0%" };
             return (
-              <button
+              <Button variant="ghost"
                 key={title}
                 type="button"
                 aria-pressed={on}
@@ -98,11 +113,15 @@ export function CategoryPicker({
                 <span className="text-lg leading-none" aria-hidden="true">{emoji}</span>
                 <span className="font-display text-[12px] font-semibold leading-tight">{short}</span>
                 {on && <Check className="absolute right-1.5 top-1.5 h-3.5 w-3.5 text-primary" strokeWidth={3} aria-hidden="true" />}
-              </button>
+              </Button>
             );
           })}
         </div>
       </div>
+      {station && stationView === "character" && <div role="group" aria-label="Space Station character menu" className="mt-3 flex flex-wrap justify-center gap-2">
+        <Button variant="outline" onClick={() => setViewKey((key) => key + 1)}><RotateCcw />Reset Monere</Button>
+        <Button onClick={() => { setStationView("topics"); toggle("Future, Purpose & Faith"); }}><MessageCircle />Talk about purpose</Button>
+      </div>}
       <p aria-live="polite" className={`float-counter mx-auto mt-4 w-fit rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${value.length ? "border-primary/50 bg-primary/15 text-primary" : "border-border bg-card/85 text-foreground"}`}>
         {value.length ? `Selected (${value.length}) — Tap '${actionLabel}'` : `Tap up to ${MAX_CATEGORIES} topics`}
       </p>
