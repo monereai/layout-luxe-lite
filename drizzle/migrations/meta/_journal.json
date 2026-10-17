@@ -71,6 +71,13 @@
       "when": 1792228383155,
       "tag": "0009_tiered_care_and_token_credits",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792231031285,
+      "tag": "0010_canonical_account_wallets",
+      "breakpoints": true
     }
   ]
 }
