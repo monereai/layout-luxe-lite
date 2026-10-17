@@ -137,3 +137,7 @@
 # Header token chip removed
 - [x] Take the tokens counter out of the header panel; the points balance, language picker, membership badge and sign-in controls stay.
 - [x] Verify signed in (carlhillyard@icloud.com): header shows 1635 pts, no token chip or lightning icon; snack tokens still work in the shop.
+
+# Header energy chip
+- [x] Put Monere's current energy level in the header where the token counter was, reading the same account energy as the care bar.
+- [x] Verify signed in: chip matches the care bar (0% at energy 0, then 50% after feeding a Super Snack), shows on every page, hidden when signed out, build clean.
