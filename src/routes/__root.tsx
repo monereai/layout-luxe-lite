@@ -8,7 +8,9 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
+import { getAnalyticsId, initAnalytics, trackPageView } from "@/lib/analytics";
 import { registerAppServiceWorker } from "@/lib/pwa";
 
 import appCss from "../styles.css?url";
@@ -129,6 +131,12 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => { void registerAppServiceWorker(); }, []);
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const [gaId, setGaId] = useState<string | null>(null);
+  useEffect(() => {
+    void getAnalyticsId().then((id) => { if (id) { initAnalytics(id); setGaId(id); } }).catch(() => {});
+  }, []);
+  useEffect(() => { if (gaId) trackPageView(path); }, [gaId, path]);
 
   return (
     <QueryClientProvider client={queryClient}>
