@@ -101,6 +101,8 @@ function StoryMode() {
     const id = runId.current;
     setBusy(true);
     setError(null);
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session) { setBusy(false); setError("Please sign in to play the story adventure."); return; }
     const res = await tellStory({
       data: { episode: epNum, turns: nextTurns, userName: userName || undefined, profile, lang },
     });

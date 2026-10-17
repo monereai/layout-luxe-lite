@@ -99,6 +99,13 @@
       "when": 1792252513670,
       "tag": "0013_tester_role_and_qa_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792252781735,
+      "tag": "0014_server_checked_habitat_unlocks",
+      "breakpoints": true
     }
   ]
 }

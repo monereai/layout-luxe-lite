@@ -34,19 +34,21 @@ function read(): PropertyState {
 let state: PropertyState = read();
 const subs = new Set<(s: PropertyState) => void>();
 
-async function sync(s: PropertyState) {
+/** Signed-in unlocks and equips are checked and charged by the server; returns false when refused. */
+export async function propertyAction(action: "buy" | "equip", id: string): Promise<{ ok: boolean; error?: string; serverSide: boolean }> {
   const { data } = await supabase.auth.getUser();
-  if (!data.user) return;
-  await supabase.from("user_properties").upsert({
-    user_id: data.user.id, unlocked_properties: s.unlockedProperties, active_property: s.activeProperty, updated_at: new Date().toISOString(),
-  });
+  if (!data.user) return { ok: true, serverSide: false };
+  const { data: res, error } = await supabase.rpc("property_action", { p_action: action, p_id: id });
+  if (error) return { ok: false, error: error.message, serverSide: true };
+  const r = res as { unlocked: string[]; active: string };
+  saveProperties({ ...state, unlockedProperties: Array.from(new Set(["treehouse", ...r.unlocked])), activeProperty: r.active }, false);
+  return { ok: true, serverSide: true };
 }
 
-export function saveProperties(next: PropertyState, remote = true) {
+export function saveProperties(next: PropertyState, _remote = true) {
   state = next;
   window.localStorage.setItem(KEY, JSON.stringify(next));
   subs.forEach((f) => f(next));
-  if (remote) sync(next).catch(() => {});
 }
 
 /** Pure purchase rule: returns null when already owned or unaffordable. */
@@ -65,8 +67,9 @@ async function pull() {
   const { data } = await supabase.auth.getUser();
   if (!data.user) return;
   const { data: row } = await supabase.from("user_properties").select("*").eq("user_id", data.user.id).maybeSingle();
-  if (!row) { sync(state).catch(() => {}); return; }
-  const unlocked = Array.from(new Set([...state.unlockedProperties, ...row.unlocked_properties]));
+  if (!row) return;
+  // The account's saved unlocks are the source of truth when signed in.
+  const unlocked = Array.from(new Set(["treehouse", ...row.unlocked_properties]));
   saveProperties({ ...state, unlockedProperties: unlocked, activeProperty: unlocked.includes(row.active_property) ? row.active_property : state.activeProperty }, false);
 }
 

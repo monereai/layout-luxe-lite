@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { LANG_IDS, languageInstruction } from "@/lib/i18n";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -89,6 +90,7 @@ const Input = z.object({
 });
 
 export const seekWisdom = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }): Promise<{ ok: true; wisdom: Wisdom } | { ok: false; error: string }> => {
     const key = process.env["LOVABLE_API_KEY"];

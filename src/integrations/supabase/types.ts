@@ -344,6 +344,10 @@ export type Database = {
         Returns: boolean
       }
       is_premium: { Args: { check_env: string }; Returns: boolean }
+      property_action: {
+        Args: { p_action: string; p_id: string }
+        Returns: Json
+      }
       qa_action: { Args: { p_action: string }; Returns: Json }
       redeem_org_code: {
         Args: { p_code: string }

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Award, Check, Footprints, Gem, Glasses, GraduationCap, Home, Lock, Sparkles } from "lucide-react";
-import { PROPERTIES, buyProperty, equipProperty, saveProperties, useProperties } from "@/lib/properties";
+import { PROPERTIES, buyProperty, equipProperty, propertyAction, saveProperties, useProperties } from "@/lib/properties";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { MonereFigure } from "@/components/MonereFigure";
@@ -55,7 +55,7 @@ function ShopPage() {
   const shop = useShop();
   const props = useProperties();
   const wallet = usePointsWallet();
-  const { tier } = usePlan();
+  const { tier, refresh: refreshPlan } = usePlan();
 
   function purchase(id: string) {
     const next = buy(shop, wallet + shop.spent, id);
@@ -168,15 +168,21 @@ function ShopPage() {
                     {on ? (
                       <Button size="sm" variant="secondary" className="mt-auto" disabled><Check /> Equipped</Button>
                     ) : owned ? (
-                      <Button size="sm" variant="outline" className="mt-auto" onClick={() => saveProperties(equipProperty(clubIncluded && !props.unlockedProperties.includes(p.id) ? { ...props, unlockedProperties: [...props.unlockedProperties, p.id] } : props, p.id))}>Equip</Button>
+                      <Button size="sm" variant="outline" className="mt-auto" onClick={async () => {
+                        const r = await propertyAction("equip", p.id);
+                        if (!r.ok) { toast.error(r.error ?? "Could not equip that habitat."); return; }
+                        if (!r.serverSide) saveProperties(equipProperty(clubIncluded && !props.unlockedProperties.includes(p.id) ? { ...props, unlockedProperties: [...props.unlockedProperties, p.id] } : props, p.id));
+                      }}>Equip</Button>
                     ) : (
-                      <Button size="sm" className={CLOTHING_BUTTON_CLASS} onClick={() => {
+                      <Button size="sm" className={CLOTHING_BUTTON_CLASS} onClick={async () => {
                         const next = buyProperty(props, wallet, p.id);
                         if (!next) {
                           if (wallet < p.cost) toast.error(`You need ${p.cost - wallet} more points to buy ${p.name}.`);
                           return;
                         }
-                        saveProperties(next);
+                        const r = await propertyAction("buy", p.id);
+                        if (!r.ok) { toast.error(r.error === "Not enough points" ? `Your saved account balance is too low for ${p.name}.` : r.error ?? "Purchase failed."); return; }
+                        if (r.serverSide) await refreshPlan(); else saveProperties(next);
                         toast.success(`${p.name} unlocked and equipped!`);
                       }}>
                         Buy Now for {p.cost} pts
