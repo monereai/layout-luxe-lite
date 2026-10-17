@@ -40,6 +40,12 @@ describe("Frugal care economy", () => {
   it("pays exactly 30 free or 60 premium", () => {
     expect(dailyAllowance(false)).toBe(30); expect(dailyAllowance(true)).toBe(60);
   });
+  it("reaching full energy credits a 20 point bonus", () => {
+    expect(FULL_ENERGY_BONUS).toBe(20);
+    const state = careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 30, pointsAwarded: 20, energyAwarded: 0, today: "2026-10-17", fullBonus: 20 });
+    expect(state.fullBonus).toBe(20);
+    expect(() => careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 30, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17" })).toThrow();
+  });
   it("a snack costs 10 separate tokens for 50 capped energy", () => {
     expect(SNACK_COST).toBe(10); expect(SNACK_ENERGY).toBe(50);
     expect(addEnergy(20, SNACK_ENERGY)).toBe(70); expect(addEnergy(80, SNACK_ENERGY)).toBe(100);
