@@ -12,6 +12,20 @@ export function useCare() {
   const update = useServerFn(updateCare);
   const key = ["monere-care", user?.id];
   const query = useQuery({ queryKey: key, queryFn: () => update({ data: { action: "sync" } }), enabled: ready && !!user, refetchInterval: 60_000, refetchOnWindowFocus: "always", staleTime: 15_000, retry: 1 });
+  const bonusToasted = useRef(false);
+  useEffect(() => {
+    const state = query.data;
+    if (!state) return;
+    if (state.fullBonus) {
+      if (!bonusToasted.current) {
+        bonusToasted.current = true;
+        toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+        void refresh();
+      }
+    } else {
+      bonusToasted.current = false;
+    }
+  }, [query.data, refresh]);
   const accept = async (state: CareState) => {
     client.setQueryData(key, state);
     if (state.fullBonus) toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
