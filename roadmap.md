@@ -1,3 +1,6 @@
+# Monere centring
+- [x] Centre-lock wheel and pinch zoom and remove interactive sway; verified wheel zoom, turning and reset in an isolated browser, with 11 character tests passing.
+
 # Uploaded economy brief
 - [ ] Add protected canonical account wallet fields and server-maintained tier, preserving existing credits and spending.
 - [ ] Replace automatic full-energy payouts with manual daily claims and +1 energy rewards.

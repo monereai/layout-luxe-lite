@@ -75,7 +75,7 @@ export function CategoryPicker({
           <span className="orbit-halo pointer-events-none" aria-hidden="true" />
           <div className="relative z-10 h-full w-full">
             {wardrobe ? <MonereCharacterView>
-              <MonereFigure gesture={listening ? "listen" : "wave"} alt="Monere the lion" className="mentor-avatar relative h-full w-full" />
+              <MonereFigure gesture={listening ? "listen" : "wave"} alt="Monere the lion" className="relative h-full w-full" />
             </MonereCharacterView> :
             <MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" />
             }

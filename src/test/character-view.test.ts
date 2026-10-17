@@ -33,9 +33,13 @@ describe("Monere view controls", () => {
     expect(wheelCharacterZoom(1, 1, 1)).toBe(wheelCharacterZoom(1, 16, 0));
     expect(wheelCharacterZoom(1, -1, 0)).toBeLessThan(1.01);
   });
-  it("keeps the point under the zoom cursor stationary", () => {
-    const view = zoomCharacter(INITIAL_CHARACTER_VIEW, 1.5, { x: 60, y: 40 });
-    expect(view.x + 60 * view.scale).toBe(60);
-    expect(view.y + 40 * view.scale).toBe(40);
+  it("keeps Monere centred when scrolling in and out", () => {
+    const enlarged = zoomCharacter(INITIAL_CHARACTER_VIEW, 1.5);
+    expect(enlarged).toEqual({ ...INITIAL_CHARACTER_VIEW, scale: 1.5 });
+    expect(zoomCharacter(enlarged, 0.7)).toEqual({ ...INITIAL_CHARACTER_VIEW, scale: 0.7 });
+  });
+  it("removes any pinch translation while preserving the turn angle", () => {
+    const shifted = { ...INITIAL_CHARACTER_VIEW, rotation: 90, x: 60, y: 40 };
+    expect(zoomCharacter(shifted, 1.2)).toEqual({ ...INITIAL_CHARACTER_VIEW, rotation: 90, scale: 1.2 });
   });
 });
