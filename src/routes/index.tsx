@@ -64,7 +64,7 @@ function Home() {
   const t = useT();
   const lang = useLang();
   const [listening, setListening] = useState(false);
-  const { premium, ready } = usePlan();
+  const { premium, ready, user } = usePlan();
   const [paywall, setPaywall] = useState<null | "limit" | "upgrade">(null);
   const [used, setUsed] = useState(0);
   useEffect(() => {
@@ -84,6 +84,7 @@ function Home() {
       return;
     }
     if (ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
+    if (!user) { toast("Please sign in to talk with Monere."); return; }
     setLoading(true);
     const res = await ask({
       data: { category, situation, includeSong, userName: userName || undefined, profile, lang },
