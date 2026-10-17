@@ -1,8 +1,8 @@
 # Pet care economy
-- [ ] Store account energy, passive drain, daily claims, separate tokens, and replay-safe game rewards.
-- [ ] Show home energy/mood bar and daily reward action; add token-priced Super Snack in shop.
-- [ ] Replace Find/Jigsaw payouts with 15 energy and 5 points per win.
-- [ ] Test exact rules and verify signed-in care/game/shop flows.
+- [x] Store account energy, passive drain, daily claims, separate tokens, and replay-safe game rewards.
+- [x] Show home energy/mood bar and daily reward action; add token-priced Super Snack in shop.
+- [x] Replace Find/Jigsaw payouts with 15 energy and 5 points per win.
+- [x] Test exact rules and verify signed-in care/game/shop flows.
 - [ ] Token funding mechanism — blocked pending user's earning or purchase rules.
 
 # MonereAI branding

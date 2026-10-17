@@ -1,0 +1,2 @@
+ALTER TABLE public.point_credits DROP CONSTRAINT point_credits_source_check;
+ALTER TABLE public.point_credits ADD CONSTRAINT point_credits_source_check CHECK (source IN ('pack','subscription','daily_care','game_round'));

@@ -36,6 +36,13 @@
       "when": 1792219804665,
       "tag": "0004_monere_pet_care_economy",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792220071824,
+      "tag": "0005_allow_care_credit_sources",
+      "breakpoints": true
     }
   ]
 }

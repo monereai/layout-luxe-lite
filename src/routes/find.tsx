@@ -1,16 +1,17 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Trophy, Award, Star } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
-  COMPLETION_BONUS, HINT_COST, MAP_UNLOCK_FINDS, MINI_COUNT, POINTS_PER_MINI,
+  HINT_COST, MAP_UNLOCK_FINDS, MINI_COUNT,
   allMapsComplete, makeSpots, mapUnlocked, recordHintSpend, recordMystery, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
 import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
+import { useCareRound } from "@/hooks/useCare";
 
 const MINI = "/find/mini.webp";
 const SCENES = [
@@ -41,8 +42,11 @@ const BURST = [0, 60, 120, 180, 240, 300];
 function FindGame() {
   const game = useGame();
   const wallet = usePointsWallet();
+  const [roundKey, setRoundKey] = useState(0);
+  const careRound = useCareRound("find", 3, roundKey);
+  const foundRef = useRef(new Set<number>());
   const [idx, setIdx] = useState(0);
-  const scene = SCENES[idx] ?? SCENES[0]!;
+  const scene = SCENES[idx] ?? { id: "jungle", name: "Jungle Park", src: "/find/jungle.webp" };
   // Spots are shuffled after mount so the server and first client render match.
   const [spots, setSpots] = useState<Spot[]>([]);
   useEffect(() => { setSpots(makeSpots()); }, []);
@@ -55,34 +59,43 @@ function FindGame() {
 
   /** Spend 20 Wisdom Points to pulse a clue ring around one unfound Mini-Monere. */
   function showHint() {
-    if (won || hint !== null) return;
+    if (won || hint !== null || !careRound.canPlay) return;
     if (wallet < HINT_COST) {
-      setToast(`A hint costs ${HINT_COST} Wisdom Points — find more Mini-Moneres first!`);
+      setToast(`A hint costs ${HINT_COST} Wisdom Points — complete more rounds first!`);
       return;
     }
     const remaining = spots.map((_, i) => i).filter((i) => !found.has(i));
     if (!remaining.length) return;
     recordHintSpend();
-    setHint(remaining[Math.floor(Math.random() * remaining.length)]!);
+    const chosen = remaining[Math.floor(Math.random() * remaining.length)];
+    if (chosen === undefined) return;
+    setHint(chosen);
     setTimeout(() => setHint(null), 3500);
   }
 
   function newRound(next = idx) {
-    if (next !== idx && !mapUnlocked(game.finds, next === 0 ? undefined : SCENES[next - 1]!.id)) {
-      setToast(`Find ${MAP_UNLOCK_FINDS} Mini-Moneres in ${SCENES[next - 1]!.name} to unlock ${SCENES[next]!.name}!`);
+    const destination = SCENES[next];
+    const previous = SCENES[next - 1];
+    if (!destination) return;
+    if (next !== idx && !mapUnlocked(game.finds, previous?.id)) {
+      setToast(`Find ${MAP_UNLOCK_FINDS} Mini-Moneres in ${previous?.name} to unlock ${destination.name}!`);
       return;
     }
+    foundRef.current = new Set();
+    setRoundKey((n) => n + 1);
     setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false); setHint(null);
   }
 
   function tap(i: number) {
-    if (found.has(i) || won) return;
-    const next = new Set(found).add(i);
+    if (foundRef.current.has(i) || won || !careRound.canPlay) return;
+    const next = new Set(foundRef.current).add(i);
+    foundRef.current = next;
     setFound(next);
     playPop();
     recordMini(scene.id);
     if (next.size >= MINI_COUNT) {
       recordComplete(); setToast(null);
+      void careRound.complete([...next]);
       const finds = { ...game.finds, [scene.id]: (game.finds[scene.id] ?? 0) + 1 };
       if (!game.mystery && allMapsComplete(finds, SCENES.map((s) => s.id))) {
         const gift = grantMystery(shop);
@@ -90,7 +103,7 @@ function FindGame() {
       }
       setTimeout(() => { playChime("win"); setWon(true); }, 600);
     } else {
-      setToast(`+${POINTS_PER_MINI} Wisdom Points!`);
+      setToast("Mini-Monere found!");
     }
   }
 
@@ -108,11 +121,11 @@ function FindGame() {
         </div>
       </div>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
         {SCENES.map((s, i) => {
-          const open = mapUnlocked(game.finds, i === 0 ? undefined : SCENES[i - 1]!.id);
+          const open = mapUnlocked(game.finds, SCENES[i - 1]?.id);
           return (
-            <button key={s.id} onClick={() => newRound(i)} className={`flex-1 rounded-full border px-2 py-1.5 text-xs ${i === idx ? "border-primary bg-primary/15 text-primary" : open ? "border-border text-muted-foreground" : "border-border text-muted-foreground/50"}`}>{open ? s.name : `🔒 ${s.name}`}</button>
+            <Button key={s.id} variant="outline" onClick={() => newRound(i)} className={`h-auto whitespace-normal rounded-full px-2 py-1.5 text-xs ${i === idx ? "border-primary bg-primary/15 text-primary" : open ? "border-border text-muted-foreground" : "border-border text-muted-foreground/50"}`}>{open ? s.name : `🔒 ${s.name}`}</Button>
           );
         })}
       </div>
@@ -128,16 +141,17 @@ function FindGame() {
       </div>
 
       <div className="mt-2 flex justify-center">
-        <button
+        <Button variant="outline"
           onClick={showHint}
-          disabled={hint !== null || won || found.size >= MINI_COUNT}
+          disabled={!careRound.canPlay || hint !== null || won || found.size >= MINI_COUNT}
           className="rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           💡 Monere's Hint — {HINT_COST} points
-        </button>
+        </Button>
       </div>
 
       <p className="mt-2 min-h-5 text-center text-sm font-medium text-primary" aria-live="polite">{toast}</p>
+      {careRound.error && !won && <div className="my-2 text-center"><p role="alert" className="text-sm text-muted-foreground">{careRound.error}</p><Button variant="outline" onClick={careRound.retry}>Try again</Button></div>}
 
       <div className="mt-1 overflow-auto rounded-2xl border border-border">
         <div className="relative w-full min-w-[720px] md:min-w-0">
@@ -145,11 +159,12 @@ function FindGame() {
           {spots.map((s, i) => {
             const isFound = found.has(i);
             return (
-              <button
+              <Button variant="ghost"
                 key={`${idx}-${i}`}
                 onClick={() => tap(i)}
+                disabled={!careRound.canPlay || found.size === MINI_COUNT}
                 aria-label={isFound ? "Mini-Monere found" : hint === i ? "Monere's clue points here" : "Hidden spot"}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full ${isFound ? "ring-2 ring-primary" : ""} ${hint === i ? "ring-4 ring-primary motion-safe:animate-pulse ring-offset-4 ring-offset-background" : ""}`}
+                className={`absolute h-auto min-h-0 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent disabled:opacity-100 ${isFound ? "ring-2 ring-primary" : ""} ${hint === i ? "ring-4 ring-primary motion-safe:animate-pulse ring-offset-4 ring-offset-background" : ""}`}
                 style={{ left: `${s.x}%`, top: `${s.y}%`, width: `${s.size}%` }}
               >
                 <img
@@ -167,7 +182,7 @@ function FindGame() {
                     style={{ "--deg": `${deg}deg` } as React.CSSProperties}
                   />
                 ))}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -180,8 +195,9 @@ function FindGame() {
           <p className="text-4xl" aria-hidden="true">🎉</p>
           <DialogTitle className="font-display text-2xl">You Found Them All!</DialogTitle>
           <DialogDescription>
-            All {MINI_COUNT} Mini-Moneres collected. +{MINI_COUNT * POINTS_PER_MINI} for the finds and a +{COMPLETION_BONUS} completion bonus!
+            All {MINI_COUNT} Mini-Moneres collected. {careRound.pending ? "Saving your reward…" : careRound.reward}
           </DialogDescription>
+          {careRound.error && <div><p role="alert" className="text-sm text-muted-foreground">{careRound.error}</p><Button variant="outline" disabled={careRound.pending} onClick={careRound.retry}>Retry reward</Button></div>}
           <p className="text-sm">"Sharp eyes! Patience and noticing the small things are a big part of wisdom."</p>
           {mystery && (
             <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3">
@@ -191,7 +207,7 @@ function FindGame() {
               <p className="text-xs text-muted-foreground">It's yours free and Monere is wearing it now.</p>
             </div>
           )}
-          <Button className="btn-gold mt-2 w-full" onClick={() => newRound()}><RotateCcw /> Play again</Button>
+          <Button className="btn-gold mt-2 w-full" disabled={careRound.pending || !!careRound.error} onClick={() => newRound()}><RotateCcw /> Play again</Button>
         </DialogContent>
       </Dialog>
     </AppShell>
