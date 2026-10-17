@@ -15,6 +15,7 @@ function loadSdk(mode: Mode): Promise<any> {
     const s = document.createElement("script");
     s.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=GBP&components=buttons&${q}`;
     s.setAttribute("data-namespace", ns);
+    s.setAttribute("data-tagline", "false");
     s.setAttribute("data-no-one-link", "true");
     s.className = "one-link-ignore";
     const timeout = window.setTimeout(() => fail(), 20000);
