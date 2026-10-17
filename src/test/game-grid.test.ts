@@ -13,10 +13,10 @@ describe("Find Monere picture hunt", () => {
       expect(p.y).toBeLessThan(100);
     }
   });
-  it("awards 20 per mini and a 100 completion bonus", () => {
-    expect(POINTS_PER_MINI).toBe(20);
-    expect(COMPLETION_BONUS).toBe(100);
-    expect(MINI_COUNT * POINTS_PER_MINI + COMPLETION_BONUS).toBe(300);
+  it("awards no points per mini and only 5 for a completed round", () => {
+    expect(POINTS_PER_MINI).toBe(0);
+    expect(COMPLETION_BONUS).toBe(5);
+    expect(MINI_COUNT * POINTS_PER_MINI + COMPLETION_BONUS).toBe(5);
   });
   it("reshuffles spots between rounds", () => {
     expect(JSON.stringify(makeSpots())).not.toBe(JSON.stringify(makeSpots()));

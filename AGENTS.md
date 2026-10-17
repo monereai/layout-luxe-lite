@@ -9,6 +9,10 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
+- Persist pet-care state in the protected profiles table and use atomic authenticated SQL functions for drain, snack spending, claims, and replay-safe round rewards; local game storage tracks progression only, preventing duplicate wallet credits.
+- Keep snack Tokens separate from the points wallet; token funding is intentionally unavailable until earning or purchase rules are supplied.
+- Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
+
 - Keep app-wide header, emblem, tagline, and footer in AppShell so every content page shares the same identity.
 - Keep breakpoint-based workspace navigation and companion actions in AppShell; content routes remain independent of device layout so phone and desktop share the same flows.
 - Keep the existing journal storage key stable through rebrands so previously saved reflections remain accessible.

@@ -14,6 +14,7 @@ import { registerAppServiceWorker } from "@/lib/pwa";
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { PlanProvider } from "@/hooks/usePlan";
+import { useCare } from "@/hooks/useCare";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -133,9 +134,12 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <PlanProvider>
+        <CareSync />
         <Outlet />
       </PlanProvider>
       <Toaster position="top-center" />
     </QueryClientProvider>
   );
 }
+
+function CareSync() { useCare(); return null; }

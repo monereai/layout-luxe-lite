@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      care_game_rounds: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          initial_order: number[]
+          kind: string
+          size: number
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          initial_order?: number[]
+          kind: string
+          size?: number
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          initial_order?: number[]
+          kind?: string
+          size?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       code_redemptions: {
         Row: {
           code_id: string
@@ -109,6 +139,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          daily_care_claimed: boolean
+          last_care_claim_date: string | null
+          last_energy_drain: string
+          monere_energy: number
+          tokens: number
+          user_id: string
+        }
+        Insert: {
+          daily_care_claimed?: boolean
+          last_care_claim_date?: string | null
+          last_energy_drain?: string
+          monere_energy?: number
+          tokens?: number
+          user_id: string
+        }
+        Update: {
+          daily_care_claimed?: boolean
+          last_care_claim_date?: string | null
+          last_energy_drain?: string
+          monere_energy?: number
+          tokens?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -183,6 +240,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      care_apply: { Args: { p_action?: string }; Returns: Json }
+      care_finish_round: {
+        Args: { p_proof: Json; p_round: string }
+        Returns: Json
+      }
+      care_start_round: {
+        Args: { p_kind: string; p_size?: number }
+        Returns: Json
+      }
       is_premium: { Args: { check_env: string }; Returns: boolean }
       redeem_org_code: {
         Args: { p_code: string }

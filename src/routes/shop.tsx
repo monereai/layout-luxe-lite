@@ -12,6 +12,7 @@ import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equipmentSlot
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
+import { MonereCare } from "@/components/MonereCare";
 import stormViking from "@/assets/combinations/storm-viking.png";
 import partyStar from "@/assets/combinations/party-star.png";
 import galaxyVoyager from "@/assets/combinations/galaxy-voyager.png";
@@ -114,6 +115,7 @@ function ShopPage() {
         </div>
 
         <MonereStore />
+        <MonereCare snack />
         <section className="mb-5">
           <h2 className="mb-3 font-display text-xl font-semibold">Clothing combinations</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

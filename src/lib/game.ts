@@ -7,8 +7,8 @@ const EMPTY: GameState = { points: 0, detective: false, best: {}, finds: {} };
 let current = EMPTY;
 
 export const MINI_COUNT = 10;
-export const POINTS_PER_MINI = 20;
-export const COMPLETION_BONUS = 100;
+export const POINTS_PER_MINI = 0;
+export const COMPLETION_BONUS = 5;
 
 /** Wisdom Points charged for one clue from Monere's Hint. */
 export const HINT_COST = 20;
@@ -55,7 +55,7 @@ function save() {
   listeners.forEach((l) => l());
 }
 
-/** +20 points for one Mini-Monere; counts the find toward the scene it was found in. */
+/** Individual finds track progression only; rewards are credited on the account per round. */
 export function recordMini(scene?: string) {
   current = {
     ...current,
@@ -66,11 +66,11 @@ export function recordMini(scene?: string) {
   return POINTS_PER_MINI;
 }
 
-/** +100 bonus when all ten are found; unlocks the Master Detective badge. */
+/** Unlocks the badge; round points and energy are credited by care_finish_round. */
 export function recordComplete() {
-  current = { ...current, points: current.points + COMPLETION_BONUS, detective: true };
+  current = { ...current, detective: true };
   save();
-  return COMPLETION_BONUS;
+  return 0;
 }
 
 /** Records a clue spend against the shared wallet; the caller checks affordability first. */
@@ -87,24 +87,23 @@ export function gameStateSnapshot(): GameState {
 let loaded = false;
 const listeners = new Set<() => void>();
 
-/** Points for a find: 100 base, +5 per second under 60s, halved when a hint was used. */
-export function scoreFind(seconds: number, usedHint: boolean) {
-  const base = 100 + Math.max(0, 60 - Math.floor(seconds)) * 5;
-  return usedHint ? Math.round(base / 2) : base;
+/** Legacy scoring uses the same frugal round value, without time or hint multipliers. */
+export function scoreFind(_seconds: number, _usedHint: boolean) {
+  return 5;
 }
 
 export function recordFind(scene: string, seconds: number, usedHint: boolean) {
   const pts = scoreFind(seconds, usedHint);
   const prev = current.best[scene];
   current = {
-    points: current.points + pts,
+    ...current,
     detective: true,
     finds: current.finds,
     best: { ...current.best, [scene]: prev === undefined ? seconds : Math.min(prev, seconds) },
   };
   try { localStorage.setItem(GAME_KEY, JSON.stringify(current)); } catch { /* ignore */ }
   listeners.forEach((l) => l());
-  return pts;
+  return 0;
 }
 
 function load() {
@@ -131,20 +130,21 @@ export function recordChapterComplete(episode: number, bonus = 100) {
   return bonus;
 }
 
-export const JIGSAW_BONUS = 50;
+export const JIGSAW_BONUS = 5;
 /** Jigsaw levels unlock in order: Easy is always open; each finished level opens the next. */
 export const JIGSAW_LEVELS = [3, 4, 5, 6] as const;
 export function jigsawUnlocked(size: number, state: GameState = current) {
   const index = JIGSAW_LEVELS.indexOf(size as (typeof JIGSAW_LEVELS)[number]);
   if (index <= 0) return index === 0;
-  return (state.jigsaws ?? []).includes(JIGSAW_LEVELS[index - 1]!);
+  const previous = JIGSAW_LEVELS[index - 1];
+  return previous !== undefined && (state.jigsaws ?? []).includes(previous);
 }
-/** +50 Wisdom Points (shop wallet) for each finished jigsaw; remembers the level so the next unlocks. */
+/** Remembers puzzle progression only; account care rewards supply points and energy. */
 export function recordJigsaw(size?: number) {
   const done = current.jigsaws ?? [];
-  current = { ...current, points: current.points + JIGSAW_BONUS, jigsaws: size !== undefined && !done.includes(size) ? [...done, size] : done };
+  current = { ...current, jigsaws: size !== undefined && !done.includes(size) ? [...done, size] : done };
   save();
-  return JIGSAW_BONUS;
+  return 0;
 }
 
 /** True when every piece sits in its home slot. */
