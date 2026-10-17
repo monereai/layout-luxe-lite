@@ -133,3 +133,7 @@
 - [x] List clothing combinations cheapest set first, by the combined cost of their three pieces.
 - [x] Verify in the preview: 800, 860, 940, 970, 1040, 1240, 1250, 1470 pts in order; all 8 combinations still listed once, build clean.
 - [x] Raise every combination price by 25% (rounded up to the nearest 5 points): 1000, 1075, 1175, 1215, 1300, 1550, 1565, 1840 pts; verified in the preview and by tests.
+
+# Header token chip removed
+- [x] Take the tokens counter out of the header panel; the points balance, language picker, membership badge and sign-in controls stay.
+- [x] Verify signed in (carlhillyard@icloud.com): header shows 1635 pts, no token chip or lightning icon; snack tokens still work in the shop.
