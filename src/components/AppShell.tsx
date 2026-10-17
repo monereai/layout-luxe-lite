@@ -67,10 +67,6 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 </Button>
               ))}
             </nav>
-            <Link to="/shop" title={t("shop")} aria-label={`${t("shop")}: ${wallet} Shop Points`} className={`mt-6 flex items-center gap-2.5 rounded-2xl border border-primary/25 bg-primary/5 p-2 transition-colors hover:border-primary/50 hover:bg-primary/10 ${collapsed ? "justify-center" : ""}`}>
-              <img src={shopMark} alt="" width={816} height={816} loading="lazy" className="h-9 w-9 shrink-0" />
-              {!collapsed && <span className="min-w-0 truncate text-sm font-semibold text-primary">{t("shop")}</span>}
-            </Link>
             {!hideCrisisBar && (
               <Button variant="ghost" onClick={() => setOpen(true)} title={t("crisisBar")} aria-label={t("crisisBar")} className={`mt-8 h-auto min-h-11 whitespace-normal text-left text-sm font-semibold text-muted-foreground ${collapsed ? "px-2" : "justify-start px-3 py-3"}`}>
                 <LifeBuoy className="shrink-0" />{!collapsed && <span>{t("crisisBar")}</span>}
@@ -90,6 +86,10 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
               </Link>
               {game.detective && <p className="mt-3 text-xs text-primary">Master Detective</p>}
+              <Link to="/shop" title={t("shop")} aria-label={`${t("shop")}: ${wallet} Shop Points`} className="mt-4 flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
+                <img src={shopMark} alt="" width={816} height={816} loading="lazy" className="h-[11.25rem] w-[11.25rem] max-w-full" />
+                <span className="text-sm font-semibold text-primary">{t("shop")}</span>
+              </Link>
             </div>
           </aside>
         </div>
