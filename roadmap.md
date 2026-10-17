@@ -34,6 +34,7 @@
 - [x] Verify onboarding and personalized advice behavior.
 
 # Where's Monere? game
+- [x] Show and verify a +1 Energy notification for each new Mini-Monere found (round payouts unchanged).
 - [x] Add hidden-object scenes, zoom/pan search, hint, celebration, Wisdom Points, and badge.
 - [x] Remove the on-screen timer and rename the tab to "Find Monere" in all five languages.
 - [ ] Translate the game screen copy (currently English only).
