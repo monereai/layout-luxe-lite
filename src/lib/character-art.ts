@@ -68,10 +68,10 @@ export async function composeCharacterFrame(baseSrc: string, extras: ClothingFra
     const [top, bottom] = regions[item.category];
     for (let offset = 0; offset < pixels.data.length; offset += 4) {
       const y = Math.floor(offset / 4 / canvas.width) / canvas.height;
-      const difference = Math.abs(pixels.data[offset] - original[offset])
-        + Math.abs(pixels.data[offset + 1] - original[offset + 1])
-        + Math.abs(pixels.data[offset + 2] - original[offset + 2])
-        + Math.abs(pixels.data[offset + 3] - original[offset + 3]);
+      const difference = Math.abs((pixels.data[offset] ?? 0) - (original[offset] ?? 0))
+        + Math.abs((pixels.data[offset + 1] ?? 0) - (original[offset + 1] ?? 0))
+        + Math.abs((pixels.data[offset + 2] ?? 0) - (original[offset + 2] ?? 0))
+        + Math.abs((pixels.data[offset + 3] ?? 0) - (original[offset + 3] ?? 0));
       if (y < top || y > bottom || difference < 65) pixels.data[offset + 3] = 0;
     }
     referenceContext.putImageData(pixels, 0, 0);

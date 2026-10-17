@@ -28,7 +28,8 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
       .catch(() => { /* Keep the available complete look if an image fails. */ });
     return () => { cancelled = true; };
   }, [pictureKey]);
-  const source = extra.length && composed?.key === pictureKey ? composed.src : activeImageSrc;
+  // Hold the fully dressed picture while the next angle loads, never flash a bare base.
+  const source = extra.length && composed ? composed.src : activeImageSrc;
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       <img data-character-look={shown} data-character-frame={frame} data-character-items={equippedItems(shop).map((item) => item.id).join(",")} src={source} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
