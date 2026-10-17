@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Trophy, Award, Star } from "lucide-react";
+import { RotateCcw, Trophy, Award, Star, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -40,6 +40,22 @@ export const Route = createFileRoute("/find")({
 
 const BURST = [0, 60, 120, 180, 240, 300];
 
+/** Energy bolt symbol used in the "Mini-Monere found" notifications. */
+function EnergyAward({ amount, signedOut = false }: { amount?: number; signedOut?: boolean }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <Zap aria-hidden="true" className="h-4 w-4 shrink-0 fill-primary text-primary" />
+      <span>
+        {signedOut
+          ? "Mini-Monere found! Sign in to earn Energy."
+          : amount && amount > 0
+            ? `Mini-Monere found! +${amount}`
+            : "Mini-Monere found!"}
+      </span>
+    </span>
+  );
+}
+
 function FindGame() {
   const game = useGame();
   const wallet = usePointsWallet();
@@ -54,7 +70,7 @@ function FindGame() {
   const [spots, setSpots] = useState<Spot[]>([]);
   useEffect(() => { setSpots(makeSpots()); }, []);
   const [found, setFound] = useState<Set<number>>(new Set());
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<React.ReactNode>(null);
   const [won, setWon] = useState(false);
   const shop = useShop();
   const [mystery, setMystery] = useState<ShopItem | null>(null);
@@ -94,10 +110,12 @@ function FindGame() {
     if (findLock.current || foundRef.current.has(i) || won || !careRound.canPlay) return;
     findLock.current = true;
     setFinding(true);
+    let awarded = 0;
     try {
       const state = await careRound.rewardFind(i);
-      if (state) notify.success(`Mini-Monere found! +${state.energyAwarded} Energy`, { duration: 2000 });
-      else notify("Mini-Monere found! Sign in to earn Energy.", { duration: 2000 });
+      awarded = state?.energyAwarded ?? 0;
+      if (state) notify.success(<EnergyAward amount={awarded} />, { duration: 2000 });
+      else notify(<EnergyAward signedOut />, { duration: 2000 });
     } catch {
       notify.error("Couldn't save your Energy. Tap the Mini-Monere to try again.");
       return;
@@ -120,7 +138,7 @@ function FindGame() {
       }
       setTimeout(() => { playChime("win"); setWon(true); }, 600);
     } else {
-      setToast("Mini-Monere found!");
+      setToast(<EnergyAward amount={awarded} />);
     }
   }
 
