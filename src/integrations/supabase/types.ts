@@ -147,8 +147,12 @@ export type Database = {
           daily_care_claimed: boolean
           full_energy_bonus: boolean
           last_care_claim_date: string | null
+          last_energy_claim_date: string | null
           last_energy_drain: string
           monere_energy: number
+          monere_points: number
+          monere_tokens: number
+          subscription_tier: string
           tokens: number
           user_id: string
         }
@@ -156,8 +160,12 @@ export type Database = {
           daily_care_claimed?: boolean
           full_energy_bonus?: boolean
           last_care_claim_date?: string | null
+          last_energy_claim_date?: string | null
           last_energy_drain?: string
           monere_energy?: number
+          monere_points?: number
+          monere_tokens?: number
+          subscription_tier?: string
           tokens?: number
           user_id: string
         }
@@ -165,8 +173,12 @@ export type Database = {
           daily_care_claimed?: boolean
           full_energy_bonus?: boolean
           last_care_claim_date?: string | null
+          last_energy_claim_date?: string | null
           last_energy_drain?: string
           monere_energy?: number
+          monere_points?: number
+          monere_tokens?: number
+          subscription_tier?: string
           tokens?: number
           user_id?: string
         }
@@ -273,6 +285,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_tier: { Args: { p_user: string }; Returns: string }
       care_apply: { Args: { p_action?: string }; Returns: Json }
       care_finish_round: {
         Args: { p_proof: Json; p_round: string }
@@ -283,9 +296,27 @@ export type Database = {
         Args: { p_round: string; p_spot: number }
         Returns: Json
       }
+      care_reward_piece: {
+        Args: { p_proof?: Json; p_round: string; p_spot: number }
+        Returns: Json
+      }
       care_start_round: {
         Args: { p_kind: string; p_size?: number }
         Returns: Json
+      }
+      care_valid_order: {
+        Args: { p_order: number[]; p_proof: Json; p_size: number }
+        Returns: number[]
+      }
+      credit_verified_membership: {
+        Args: {
+          p_month: number
+          p_paid_at: string
+          p_subscription: string
+          p_tier: string
+          p_user: string
+        }
+        Returns: undefined
       }
       is_premium: { Args: { check_env: string }; Returns: boolean }
       redeem_org_code: {

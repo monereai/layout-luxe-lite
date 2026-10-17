@@ -29,9 +29,9 @@ export const finishCareRound = createServerFn({ method: "POST" })
   });
 export const rewardCareFind = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ round: z.string().uuid(), spot: z.number().int().min(0).max(9) }))
+  .inputValidator(z.object({ round: z.string().uuid(), spot: z.number().int().min(0).max(35), proof: z.array(z.tuple([z.number().int(), z.number().int()])).max(10000).default([]) }))
   .handler(async ({ data, context }) => {
-    const result = await context.supabase.rpc("care_reward_find", { p_round: data.round, p_spot: data.spot });
+    const result = await context.supabase.rpc("care_reward_piece", { p_round: data.round, p_spot: data.spot, p_proof: data.proof });
     if (result.error) throw new Error(result.error.message);
     return careSchema.parse(result.data);
   });

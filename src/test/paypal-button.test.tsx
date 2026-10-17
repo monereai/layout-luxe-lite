@@ -8,6 +8,14 @@ afterEach(() => {
 });
 
 describe("PayPal button lifecycle", () => {
+  it("ties a new subscription to the signed-in account", async () => {
+    const create = vi.fn(() => ({ render: async () => {}, close: async () => {} }));
+    Object.assign(window, { paypal_subs: { Buttons: create } });
+    render(<PayPalButton mode="subscription" planId="plus-monthly" accountId="account-123" onApprove={async () => {}} />);
+    await waitFor(() => expect(create).toHaveBeenCalled());
+    const options = create.mock.calls[0]?.[0] as any;
+    expect(options.createSubscription({}, { subscription: { create: (value: unknown) => value } })).toEqual({ plan_id: "plus-monthly", custom_id: "account-123" });
+  });
   it("isolates a new billing plan from an unfinished previous render", async () => {
     let finishFirst: (() => void) | undefined;
     const hosts: HTMLElement[] = [];
