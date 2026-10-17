@@ -20,11 +20,12 @@ describe("PayPal button lifecycle", () => {
     await waitFor(() => expect(hosts).toHaveLength(1));
     view.rerender(<PayPalButton mode="subscription" planId="yearly" onApprove={approved} />);
     await waitFor(() => expect(hosts).toHaveLength(2));
-    expect(hosts[0].isConnected).toBe(false);
-    expect(hosts[1].isConnected).toBe(true);
-    expect(create.mock.calls[1][0].createSubscription({}, { subscription: { create: (input: unknown) => input } })).toEqual({ plan_id: "yearly" });
+    expect(hosts[0]?.isConnected).toBe(false);
+    expect(hosts[1]?.isConnected).toBe(true);
+    const secondOptions = create.mock.calls[1]?.[0];
+    expect(secondOptions?.createSubscription({}, { subscription: { create: (input: unknown) => input } })).toEqual({ plan_id: "yearly" });
     await act(async () => finishFirst?.());
-    expect(hosts[1].isConnected).toBe(true);
+    expect(hosts[1]?.isConnected).toBe(true);
   });
 
   it("retries a rejected render rather than leaving checkout empty", async () => {
