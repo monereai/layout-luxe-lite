@@ -12,6 +12,7 @@ import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
 import { fallbackArt, raceSceneBackup, sceneFallbackArt } from "@/lib/story-art";
 import { streamImage } from "@/lib/stream-image";
+import { supabase } from "@/integrations/supabase/client";
 import { playChime, playFanfare } from "@/lib/sound";
 
 type SceneImg = { src: string | null; final: boolean; fallback: boolean };
@@ -78,8 +79,11 @@ function StoryMode() {
     const id = runId.current;
     let painted_: string | null = null;
     const painted = new Promise<string>((resolve, reject) => {
-      streamImage("/api/story-image", { scene }, (src, final) => {
-        if (final) painted_ = src;
+      supabase.auth.getSession().then(({ data: s }) => {
+        if (!s.session) throw new Error("sign in for painted scenes");
+        return streamImage("/api/story-image", { scene }, (src, final) => {
+          if (final) painted_ = src;
+        }, undefined, { Authorization: `Bearer ${s.session.access_token}` });
       })
         .then(() => (painted_ ? resolve(painted_) : reject(new Error("no image"))))
         .catch(reject);

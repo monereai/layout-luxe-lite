@@ -8,6 +8,12 @@ export const Route = createFileRoute("/api/story-image")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+        if (!token) return new Response("Sign in required", { status: 401 });
+        const { createClient } = await import("@supabase/supabase-js");
+        const sb = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_PUBLISHABLE_KEY"]!, { auth: { persistSession: false } });
+        const { data: claims, error: authError } = await sb.auth.getClaims(token);
+        if (authError || !claims?.claims?.sub) return new Response("Sign in required", { status: 401 });
         let body: { scene?: unknown; stream?: unknown };
         try {
           body = await request.json();
