@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { allJigsawsComplete, type GameState } from "@/lib/game";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
 import amberSnapback from "@/assets/shop/amber-snapback.webp";
@@ -102,7 +103,7 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export type EquipmentSlot = "hat" | "outfit" | "glasses" | "accessory" | "footwear";
 export function equipmentSlot(category: ShopCategory): EquipmentSlot { return category === "costume" ? "outfit" : category; }
-export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>>; comboUnlocked?: string[] };
+export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>>; comboUnlocked?: string[]; jigsawReward?: string };
 export function normalizeEquipment(state: ShopState): ShopState {
   const equipped: ShopState["equipped"] = {};
   for (const slot of ["hat", "outfit", "glasses", "accessory", "footwear"] as const) {
@@ -178,6 +179,7 @@ function load() {
         owned: p.owned,
         equipped: p.equipped ?? {},
         comboUnlocked: Array.isArray(p.comboUnlocked) ? p.comboUnlocked : [],
+        jigsawReward: typeof p.jigsawReward === "string" ? p.jigsawReward : undefined,
       });
       listeners.forEach((l) => l());
     }
@@ -211,4 +213,22 @@ export function grantMystery(state: ShopState, rand: () => number = Math.random)
   const item = pool[Math.min(pool.length - 1, Math.floor(rand() * pool.length))];
   if (!item) return null;
   return { item, state: equip({ ...state, owned: [...state.owned, item.id] }, item.category, item.id) };
+}
+
+/** Adds a free, unowned shop item once per full jigsaw collection, without changing clothing. */
+export function grantJigsawReward(state: ShopState, game: GameState, rand: () => number = Math.random): { state: ShopState; item: ShopItem | null } | null {
+  if (state.jigsawReward || !allJigsawsComplete(game)) return null;
+  const gift = grantMystery(state, rand);
+  return {
+    item: gift?.item ?? null,
+    state: { ...state, owned: gift?.state.owned ?? state.owned, jigsawReward: gift?.item.id ?? "all-owned" },
+  };
+}
+
+/** Ownership and the claim marker are persisted together before notifying the player. */
+export function claimJigsawReward(game: GameState) {
+  load();
+  const gift = grantJigsawReward(current, game);
+  if (gift) saveShop(gift.state);
+  return gift;
 }

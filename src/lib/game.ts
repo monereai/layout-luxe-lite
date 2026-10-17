@@ -133,6 +133,9 @@ export function recordChapterComplete(episode: number, bonus = 100) {
 export const JIGSAW_BONUS = 5;
 /** Jigsaw levels unlock in order: Easy is always open; each finished level opens the next. */
 export const JIGSAW_LEVELS = [3, 4, 5, 6] as const;
+export function allJigsawsComplete(state: GameState) {
+  return JIGSAW_LEVELS.every((size) => (state.jigsaws ?? []).includes(size));
+}
 export function jigsawUnlocked(size: number, state: GameState = current) {
   const index = JIGSAW_LEVELS.indexOf(size as (typeof JIGSAW_LEVELS)[number]);
   if (index <= 0) return index === 0;
