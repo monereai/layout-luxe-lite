@@ -52,7 +52,7 @@ export function PayPalButton(props:
     let cancelled = false;
     const host = document.createElement("div");
     host.setAttribute("data-no-one-link", "true");
-    host.className = "one-link-ignore";
+    host.className = "one-link-ignore paypal-compact";
     ref.current?.replaceChildren(host);
     setFailed(false);
     setLoading(true);
