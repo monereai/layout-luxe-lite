@@ -1,3 +1,8 @@
+# Stripe production launch
+- [ ] Complete Stripe readiness check in Payments (user action).
+- [ ] Restore monereai.com domain setup and publish (domain setup currently failed; app unpublished).
+- [ ] Prepare same-origin home payment return and verify payment confirmation refreshes the wallet.
+
 # Mini-game rewards and Club Space Station
 - [x] Verify replay-safe +1 energy/+5 points wins and immediate header updates: two Find rounds and a solved Jigsaw checked on a dedicated QA account; duplicate completion pays zero. Verify 20/40/60 daily claims and repeated-claim rejection on that account.
 - [x] Enforce Club-only Space Station, including previously owned copies; verify locked upgrade previews, Club equip, floating topics and character interactions on desktop/phone.
