@@ -1,3 +1,6 @@
+# Equipped clothing while turning
+- [ ] Keep all equipped slots visible through all eight angles, using one composed character picture; verify with isolated clothing data.
+
 # Monere centring
 - [x] Centre-lock wheel and pinch zoom and remove interactive sway; verified wheel zoom, turning and reset in an isolated browser, with 11 character tests passing.
 

@@ -1,11 +1,12 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { equippedItems, useShop } from "@/lib/shop";
-import { LOOKS_WITH_ART, combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
+import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { useCharacterFrame } from "@/lib/character-frame";
+import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
 
 export type Gesture = "wave" | "think" | "thumbs" | "listen";
 
-/** Each frame is one complete character picture, not a base with accessory overlays. Looks without their own turnaround art fall back to the default Monere. */
+/** Each angle is one complete character picture, including every equipped slot. */
 export function MonereFigure({ className = "", alt = "", showWorn = true }: { gesture?: Gesture; className?: string; alt?: string; bareBase?: boolean; showWorn?: boolean }) {
   const shop = useShop();
   const frame = useCharacterFrame();
@@ -14,48 +15,26 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
   useEffect(() => setMissing(false), [look]);
   const shown = missing ? "default" : look;
   const activeImageSrc = `/monere/looks/${shown}/${frame}.webp`;
-  // Items equipped but not drawn in the current complete picture still show as worn badges.
   const drawn = new Set<string>(itemsDrawnIn(shown, shop.equipped));
   const extra = showWorn ? equippedItems(shop).filter((item) => item && !drawn.has(item.id)) : [];
+  const selectionKey = extra.map((item) => item.id).join(",");
+  const pictureKey = `${activeImageSrc}:${selectionKey}`;
+  const [composed, setComposed] = useState<{ key: string; src: string }>();
+  useEffect(() => {
+    if (!extra.length) return;
+    let cancelled = false;
+    composeCharacterFrame(activeImageSrc, clothingFrames(extra, frame), frame)
+      .then((src) => { if (!cancelled) setComposed({ key: pictureKey, src }); })
+      .catch(() => { /* Keep the available complete look if an image fails. */ });
+    return () => { cancelled = true; };
+  }, [pictureKey]);
+  const source = extra.length && composed?.key === pictureKey ? composed.src : activeImageSrc;
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
-      <img data-character-look={shown} data-character-frame={frame} src={activeImageSrc} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-      {extra.filter((item) => item && (item.category === "footwear" || [0, 1, 7].includes(frame))).flatMap((item) => !item ? [] :
-        item.category === "footwear" && LOOKS_WITH_ART.has(item.id)
-          ? [
-              // Borrow the feet from Monere's own picture wearing these shoes, same pose and angle.
-              <img key={item.id} data-worn-layer="footwear" src={`/monere/looks/${item.id}/${frame}.webp`} alt="" aria-hidden="true" draggable={false}
-                style={{ zIndex: WORN_Z["footwear"], clipPath: "inset(85% 0 0 0)" }}
-                className="pointer-events-none absolute inset-0 h-full w-full object-contain" />,
-            ]
-          : item.category === "footwear"
-          ? FEET.map((foot, i: number) => (
-              <img key={`${item.id}-${i}`} data-worn-layer="footwear" src={item.src} alt="" aria-hidden="true" draggable={false}
-                style={{ ...foot, zIndex: WORN_Z["footwear"], }}
-                className="pointer-events-none absolute object-contain drop-shadow-md" />
-            ))
-          : [
-              <img key={item.id} data-worn-layer={item.category} src={item.src} alt="" aria-hidden="true" draggable={false}
-                style={{ ...WORN_POSITION[item.category], zIndex: WORN_Z[item.category] }}
-                className="pointer-events-none absolute object-contain drop-shadow-md" />,
-            ])}
+      <img data-character-look={shown} data-character-frame={frame} data-character-items={equippedItems(shop).map((item) => item.id).join(",")} src={source} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
     </div>
   );
 }
-
-/** Where each worn item sits on the front-facing Monere picture (percent of the frame). */
-const WORN_POSITION: Record<string, CSSProperties> = {
-  hat: { left: "33%", top: "-2%", width: "30%", height: "16%" },
-  glasses: { left: "38%", top: "11.5%", width: "21%", height: "8%" },
-  accessory: { left: "40%", top: "27%", width: "16%", height: "12%" },
-  footwear: { left: "26%", top: "80%", width: "46%", height: "18%" },
-  costume: { left: "28%", top: "26%", width: "40%", height: "36%" },
-};
-/** One shoe drawn over each foot. */
-const FEET: CSSProperties[] = [
-  { left: "21%", top: "79%", width: "56%", height: "21%" },
-];
-const WORN_Z: Record<string, number> = { costume: 3, footwear: 4, accessory: 5, hat: 6, glasses: 7 };
 
 /** Round head-and-shoulders avatar for chat bubbles and the header. */
 export function MonereAvatar({ className = "h-9 w-9" }: { className?: string }) {

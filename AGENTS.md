@@ -23,7 +23,7 @@
 - Serve the combo outfit art from public/wardrobe as plain URLs, never as eager module imports. Why: one failed image module blanked the whole app on load.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
-- Keep complete shop-look frames under public/monere/looks and render one image in MonereFigure, with no accessory layers. Why: each selected item forms one cohesive character at every angle.
+- Keep complete shop-look frames under public/monere/looks and render one image in MonereFigure; compose unmatched equipped slots into that image from angle-matched art. Why: clothing must not vanish when turning or become front-facing DOM overlays.
 - Keep single-view combination card artwork separate from turnaround-frame availability. Why: a new thumbnail must not replace the working spin viewer with missing angles.
 - Share clothing-button sizing between combination cards and individual inventory cards in the shop. Why: purchase and equip controls must stay consistent and fit their cards.
 - Use usePointsWallet for all spendable-points displays, deducting clothing and habitat spending from game and credited points. Why: displayed points must match purchasing power everywhere.

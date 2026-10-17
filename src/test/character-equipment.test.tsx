@@ -2,6 +2,17 @@ import { expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { SHOP_ITEMS, equip, normalizeEquipment, type ShopState } from "@/lib/shop";
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
+import { clothingFrames } from "@/lib/character-art";
+
+it("keeps every extra equipped item in all eight turning frames", () => {
+  const items = SHOP_ITEMS.filter((item) => ["crown", "sunglasses", "bow-tie", "crisp-sneakers", "party-hat"].includes(item.id));
+  for (let frame = 0; frame < 8; frame++) {
+    const pictures = clothingFrames(items, frame);
+    expect(pictures.map(({ item }) => item.id).sort()).toEqual(items.map((item) => item.id).sort());
+    expect(pictures.find(({ item }) => item.id === "crown")?.src).toBe(`/monere/looks/crown/${frame}.webp`);
+    expect(pictures.find(({ item }) => item.id === "party-hat")?.src).toBe(items.find((item) => item.id === "party-hat")?.src);
+  }
+});
 
 it("has eight complete turn-around pictures for every look that ships its own art", () => {
   // Items and combinations without their own turn-around art fall back to the
