@@ -35,3 +35,5 @@
 - PayPal purchases are verified server-side (paypal.functions.ts) before writing point_credits / subscriptions; the browser never grants points or tiers. Why: client approval callbacks can be faked.
 - Keep the PayPal catalog visible while signed out, require sign-in for checkout, and isolate each SDK button render in a disposable host with retryable loading. Why: auth outages and billing-period changes must not silently remove purchase options.
 - Never apply mix-blend-mode multiply to Monere's character or item cutouts; reserve the .blend-white utility for opaque pictures that actually have a white background. Why: the app canvas is dark, so multiply turns the transparent character art into a near-black silhouette.
+- Habitat unlocks/equips for signed-in users go only through the property_action database function (server price, account points, Club check); clients cannot write user_properties. Why: local state could grant paid habitats free.
+- AI advice, follow-up, story and story-image endpoints require sign-in. Why: unauthenticated calls spend AI credits.
