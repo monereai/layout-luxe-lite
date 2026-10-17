@@ -1,3 +1,8 @@
+# Uploaded economy brief
+- [ ] Add protected canonical account wallet fields and server-maintained tier, preserving existing credits and spending.
+- [ ] Replace automatic full-energy payouts with manual daily claims and +1 energy rewards.
+- [ ] Verify membership grants, immediate wallet refresh, and authenticated reward replay protection.
+
 # Pet care economy
 - [x] Award a one-time free Points Shop item after all four jigsaw levels; verified all puzzles, inventory persistence, unchanged spending/outfit, and replay protection.
 - [x] Save replay-safe +1 Energy per Mini-Monere find and verify the home energy bar updates (50→51, persisted after reload).
@@ -5,7 +10,7 @@
 - [x] Show home energy/mood bar and daily reward action; add token-priced Super Snack in shop.
 - [x] Replace Find/Jigsaw payouts with 15 energy and 5 points per win.
 - [x] Test exact rules and verify signed-in care/game/shop flows.
-- [ ] Token funding mechanism — blocked pending user's earning or purchase rules.
+- [x] Tokens funded by verified Plus and Club membership grants.
 
 # MonereAI branding
 - [x] Add a wide tablet/desktop workspace with collapsible navigation and quick actions, preserving the phone layout.
