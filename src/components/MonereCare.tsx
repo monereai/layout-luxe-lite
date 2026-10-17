@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, Gift, Cookie } from "lucide-react";
+import { Heart, Gift, Cookie, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
