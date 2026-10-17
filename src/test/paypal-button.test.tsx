@@ -9,7 +9,7 @@ afterEach(() => {
 
 describe("PayPal button lifecycle", () => {
   it("ties a new subscription to the signed-in account", async () => {
-    const create = vi.fn(() => ({ render: async () => {}, close: async () => {} }));
+    const create = vi.fn((_options: Record<string, unknown>) => ({ render: async () => {}, close: async () => {} }));
     Object.assign(window, { paypal_subs: { Buttons: create } });
     render(<PayPalButton mode="subscription" planId="plus-monthly" accountId="account-123" onApprove={async () => {}} />);
     await waitFor(() => expect(create).toHaveBeenCalled());
