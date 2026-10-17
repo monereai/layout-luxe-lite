@@ -16,7 +16,7 @@ export function useCare() {
     client.setQueryData(key, state);
     if (state.pointsAwarded) await refresh();
   };
-  const action = useMutation({ mutationFn: (action: "claim" | "snack") => update({ data: { action } }), onSuccess: accept });
+  const action = useMutation({ mutationFn: (action: "claim") => update({ data: { action } }), onSuccess: accept });
   return { ...query, user, ready, action, accept };
 }
 

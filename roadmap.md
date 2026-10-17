@@ -1,3 +1,8 @@
+# Legacy UI cleanup
+- [ ] Remove Super Snack controls and feed bars from games and store; preserve active energy rewards and daily claims.
+- [ ] Remove legacy Customise Monere button/modal and unused code; preserve current store equipment and properties.
+- [ ] Verify cleanup with isolated browser data and relevant tests without changing Carl's account.
+
 # Equipped clothing while turning
 - [x] Keep all equipped slots visible through all eight angles using one composed character picture; verified full turns and reset on home and shop with isolated clothing data, no account changes, and 26 passing tests.
 

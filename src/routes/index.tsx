@@ -164,7 +164,7 @@ function Home() {
         <>
           <p className="mb-4 text-center font-display text-lg font-semibold text-primary drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">Welcome to the {habitat}! Choose an option to begin.</p>
           <Treehouse>
-            <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} backdrop={TREEHOUSE_BACKDROP} />
+            <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} interactive listening={listening} backdrop={TREEHOUSE_BACKDROP} />
             <div className="mt-4">
               <MonereMentor portrait={false} />
             </div>

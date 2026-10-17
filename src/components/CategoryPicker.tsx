@@ -1,7 +1,6 @@
 import { Check } from "lucide-react";
 import { PROPERTIES, useProperties } from "@/lib/properties";
 import { MonereFigure } from "@/components/MonereFigure";
-import { WardrobeButton } from "@/components/Wardrobe";
 import { MonereCharacterView } from "@/components/MonereCharacterView";
 
 export type Category = { title: string; short: string; emoji: string };
@@ -44,14 +43,14 @@ export function CategoryPicker({
   value,
   onChange,
   actionLabel = "Continue",
-  wardrobe = false,
+  interactive = false,
   listening = false,
   backdrop,
 }: {
   value: string[];
   onChange: (titles: string[]) => void;
   actionLabel?: string;
-  wardrobe?: boolean;
+  interactive?: boolean;
   listening?: boolean;
   backdrop?: string;
 }) {
@@ -63,7 +62,6 @@ export function CategoryPicker({
   const property = useProperties();
   return (
     <div className="mt-3">
-      {wardrobe && <div className="flex justify-end"><WardrobeButton /></div>}
       <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
         <div className="orbit-center">
           {backdrop && property.activeProperty === "treehouse" && (
@@ -74,7 +72,7 @@ export function CategoryPicker({
           ))}
           <span className="orbit-halo pointer-events-none" aria-hidden="true" />
           <div className="relative z-10 h-full w-full">
-            {wardrobe ? <MonereCharacterView>
+            {interactive ? <MonereCharacterView>
               <MonereFigure gesture={listening ? "listen" : "wave"} alt="Monere the lion" className="relative h-full w-full" />
             </MonereCharacterView> :
             <MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" />
