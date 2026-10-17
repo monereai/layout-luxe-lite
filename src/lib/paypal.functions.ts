@@ -23,7 +23,8 @@ export const createPackOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ pack: z.enum(["pocket", "popular", "mega"]) }).parse(d))
   .handler(async ({ data, context }) => {
-    const pack = POINT_PACKS.find((p) => p.id === data.pack)!;
+    const pack = POINT_PACKS.find((p) => p.id === data.pack);
+    if (!pack) throw new Error("Unknown point pack");
     const { ok, body } = await paypal("/v2/checkout/orders", {
       method: "POST",
       body: JSON.stringify({ intent: "CAPTURE", purchase_units: [{ custom_id: `${context.userId}:${pack.id}`, description: `${pack.name} — ${pack.points} points`, amount: { currency_code: "GBP", value: pack.price } }] }),
@@ -45,7 +46,8 @@ export const capturePackOrder = createServerFn({ method: "POST" })
     if (body?.status !== "COMPLETED" || capture?.status !== "COMPLETED" || uid !== context.userId || !pack) return { ok: false, points: 0 };
     if (capture.amount?.currency_code !== "GBP" || capture.amount?.value !== pack.price) return { ok: false, points: 0 };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("point_credits").upsert({ user_id: context.userId, source: "pack", reference: `order:${data.orderId}`, points: pack.points }, { onConflict: "reference", ignoreDuplicates: true });
+    const credit = await supabaseAdmin.from("point_credits").upsert({ user_id: context.userId, source: "pack", reference: `order:${data.orderId}`, points: pack.points }, { onConflict: "reference", ignoreDuplicates: true });
+    if (credit.error) throw new Error("Payment verified, but your points could not be saved. Please retry.");
     return { ok: true, points: pack.points };
   });
 
@@ -69,20 +71,22 @@ async function syncOne(subscriptionId: string, userId: string): Promise<{ ok: bo
   const plan = ok ? planInfo(body.plan_id) : null;
   if (!plan) return { ok: false, tier: null };
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: existing } = await supabaseAdmin.from("subscriptions").select("user_id").eq("stripe_subscription_id", subscriptionId).maybeSingle();
+  const { data: existing, error: lookupError } = await supabaseAdmin.from("subscriptions").select("user_id").eq("stripe_subscription_id", subscriptionId).maybeSingle();
+  if (lookupError) throw new Error("Could not verify membership ownership");
   if (existing && existing.user_id !== userId) return { ok: false, tier: null };
+  if (!existing && body.custom_id !== userId) return { ok: false, tier: null };
   const status = body.status === "ACTIVE" ? "active" : body.status === "CANCELLED" ? "canceled" : String(body.status).toLowerCase();
   const end = body.billing_info?.next_billing_time ?? null;
   const row = { user_id: userId, environment: "live", product_id: plan.tier, price_id: `${plan.tier}_${plan.interval}`, status, stripe_customer_id: "paypal", stripe_subscription_id: subscriptionId, current_period_end: end, current_period_start: body.billing_info?.last_payment?.time ?? body.start_time ?? null, updated_at: new Date().toISOString() };
-  if (existing) await supabaseAdmin.from("subscriptions").update(row).eq("stripe_subscription_id", subscriptionId);
-  else await supabaseAdmin.from("subscriptions").insert(row);
+  const saved = existing ? await supabaseAdmin.from("subscriptions").update(row).eq("stripe_subscription_id", subscriptionId) : await supabaseAdmin.from("subscriptions").insert(row);
+  if (saved.error) throw new Error("Could not save your verified membership. Please retry.");
   const paidAt = body.billing_info?.last_payment?.time;
   if (body.status === "ACTIVE" && paidAt) {
     // Yearly plans still award points monthly: one credit per elapsed month since the last payment.
     const months = plan.interval === "yearly" ? Math.min(12, Math.floor((Date.now() - Date.parse(paidAt)) / (30 * 864e5)) + 1) : 1;
     for (let m = 0; m < months; m++) {
-      await supabaseAdmin.from("point_credits").upsert({ user_id: userId, source: "subscription", reference: `sub:${subscriptionId}:${paidAt}:${m}`, points: plan.points }, { onConflict: "reference", ignoreDuplicates: true });
-      await supabaseAdmin.from("token_credits").upsert({ user_id: userId, source: "subscription", reference: `subtok:${subscriptionId}:${paidAt}:${m}`, tokens: plan.tokens }, { onConflict: "reference", ignoreDuplicates: true });
+      const grant = await supabaseAdmin.rpc("credit_verified_membership", { p_user: userId, p_subscription: subscriptionId, p_paid_at: paidAt, p_month: m, p_tier: plan.tier });
+      if (grant.error) throw new Error("Your membership is verified, but its wallet grant needs a retry.");
     }
   }
   return { ok: body.status === "ACTIVE", tier: plan.tier };

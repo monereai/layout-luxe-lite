@@ -37,7 +37,7 @@ function loadSdk(mode: Mode): Promise<any> {
 
 export function PayPalButton(props:
   | { mode: "capture"; createOrder: () => Promise<string>; onApprove: (orderId: string) => Promise<void>; onError?: () => void }
-  | { mode: "subscription"; planId: string; onApprove: (subscriptionId: string) => Promise<void>; onError?: () => void }) {
+  | { mode: "subscription"; planId: string; accountId?: string; onApprove: (subscriptionId: string) => Promise<void>; onError?: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const latest = useRef(props);
   latest.current = props;
@@ -62,7 +62,7 @@ export function PayPalButton(props:
         style: { shape: "rect", color: "gold", layout: "vertical", height: 40 },
         ...(p.mode === "capture"
           ? { createOrder: () => (latest.current as any).createOrder(), onApprove: (d: any) => latest.current.onApprove(d.orderID) }
-          : { createSubscription: (_d: any, actions: any) => actions.subscription.create({ plan_id: (latest.current as any).planId }), onApprove: (d: any) => latest.current.onApprove(d.subscriptionID) }),
+          : { createSubscription: (_d: any, actions: any) => actions.subscription.create({ plan_id: (latest.current as any).planId, ...((latest.current as any).accountId ? { custom_id: (latest.current as any).accountId } : {}) }), onApprove: (d: any) => latest.current.onApprove(d.subscriptionID) }),
         onError: () => {
           if (!cancelled) { setFailed(true); setLoading(false); latest.current.onError?.(); }
         },
