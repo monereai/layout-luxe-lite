@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, ArrowUpRight, Award, Puzzle, Zap } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, ArrowUpRight, Award, Puzzle, Zap, Coins } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
@@ -8,7 +8,6 @@ import { useT, useLang, setLang, LANGS, signSrc, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
-import { MonereAvatar } from "./MonereFigure";
 
 const tabs = [
   { to: "/", label: "seek", icon: Compass },
@@ -38,9 +37,9 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             </span>
             <span className="truncate font-display text-4xl font-semibold min-[380px]:text-5xl sm:text-5xl md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
           </Link>
-          <div className="flex flex-row flex-wrap items-center justify-end gap-x-2 gap-y-1 pt-1 text-xs sm:flex-col sm:items-end sm:gap-1">
-            <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 py-0.5 pl-0.5 pr-2 font-semibold text-primary"><MonereAvatar className="h-6 w-6" /><span className="tabular-nums">{wallet}</span> pts</Link>
-            {user && <span aria-label={`${tokens} Tokens`} className="flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 font-semibold text-amber-300"><Zap className="h-3.5 w-3.5" aria-hidden="true" /><span className="tabular-nums">{tokens}</span> tokens</span>}
+          <div className="flex flex-row flex-wrap items-center justify-end gap-x-2 gap-y-1 pt-1 text-xs sm:gap-1">
+            <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 font-semibold text-primary"><Coins className="h-3.5 w-3.5" aria-hidden="true" /><span className="tabular-nums">{wallet}</span> pts</Link>
+            {user && <span aria-label={`${tokens} Tokens`} className="flex items-center gap-1 rounded-full border border-primary/40 bg-accent px-2 py-0.5 font-semibold text-accent-foreground"><Zap className="h-3.5 w-3.5" aria-hidden="true" /><span className="tabular-nums">{tokens}</span> tokens</span>}
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
             {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">{tier === "club" ? "CLUB" : "PLUS"}</span>}
             {!premium && <PassCodeLink label="Access code" className="font-semibold !text-primary" />}

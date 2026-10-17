@@ -18,18 +18,15 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   const check = useCallback(async (u: User | null) => {
     if (!u) { setPremium(false); setTier("free"); setBonus(0); setTokens(0); return false; }
-    const [{ data }, { data: credits }, { data: subs }, { data: profile }] = await Promise.all([
+    const [{ data }, { data: profile }] = await Promise.all([
       supabase.rpc("is_premium", { check_env: "live" }),
-      supabase.from("point_credits").select("points"),
-      supabase.from("subscriptions").select("product_id,status,current_period_end").eq("stripe_customer_id", "paypal"),
-      supabase.from("profiles").select("tokens").eq("user_id", u.id).maybeSingle(),
+      supabase.from("profiles").select("monere_points,monere_tokens,subscription_tier").eq("user_id", u.id).maybeSingle(),
     ]);
     const p = data === true;
     setPremium(p);
-    setBonus((credits ?? []).reduce((s, c) => s + c.points, 0));
-    setTokens(profile?.tokens ?? 0);
-    const live = (subs ?? []).filter((s) => s.status === "active" || (s.current_period_end && Date.parse(s.current_period_end) > Date.now()));
-    setTier(live.some((s) => s.product_id === "club") ? "club" : p ? "plus" : "free");
+    setBonus(profile?.monere_points ?? 0);
+    setTokens(profile?.monere_tokens ?? 0);
+    setTier(p && profile?.subscription_tier === "monere_club" ? "club" : p ? "plus" : "free");
     window.localStorage.setItem("monereai-tier", p ? "premium" : "free");
     return p;
   }, []);
