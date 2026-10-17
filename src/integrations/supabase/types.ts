@@ -220,6 +220,33 @@ export type Database = {
         }
         Relationships: []
       }
+      token_credits: {
+        Row: {
+          created_at: string
+          id: string
+          reference: string
+          source: string
+          tokens: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reference: string
+          source: string
+          tokens: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reference?: string
+          source?: string
+          tokens?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_properties: {
         Row: {
           active_property: string

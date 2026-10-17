@@ -64,6 +64,13 @@
       "when": 1792221140601,
       "tag": "0008_full_energy_resets_bar",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792228383155,
+      "tag": "0009_tiered_care_and_token_credits",
+      "breakpoints": true
     }
   ]
 }
