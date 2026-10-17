@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, EyeOff, Lock, Puzzle, RotateCcw, Star, Zap } from "lucide-react";
 import { toast as notify } from "sonner";
 import { Button } from "@/components/ui/button";
-import { jigsawSolved, jigsawUnlocked, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
+import { jigsawSolved, jigsawUnlocked, lockedSlots, recordJigsaw, shufflePieces, useGame } from "@/lib/game";
 import { playChime, playPop } from "@/lib/sound";
 import { useCareRound } from "@/hooks/useCare";
 
