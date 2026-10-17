@@ -14,7 +14,8 @@ export function useCare() {
   const query = useQuery({ queryKey: key, queryFn: () => update({ data: { action: "sync" } }), enabled: ready && !!user, refetchInterval: 60_000, refetchOnWindowFocus: "always", staleTime: 15_000, retry: 1 });
   const accept = async (state: CareState) => {
     client.setQueryData(key, state);
-    if (state.pointsAwarded) await refresh();
+    if (state.fullBonus) toast.success(`Monere is full of energy! +${state.fullBonus} Points`);
+    if (state.pointsAwarded || state.fullBonus) await refresh();
   };
   const action = useMutation({ mutationFn: (action: "claim" | "snack") => update({ data: { action } }), onSuccess: accept });
   return { ...query, user, ready, action, accept };
