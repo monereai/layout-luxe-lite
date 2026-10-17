@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Persist pet-care state in the protected profiles table and use atomic authenticated SQL functions for drain, snack spending, claims, and replay-safe round rewards; local game storage tracks progression only, preventing duplicate wallet credits.
+- Persist per-find rewards as unique spot IDs on account-owned rounds and update the shared care query only after the atomic award succeeds. Why: duplicate taps and retries must not grant energy twice.
 - Keep snack Tokens separate from the points wallet; token funding is intentionally unavailable until earning or purchase rules are supplied.
 - Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
 

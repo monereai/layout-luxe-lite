@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { usePlan } from "@/hooks/usePlan";
-import { updateCare, startCareRound, finishCareRound } from "@/lib/care.functions";
+import { updateCare, startCareRound, finishCareRound, rewardCareFind } from "@/lib/care.functions";
 import type { CareState } from "@/lib/care";
 
 export function useCare() {
@@ -23,6 +23,7 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6, round
   const { user, ready, accept } = useCare();
   const start = useServerFn(startCareRound);
   const finish = useServerFn(finishCareRound);
+  const find = useServerFn(rewardCareFind);
   const [round, setRound] = useState<{ id: string; order: number[] } | null>(null);
   const [error, setError] = useState("");
   const [reward, setReward] = useState("");
@@ -56,5 +57,12 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6, round
       lock.current = false;
     } finally { if (version === generation.current) setPending(false); }
   }, [user?.id, round, finish, accept]);
-  return { round, error, reward, pending, canPlay: ready && (!user || !!round), complete, retry: () => round ? void complete(proof.current) : setAttempt((n) => n + 1) };
+  const rewardFind = async (spot: number) => {
+    if (!user) return null;
+    if (!round) throw new Error("Wait for the game to start.");
+    const state = await find({ data: { round: round.id, spot } });
+    await accept(state);
+    return state;
+  };
+  return { round, error, reward, pending, rewardFind, canPlay: ready && (!user || !!round), complete, retry: () => round ? void complete(proof.current) : setAttempt((n) => n + 1) };
 }

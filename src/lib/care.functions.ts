@@ -27,3 +27,11 @@ export const finishCareRound = createServerFn({ method: "POST" })
     if (result.error) throw new Error(result.error.message);
     return careSchema.parse(result.data);
   });
+export const rewardCareFind = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ round: z.string().uuid(), spot: z.number().int().min(0).max(9) }))
+  .handler(async ({ data, context }) => {
+    const result = await context.supabase.rpc("care_reward_find", { p_round: data.round, p_spot: data.spot });
+    if (result.error) throw new Error(result.error.message);
+    return careSchema.parse(result.data);
+  });

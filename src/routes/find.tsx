@@ -46,6 +46,8 @@ function FindGame() {
   const [roundKey, setRoundKey] = useState(0);
   const careRound = useCareRound("find", 3, roundKey);
   const foundRef = useRef(new Set<number>());
+  const findLock = useRef(false);
+  const [finding, setFinding] = useState(false);
   const [idx, setIdx] = useState(0);
   const scene = SCENES[idx] ?? { id: "jungle", name: "Jungle Park", src: "/find/jungle.webp" };
   // Spots are shuffled after mount so the server and first client render match.
@@ -75,6 +77,7 @@ function FindGame() {
   }
 
   function newRound(next = idx) {
+    if (findLock.current) return;
     const destination = SCENES[next];
     const previous = SCENES[next - 1];
     if (!destination) return;
@@ -87,14 +90,26 @@ function FindGame() {
     setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false); setHint(null);
   }
 
-  function tap(i: number) {
-    if (foundRef.current.has(i) || won || !careRound.canPlay) return;
+  async function tap(i: number) {
+    if (findLock.current || foundRef.current.has(i) || won || !careRound.canPlay) return;
+    findLock.current = true;
+    setFinding(true);
+    try {
+      const state = await careRound.rewardFind(i);
+      if (state) notify.success(`Mini-Monere found! +${state.energyAwarded} Energy`, { duration: 2000 });
+      else notify("Mini-Monere found! Sign in to earn Energy.", { duration: 2000 });
+    } catch {
+      notify.error("Couldn't save your Energy. Tap the Mini-Monere to try again.");
+      return;
+    } finally {
+      findLock.current = false;
+      setFinding(false);
+    }
     const next = new Set(foundRef.current).add(i);
     foundRef.current = next;
     setFound(next);
     playPop();
     recordMini(scene.id);
-    notify.success("Mini-Monere found! +1 Energy", { duration: 2000 });
     if (next.size >= MINI_COUNT) {
       recordComplete(); setToast(null);
       void careRound.complete([...next]);
@@ -164,7 +179,7 @@ function FindGame() {
               <Button variant="ghost"
                 key={`${idx}-${i}`}
                 onClick={() => tap(i)}
-                disabled={!careRound.canPlay || found.size === MINI_COUNT}
+                disabled={finding || !careRound.canPlay || found.size === MINI_COUNT}
                 aria-label={isFound ? "Mini-Monere found" : hint === i ? "Monere's clue points here" : "Hidden spot"}
                 className={`absolute h-auto min-h-0 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent disabled:opacity-100 ${isFound ? "ring-2 ring-primary" : ""} ${hint === i ? "ring-4 ring-primary motion-safe:animate-pulse ring-offset-4 ring-offset-background" : ""}`}
                 style={{ left: `${s.x}%`, top: `${s.y}%`, width: `${s.size}%` }}

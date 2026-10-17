@@ -1,4 +1,5 @@
 # Pet care economy
+- [x] Save replay-safe +1 Energy per Mini-Monere find and verify the home energy bar updates (50→51, persisted after reload).
 - [x] Store account energy, passive drain, daily claims, separate tokens, and replay-safe game rewards.
 - [x] Show home energy/mood bar and daily reward action; add token-priced Super Snack in shop.
 - [x] Replace Find/Jigsaw payouts with 15 energy and 5 points per win.

@@ -21,6 +21,7 @@ export type Database = {
           id: string
           initial_order: number[]
           kind: string
+          rewarded_finds: number[]
           size: number
           user_id: string
         }
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           initial_order?: number[]
           kind: string
+          rewarded_finds?: number[]
           size?: number
           user_id: string
         }
@@ -39,6 +41,7 @@ export type Database = {
           id?: string
           initial_order?: number[]
           kind?: string
+          rewarded_finds?: number[]
           size?: number
           user_id?: string
         }
@@ -243,6 +246,10 @@ export type Database = {
       care_apply: { Args: { p_action?: string }; Returns: Json }
       care_finish_round: {
         Args: { p_proof: Json; p_round: string }
+        Returns: Json
+      }
+      care_reward_find: {
+        Args: { p_round: string; p_spot: number }
         Returns: Json
       }
       care_start_round: {
