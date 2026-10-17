@@ -28,6 +28,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { useT, useLang } from "@/lib/i18n";
 import { propertyName, useProperties } from "@/lib/properties";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
+import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/")({
 
 
 function Home() {
+  usePaymentReturn();
   const ask = useServerFn(seekWisdom);
   const [categories, setCategories] = useState<string[]>([]);
   const category = categories.length ? categories.join(" + ") : "General life question";

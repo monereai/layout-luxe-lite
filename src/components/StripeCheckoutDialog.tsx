@@ -4,12 +4,15 @@ import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createCheckoutSession } from "@/lib/payments.functions";
+import { paymentReturnUrl } from "@/lib/payment-return";
 
 export function StripeCheckoutDialog({ item, onClose }: { item: { priceId: string; title: string } | null; onClose: () => void }) {
   const create = useServerFn(createCheckoutSession);
   const priceId = item?.priceId;
   const fetchClientSecret = useCallback(async () => {
-    const r = await create({ data: { priceId: priceId!, environment: getStripeEnvironment(), returnUrl: `${window.location.origin}/shop?session_id={CHECKOUT_SESSION_ID}` } });
+    if (!priceId) throw new Error("Choose a product before paying.");
+    const environment = getStripeEnvironment();
+    const r = await create({ data: { priceId, environment, returnUrl: paymentReturnUrl(window.location.origin, environment) } });
     if ("error" in r) throw new Error(r.error);
     return r.clientSecret;
   }, [create, priceId]);

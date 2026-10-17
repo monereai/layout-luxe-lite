@@ -1,44 +1,19 @@
-import { useEffect, useRef, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, CreditCard, Crown, Sparkles } from "lucide-react";
-import { toast } from "sonner";
 import { usePlan } from "@/hooks/usePlan";
 import { MEMBERSHIPS, POINT_PACKS, type Interval } from "@/lib/store-config";
-import { confirmCheckout } from "@/lib/payments.functions";
-import { getStripeEnvironment } from "@/lib/stripe";
-import { playFanfare } from "@/lib/sound";
+import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StripeCheckoutDialog } from "./StripeCheckoutDialog";
 
 export function MonereStore() {
-  const { user, tier, ready, refresh } = usePlan();
+  const { user, tier, ready } = usePlan();
   const [interval, setInterval] = useState<Interval>("monthly");
   const [checkout, setCheckout] = useState<{ priceId: string; title: string } | null>(null);
   const [upgrade, setUpgrade] = useState<{ priceId: string; title: string; name: string; price: string; points: number; tokens: number } | null>(null);
-  const confirm = useServerFn(confirmCheckout);
-  const queryClient = useQueryClient();
-  const handled = useRef(false);
-
-  // After Stripe returns to /shop?session_id=…, verify server-side and update the wallet without a reload.
-  useEffect(() => {
-    if (!ready || !user || handled.current) return;
-    const sessionId = new URLSearchParams(window.location.search).get("session_id");
-    if (!sessionId) return;
-    handled.current = true;
-    window.history.replaceState(null, "", window.location.pathname);
-    void (async () => {
-      const r = await confirm({ data: { sessionId, environment: getStripeEnvironment() } });
-      await refresh();
-      await queryClient.invalidateQueries({ queryKey: ["monere-care", user.id] });
-      if (!r.ok) { toast.error(r.error ?? "We couldn't confirm that payment yet. Contact us if it doesn't appear shortly."); return; }
-      try { playFanfare(); } catch { /* sound optional */ }
-      if (r.kind === "pack") toast.success(`🎉 +${r.points} Shop Points added to your wallet!`, { duration: 6000 });
-      else toast.success(`👑 Welcome to ${r.tier === "club" ? "Monere Club" : "Monere Plus"}! Your monthly points and tokens are in your wallet.`, { duration: 6000 });
-    })();
-  }, [ready, user, confirm, refresh, queryClient]);
+  usePaymentReturn();
 
   const signIn = <Button asChild size="sm" className="h-auto min-h-8 w-full whitespace-normal px-2 py-1.5 text-xs"><Link to="/auth">Sign in to buy</Link></Button>;
   const loading = <p role="status" className="min-h-8 py-1.5 text-center text-xs text-muted-foreground">Loading…</p>;
