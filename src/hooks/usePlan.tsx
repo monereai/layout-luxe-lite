@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { syncMembership } from "@/lib/paypal.functions";
 
 export type MemberTier = "free" | "plus" | "club";
-type Plan = { user: User | null; premium: boolean; tier: MemberTier; bonusPoints: number; ready: boolean; refresh: () => Promise<boolean>; signOut: () => Promise<void> };
+type Plan = { user: User | null; premium: boolean; tier: MemberTier; bonusPoints: number; tokens: number; ready: boolean; refresh: () => Promise<boolean>; signOut: () => Promise<void> };
 
-const PlanCtx = createContext<Plan>({ user: null, premium: false, tier: "free", bonusPoints: 0, ready: false, refresh: async () => false, signOut: async () => {} });
+const PlanCtx = createContext<Plan>({ user: null, premium: false, tier: "free", bonusPoints: 0, tokens: 0, ready: false, refresh: async () => false, signOut: async () => {} });
 
 export function PlanProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
