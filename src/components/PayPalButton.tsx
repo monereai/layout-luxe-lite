@@ -59,7 +59,7 @@ export function PayPalButton(props:
       if (cancelled || !ref.current) return;
       const p = latest.current;
       buttons = paypal.Buttons({
-        style: { shape: "rect", color: "gold", layout: "vertical", height: 40 },
+        style: { shape: "rect", color: "gold", layout: "vertical", height: 34 },
         ...(p.mode === "capture"
           ? { createOrder: () => (latest.current as any).createOrder(), onApprove: (d: any) => latest.current.onApprove(d.orderID) }
           : { createSubscription: (_d: any, actions: any) => actions.subscription.create({ plan_id: (latest.current as any).planId, ...((latest.current as any).accountId ? { custom_id: (latest.current as any).accountId } : {}) }), onApprove: (d: any) => latest.current.onApprove(d.subscriptionID) }),
