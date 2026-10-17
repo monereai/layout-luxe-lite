@@ -7,17 +7,14 @@ import { usePlan } from "@/hooks/usePlan";
 import { MEMBERSHIPS, POINT_PACKS, type Interval } from "@/lib/paypal-config";
 import { activateSubscription, capturePackOrder, createPackOrder } from "@/lib/paypal.functions";
 import { playFanfare } from "@/lib/sound";
+import { Button } from "@/components/ui/button";
 
 export function MonereStore() {
-  const { user, tier, refresh } = usePlan();
+  const { user, tier, ready, refresh } = usePlan();
   const [interval, setInterval] = useState<Interval>("monthly");
 
-  if (!user) return (
-    <section data-no-one-link="true" className="one-link-ignore mb-5 rounded-lg border border-primary/40 bg-card p-4 text-center">
-      <h2 className="font-display text-xl font-semibold">MonereAI Store</h2>
-      <p className="mt-1 text-sm text-muted-foreground"><Link to="/auth" className="font-semibold text-primary underline-offset-2 hover:underline">Sign in</Link> to buy Point Packs or join Monere Plus / MonereAI Club.</p>
-    </section>
-  );
+  const signInCheckout = <Button asChild className="h-auto min-h-10 w-full whitespace-normal text-center"><Link to="/auth">Sign in to pay with PayPal</Link></Button>;
+  const loadingCheckout = <p role="status" className="min-h-10 py-2 text-center text-sm text-muted-foreground">Loading checkout…</p>;
 
   async function captured(orderId: string) {
     const r = await capturePackOrder({ data: { orderId } });
@@ -46,7 +43,7 @@ export function MonereStore() {
               <p className="font-display text-2xl font-semibold text-primary">{p.points.toLocaleString()} <span className="text-sm">pts</span></p>
               <p className="mb-3 text-sm text-muted-foreground">£{p.price} one-time</p>
               <div className="mt-auto">
-                <PayPalButton mode="capture" createOrder={async () => (await createPackOrder({ data: { pack: p.id } })).id} onApprove={captured} onError={() => toast.error("PayPal checkout didn't complete.")} />
+                {!ready ? loadingCheckout : !user ? signInCheckout : <PayPalButton mode="capture" createOrder={async () => (await createPackOrder({ data: { pack: p.id } })).id} onApprove={captured} onError={() => toast.error("PayPal checkout didn't complete.")} />}
               </div>
             </div>
           ))}
@@ -58,7 +55,7 @@ export function MonereStore() {
           <h2 className="font-display text-xl font-semibold">Memberships</h2>
           <div className="flex rounded-full border border-border p-0.5 text-xs font-semibold" role="group" aria-label="Billing period">
             {(["monthly", "yearly"] as Interval[]).map((i) => (
-              <button key={i} type="button" onClick={() => setInterval(i)} aria-pressed={interval === i} className={`rounded-full px-3 py-1 capitalize ${interval === i ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{i}</button>
+              <Button key={i} type="button" size="sm" variant={interval === i ? "default" : "ghost"} onClick={() => setInterval(i)} aria-pressed={interval === i} className="h-auto rounded-full px-3 py-1 capitalize">{i}</Button>
             ))}
           </div>
         </div>
@@ -73,7 +70,7 @@ export function MonereStore() {
                 <p className="font-display text-2xl font-semibold">£{interval === "monthly" ? m.monthly : m.yearly}<span className="text-sm text-muted-foreground">/{interval === "monthly" ? "mo" : "yr"}</span></p>
                 <ul className="my-3 space-y-1 text-sm text-muted-foreground">{m.perks.map((x) => <li key={x} className="flex gap-1.5"><Check className="h-4 w-4 shrink-0 text-primary" />{x}</li>)}</ul>
                 <div className="mt-auto">
-                  {current ? <p className="rounded-md bg-primary/10 py-2 text-center text-sm font-semibold text-primary">Your current membership</p>
+                  {!ready ? loadingCheckout : !user ? signInCheckout : current ? <p className="rounded-md bg-primary/10 py-2 text-center text-sm font-semibold text-primary">Your current membership</p>
                     : planId ? <PayPalButton mode="subscription" planId={planId} onApprove={subscribed} onError={() => toast.error("PayPal checkout didn't complete.")} />
                     : <p className="rounded-md border border-dashed border-border py-2 text-center text-xs text-muted-foreground">Coming soon</p>}
                 </div>
