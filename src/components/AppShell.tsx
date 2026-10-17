@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
 import { usePlan } from "@/hooks/usePlan";
-import { useT, setLang, LANGS, type Lang } from "@/lib/i18n";
+import { useT, useLang, setLang, LANGS, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
@@ -25,6 +25,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   const { user, premium, signOut, tier, tokens } = usePlan();
   const wallet = usePointsWallet();
   const t = useT();
+  const lang = useLang();
   return (
     <div className="bg-glow relative isolate min-h-screen">
       <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>
