@@ -13,13 +13,13 @@ export function MonereCare({ snack = false }: { snack?: boolean }) {
   const bonus = care.bonus;
   const [display, setDisplay] = useState<number | null>(null);
   useEffect(() => {
-    if (!state) return;
-    if (bonus > 0) {
-      setDisplay(100);
-      const t = window.setTimeout(() => setDisplay(state.energy), 1200);
-      return () => window.clearTimeout(t);
+    if (!state || bonus <= 0) {
+      setDisplay(null);
+      return undefined;
     }
-    setDisplay(null);
+    setDisplay(100);
+    const t = window.setTimeout(() => setDisplay(state.energy), 1200);
+    return () => window.clearTimeout(t);
   }, [bonus, state]);
   const shown = display ?? state?.energy ?? 0;
   if (!care.ready) return <p className="py-3 text-center text-sm text-muted-foreground">Loading Monere's care…</p>;
