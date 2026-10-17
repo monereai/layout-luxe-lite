@@ -8,6 +8,7 @@ import { MonereCharacterView } from "@/components/MonereCharacterView";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
+import { usePlan } from "@/hooks/usePlan";
 import { SHOP_ITEMS, buy, buyCombination, combinationPrice, equip, equipmentSlot, saveShop, useShop, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
@@ -155,7 +156,8 @@ function ShopPage() {
           <TabsContent value="habitats">
             <div className="grid grid-cols-2 gap-3">
               {PROPERTIES.map((p) => {
-                const owned = props.unlockedProperties.includes(p.id);
+                const clubIncluded = p.id === "space-station" && tier === "club";
+                const owned = props.unlockedProperties.includes(p.id) || clubIncluded;
                 const on = props.activeProperty === p.id;
                 return (
                   <div key={p.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
