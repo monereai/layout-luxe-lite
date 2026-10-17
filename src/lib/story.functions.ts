@@ -1,3 +1,4 @@
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { LANG_IDS, languageInstruction } from "@/lib/i18n";
@@ -51,6 +52,7 @@ const Input = z.object({
 const FALLBACK_CHOICES = ["Take the brave path", "Look for another way", "Ask Monere what he'd do"];
 
 export const tellStory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }): Promise<{ ok: true; story: StoryResult } | { ok: false; error: string }> => {
     const key = process.env["LOVABLE_API_KEY"];
