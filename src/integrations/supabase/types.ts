@@ -326,6 +326,15 @@ export type Database = {
         Args: { p_order: number[]; p_proof: Json; p_size: number }
         Returns: number[]
       }
+      credit_stripe_membership: {
+        Args: {
+          p_period_key: string
+          p_subscription: string
+          p_tier: string
+          p_user: string
+        }
+        Returns: undefined
+      }
       credit_verified_membership: {
         Args: {
           p_month: number

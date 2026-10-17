@@ -106,6 +106,13 @@
       "when": 1792252781735,
       "tag": "0014_server_checked_habitat_unlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792261847241,
+      "tag": "0015_stripe_memberships",
+      "breakpoints": true
     }
   ]
 }

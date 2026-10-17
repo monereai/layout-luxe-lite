@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { syncMembership } from "@/lib/paypal.functions";
+import { syncMembership } from "@/lib/payments.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 export type MemberTier = "free" | "plus" | "club";
 type Plan = { user: User | null; premium: boolean; tier: MemberTier; bonusPoints: number; tokens: number; ready: boolean; refresh: () => Promise<boolean>; signOut: () => Promise<void> };
@@ -19,7 +20,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const check = useCallback(async (u: User | null) => {
     if (!u) { setPremium(false); setTier("free"); setBonus(0); setTokens(0); return false; }
     const [{ data }, { data: profile }] = await Promise.all([
-      supabase.rpc("is_premium", { check_env: "live" }),
+      supabase.rpc("is_premium", { check_env: getStripeEnvironment() }),
       supabase.from("profiles").select("monere_points,monere_tokens,subscription_tier").eq("user_id", u.id).maybeSingle(),
     ]);
     const p = data === true;
@@ -32,7 +33,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => { setUser(data.user); await check(data.user); setReady(true); if (data.user) void syncMembership().then(() => check(data.user)).catch(() => {}); });
+    supabase.auth.getUser().then(async ({ data }) => { setUser(data.user); await check(data.user); setReady(true); if (data.user) void syncMembership({ data: { environment: getStripeEnvironment() } }).then(() => check(data.user)).catch(() => {}); });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       const u = session?.user ?? null;

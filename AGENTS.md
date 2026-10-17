@@ -23,8 +23,8 @@
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
 - Use usePointsWallet for all spendable-points displays, deducting clothing and habitat spending from game and credited points. Why: displayed points must match purchasing power everywhere.
 - Anything purchased stays wearable forever with no further charge: combinations of owned items are free (no combo unlock fee), and shop.ts loads saved state eagerly at module init so a fast click can never overwrite purchases with the empty state. Why: paying twice or losing purchases breaks trust in the shop.
-- PayPal purchases are verified server-side (paypal.functions.ts) before writing point_credits / subscriptions; the browser never grants points or tiers. Why: client approval callbacks can be faked.
-- Keep the PayPal catalog visible while signed out, require sign-in for checkout, and isolate each SDK button render in a disposable host with retryable loading. Why: auth outages and billing-period changes must not silently remove purchase options.
+- Stripe purchases are verified server-side (payments.functions.ts confirmCheckout + stripe-sync.server.ts + /api/public/payments/webhook) before writing point_credits / subscriptions; the browser never grants points or tiers. Why: client completion callbacks can be faked.
+- Keep the store catalog visible while signed out and require sign-in for Stripe embedded checkout. Why: purchases must be tied to an account.
 - Habitat unlocks/equips for signed-in users go only through the property_action database function (server price, account points, Club check); clients cannot write user_properties. Why: local state could grant paid habitats free.
 - AI advice, follow-up, story and story-image endpoints require sign-in. Why: unauthenticated calls spend AI credits.
 
