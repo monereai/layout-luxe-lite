@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 import { STORE_PRICE_IDS, packPrice } from "./store-config";
 import { syncStripeSubscription } from "./stripe-sync.server";
+import { paymentReturnUrl } from "./payment-return";
 
 const envSchema = z.enum(["sandbox", "live"]);
 
@@ -35,6 +36,9 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ priceId: z.enum(STORE_PRICE_IDS as [string, ...string[]]), returnUrl: z.string().url().max(500), environment: envSchema }).parse(d))
   .handler(async ({ data, context }): Promise<{ clientSecret: string } | { error: string }> => {
     try {
+      if (data.environment === "live" && data.returnUrl !== paymentReturnUrl(new URL(data.returnUrl).origin, "live")) {
+        throw new Error("Live payments must return to https://monereai.com with payment verification enabled.");
+      }
       const stripe = createStripeClient(data.environment as StripeEnv);
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
       const price = prices.data[0];

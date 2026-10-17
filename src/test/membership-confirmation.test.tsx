@@ -50,17 +50,17 @@ describe("Paid membership confirmation", () => {
     expect(screen.getByLabelText("Selected checkout")).toHaveTextContent("club_yearly");
   });
 
-  it("refreshes account balances and care after verified payment without reloading", async () => {
+  it.each(["/shop?session_id=cs_test_isolated", "/?payment=success&session_id=cs_test_isolated"])("refreshes account balances after verified return to %s without reloading", async (returnPath) => {
     const client = new QueryClient();
     const invalidate = vi.spyOn(client, "invalidateQueries");
     mocks.confirm.mockResolvedValueOnce({ ok: true, kind: "membership", tier: "plus" });
     mocks.refresh.mockResolvedValueOnce(true);
-    window.history.replaceState(null, "", "/shop?session_id=cs_test_isolated");
+    window.history.replaceState(null, "", returnPath);
     render(<QueryClientProvider client={client}><MonereStore /></QueryClientProvider>);
     await waitFor(() => expect(mocks.refresh).toHaveBeenCalledTimes(1));
     expect(mocks.confirm).toHaveBeenCalledWith({ data: { sessionId: "cs_test_isolated", environment: "sandbox" } });
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["monere-care", "isolated-test-user"] }));
-    expect(window.location.pathname).toBe("/shop");
-    expect(window.location.search).toBe("");
+    await waitFor(() => expect(window.location.search).toBe(returnPath.startsWith("/shop") ? "" : "?payment=success"));
+    expect(window.location.pathname).toBe(returnPath.startsWith("/shop") ? "/shop" : "/");
   });
 });
