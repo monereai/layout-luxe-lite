@@ -257,15 +257,6 @@
   mix-blend-mode: multiply;
 }
 
-/* PayPal's own frame stacks its two payment buttons above a "Powered by
-   PayPal" line. Both buttons stay fully visible — only the attribution row is
-   clipped, so checkout blocks fit the compact shop cards. The wrapper has to
-   be capped too, otherwise it keeps reserving the full unclipped height. */
-.paypal-compact .paypal-buttons,
-.paypal-compact iframe {
-  height: 78px !important;
-  max-height: 78px !important;
-}
 
 /* Energy awarded: the header marker pops and floats the amount gained.
    Reduced-motion users get a still badge that simply fades out. */

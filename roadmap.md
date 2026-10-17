@@ -69,8 +69,8 @@
 - [x] Verify the bar still shows everywhere else and returns after closing the upgrade window.
 
 # Points Shop
-- [x] Restore visible PayPal purchase options; verify signed-out sign-in links, actual SDK monthly/yearly rendering, and retry regression tests.
-- [ ] Verify PayPal checkout in the signed-in shop — blocked pending an authorized preview session.
+- [x] Keep shop purchases visible to signed-out visitors with sign-in links; verify Stripe monthly/yearly rendering and retry regression tests.
+- [x] Verify the Stripe checkout window in the signed-in shop and that all shop wording says Stripe, not PayPal.
 - [x] Unify personal and shop balances including habitat spending; verify the 1030-point case and habitat purchase.
 - [x] Keep habitat Buy Now buttons active and verify Cozy Bedroom/Space Station purchase and point-shortfall feedback.
 - [x] Match clothing combination purchase buttons to inventory buttons and verify active purchases and insufficient-points feedback.
@@ -111,18 +111,18 @@
 - [x] Show the sign in the side quick-actions panel instead of the "Points Shop" text link.
 - [x] Make the sign banner larger on the shop page and in the side panel.
 
-- [ ] PayPal: MonereAI Club £4.99/mo subscription (1,000 pts/month + monthly outfit), server-verified (blocked: PayPal client ID + plan ID)
-- [x] PayPal: Point Packs — Pocket 250/£1.99, Popular 600/£3.99, Mega 1,500/£7.99; server-verified capture (blocked: PayPal credentials)
+- [x] Stripe: Monere Club £4.99/mo subscription (250 pts + 75 tokens/month), server-verified.
+- [x] Stripe: Point Packs — Pocket 250/£1.99, Popular 600/£3.99, Mega 1,000/£7.99; server-verified capture.
 - [x] Payment containers marked data-no-one-link, click hijack guard
-- [ ] Two-tier membership screen: Plus £2.99/mo|£24.99/yr (250 pts/mo, unlimited Story) + Club £4.99/mo|£44.99/yr (1,000 pts/mo, exclusive outfits, BEST VALUE); status plus|club (blocked: PayPal plan IDs)
+- [x] Two-tier membership screen: Plus £2.99/mo|£24.99/yr + Club £4.99/mo|£44.99/yr via Stripe; status plus|club.
 - [ ] Club exclusive subscriber-only outfits (needs outfit designs)
-- [ ] Paste 4 PayPal plan IDs into src/lib/paypal-config.ts (blocked: user)
+- [x] Stripe price keys live in src/lib/store-config.ts (plus_monthly/yearly, club_monthly/yearly, pack ids); paypal-config.ts removed.
 
 ## Batch updates (done 2026-10-16)
 - [x] Draw and display the four missing combination card pictures: Storm Viking, Party Star, Galaxy Voyager, Dapper Pirate; verified in the signed-in shop.
 - [x] Home canvas: welcome banner "Welcome to MonereAI! Choose an option to begin."
 - [x] Image backgrounds: verified all character/item art is transparent cutouts; MonereFigure falls back to default look if art missing
-- [x] "Get Monere Plus" on home now links straight to the Points Shop PayPal memberships (no passcode popup)
+- [x] "Get Monere Plus" on home now links straight to the Points Shop Stripe memberships (no passcode popup)
 - [x] Story Mode tab removed from navigation (route file kept)
 - [x] Shop expanded: +8 items (party hat, viking helmet, star shades, pirate coat, astro suit, rain boots, rocket boots, shell necklace) — 44 total
 - [x] Where's Monere: +2 scenes (Seaside Cove, Castle Courtyard) — 6 maps
@@ -137,7 +137,7 @@
 
 # Compact point packs & memberships
 - [x] Shrink the point pack and membership cards (tighter padding, smaller headings/prices/perks, smaller badges and billing toggle) while keeping every line readable.
-- [x] Slim the PayPal checkout buttons from 40px to 34px tall, clip only the "Powered by PayPal" attribution row (both the PayPal and Debit or Credit Card buttons stay), and match the sign-in prompt.
+- [x] (Superseded — PayPal removed, its button-clipping CSS deleted with it.) Slim the old PayPal checkout buttons from 40px to 34px tall, clipping only the "Powered by PayPal" attribution row.
 - [x] Verify in the preview: panel 598px to 450px signed out (550 to 502 signed in), pack cards 178 to 122 (199 to 175), membership cards 294 to 223 (246 to 222), no cut-off or overlapping text, build clean, all 132 tests pass.
 
 # Combinations by value
