@@ -112,7 +112,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           <a href="https://MonereAI.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary">Powered by <span className="font-semibold">MonereAI.com</span></a>
         </footer>
       </div>
-      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md sm:max-w-2xl md:hidden">
         {!hideCrisisBar && (
           <Button onClick={() => setOpen(true)} className="mx-3 mb-1.5 h-auto min-h-10 w-[calc(100%-1.5rem)] justify-start whitespace-normal rounded-2xl bg-accent px-3 py-1.5 text-left text-xs leading-snug text-accent-foreground">
             <LifeBuoy className="h-4 w-4 shrink-0" />
