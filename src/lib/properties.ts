@@ -10,6 +10,11 @@ export const PROPERTIES: Property[] = [
   { id: "space-station", name: "Space Station", cost: 900, src: "/properties/space-station.jpg" },
 ];
 
+/** Display name of a habitat — always a real one so welcome copy can never name a missing place. */
+export function propertyName(id: string): string {
+  return PROPERTIES.find((p) => p.id === id)?.name ?? "Treehouse";
+}
+
 export type PropertyState = { unlockedProperties: string[]; activeProperty: string; spent: number };
 const KEY = "monere.properties.v1";
 const DEFAULT: PropertyState = { unlockedProperties: ["treehouse"], activeProperty: "treehouse", spent: 0 };

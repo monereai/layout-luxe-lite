@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { PassCodeDialog } from "@/components/PassCodeDialog";
 import { usePlan } from "@/hooks/usePlan";
 import { useT, useLang } from "@/lib/i18n";
+import { propertyName, useProperties } from "@/lib/properties";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
 
 export const Route = createFileRoute("/")({
@@ -58,6 +59,7 @@ function Home() {
   const [includeSong, setIncludeSong] = useState(true);
   const userName = useUserName();
   const profile = useProfile();
+  const habitat = propertyName(useProperties().activeProperty);
   const t = useT();
   const lang = useLang();
   const [listening, setListening] = useState(false);
@@ -158,7 +160,7 @@ function Home() {
         </>
       ) : (
         <>
-          <p className="mb-4 text-center font-display text-lg font-semibold text-primary drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">Welcome to MonereAI! Choose an option to begin.</p>
+          <p className="mb-4 text-center font-display text-lg font-semibold text-primary drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">Welcome to the {habitat}! Choose an option to begin.</p>
           <Treehouse>
             <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} backdrop={TREEHOUSE_BACKDROP} />
             <div className="mt-4">

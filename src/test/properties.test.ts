@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buyProperty, equipProperty } from "@/lib/properties";
+import { buyProperty, equipProperty, propertyName } from "@/lib/properties";
 
 const base = { unlockedProperties: ["treehouse"], activeProperty: "treehouse", spent: 0 };
 
@@ -28,4 +28,11 @@ describe("properties", () => {
     expect(next?.activeProperty).toBe("space-station");
     expect(next?.unlockedProperties).toContain("space-station");
   });
+  it("names every habitat for welcome copy", () => {
+    expect(propertyName("cozy-bedroom")).toBe("Cozy Bedroom");
+    expect(propertyName("treehouse")).toBe("Treehouse");
+    expect(propertyName("space-station")).toBe("Space Station");
+    expect(propertyName("beach-bungalow")).toBe("Beach Bungalow");
+  });
+  it("falls back to the treehouse for an unknown habitat", () => expect(propertyName("ghost-flat")).toBe("Treehouse"));
 });
