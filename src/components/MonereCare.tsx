@@ -10,6 +10,18 @@ import { canClaimCare, SNACK_COST, SNACK_ENERGY } from "@/lib/care";
 export function MonereCare({ snack = false }: { snack?: boolean }) {
   const care = useCare();
   const state = care.data;
+  const bonus = care.bonus;
+  const [display, setDisplay] = useState<number | null>(null);
+  useEffect(() => {
+    if (!state) return;
+    if (bonus > 0) {
+      setDisplay(100);
+      const t = window.setTimeout(() => setDisplay(state.energy), 1200);
+      return () => window.clearTimeout(t);
+    }
+    setDisplay(null);
+  }, [bonus, state]);
+  const shown = display ?? state?.energy ?? 0;
   if (!care.ready) return <p className="py-3 text-center text-sm text-muted-foreground">Loading Monere's care…</p>;
   if (!care.user) return <p className="py-3 text-center text-sm text-muted-foreground"><Link to="/auth" className="text-primary underline">Sign in</Link> to care for Monere and earn rewards.</p>;
   if (!state) return <div className="py-3 text-center"><p className="text-sm text-muted-foreground">{care.isError ? "Monere's care couldn't load." : "Loading Monere's care…"}</p>{care.isError && <Button variant="outline" onClick={() => void care.refetch()}>Try again</Button>}</div>;
