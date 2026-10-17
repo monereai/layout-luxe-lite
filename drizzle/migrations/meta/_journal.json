@@ -85,6 +85,13 @@
       "when": 1792231054113,
       "tag": "0011_manual_care_and_verified_piece_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792231090090,
+      "tag": "0012_atomic_verified_membership_grants",
+      "breakpoints": true
     }
   ]
 }

@@ -308,6 +308,16 @@ export type Database = {
         Args: { p_order: number[]; p_proof: Json; p_size: number }
         Returns: number[]
       }
+      credit_verified_membership: {
+        Args: {
+          p_month: number
+          p_paid_at: string
+          p_subscription: string
+          p_tier: string
+          p_user: string
+        }
+        Returns: undefined
+      }
       is_premium: { Args: { check_env: string }; Returns: boolean }
       redeem_org_code: {
         Args: { p_code: string }
