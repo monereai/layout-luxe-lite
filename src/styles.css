@@ -256,3 +256,11 @@
 @utility blend-white {
   mix-blend-mode: multiply;
 }
+
+/* PayPal's own frame stacks its two payment buttons above a "Powered by
+   PayPal" line. Both buttons stay fully visible — only the attribution row is
+   clipped, so checkout blocks fit the compact shop cards. */
+.paypal-compact iframe {
+  height: 78px !important;
+  max-height: 78px !important;
+}
