@@ -9,11 +9,11 @@ import {
 } from "@/lib/paypal-config";
 
 describe("membership plan wiring", () => {
-  it("maps every PayPal plan id to its tier, billing period and monthly points", () => {
-    expect(planInfo(PLUS_MONTHLY_PLAN_ID)).toEqual({ tier: "plus", interval: "monthly", points: 250 });
-    expect(planInfo(PLUS_YEARLY_PLAN_ID)).toEqual({ tier: "plus", interval: "yearly", points: 250 });
-    expect(planInfo(CLUB_MONTHLY_PLAN_ID)).toEqual({ tier: "club", interval: "monthly", points: 1000 });
-    expect(planInfo(CLUB_YEARLY_PLAN_ID)).toEqual({ tier: "club", interval: "yearly", points: 1000 });
+  it("maps every PayPal plan id to its tier, billing period and monthly grants", () => {
+    expect(planInfo(PLUS_MONTHLY_PLAN_ID)).toEqual({ tier: "plus", interval: "monthly", points: 100, tokens: 25 });
+    expect(planInfo(PLUS_YEARLY_PLAN_ID)).toEqual({ tier: "plus", interval: "yearly", points: 100, tokens: 25 });
+    expect(planInfo(CLUB_MONTHLY_PLAN_ID)).toEqual({ tier: "club", interval: "monthly", points: 250, tokens: 75 });
+    expect(planInfo(CLUB_YEARLY_PLAN_ID)).toEqual({ tier: "club", interval: "yearly", points: 250, tokens: 75 });
   });
 
   it("keeps the agreed membership prices", () => {
