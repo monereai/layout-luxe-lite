@@ -164,3 +164,8 @@
 - [x] Add a menu button to the phone header that opens a side panel listing every page, keeping the bottom tab bar.
 - [x] Remove Story Mode from that panel's page list; the panel now reads Seek, Daily, Journal, Find Monere, Jigsaw, Points Shop, then sign in/out.
 - [x] Verify in the preview at 393x818: panel opens, lists the six pages with no Story Mode entry, closes on pick, build clean.
+
+# Treehouse illustration visibility
+- [x] Raise the treehouse picture behind Monere on the main page from 20% to 50% (60% and a touch bigger on phones) so the house, lanterns, window and ladder read clearly.
+- [x] Keep the topic buttons and the "Tap up to 3 topics" pill readable over the brighter picture (firmer button fill, stronger blur, solid pill background).
+- [x] Verify in the preview at 1284 and 393 px wide: illustration clearly more visible, all labels legible, no page errors, build clean.
