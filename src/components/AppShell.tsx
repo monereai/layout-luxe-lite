@@ -88,8 +88,8 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               ))}
             </div>
             <div className="border-y border-border py-5">
-              <Link to="/find" className="flex items-center justify-between gap-3" aria-label={`${t("game")}: ${wallet} Wisdom Points`}>
-                <span className="flex items-center gap-2 text-sm text-muted-foreground"><Award className="h-4 w-4 text-primary" />Wisdom Points</span>
+              <Link to="/find" className="flex items-center justify-between gap-3" aria-label={`${t("game")}: ${wallet} Shop Points`}>
+                <span className="flex items-center gap-2 text-sm text-muted-foreground"><Award className="h-4 w-4 text-primary" />Shop Points</span>
                 <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
               </Link>
               {game.detective && <p className="mt-3 text-xs text-primary">Master Detective</p>}
