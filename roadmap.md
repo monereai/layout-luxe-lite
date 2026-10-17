@@ -155,3 +155,7 @@
 - [x] Enlarge the energy chip (16px text, 20px symbol, 34px tall vs the 12px points chip) and replace the heart with a lightning bolt; verified in the preview.
 - [x] Animate the marker whenever energy is added: the chip pops (scale 1.12) with an amber glow and floats the amount gained ("+50", "+10" — the real difference) for 1.8s; nothing fires on page load, the hourly drain, or a refresh that changes nothing. Verified in the preview after Super Snacks; reduced-motion users get a still badge that fades out.
 - [x] Widen the spacing between header markers (4px to 12px on wide screens) so the popped chip keeps clear space from the points chip and language picker; measured 5.8px clear on both sides mid-animation, no text obscured.
+
+# Find Monere panel size
+- [x] Enlarge the Where's Monere? picture panel by 5% (105% width, centred) while keeping the rest of the page at its normal width.
+- [x] Verify in the preview at 1280, 820 and 390 px: panel exactly 1.05x its column, all 10 Mini-Moneres still inside the picture, no side-to-side page scrolling, no clipping, build clean.
