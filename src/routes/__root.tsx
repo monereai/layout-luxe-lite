@@ -107,6 +107,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/icon-192.png" },
       { rel: "manifest", href: "/manifest.json" },
     ],
+    scripts: [
+      { id: "cookieyes", type: "text/javascript", src: "https://cdn-cookieyes.com/client_data/3cd52b1bea050b7f5a7cd58f/script.js" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
