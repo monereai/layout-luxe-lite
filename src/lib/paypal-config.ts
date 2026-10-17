@@ -6,7 +6,7 @@ export type PackId = "pocket" | "popular" | "mega";
 export const POINT_PACKS: { id: PackId; name: string; points: number; price: string; badge?: string }[] = [
   { id: "pocket", name: "Pocket Pack", points: 250, price: "1.99" },
   { id: "popular", name: "Popular Pack", points: 600, price: "3.99", badge: "Popular" },
-  { id: "mega", name: "Mega Bundle", points: 1500, price: "7.99", badge: "Best Value" },
+  { id: "mega", name: "Mega Bundle", points: 1000, price: "7.99", badge: "Best Value" },
 ];
 
 export type Tier = "plus" | "club";
