@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Heart, Coins } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
 import { PassCodeLink } from "./PassCodeDialog";
@@ -43,7 +43,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           </Link>
           <div className="flex flex-row flex-wrap items-center justify-end gap-x-2 gap-y-1 pt-1 text-xs sm:gap-1">
             <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 font-semibold text-primary"><Coins className="h-3.5 w-3.5" aria-hidden="true" /><span className="tabular-nums">{wallet}</span> pts</Link>
-            {user && energy != null && <span aria-label={`Monere energy: ${energy} percent`} title="Monere's energy" className="flex items-center gap-1 rounded-full border border-primary/40 bg-accent px-2 py-0.5 font-semibold text-accent-foreground"><Heart className="h-3.5 w-3.5" aria-hidden="true" /><span className="tabular-nums">{energy}</span>%</span>}
+            {user && energy != null && <span aria-label={`Monere energy: ${energy} percent`} title="Monere's energy" className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-accent px-3 py-1 text-base font-semibold text-accent-foreground"><Zap className="h-5 w-5" aria-hidden="true" /><span className="tabular-nums">{energy}</span>%</span>}
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
             {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">{tier === "club" ? "CLUB" : "PLUS"}</span>}
             {!premium && <PassCodeLink label="Access code" className="font-semibold !text-primary" />}
