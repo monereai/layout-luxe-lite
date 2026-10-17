@@ -3,6 +3,10 @@
 - [x] Remove legacy Customise Monere button/modal and unused code; preserve current store equipment and properties.
 - [x] Verify cleanup with isolated browser data and 65 passing tests; owned clothing equips and persists after reload, no account changes, preview builds clean.
 
+# Membership confirmation before payment
+- [x] Add Plus and Club upgrade confirmation with selected billing price and initial points/tokens; continue to existing Stripe payment only on confirmation.
+- [ ] Verify cancellation makes no payment request, confirmed selection opens the correct checkout, and existing verified-payment wallet synchronization remains intact using isolated tests.
+
 # Equipped clothing while turning
 - [x] Keep all equipped slots visible through all eight angles using one composed character picture; verified full turns and reset on home and shop with isolated clothing data, no account changes, and 26 passing tests.
 
