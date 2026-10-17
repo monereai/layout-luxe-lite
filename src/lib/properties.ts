@@ -29,7 +29,7 @@ function read(): PropertyState {
     const p = JSON.parse(window.localStorage.getItem(KEY) || "null");
     if (p && Array.isArray(p.unlockedProperties)) {
       const unlocked = Array.from(new Set(["treehouse", ...p.unlockedProperties.filter((id: string) => PROPERTIES.some((x) => x.id === id))]));
-      return { unlockedProperties: unlocked, activeProperty: unlocked.includes(p.activeProperty) ? p.activeProperty : "treehouse", spent: Number(p.spent) || 0 };
+      return { unlockedProperties: unlocked, activeProperty: unlocked.includes(p.activeProperty) || p.activeProperty === "space-station" ? p.activeProperty : "treehouse", spent: Number(p.spent) || 0 };
     }
   } catch { /* ignore */ }
   return DEFAULT;
@@ -74,7 +74,7 @@ async function pull() {
   if (!row) return;
   // The account's saved unlocks are the source of truth when signed in.
   const unlocked = Array.from(new Set(["treehouse", ...row.unlocked_properties]));
-  saveProperties({ ...state, unlockedProperties: unlocked, activeProperty: unlocked.includes(row.active_property) ? row.active_property : state.activeProperty }, false);
+  saveProperties({ ...state, unlockedProperties: unlocked, activeProperty: unlocked.includes(row.active_property) || row.active_property === "space-station" ? row.active_property : "treehouse" }, false);
 }
 
 export function useProperties() {
