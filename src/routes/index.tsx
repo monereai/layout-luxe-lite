@@ -158,7 +158,7 @@ function Home() {
         </>
       ) : (
         <>
-          <p className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-center font-display text-lg font-semibold text-primary">Welcome to MonereAI! Choose an option to begin.</p>
+          <p className="mb-4 text-center font-display text-lg font-semibold text-primary drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">Welcome to MonereAI! Choose an option to begin.</p>
           <Treehouse>
             <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} wardrobe listening={listening} backdrop={TREEHOUSE_BACKDROP} />
             <div className="mt-4">
