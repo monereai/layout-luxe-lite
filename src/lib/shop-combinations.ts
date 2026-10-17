@@ -1,9 +1,9 @@
-export type CombinationFamily = {
+/** The three pieces a combination is made of. */
+export type CombinationPieces = { hat: string; outfit: string; footwear: string };
+
+export type CombinationFamily = CombinationPieces & {
   id: string;
   name: string;
-  hat: string;
-  outfit: string;
-  footwear: string;
 };
 
 export const COMBINATION_FAMILIES: readonly CombinationFamily[] = [

@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { COMBINATION_FAMILIES, type CombinationFamily } from "@/lib/shop-combinations";
+import { COMBINATION_FAMILIES, type CombinationFamily, type CombinationPieces } from "@/lib/shop-combinations";
 import { allJigsawsComplete, type GameState } from "@/lib/game";
 import detectiveHat from "@/assets/shop/detective-hat.webp";
 import crown from "@/assets/shop/crown.webp";
@@ -133,14 +133,14 @@ export function buy(state: ShopState, earned: number, itemId: string): ShopState
 }
 
 /** Points still needed to own every piece of a combination; 0 once all are owned. */
-export function combinationPrice(state: ShopState, family: CombinationFamily) {
+export function combinationPrice(state: ShopState, family: CombinationPieces) {
   return [family.hat, family.outfit, family.footwear]
     .filter((id) => !state.owned.includes(id))
     .reduce((sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0), 0);
 }
 
 /** What a combination is worth in full: every piece's cost, owned or not. */
-export function combinationValue(family: CombinationFamily) {
+export function combinationValue(family: CombinationPieces) {
   return [family.hat, family.outfit, family.footwear].reduce(
     (sum, id) => sum + (SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0),
     0,
@@ -151,7 +151,7 @@ export function combinationValue(family: CombinationFamily) {
 export const COMBINATIONS_BY_VALUE = [...COMBINATION_FAMILIES].sort((a, b) => combinationValue(a) - combinationValue(b));
 
 /** Buys the combination pieces the player does not own yet, then wears all three. Null when already owned or unaffordable. */
-export function buyCombination(state: ShopState, wallet: number, family: { hat: string; outfit: string; footwear: string }): ShopState | null {
+export function buyCombination(state: ShopState, wallet: number, family: CombinationPieces): ShopState | null {
   const price = combinationPrice(state, family);
   if (!price || wallet < price) return null;
   const missing = [family.hat, family.outfit, family.footwear].filter((id) => !state.owned.includes(id));
