@@ -199,7 +199,7 @@ function FindGame() {
       <p className="mt-2 min-h-5 text-center text-sm font-medium text-primary" aria-live="polite">{toast}</p>
       {careRound.error && !won && <div className="my-2 text-center"><p role="alert" className="text-sm text-muted-foreground">{careRound.error}</p><Button variant="outline" onClick={careRound.retry}>Try again</Button></div>}
 
-      <div className="mt-1 overflow-auto rounded-2xl border border-border">
+      <div className="mt-1 -mx-[2.5%] w-[105%] overflow-auto rounded-2xl border border-border">
         <div className="relative w-full min-w-[720px] md:min-w-0">
           <img src={scene.src} alt={`${scene.name} hidden-object scene`} width={1536} height={1024} draggable={false} className="block w-full select-none" />
           <div
