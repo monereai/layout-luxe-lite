@@ -29,6 +29,7 @@ import { useT, useLang } from "@/lib/i18n";
 import { propertyName, useProperties } from "@/lib/properties";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
 import { usePaymentReturn } from "@/hooks/usePaymentReturn";
+import { MessageResponse } from "@/components/ai-elements/message";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -144,7 +145,7 @@ function Home() {
           {wisdom.personalReply ? (
             <div className="surface-card mt-6 p-5">
               <p className="text-xs font-bold uppercase text-primary">Monere</p>
-              <p className="mt-2 leading-relaxed">{wisdom.personalReply}</p>
+              <MessageResponse mode="static" className="mt-2 leading-relaxed">{wisdom.personalReply}</MessageResponse>
             </div>
           ) : (
           <>
