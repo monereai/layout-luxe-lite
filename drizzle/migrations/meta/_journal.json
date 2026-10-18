@@ -134,6 +134,13 @@
       "when": 1792301538955,
       "tag": "0018_add_formidable_jigsaw",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792310557715,
+      "tag": "0019_advice_daily_quota",
+      "breakpoints": true
     }
   ]
 }

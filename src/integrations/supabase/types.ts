@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      advice_usage: {
+        Row: {
+          count: number
+          day: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       care_game_rounds: {
         Row: {
           completed: boolean
@@ -329,6 +347,7 @@ export type Database = {
         Args: { p_order: number[]; p_proof: Json; p_size: number }
         Returns: number[]
       }
+      consume_advice_quota: { Args: never; Returns: boolean }
       credit_stripe_membership: {
         Args: {
           p_period_key: string
