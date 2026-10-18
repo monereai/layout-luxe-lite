@@ -120,6 +120,13 @@
       "when": 1792263325451,
       "tag": "0016_club_habitat_and_protected_qa_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792301254439,
+      "tag": "0017_increase_habitat_prices_twenty_percent",
+      "breakpoints": true
     }
   ]
 }

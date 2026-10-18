@@ -1,3 +1,6 @@
+# Habitat pricing
+- [ ] Raise paid habitat prices by 20% in the catalog and protected purchase function; verify exact charges and retained ownership.
+
 # Public-page sitemap
 - [x] Install router-derived sitemap with explicit public/private route decisions and canonical origin.
 - [x] Verify XML, exclusions and tests.
