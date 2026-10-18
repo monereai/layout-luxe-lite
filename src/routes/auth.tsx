@@ -65,6 +65,11 @@ function AuthPage() {
     <AppShell>
       <h1 className="font-display text-2xl font-semibold">{forgot ? "Reset your password" : mode === "up" ? "Create your account" : "Welcome back"}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{forgot ? "Enter your email and Monere will send you a link to choose a new password." : "Your account keeps Monere Plus and pass codes with you. Your journal still stays on this device."}</p>
+      {next && !forgot && (
+        <div className="surface-card mt-4 border-primary/40 p-4 text-sm font-medium">
+          Create a free MonereAI account or sign in to play mini-games, earn points, and unlock outfits!
+        </div>
+      )}
       {resetSent ? (
         <div className="mt-6 grid gap-3">
           <div className="surface-card p-5 text-sm">Check your inbox — we've sent a link to set a new password. It may take a minute or two to arrive.</div>
