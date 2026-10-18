@@ -12,10 +12,10 @@ function routeDecision(file: string) {
 }
 
 describe("MonereAI public sitemap", () => {
-  it.each(["index.tsx", "daily.tsx", "find.tsx", "jigsaw.tsx", "shop.tsx", "story.tsx"])("includes public page %s", file => {
+  it.each(["index.tsx", "daily.tsx", "shop.tsx"])("includes public page %s", file => {
     expect(routeDecision(file)).toBe("true");
   });
-  it.each(["journal.tsx", "auth.tsx", "reset-password.tsx", "[.]lovable.oauth.consent.tsx", "mcp.ts", "[.well-known]/oauth-protected-resource.ts", "api/story-image.ts", "api/public/payments/webhook.ts", "__root.tsx", "sitemap[.]xml.ts"])("excludes personal or non-content route %s", file => {
+  it.each(["journal.tsx", "auth.tsx", "find.tsx", "jigsaw.tsx", "story.tsx", "reset-password.tsx", "[.]lovable.oauth.consent.tsx", "mcp.ts", "[.well-known]/oauth-protected-resource.ts", "api/story-image.ts", "api/public/payments/webhook.ts", "__root.tsx", "sitemap[.]xml.ts"])("excludes personal or non-content route %s", file => {
     expect(routeDecision(file)).toBe("false");
   });
   it("requires decisions on every existing route", () => {

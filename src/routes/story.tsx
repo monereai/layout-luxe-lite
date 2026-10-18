@@ -14,6 +14,7 @@ import { fallbackArt, raceSceneBackup, sceneFallbackArt } from "@/lib/story-art"
 import { streamImage } from "@/lib/stream-image";
 import { supabase } from "@/integrations/supabase/client";
 import { playChime, playFanfare } from "@/lib/sound";
+import { requireAuth } from "@/lib/require-auth";
 
 type SceneImg = { src: string | null; final: boolean; fallback: boolean };
 
@@ -36,7 +37,8 @@ function SceneFrame({ img, alt }: { img?: SceneImg | undefined; alt: string }) {
 }
 
 export const Route = createFileRoute("/story")({
-  staticData: { sitemap: true },
+  staticData: { sitemap: false },
+  beforeLoad: ({ location }) => requireAuth(location),
   head: () => ({
     meta: [
       { title: "Story Mode — MonereAI" },
