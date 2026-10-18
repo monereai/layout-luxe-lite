@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import shopMark from "@/assets/shop/store-front.png";
+
+import { useWebMCP } from "use-webmcp-tool";
+import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 
 const tabs = [
   { to: "/", label: "seek", icon: Compass },
@@ -52,6 +55,26 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   }, [energy]);
   const t = useT();
   const lang = useLang();
+  const navigate = useNavigate();
+  const location = useLocation();
+  useWebMCP({
+    name: "read_header_status",
+    description: "Read the current page and visible header's spendable Shop Points, membership, and energy.",
+    annotations: { readOnlyHint: true },
+    execute: () => runWebMCPTool("read_header_status", () => `Page: ${location.pathname}. Shop Points: ${wallet}. ${user ? `Membership: ${tier}. Energy: ${energy == null ? "loading" : `${energy}%`}.` : "Signed out; energy and membership are unavailable."}`),
+  });
+  useWebMCP({
+    name: "navigate_monere",
+    description: "Open a page from MonereAI's visible menu: Seek, Daily, Journal, Find Monere, Jigsaw, or Points Shop.",
+    inputSchema: { type: "object", properties: { page: { type: "string", enum: menuItems.map(item => item.to), description: "The menu page path to open." } }, required: ["page"], additionalProperties: false },
+    execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
+      const item = menuItems.find(item => item.to === page);
+      if (typeof page !== "string" || !item) throw new Error("Choose a page from the visible menu.");
+      setMenuOpen(false);
+      await navigate({ to: item.to });
+      return `Opened ${t(item.label)}.`;
+    }),
+  });
   return (
     <div className="bg-glow relative isolate min-h-screen">
       <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>

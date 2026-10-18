@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlan } from "@/hooks/usePlan";
 
-function safeNext(n: unknown) {
-  return typeof n === "string" && n.startsWith("/") && !n.startsWith("//") ? n : "/";
-}
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>): { next?: string | undefined } => ({ next: typeof s["next"] === "string" ? (s["next"] as string) : undefined }),
+  validateSearch: (s: Record<string, unknown>): { next?: string } => ({ next: oauthReturnPath(s["next"]) }),
   head: () => ({
     meta: [
       { title: "Sign in — MonereAI" },
@@ -28,7 +26,6 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { next } = Route.useSearch();
-  const navigate = useNavigate();
   const { user, ready } = usePlan();
   const [mode, setMode] = useState<"in" | "up">("up");
   const [email, setEmail] = useState("");
@@ -37,9 +34,9 @@ function AuthPage() {
   const [sent, setSent] = useState(false);
   const [forgot, setForgot] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const target = safeNext(next);
+  const target = next ?? "/";
 
-  useEffect(() => { if (ready && user) void navigate({ to: target as "/" , replace: true }); }, [ready, user, target, navigate]);
+  useEffect(() => { if (ready && user) window.location.replace(target); }, [ready, user, target]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,7 +49,7 @@ function AuthPage() {
       return;
     }
     if (mode === "up") {
-      const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}${target}` } });
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: new URL(target, window.location.origin).href } });
       setBusy(false);
       if (error) { toast.error(error.message); return; }
       if (!data.session) setSent(true);

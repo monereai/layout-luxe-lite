@@ -14,8 +14,7 @@
 - Fund separate token and point ledgers only through verified payments; profile totals project ledger inserts while usePointsWallet preserves local spending. Why: retries cannot duplicate paid grants.
 - Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
 
-- Keep app-wide header, emblem, tagline, and footer in AppShell so every content page shares the same identity.
-- Keep breakpoint-based workspace navigation and companion actions in AppShell; content routes remain independent of device layout so phone and desktop share the same flows.
+- Keep shared identity and breakpoint navigation in AppShell; content routes stay device-independent. Why: all pages share branding and flows.
 - Keep the existing journal storage key stable through rebrands so previously saved reflections remain accessible.
 - Keep the reusable mentor portrait and welcome/loading/results states in MonereMentor; animate the CGI-style asset with reduced-motion support rather than duplicating character layouts.
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
@@ -34,3 +33,6 @@
 - Keep shared conversational persona and catalog-derived platform facts in mentor-persona; use the existing direct-answer field for non-dilemma questions and AI Elements MessageResponse for formatted replies without replacing the established conversation transport. Why: general knowledge must not become forced moral advice or drift from real membership rules.
 
 - Subdirectories have their own AGENTS.md (src/components covers character art, wardrobe and shop) — read it before changing files there.
+
+- Keep MCP reads OAuth caller-scoped in src/lib/mcp; browser tools use owning controls and static fail-open telemetry. Why: agents must preserve permissions, never grant purchases/rewards.
+- Validate same-origin OAuth return paths for every sign-in method. Why: preserve consent requests without unsafe redirects.
