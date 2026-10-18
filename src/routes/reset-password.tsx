@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
+      { name: "robots", content: "noindex" },
       { title: "Reset password — MonereAI" },
       { name: "description", content: "Choose a new password for your MonereAI account." },
       { property: "og:title", content: "Reset password — MonereAI" },

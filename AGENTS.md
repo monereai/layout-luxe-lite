@@ -14,8 +14,8 @@
 - Fund separate token and point ledgers only through verified payments; profile totals project ledger inserts while usePointsWallet preserves local spending. Why: retries cannot duplicate paid grants.
 - Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
 
-- Keep shared identity and breakpoint navigation in AppShell; content routes stay device-independent. Why: all pages share branding and flows.
-- Keep the existing journal storage key stable through rebrands so previously saved reflections remain accessible.
+- Share identity and breakpoint navigation in AppShell; keep content routes device-independent. Why: consistent branding and flows.
+- Preserve the journal storage key through rebrands. Why: saved reflections must remain accessible.
 - Keep the reusable mentor portrait and welcome/loading/results states in MonereMentor; animate the CGI-style asset with reduced-motion support rather than duplicating character layouts.
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
@@ -36,3 +36,5 @@
 
 - Keep MCP reads OAuth caller-scoped in src/lib/mcp; browser tools use owning controls and static fail-open telemetry. Why: agents must preserve permissions, never grant purchases/rewards.
 - Validate same-origin OAuth return paths for every sign-in method. Why: preserve consent requests without unsafe redirects.
+
+- Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps. Why: discover public pages without leaking private destinations.

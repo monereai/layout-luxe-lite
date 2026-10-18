@@ -18,6 +18,7 @@ import { Route as JournalRouteImport } from './routes/journal'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StoryRouteImport } from './routes/story'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as ApiStoryImageRouteImport } from './routes/api/story-image'
@@ -69,6 +70,11 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoryRoute = StoryRouteImport.update({
   id: '/story',
   path: '/story',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/reset-password'
     | '/shop'
+    | '/sitemap.xml'
     | '/story'
     | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/reset-password'
     | '/shop'
+    | '/sitemap.xml'
     | '/story'
     | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/reset-password'
     | '/shop'
+    | '/sitemap.xml'
     | '/story'
     | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
@@ -207,6 +219,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StoryRoute: typeof StoryRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiStoryImageRoute: typeof ApiStoryImageRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/story': {
       id: '/story'
       path: '/story'
@@ -327,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   StoryRoute: StoryRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/daily")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Daily Reflection — MonereAI" },

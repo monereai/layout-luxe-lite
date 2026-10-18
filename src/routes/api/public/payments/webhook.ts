@@ -3,6 +3,7 @@ import { createStripeClient, type StripeEnv, verifyWebhook } from "@/lib/stripe.
 import { syncStripeSubscription } from "@/lib/stripe-sync.server";
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

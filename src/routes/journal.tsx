@@ -8,6 +8,7 @@ import { OwnedInventory } from "@/components/OwnedInventory";
 import { useUserName } from "@/lib/username";
 
 export const Route = createFileRoute("/journal")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Reflection Journal — MonereAI" },

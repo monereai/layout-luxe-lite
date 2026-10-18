@@ -25,6 +25,7 @@ const SCENES = [
 ];
 
 export const Route = createFileRoute("/find")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Where's Monere? — MonereAI" },

@@ -22,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useState } from "react";
 
 export const Route = createFileRoute("/shop")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Monere's Points Shop — MonereAI" },
