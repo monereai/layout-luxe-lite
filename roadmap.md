@@ -1,6 +1,6 @@
 # Formidable jigsaw
-- [ ] Add a fifth, harder 7×7 Formidable level with unique artwork, sequential unlock and verified game rewards; preserve existing earned shop gifts.
-- [ ] Verify level selection, puzzle play and tests using isolated data.
+- [x] Add a fifth, harder 7×7 Formidable level with unique artwork, sequential unlock and verified game rewards; preserve existing earned shop gifts.
+- [x] Verify level selection, 49-piece completion and +1 energy/+5 points on the separate QA account; 25 tests pass and mobile has no horizontal overflow.
 
 # Habitat pricing
 - [x] Raise paid habitat prices by 20%: Beach Bungalow 540, Cozy Bedroom 720; verified live purchase-function prices, unchanged ownership guard, shop display and 12 passing purchase tests without altering accounts.
