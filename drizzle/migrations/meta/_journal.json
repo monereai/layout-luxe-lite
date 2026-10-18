@@ -127,6 +127,13 @@
       "when": 1792301254439,
       "tag": "0017_increase_habitat_prices_twenty_percent",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792301538955,
+      "tag": "0018_add_formidable_jigsaw",
+      "breakpoints": true
     }
   ]
 }
