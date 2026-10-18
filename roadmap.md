@@ -1,7 +1,8 @@
 # Agent integrations
 - [x] Activate OAuth and add caller-scoped account status and catalog MCP tools.
-- [ ] Preserve sign-in/sign-up consent returns and verify approval, denial, and errors.
-- [ ] Add browser-local header read/navigation tools and verify registrations and manifest.
+- [x] Preserve sign-in/sign-up consent returns; verify missing/invalid authorization errors, real provider approval/denial and OAuth-authenticated account reads on the separate QA account. Local browser tests bridge the approved production origin; hosted end-to-end verification requires republishing.
+- [x] Add browser-local header read/navigation tools; verify registrations and journal navigation with test browser support. Generate the two-tool MCP manifest; 161 regression tests pass and build OK.
+- [ ] Republish and verify the hosted assistant connection (user publication action required).
 
 # Monere conversational knowledge
 - [x] Broaden initial and follow-up answers beyond dilemmas; retain Christian guidance, honest uncertainty and safety.
