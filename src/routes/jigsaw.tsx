@@ -6,6 +6,7 @@ import { requireAuth } from "@/lib/require-auth";
 export const Route = createFileRoute("/jigsaw")({
   staticData: { sitemap: false },
   beforeLoad: ({ location }) => requireAuth(location),
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Monere's Jigsaw — MonereAI" },
