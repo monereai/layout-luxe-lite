@@ -114,11 +114,11 @@ export function JigsawGame() {
       {shop.jigsawReward && (
         <div role="status" className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-primary/40 bg-primary/10 p-3">
           {prize ? <img src={prize.src} alt={prize.name} className="h-16 w-16 shrink-0 object-contain" /> : <Gift className="h-6 w-6 text-primary" />}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 basis-40">
             <p className="font-display font-semibold text-primary">Original four levels complete!</p>
             <p className="text-sm">{prize ? `${prize.name} unlocked — yours to keep!` : "You already own every reward item!"}</p>
           </div>
-          <Button variant="outline" asChild><Link to="/shop"><Gift />Points Shop</Link></Button>
+          <Button variant="outline" className="w-full sm:w-auto" asChild><Link to="/shop"><Gift />Points Shop</Link></Button>
         </div>
       )}
 
