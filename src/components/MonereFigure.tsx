@@ -7,7 +7,7 @@ import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
 export type Gesture = "wave" | "think" | "thumbs" | "listen";
 
 /** Each angle is one complete character picture, including every equipped slot. */
-export function MonereFigure({ className = "", alt = "", showWorn = true }: { gesture?: Gesture; className?: string; alt?: string; bareBase?: boolean; showWorn?: boolean }) {
+export function MonereFigure({ gesture, className = "", alt = "", showWorn = true }: { gesture?: Gesture; className?: string; alt?: string; bareBase?: boolean; showWorn?: boolean }) {
   const shop = useShop();
   const frame = useCharacterFrame();
   const look = combinationLook(shop.equipped) ?? "default";
@@ -19,6 +19,20 @@ export function MonereFigure({ className = "", alt = "", showWorn = true }: { ge
   const extra = showWorn ? equippedItems(shop).filter((item) => item && !drawn.has(item.id)) : [];
   const selectionKey = extra.map((item) => item.id).join(",");
   const pictureKey = `${activeImageSrc}:${selectionKey}`;
+  // Wave only from the front view in the plain look, so raised-arm art never fights equipped clothing.
+  const canWave = gesture === "wave" && shown === "default" && frame === 0 && !extra.length;
+  const [waving, setWaving] = useState(false);
+  useEffect(() => {
+    if (!canWave) { setWaving(false); return; }
+    let hide = 0;
+    const start = () => {
+      setWaving(true);
+      hide = window.setTimeout(() => setWaving(false), 2400);
+    };
+    const first = window.setTimeout(start, 1200);
+    const loop = window.setInterval(start, 11000);
+    return () => { clearTimeout(first); clearTimeout(hide); clearInterval(loop); setWaving(false); };
+  }, [canWave]);
   const [composed, setComposed] = useState<{ key: string; src: string }>();
   useEffect(() => {
     if (!extra.length) return;
