@@ -28,6 +28,7 @@ const SCENES = [
 export const Route = createFileRoute("/find")({
   staticData: { sitemap: false },
   beforeLoad: ({ location }) => requireAuth(location),
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Where's Monere? — MonereAI" },

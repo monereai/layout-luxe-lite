@@ -39,6 +39,7 @@ function SceneFrame({ img, alt }: { img?: SceneImg | undefined; alt: string }) {
 export const Route = createFileRoute("/story")({
   staticData: { sitemap: false },
   beforeLoad: ({ location }) => requireAuth(location),
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Story Mode — MonereAI" },
