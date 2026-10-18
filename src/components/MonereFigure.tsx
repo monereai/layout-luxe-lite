@@ -47,6 +47,9 @@ export function MonereFigure({ gesture, className = "", alt = "", showWorn = tru
   return (
     <div className={`relative isolate block aspect-square ${className}`} role={alt ? "img" : undefined} aria-label={alt || undefined}>
       <img data-character-look={shown} data-character-frame={frame} data-character-items={equippedItems(shop).map((item) => item.id).join(",")} src={source} alt="" aria-hidden="true" draggable={false} onError={() => setMissing(true)} className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+      {canWave && (
+        <img src="/monere/looks/default/wave.webp" alt="" aria-hidden="true" draggable={false} className={`gesture-frame pointer-events-none absolute inset-0 h-full w-full object-contain ${waving ? "gesture-on wave-rock" : ""}`} />
+      )}
     </div>
   );
 }
@@ -55,7 +58,7 @@ export function MonereFigure({ gesture, className = "", alt = "", showWorn = tru
 export function MonereAvatar({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <span className={`relative block shrink-0 overflow-hidden rounded-full border border-primary/40 bg-secondary ${className}`}>
-      <MonereFigure gesture="wave" showWorn={false} className="absolute left-1/2 top-0 w-[260%] -translate-x-1/2" />
+      <MonereFigure showWorn={false} className="absolute left-1/2 top-0 w-[260%] -translate-x-1/2" />
     </span>
   );
 }
