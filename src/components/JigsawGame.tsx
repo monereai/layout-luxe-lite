@@ -7,6 +7,7 @@ import { jigsawSolved, jigsawUnlocked, lockedSlots, recordJigsaw, shufflePieces,
 import { playChime, playPop } from "@/lib/sound";
 import { useCareRound } from "@/hooks/useCare";
 import { claimJigsawReward, SHOP_ITEMS, useShop } from "@/lib/shop";
+import formidableImage from "@/assets/jigsaw-formidable.jpg";
 
 // Each difficulty level shows a different scene illustration.
 export const JIGSAW_IMAGES = {
@@ -14,6 +15,7 @@ export const JIGSAW_IMAGES = {
   4: "/find/castle.jpg",
   5: "/find/space.webp",
   6: "/find/arcade.webp",
+  7: formidableImage,
 } as const;
 const BURST = [0, 45, 90, 135, 180, 225, 270, 315];
 const LEVELS = [
@@ -21,6 +23,7 @@ const LEVELS = [
   { size: 4, label: "Medium" },
   { size: 5, label: "Hard" },
   { size: 6, label: "Crazy Hard" },
+  { size: 7, label: "Formidable" },
 ] as const;
 type Size = (typeof LEVELS)[number]["size"];
 
@@ -112,7 +115,7 @@ export function JigsawGame() {
         <div role="status" className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-primary/40 bg-primary/10 p-3">
           {prize ? <img src={prize.src} alt={prize.name} className="h-16 w-16 shrink-0 object-contain" /> : <Gift className="h-6 w-6 text-primary" />}
           <div className="min-w-0 flex-1">
-            <p className="font-display font-semibold text-primary">All four levels complete!</p>
+            <p className="font-display font-semibold text-primary">Original four levels complete!</p>
             <p className="text-sm">{prize ? `${prize.name} unlocked — yours to keep!` : "You already own every reward item!"}</p>
           </div>
           <Button variant="outline" asChild><Link to="/shop"><Gift />Points Shop</Link></Button>

@@ -30,7 +30,7 @@
 - Space Station admission is checked both by property_action and at the character canvas, regardless of stored ownership. Why: expired Club access and old purchases cannot bypass the exclusive habitat gate.
 - QA tier overrides are honored by account_tier/is_premium only for protected admin/tester role rows and never modify subscriptions or grant monthly credits. Why: test tiers remain stable during care refresh without granting public privileges.
 - AI advice, follow-up, story and story-image endpoints require sign-in. Why: unauthenticated calls spend AI credits.
-- Keep shared conversational persona and catalog-derived platform facts in mentor-persona; use the existing direct-answer field for non-dilemma questions and AI Elements MessageResponse for formatted replies without replacing the established conversation transport. Why: general knowledge must not become forced moral advice or drift from real membership rules.
+- Share persona/catalog facts in mentor-persona; use direct-answer for non-dilemmas and MessageResponse formatting, preserving transport. Why: accurate knowledge and membership rules.
 
 - Subdirectories have their own AGENTS.md (src/components covers character art, wardrobe and shop) — read it before changing files there.
 
@@ -38,3 +38,4 @@
 - Validate same-origin OAuth return paths for every sign-in method. Why: preserve consent requests without unsafe redirects.
 
 - Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps. Why: discover public pages without leaking private destinations.
+- Extend jigsaw sizes across UI, progression, server validation and SQL; retain original gift eligibility. Why: extra levels must play/pay without revoking gifts.

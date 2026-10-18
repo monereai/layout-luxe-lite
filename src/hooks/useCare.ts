@@ -20,7 +20,7 @@ export function useCare() {
   return { ...query, user, ready, action, accept };
 }
 
-export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6, roundKey: number) {
+export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6 | 7, roundKey: number) {
   const { user, ready, accept } = useCare();
   const start = useServerFn(startCareRound);
   const finish = useServerFn(finishCareRound);
