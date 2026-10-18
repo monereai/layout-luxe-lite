@@ -169,30 +169,32 @@ function Home() {
           <p className="mb-4 text-center font-display text-lg font-semibold text-primary drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">Welcome to the {habitat}! Choose an option to begin.</p>
           <Treehouse>
             <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} interactive listening={listening} backdrop={TREEHOUSE_BACKDROP} />
+            <div role="region" aria-label="Chat with Monere" className="relative z-20 mx-auto mt-5 w-full max-w-lg border-t border-border pt-4">
+              <label htmlFor="monere-chat" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                {t("whatsOnMind")}
+              </label>
+              <div className="mt-3 rounded-lg border border-input bg-background/90 p-3 focus-within:border-primary">
+                <textarea id="monere-chat" aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} onFocus={() => setListening(true)} onBlur={() => setListening(false)} rows={3} maxLength={3000} placeholder={t("placeholder")} className="block w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
+              </div>
+              <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 text-sm">
+                <span>{t("includeSong")}</span>
+                <Switch checked={includeSong} onCheckedChange={setIncludeSong} aria-label="Include a Song Recommendation" />
+              </label>
+              <Button onClick={() => run()} disabled={loading} className="btn-gold mt-4 h-auto w-full whitespace-normal py-3"><ShieldCheck /> {t("talk")}</Button>
+              {ready && !premium && (
+                <p className="mt-3 text-center text-xs text-muted-foreground">
+                  {t("freeLeft", { n: Math.max(0, FREE_DAILY_LIMIT - used), max: FREE_DAILY_LIMIT })} ·{" "}
+                  <Link to="/shop" className="font-semibold text-primary hover:underline">{t("getPlus")}</Link>
+                </p>
+              )}
+              <p className="mt-3 text-center text-xs text-muted-foreground">{t("disclaimer")}</p>
+            </div>
             <div className="mt-4">
               <MonereMentor portrait={false} />
             </div>
           </Treehouse>
           <MonereCare />
           <div className="mt-4"><QaPanel /></div>
-          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            {t("whatsOnMind")}
-          </p>
-          <div className="surface-card mt-3 p-4 focus-within:border-primary">
-            <textarea aria-label="What situation are you facing?" value={situation} onChange={(e) => setSituation(e.target.value)} onFocus={() => setListening(true)} onBlur={() => setListening(false)} rows={4} maxLength={3000} placeholder={t("placeholder")} className="w-full resize-none bg-transparent leading-relaxed outline-none placeholder:text-muted-foreground" />
-          </div>
-          <label className="surface-card mt-3 flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-sm">
-            <span>{t("includeSong")}</span>
-            <Switch checked={includeSong} onCheckedChange={setIncludeSong} aria-label="Include a Song Recommendation" />
-          </label>
-          <Button onClick={() => run()} disabled={loading} className="btn-gold mt-4 h-auto w-full py-4"><ShieldCheck /> {t("talk")}</Button>
-          {ready && !premium && (
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("freeLeft", { n: Math.max(0, FREE_DAILY_LIMIT - used), max: FREE_DAILY_LIMIT })} ·{" "}
-              <Link to="/shop" className="font-semibold text-primary hover:underline">{t("getPlus")}</Link>
-            </p>
-          )}
-          <p className="mt-3 text-center text-xs text-muted-foreground">{t("disclaimer")}</p>
         </>
       )}
       {!wisdom && !safety && !onboarding && <InstallBanner />}
