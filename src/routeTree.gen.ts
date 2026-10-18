@@ -15,10 +15,13 @@ import { Route as DailyRouteImport } from './routes/daily'
 import { Route as FindRouteImport } from './routes/find'
 import { Route as JigsawRouteImport } from './routes/jigsaw'
 import { Route as JournalRouteImport } from './routes/journal'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as StoryRouteImport } from './routes/story'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as ApiStoryImageRouteImport } from './routes/api/story-image'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -51,6 +54,11 @@ const JournalRoute = JournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -66,9 +74,20 @@ const StoryRoute = StoryRouteImport.update({
   path: '/story',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiStoryImageRoute = ApiStoryImageRouteImport.update({
   id: '/api/story-image',
   path: '/api/story-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicPaymentsWebhookRoute =
@@ -85,10 +104,13 @@ export interface FileRoutesByFullPath {
   '/find': typeof FindRoute
   '/jigsaw': typeof JigsawRoute
   '/journal': typeof JournalRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/story': typeof StoryRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -98,10 +120,13 @@ export interface FileRoutesByTo {
   '/find': typeof FindRoute
   '/jigsaw': typeof JigsawRoute
   '/journal': typeof JournalRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/story': typeof StoryRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -112,10 +137,13 @@ export interface FileRoutesById {
   '/find': typeof FindRoute
   '/jigsaw': typeof JigsawRoute
   '/journal': typeof JournalRoute
+  '/mcp': typeof McpRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
   '/story': typeof StoryRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -127,10 +155,13 @@ export interface FileRouteTypes {
     | '/find'
     | '/jigsaw'
     | '/journal'
+    | '/mcp'
     | '/reset-password'
     | '/shop'
     | '/story'
+    | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
+    | '/.lovable/oauth/consent'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -140,10 +171,13 @@ export interface FileRouteTypes {
     | '/find'
     | '/jigsaw'
     | '/journal'
+    | '/mcp'
     | '/reset-password'
     | '/shop'
     | '/story'
+    | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
+    | '/.lovable/oauth/consent'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -153,10 +187,13 @@ export interface FileRouteTypes {
     | '/find'
     | '/jigsaw'
     | '/journal'
+    | '/mcp'
     | '/reset-password'
     | '/shop'
     | '/story'
+    | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
+    | '/.lovable/oauth/consent'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -167,10 +204,13 @@ export interface RootRouteChildren {
   FindRoute: typeof FindRoute
   JigsawRoute: typeof JigsawRoute
   JournalRoute: typeof JournalRoute
+  McpRoute: typeof McpRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
   StoryRoute: typeof StoryRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiStoryImageRoute: typeof ApiStoryImageRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -218,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
@@ -239,11 +286,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/story-image': {
       id: '/api/story-image'
       path: '/api/story-image'
       fullPath: '/api/story-image'
       preLoaderRoute: typeof ApiStoryImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/webhook': {
@@ -263,10 +324,14 @@ const rootRouteChildren: RootRouteChildren = {
   FindRoute: FindRoute,
   JigsawRoute: JigsawRoute,
   JournalRoute: JournalRoute,
+  McpRoute: McpRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
   StoryRoute: StoryRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiStoryImageRoute: ApiStoryImageRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

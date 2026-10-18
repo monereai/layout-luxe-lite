@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "sdk_version": "3.1.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://fxawjewizcrbnhzvgzra.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "monereai",
+      "version": "0.1.0",
+      "title": "MONEREAI"
+    },
+    "tools": [
+      {
+        "name": "read_account_status",
+        "title": "Read Monere account status",
+        "description": "Read your saved energy, account points, and effective membership; device-local purchases and journal entries are not included.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "read_memberships",
+        "title": "Read membership and point pack prices",
+        "description": "Read MonereAI's current membership prices, monthly allowances, and point packs without purchasing anything.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
