@@ -10,14 +10,18 @@ describe("properties", () => {
     const n = buyProperty(base, 1000, "beach-bungalow");
     if (!n) throw new Error("Expected habitat purchase");
     expect(n.activeProperty).toBe("beach-bungalow");
-    expect(n.spent).toBe(450);
+    expect(n.spent).toBe(540);
     expect(buyProperty(n, 1000, "beach-bungalow")).toBeNull();
   });
   it("cannot equip a locked property", () => expect(equipProperty(base, "cozy-bedroom").activeProperty).toBe("treehouse"));
-  it("Cozy Bedroom purchases with exactly 600 available points", () => {
-    expect(buyProperty(base, 599, "cozy-bedroom")).toBeNull();
-    const next = buyProperty(base, 600, "cozy-bedroom");
-    expect(next?.spent).toBe(600);
+  it("Beach Bungalow costs 540 points after the 20% increase", () => {
+    expect(buyProperty(base, 539, "beach-bungalow")).toBeNull();
+    expect(buyProperty(base, 540, "beach-bungalow")?.spent).toBe(540);
+  });
+  it("Cozy Bedroom costs 720 points after the 20% increase", () => {
+    expect(buyProperty(base, 719, "cozy-bedroom")).toBeNull();
+    const next = buyProperty(base, 720, "cozy-bedroom");
+    expect(next?.spent).toBe(720);
     expect(next?.activeProperty).toBe("cozy-bedroom");
     expect(next?.unlockedProperties).toContain("cozy-bedroom");
   });

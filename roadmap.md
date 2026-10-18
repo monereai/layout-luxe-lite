@@ -1,3 +1,6 @@
+# Habitat pricing
+- [x] Raise paid habitat prices by 20%: Beach Bungalow 540, Cozy Bedroom 720; verified live purchase-function prices, unchanged ownership guard, shop display and 12 passing purchase tests without altering accounts.
+
 # Public-page sitemap
 - [x] Install router-derived sitemap with explicit public/private route decisions and canonical origin.
 - [x] Verify XML, exclusions and tests.
