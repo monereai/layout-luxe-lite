@@ -3,6 +3,7 @@ import type { ToolContext } from "@lovable.dev/mcp-js";
 import type { Database } from "@/integrations/supabase/types";
 function configuredEnv(names: string[]) {
   for (const name of names) { const value = process.env[name]?.trim(); if (value) return value; }
+  return undefined;
 }
 function projectUrl() {
   const url = configuredEnv(["SUPABASE_URL", "VITE_SUPABASE_URL"]);
@@ -18,7 +19,7 @@ function publishableKey() {
       const parsed: unknown = JSON.parse(dictionary);
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         const keys = parsed as Record<string, unknown>;
-        const key = [keys.default, ...Object.values(keys)].find((v): v is string => typeof v === "string" && v.trim().startsWith("sb_publishable_"));
+        const key = [keys["default"], ...Object.values(keys)].find((v): v is string => typeof v === "string" && v.trim().startsWith("sb_publishable_"));
         if (key) return key.trim();
       }
     } catch { /* Keep legacy fallback available. */ }

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
-  validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s.authorization_id === "string" ? s.authorization_id : "" }),
+  validateSearch: (s: Record<string, unknown>) => ({ authorization_id: typeof s["authorization_id"] === "string" ? s["authorization_id"] : "" }),
   head: () => ({ meta: [
     { title: "Connect your assistant — MonereAI" },
     { name: "description", content: "Review and approve an assistant connection to your MonereAI account." },
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
     return data;
   },
   pendingComponent: () => <ConsentFrame><p>Loading connection request…</p></ConsentFrame>,
-  errorComponent: ({ error }) => <ConsentFrame><h1 className="font-display text-2xl">Connection unavailable</h1><p className="mt-4 text-muted-foreground" role="alert">{error.message}</p></ConsentFrame>,
+  errorComponent: ({ error }) => <ConsentFrame><h1 className="font-display text-2xl">Connection unavailable</h1><p className="mt-4 text-muted-foreground" role="alert">{error instanceof Error ? error.message : "Could not load this connection. Please start again."}</p></ConsentFrame>,
   component: Consent,
 });
 function ConsentFrame({ children }: { children: ReactNode }) {

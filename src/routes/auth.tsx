@@ -10,7 +10,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({ next: oauthReturnPath(s["next"]) }),
+  validateSearch: (s: Record<string, unknown>): { next?: string } => ({ next: oauthReturnPath(s["next"]) }),
   head: () => ({
     meta: [
       { title: "Sign in — MonereAI" },
@@ -34,7 +34,7 @@ function AuthPage() {
   const [sent, setSent] = useState(false);
   const [forgot, setForgot] = useState(false);
   const [resetSent, setResetSent] = useState(false);
-  const target = next;
+  const target = next ?? "/";
 
   useEffect(() => { if (ready && user) window.location.replace(target); }, [ready, user, target]);
 
