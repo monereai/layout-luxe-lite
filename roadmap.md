@@ -1,6 +1,7 @@
 # Public-page sitemap
-- [ ] Install router-derived sitemap with explicit public/private route decisions and canonical origin.
-- [ ] Verify XML, exclusions and tests; publication remains a user action.
+- [x] Install router-derived sitemap with explicit public/private route decisions and canonical origin.
+- [x] Verify XML, exclusions and tests.
+- [ ] Publish and verify the hosted sitemap (user publication action required).
 
 # Agent integrations
 - [x] Activate OAuth and add caller-scoped account status and catalog MCP tools.
