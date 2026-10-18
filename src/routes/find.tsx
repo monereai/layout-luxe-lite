@@ -224,7 +224,7 @@ function FindGame() {
                   src={MINI}
                   alt=""
                   draggable={false}
-                  className={`aspect-square w-full object-contain transition ${isFound ? "scale-125" : hint === i ? "opacity-85 saturate-50" : "opacity-50 saturate-50"}`}
+                  className={`aspect-square w-full object-contain transition ${isFound ? "scale-125" : hint === i ? "opacity-85 saturate-50" : "opacity-53 saturate-50"}`}
                   style={{ transform: `rotate(${s.rot}deg)` }}
                 />
                 {isFound && BURST.map((deg) => (
