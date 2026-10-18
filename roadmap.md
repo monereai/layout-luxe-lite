@@ -1,3 +1,8 @@
+# Agent integrations
+- [x] Activate OAuth and add caller-scoped account status and catalog MCP tools.
+- [ ] Preserve sign-in/sign-up consent returns and verify approval, denial, and errors.
+- [ ] Add browser-local header read/navigation tools and verify registrations and manifest.
+
 # Monere conversational knowledge
 - [x] Broaden initial and follow-up answers beyond dilemmas; retain Christian guidance, honest uncertainty and safety.
 - [x] Render readable answer formatting and include accurate platform guidance without changing access rules or AI models.
