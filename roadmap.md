@@ -1,3 +1,7 @@
+# Public-page sitemap
+- [ ] Install router-derived sitemap with explicit public/private route decisions and canonical origin.
+- [ ] Verify XML, exclusions and tests; publication remains a user action.
+
 # Agent integrations
 - [x] Activate OAuth and add caller-scoped account status and catalog MCP tools.
 - [x] Preserve sign-in/sign-up consent returns; verify missing/invalid authorization errors, real provider approval/denial and OAuth-authenticated account reads on the separate QA account. Local browser tests bridge the approved production origin; hosted end-to-end verification requires republishing.

@@ -5,6 +5,7 @@ const STYLE =
   "Rich, vibrant, magical cartoon illustration, 2D storybook style, featuring a friendly lion cub mascot with a small backpack in the scene. Wide 16:9 composition, no text or lettering.";
 
 export const Route = createFileRoute("/api/story-image")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

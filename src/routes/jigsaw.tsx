@@ -3,6 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { JigsawGame } from "@/components/JigsawGame";
 
 export const Route = createFileRoute("/jigsaw")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Monere's Jigsaw — MonereAI" },

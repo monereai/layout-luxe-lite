@@ -36,3 +36,5 @@
 
 - Keep MCP reads OAuth caller-scoped in src/lib/mcp; browser tools use owning controls and static fail-open telemetry. Why: agents must preserve permissions, never grant purchases/rewards.
 - Validate same-origin OAuth return paths for every sign-in method. Why: preserve consent requests without unsafe redirects.
+
+- Keep the sitemap router-derived through required staticData.sitemap decisions; exclude personal and protocol routes and omit dates without page-specific change timestamps. Why: new public routes stay discoverable without leaking private destinations.

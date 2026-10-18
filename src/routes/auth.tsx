@@ -10,6 +10,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 export const Route = createFileRoute("/auth")({
+  staticData: { sitemap: false },
   validateSearch: (s: Record<string, unknown>): { next?: string } => ({ next: oauthReturnPath(s["next"]) }),
   head: () => ({
     meta: [

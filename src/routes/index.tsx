@@ -32,6 +32,7 @@ import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 import { MessageResponse } from "@/components/ai-elements/message";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Talk to Monere — MonereAI" },
