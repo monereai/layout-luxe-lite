@@ -95,9 +95,13 @@ const Input = z.object({
 export const seekWisdom = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d))
-  .handler(async ({ data }): Promise<{ ok: true; wisdom: Wisdom } | { ok: false; error: string }> => {
+  .handler(async ({ data, context }): Promise<{ ok: true; wisdom: Wisdom } | { ok: false; error: string }> => {
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { ok: false, error: "The advice service isn't configured yet." };
+    if (!(data.previous && data.followUp)) {
+      const quota = await context.supabase.rpc("consume_advice_quota");
+      if (quota.error || quota.data !== true) return { ok: false, error: "You've used today's free questions. Upgrade to Monere Plus for unlimited advice, or come back tomorrow." };
+    }
 
     const profileGuidance = data.profile === "young-man"
       ? "Selected profile: Young Man. Tailor relevant guidance around courage, servant leadership, steady strength, and responsibility without stereotypes."

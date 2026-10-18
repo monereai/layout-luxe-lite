@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { getRequest } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 import { STORE_PRICE_IDS, packPrice } from "./store-config";
@@ -14,16 +15,6 @@ async function resolveOrCreateCustomer(stripe: ReturnType<typeof createStripeCli
     const found = await stripe.customers.search({ query: `metadata['userId']:'${options.userId}'`, limit: 1 });
     const f = found.data[0]; if (f) return f.id;
   }
-  if (options.email) {
-    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
-    const customer = existing.data[0];
-    if (customer) {
-      if (options.userId && customer.metadata?.['userId'] !== options.userId) {
-        await stripe.customers.update(customer.id, { metadata: { ...customer.metadata, userId: options.userId } });
-      }
-      return customer.id;
-    }
-  }
   const created = await stripe.customers.create({
     ...(options.email && { email: options.email }),
     ...(options.userId && { metadata: { userId: options.userId } }),
@@ -36,8 +27,11 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ priceId: z.enum(STORE_PRICE_IDS as [string, ...string[]]), returnUrl: z.string().url().max(500), environment: envSchema }).parse(d))
   .handler(async ({ data, context }): Promise<{ clientSecret: string } | { error: string }> => {
     try {
-      if (data.environment === "live" && data.returnUrl !== paymentReturnUrl(new URL(data.returnUrl).origin, "live")) {
-        throw new Error("Live payments must return to https://monereai.com with payment verification enabled.");
+      const origin = new URL(data.returnUrl).origin;
+      const allowed = data.environment === "live" ? ["https://monereai.com"] : ["https://monereai.com", "https://www.monereai.com", "https://layout-luxe-lite.lovable.app", "http://localhost:8080"];
+      const sameOrigin = (() => { try { const h = getRequest()?.headers; const o = h?.get("origin"); return o ? new URL(o).origin : null; } catch { return null; } })();
+      if ((!allowed.includes(origin) && origin !== sameOrigin) || data.returnUrl !== paymentReturnUrl(origin, data.environment)) {
+        throw new Error("Payments must return to this website with payment verification enabled.");
       }
       const stripe = createStripeClient(data.environment as StripeEnv);
       const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
@@ -76,7 +70,7 @@ export const confirmCheckout = createServerFn({ method: "POST" })
       const env = data.environment as StripeEnv;
       const stripe = createStripeClient(env);
       const session = await stripe.checkout.sessions.retrieve(data.sessionId);
-      if (session.metadata?.['userId'] !== context.userId || session.status !== "complete" || session.payment_status === "unpaid") return { ok: false };
+      if (session.metadata?.['userId'] !== context.userId || session.status !== "complete" || (session.mode === "payment" ? session.payment_status !== "paid" : session.payment_status === "unpaid")) return { ok: false };
       if (session.mode === "subscription") {
         const subId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
         if (!subId) return { ok: false };
