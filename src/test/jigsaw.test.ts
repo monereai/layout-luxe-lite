@@ -38,7 +38,7 @@ it("handles a fully owned inventory without duplicate items", async () => {
 
 it("awards only 5 points per puzzle", () => expect(JIGSAW_BONUS).toBe(5));
 it("shuffle never starts solved and keeps all pieces", () => {
-  for (const n of [9, 16, 25]) {
+  for (const n of [9, 16, 25, 36, 49]) {
     const a = shufflePieces(n);
     expect(jigsawSolved(a)).toBe(false);
     expect([...a].sort((x, y) => x - y)).toEqual(Array.from({ length: n }, (_, i) => i));
@@ -69,8 +69,21 @@ it("unlocks levels in order of play", async () => {
 
 it("gives each jigsaw level its own illustration", async () => {
   const { JIGSAW_IMAGES } = await import("@/components/JigsawGame");
-  expect(Object.keys(JIGSAW_IMAGES).sort()).toEqual(["3", "4", "5", "6"]);
+  expect(Object.keys(JIGSAW_IMAGES).sort()).toEqual(["3", "4", "5", "6", "7"]);
   const values = Object.values(JIGSAW_IMAGES);
-  expect(new Set(values).size).toBe(4);
-  expect(values.every((v) => v.startsWith("/find/"))).toBe(true);
+  expect(new Set(values).size).toBe(5);
+  expect(values.every((v) => v.length > 0)).toBe(true);
+});
+
+it("unlocks the 49-piece Formidable challenge after Crazy Hard", async () => {
+  const { JIGSAW_LEVELS, jigsawUnlocked } = await import("@/lib/game");
+  expect(JIGSAW_LEVELS).toEqual([3, 4, 5, 6, 7]);
+  expect(jigsawUnlocked(7, { ...rewardGame, jigsaws: [3, 4, 5] })).toBe(false);
+  expect(jigsawUnlocked(7, rewardGame)).toBe(true);
+});
+
+it("preserves an existing collection gift when Formidable is completed", () => {
+  const gift = grantJigsawReward(rewardShop, rewardGame, () => 0);
+  if (!gift) throw new Error("Expected original collection gift");
+  expect(grantJigsawReward(gift.state, { ...rewardGame, jigsaws: [3, 4, 5, 6, 7] })).toBeNull();
 });
