@@ -166,7 +166,13 @@ function Home() {
         </>
       ) : (
         <>
+          <div className="mb-4 text-center">
+            <p className="mb-2 flex items-center justify-center gap-2 text-xs font-semibold text-primary"><ShieldCheck className="h-3.5 w-3.5" /> {t("motto")}</p>
+            <h1 className="font-display text-3xl font-semibold leading-tight drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">{userName ? t("heyName", { name: userName }) : t("hey")}</h1>
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground drop-shadow-[0_1px_6px_color-mix(in_oklab,var(--background)_85%,transparent)]">{userName ? t("welcomeName", { name: userName }) : t("welcome")}</p>
+          </div>
           <p className="mb-4 text-center font-display text-lg font-semibold text-primary drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">Welcome to the {habitat}! Choose an option to begin.</p>
+
           <Treehouse>
             <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} interactive listening={listening} backdrop={TREEHOUSE_BACKDROP} />
             <div role="region" aria-label="Chat with Monere" className="relative z-20 mx-auto mt-5 w-full max-w-lg border-t border-border pt-4">
@@ -188,9 +194,6 @@ function Home() {
                 </p>
               )}
               <p className="mt-3 text-center text-xs text-muted-foreground">{t("disclaimer")}</p>
-            </div>
-            <div className="mt-4">
-              <MonereMentor portrait={false} />
             </div>
           </Treehouse>
           <MonereCare />
