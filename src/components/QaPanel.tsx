@@ -45,7 +45,7 @@ export function QaPanel() {
 
   if (!tester && !isSandboxAdmin(user)) return null;
   return (
-    <aside aria-label="Admin Sandbox" className="fixed bottom-40 left-3 z-40 max-w-[calc(100%-1.5rem)] rounded-lg border border-primary/40 bg-card p-3 shadow-lg md:bottom-6">
+    <aside aria-label="Admin Sandbox" className="relative z-40 mt-6 w-fit max-w-full rounded-lg border border-primary/40 bg-card p-3 shadow-lg md:fixed md:bottom-6 md:left-3 md:mt-0 md:max-w-[calc(100%-1.5rem)]">
       <Button variant="outline" size="sm" aria-expanded={open} onClick={() => setOpen(!open)}><ShieldCheck />Admin Sandbox · {tier}</Button>
       {open && <div className="mt-3 flex max-w-xs flex-wrap gap-2">
         {ACTIONS.map((a) => (

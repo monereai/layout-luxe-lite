@@ -14,7 +14,7 @@
 - Fund separate token and point ledgers only through verified payments; profile totals project ledger inserts while usePointsWallet preserves local spending. Why: retries cannot duplicate paid grants.
 - Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
 
-- Share identity and breakpoint navigation in AppShell; keep content routes device-independent. Why: consistent branding and flows.
+- Share identity/navigation in AppShell. Mobile QA stays in flow; habitat dialogs clear tabs. Why: consistent, unobstructed controls.
 - Preserve the journal storage key through rebrands. Why: saved reflections must remain accessible.
 - Reuse MonereMentor portraits and welcome/loading/results states with reduced-motion support; never duplicate character layouts.
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
