@@ -10,8 +10,8 @@ export type Tier = "plus" | "club";
 export type Interval = "monthly" | "yearly";
 
 export const MEMBERSHIPS: { tier: Tier; name: string; monthly: string; yearly: string; points: number; tokens: number; perks: string[]; badge?: string; prices: Record<Interval, string> }[] = [
-  { tier: "plus", name: "Monere Plus", monthly: "2.99", yearly: "24.99", points: 100, tokens: 25, perks: ["100 Points + 25 Tokens every month", "2x Daily Care Points (40 pts at 100% energy)"], prices: { monthly: "plus_monthly", yearly: "plus_yearly" } },
-  { tier: "club", name: "Monere Club", monthly: "4.99", yearly: "44.99", points: 250, tokens: 75, perks: ["Everything in Plus", "250 Points + 75 Tokens every month", "3x Daily Care Points (60 pts at 100% energy)", "Space Station Property Access", "Exclusive subscriber-only outfits", "Priority features"], badge: "BEST VALUE", prices: { monthly: "club_monthly", yearly: "club_yearly" } },
+  { tier: "plus", name: "Monere Plus", monthly: "2.99", yearly: "24.99", points: 100, tokens: 25, perks: ["100 Points + 25 Tokens every month", "2x Daily Care Points (200 pts at 100% energy)"], prices: { monthly: "plus_monthly", yearly: "plus_yearly" } },
+  { tier: "club", name: "Monere Club", monthly: "4.99", yearly: "44.99", points: 250, tokens: 75, perks: ["Everything in Plus", "250 Points + 75 Tokens every month", "3x Daily Care Points (300 pts at 100% energy)", "Space Station Property Access", "Exclusive subscriber-only outfits", "Priority features"], badge: "BEST VALUE", prices: { monthly: "club_monthly", yearly: "club_yearly" } },
 ];
 
 export function membershipPrice(priceId: string): { tier: Tier; interval: Interval; points: number; tokens: number } | null {

@@ -7,7 +7,7 @@ export const GAME_ENERGY = 1;
 export const GAME_POINTS = 5;
 export const MINI_ENERGY = 1;
 export const FULL_ENERGY_BONUS = 0;
-export const dailyAllowance = (tier: "free" | "plus" | "club") => tier === "club" ? 60 : tier === "plus" ? 40 : 20;
+export const dailyAllowance = (tier: "free" | "plus" | "club") => tier === "club" ? 300 : tier === "plus" ? 200 : 100;
 export const addEnergy = (energy: number, amount: number) => Math.min(ENERGY_MAX, Math.max(0, energy + amount));
 export function drainEnergy(energy: number, lastDrain: number, now: number) {
   const hours = Math.max(0, Math.floor((now - lastDrain) / 3_600_000));
@@ -21,6 +21,6 @@ export const energyGain = (previous: number | null | undefined, current: number 
 export const careSchema = z.object({
   energy: z.number().int().min(0).max(100), lastDrain: z.string(), claimed: z.boolean(),
   claimDate: z.string().nullable(), tokens: z.number().int().nonnegative(),
-  allowance: z.union([z.literal(20), z.literal(40), z.literal(60)]), pointsAwarded: z.number(), energyAwarded: z.number(), today: z.string(), fullBonus: z.number(),
+  allowance: z.union([z.literal(100), z.literal(200), z.literal(300)]), pointsAwarded: z.number(), energyAwarded: z.number(), today: z.string(), fullBonus: z.number(),
 });
 export type CareState = z.infer<typeof careSchema>;

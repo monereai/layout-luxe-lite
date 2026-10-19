@@ -40,14 +40,14 @@ describe("Frugal care economy", () => {
   it("claim date still blocks a reward when a stale claimed flag is false", () => {
     expect(canClaimCare(100, false, "2026-10-17", "2026-10-17")).toBe(false);
   });
-  it("pays exactly 20 free, 40 plus or 60 club", () => {
-    expect(dailyAllowance("free")).toBe(20); expect(dailyAllowance("plus")).toBe(40); expect(dailyAllowance("club")).toBe(60);
+  it("pays exactly 100 free, 200 plus or 300 club", () => {
+    expect(dailyAllowance("free")).toBe(100); expect(dailyAllowance("plus")).toBe(200); expect(dailyAllowance("club")).toBe(300);
   });
   it("full energy retains 100 without automatic points", () => {
     expect(FULL_ENERGY_BONUS).toBe(0);
-    const state = careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 20, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17", fullBonus: 0 });
+    const state = careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 100, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17", fullBonus: 0 });
     expect(state.fullBonus).toBe(0);
-    expect(() => careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 20, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17" })).toThrow();
+    expect(() => careSchema.parse({ energy: 100, lastDrain: "x", claimed: false, claimDate: null, tokens: 0, allowance: 100, pointsAwarded: 0, energyAwarded: 0, today: "2026-10-17" })).toThrow();
   });
   it("local game progression never duplicates account point rewards", () => {
     const before = gameStateSnapshot().points;

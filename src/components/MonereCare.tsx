@@ -16,7 +16,8 @@ export function MonereCare() {
   async function claim() {
     try {
       const result = await care.action.mutateAsync("claim");
-      toast.success(`Daily care reward: +${result.pointsAwarded} Points!`);
+      const perk = result.allowance === 300 ? "Club Perk" : result.allowance === 200 ? "Plus Perk" : "Upgrade to Plus for 2x";
+      toast.success(`+${result.pointsAwarded} Points! (${perk})`);
     } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't save Monere's care. Try again."); }
   }
   const eligible = canClaimCare(state.energy, state.claimed, state.claimDate, state.today);
