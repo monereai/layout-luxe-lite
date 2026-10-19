@@ -16,6 +16,7 @@ import petShopMark from "@/assets/shop/pet-shop.png";
 
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
+import { QaPanel } from "@/components/QaPanel";
 
 const tabs = [
   { to: "/", label: "seek", icon: Compass },
@@ -125,6 +126,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             )}
           </aside>
           <main className="relative z-0 flex min-w-0 flex-1 flex-col md:workspace-panel md:min-h-[calc(100dvh-14rem)] md:p-6 lg:p-8">{children}</main>
+          <QaPanel />
           <aside aria-label="Points Shop" className="sticky top-6 hidden min-w-0 xl:block">
             <div className="flex items-center gap-2 border-b border-border pb-4 text-primary">
               <Compass className="h-5 w-5 shrink-0" />
