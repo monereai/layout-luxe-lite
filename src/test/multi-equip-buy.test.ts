@@ -19,7 +19,10 @@ describe("footwear stays visible with other items", () => {
     expect(look).toBe("storm-cloak");
     expect(itemsDrawnIn(look, sel)).not.toContain("knight-boots");
   });
+  it("repaired equipment uses its own picture", () => {
+    expect(combinationLook({ footwear: "rocket-boots" })).toBe("rocket-boots");
+  });
   it("items without their own picture fall back to the default look", () => {
-    expect(combinationLook({ footwear: "rocket-boots" })).toBe("default");
+    expect(combinationLook({ hat: "viking-helmet" })).toBe("default");
   });
 });
