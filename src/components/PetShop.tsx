@@ -34,8 +34,8 @@ export function PetShop() {
     <section aria-label="Pet Shop">
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">Adopt a companion for Monere with your Shop Points.</p>
-        <div className="flex shrink-0 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-primary" aria-live="polite" aria-label={`${wallet} points available`}>
-          <Award className="h-4 w-4" /><span className="font-display text-lg font-semibold tabular-nums">{wallet}</span><span className="text-xs">pts</span>
+        <div className="flex shrink-0 items-center gap-2 rounded-full border border-points/45 bg-points/10 px-3 py-1.5 text-points pop-shadow" aria-live="polite" aria-label={`${wallet} points available`}>
+          <Award className="h-4 w-4" /><span className="font-heading text-lg font-semibold tabular-nums">{wallet}</span><span className="text-xs">pts</span>
         </div>
       </div>
       {!user && <p className="mb-4 rounded-lg border border-border bg-card p-3 text-sm"><Link to="/auth" search={{ next: "/pet-shop" } as never} className="text-primary underline-offset-2 hover:underline">Sign in</Link> to adopt pets.</p>}
@@ -47,9 +47,9 @@ export function PetShop() {
               <div className="mb-2 flex h-28 items-center justify-center">
                 <img src={pet.src} alt={pet.name} width={816} height={816} loading="lazy" className="max-h-full max-w-full object-contain" />
               </div>
-              <p className="text-sm font-semibold">{pet.name}</p>
-              <p className="text-xs text-muted-foreground">{pet.description}</p>
-              <p className="mb-3 mt-1 flex items-center gap-1 text-xs font-medium text-primary"><Award className="h-3.5 w-3.5" />{pet.cost} pts</p>
+              <p className="font-heading text-sm font-semibold">{pet.name}</p>
+              <p className="font-body text-xs text-muted-foreground">{pet.description}</p>
+              <p className="mb-3 mt-1 flex items-center gap-1 font-heading text-xs font-semibold text-points"><Award className="h-3.5 w-3.5" />{pet.cost} pts</p>
               {st === "equipped" ? (
                 <Button size="sm" variant="secondary" className={BUTTON} disabled={busy === pet.id} onClick={() => run("unequip", pet)} aria-label={`${pet.name} equipped — tap to unequip`}><Check /> Equipped · Unequip</Button>
               ) : st === "owned" ? (

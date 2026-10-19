@@ -113,8 +113,8 @@ function ShopPage() {
             <h1 className="font-display text-2xl font-semibold"><img src={signSrc(lang)} alt="Points Shop" width={1205} height={389} loading="lazy" className="h-16 w-auto sm:h-20" /></h1>
             <p className="text-sm text-muted-foreground">Dress Monere up with points from <Link to="/find" className="text-primary underline-offset-2 hover:underline">Where's Monere?</Link></p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-primary" aria-label={`${wallet} points available`}>
-            <Award className="h-4 w-4" /><span className="font-display text-lg font-semibold tabular-nums">{wallet}</span><span className="text-xs">pts</span>
+          <div className="flex shrink-0 items-center gap-2 rounded-full border border-points/45 bg-points/10 px-3 py-1.5 text-points pop-shadow" aria-label={`${wallet} points available`}>
+            <Award className="h-4 w-4" /><span className="font-heading text-lg font-semibold tabular-nums">{wallet}</span><span className="text-xs">pts</span>
           </div>
         </div>
 
@@ -140,8 +140,8 @@ function ShopPage() {
               return <div key={family.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                 <img src={picture} alt={family.name} className="aspect-square w-full object-contain" loading="lazy" onError={(e) => { const fallback = SHOP_ITEMS.find((item) => item.id === family.outfit)?.src; if (fallback && !e.currentTarget.src.endsWith(fallback)) e.currentTarget.src = fallback; }} />
                 <h3 className="text-sm font-semibold">{family.name}</h3>
-                <p className="text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
-                <p className="mb-3 text-xs text-muted-foreground">{ready ? "Free — items owned" : `${price} pts`}</p>
+                <p className="font-body text-xs text-muted-foreground">{ids.map((id) => SHOP_ITEMS.find((item) => item.id === id)?.name).join(" + ")}</p>
+                <p className="mb-3 font-heading text-xs font-semibold text-points">{ready ? "Free — items owned" : `${price} pts`}</p>
                 {on ? (
                   <Button size="sm" variant="secondary" className={CLOTHING_BUTTON_CLASS} onClick={() => takeOffCombo(family)} aria-label={`${family.name} equipped — tap to take off`}>
                     <Check /> Equipped
@@ -174,8 +174,8 @@ function ShopPage() {
                 return (
                   <div key={p.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                     <img src={p.src ?? "/treehouse-watermark.webp"} alt={p.name} loading="lazy" width={816} height={816} className="mb-2 aspect-square w-full rounded-md object-cover" />
-                    <p className="text-sm font-semibold">{p.name}</p>
-                    <p className="mb-3 text-xs text-muted-foreground">{p.id === "space-station" ? "Monere Club exclusive" : p.cost ? `${p.cost} pts` : "Free"}</p>
+                    <p className="font-heading text-sm font-semibold">{p.name}</p>
+                    <p className="mb-3 font-heading text-xs font-semibold text-points">{p.id === "space-station" ? "Monere Club exclusive" : p.cost ? `${p.cost} pts` : "Free"}</p>
                     {clubLocked ? <Button variant="outline" size="sm" className={CLOTHING_BUTTON_CLASS} onClick={() => setStationPreview(true)}><Lock />Preview Space Station</Button> : on ? (
                       <Button size="sm" variant="secondary" className="mt-auto" disabled><Check /> Equipped</Button>
                     ) : owned ? (
@@ -216,8 +216,8 @@ function ShopPage() {
                       <div className="mb-2 flex h-24 items-center justify-center">
                         <img src={item.src} alt="" loading="lazy" className={`max-h-full max-w-full object-contain ${owned ? "" : "opacity-80"}`} />
                       </div>
-                      <p className="text-sm font-semibold">{item.name}</p>
-                      <p className="mb-3 text-xs text-muted-foreground">{item.cost} pts</p>
+                      <p className="font-heading text-sm font-semibold">{item.name}</p>
+                      <p className="mb-3 font-heading text-xs font-semibold text-points">{item.cost} pts</p>
                       {on ? (
                           <Button size="sm" variant="secondary" className={CLOTHING_BUTTON_CLASS} onClick={() => wear(item.category, null)} aria-label={`${item.name} equipped — tap to take off`}>
                           <Check /> Equipped

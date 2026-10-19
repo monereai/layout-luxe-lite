@@ -79,9 +79,9 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
           {celebrate && <Sparkles aria-hidden="true" className="absolute right-4 top-4 h-10 w-10 text-primary motion-safe:animate-bounce" />}
         </div>
         <p className="mt-5 flex items-center justify-center gap-2 font-semibold text-primary"><CheckCircle2 className="h-5 w-5" /> Today’s dilemma complete</p>
-        <p className="mt-3 text-base leading-relaxed">{story.reflection}</p>
+        <p className="font-body mt-3 text-base leading-relaxed">{story.reflection}</p>
         <p className="mt-2 text-xs text-muted-foreground">{story.reference}</p>
-        {celebrate && <p role="status" className="mt-4 font-semibold text-primary">+{state.care.energyAwarded} Energy · +50 Points</p>}
+        {celebrate && <p role="status" className="font-heading mt-4 text-base font-semibold"><span className="text-energy">+{state.care.energyAwarded} Energy</span><span className="text-muted-foreground"> · </span><span className="text-points">+50 Points</span></p>}
         <div className="mt-5 border-t border-border pt-4">
           <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground"><Clock className="h-4 w-4" /> Next dilemma in</p>
           <p role="timer" aria-label="Time until the next dilemma" className="mt-2 font-display text-3xl font-semibold tabular-nums text-primary">{countdown || '…'}</p>
@@ -93,15 +93,15 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
         <article className="rounded-lg border border-border bg-secondary p-4 sm:p-5">
           <p className="text-xs font-semibold uppercase text-primary">{story.theme}</p>
           <h2 className="mt-2 font-display text-xl font-semibold">{story.title}</h2>
-          <p className="mt-3 leading-relaxed">{story.story}</p>
+          <p className="font-body mt-3 leading-relaxed">{story.story}</p>
         </article>
         <div className="grid gap-2" aria-label="Decision options">
           {story.choices.map((choice, index) => <Button key={choice} variant="outline" disabled={choose.isPending} onClick={() => void decide(index)} className="h-auto min-h-14 justify-start gap-3 whitespace-normal px-4 py-3 text-left leading-relaxed">
-            <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">{String.fromCharCode(65 + index)}</span><span>{choice}</span>
+            <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">{String.fromCharCode(65 + index)}</span><span className="font-body font-semibold">{choice}</span>
           </Button>)}
         </div>
         {feedback && <p role="status" className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm leading-relaxed">{feedback}</p>}
-        <p className="flex flex-wrap items-center justify-center gap-2 text-sm font-semibold text-primary"><Zap className="h-4 w-4" /> +25 Energy <Trophy className="h-4 w-4" /> +50 Points</p>
+        <p className="flex flex-wrap items-center justify-center gap-3 font-heading text-sm font-semibold"><span className="flex items-center gap-1.5 text-energy"><Zap className="h-4 w-4" /> +25 Energy</span><span className="flex items-center gap-1.5 text-points"><Trophy className="h-4 w-4" /> +50 Points</span></p>
         <p className="text-center text-xs text-muted-foreground">One completion per day · Energy capped at 100</p>
       </> : null}
       {(error || status.isError) && <div role="alert" className="text-center text-sm text-destructive">
