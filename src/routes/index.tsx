@@ -33,7 +33,7 @@ import { BiblicalSnapModal } from "@/components/BiblicalSnapModal";
 
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
-  validateSearch: (s: Record<string, unknown>): { snap?: number; [key: string]: unknown } => ({
+  validateSearch: (s: Record<string, unknown>): { snap?: number | undefined; [key: string]: unknown } => ({
     ...s,
     snap: s["snap"] === "1" || s["snap"] === 1 ? 1 : undefined,
   }),
