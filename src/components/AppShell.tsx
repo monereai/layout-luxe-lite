@@ -152,6 +152,20 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               </div>
             )}
           </aside>
+          {location.pathname === "/" && (
+            <Link
+              to="/shop"
+              title={t("petShop")}
+              aria-label={`${t("petShop")}: ${t("petShopSub")}`}
+              className="mt-6 flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10 md:hidden"
+            >
+              <img src={petShopMark} alt="" width={816} height={816} loading="lazy" className="h-24 w-24 shrink-0 max-w-full" />
+              <span className="min-w-0">
+                <span className="block text-base font-semibold text-primary">{t("petShop")}</span>
+                <span className="mt-1 block text-xs leading-snug text-muted-foreground">{t("petShopSub")}</span>
+              </span>
+            </Link>
+          )}
         </div>
         <footer className="pt-6 text-center">
           <a href="https://MonereAI.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary">Powered by <span className="font-semibold">MonereAI.com</span></a>
