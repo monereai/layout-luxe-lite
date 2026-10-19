@@ -131,3 +131,20 @@ describe("points shop", () => {
     expect(buyCombination(owned, 1000, combo)).toBeNull();
   });
 });
+
+describe("rarity tier prices", () => {
+  it("prices common items at 300 and themed costumes at 800", () => {
+    const byId = Object.fromEntries(SHOP_ITEMS.map((i) => [i.id, i.cost]));
+    expect(byId["party-hat"]).toBe(300);
+    expect(byId["sunglasses"]).toBe(300);
+    expect(byId["bandana"]).toBe(300);
+    expect(byId["crisp-sneakers"]).toBe(300);
+    expect(byId["royal-cape"]).toBe(800);
+    expect(byId["hero-cape"]).toBe(800);
+    expect(byId["crown"]).toBe(800);
+    expect(byId["rocket-boots"]).toBe(800);
+  });
+  it("only uses the 300 / 800 tiers for clothing", () => {
+    expect(SHOP_ITEMS.every((i) => i.cost === 300 || i.cost === 800)).toBe(true);
+  });
+});
