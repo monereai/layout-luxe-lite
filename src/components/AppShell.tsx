@@ -94,9 +94,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               <Compass className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" strokeWidth={1.5} aria-hidden="true" />
             </span>
             <span className="truncate font-display text-3xl font-semibold min-[380px]:text-4xl sm:text-5xl md:text-6xl text-foreground pop-shadow">Monere<span className="text-primary">AI</span></span>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 sm:h-14 sm:w-14 md:h-16 md:w-16" aria-hidden="true">
-              <img src={crossAsset.url} alt="" width={432} height={692} decoding="async" className="h-7 w-auto object-contain sm:h-9 md:h-11" />
-            </span>
+            <img src={crossAsset.url} alt="" width={432} height={692} decoding="async" className="h-9 w-auto shrink-0 object-contain sm:h-11 md:h-14" />
           </Link>
           <div className="flex flex-row flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1 text-xs">
             <Button variant="outline" size="icon" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="md:hidden shrink-0"><Menu className="h-5 w-5" aria-hidden="true" /></Button>
