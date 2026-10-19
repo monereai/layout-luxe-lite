@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import shopMark from "@/assets/shop/store-front.png";
+import petShopMark from "@/assets/shop/pet-shop.png";
 
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
@@ -141,6 +142,15 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 <span className="text-sm font-semibold text-primary">{t("shop")}</span>
               </Link>
             </div>
+            {location.pathname === "/" && (
+              <div className="border-b border-border py-5">
+                <Link to="/shop" title={t("petShop")} aria-label={`${t("petShop")}: ${t("petShopSub")}`} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
+                  <img src={petShopMark} alt="" width={816} height={816} loading="lazy" className="h-[11.25rem] w-[11.25rem] max-w-full" />
+                  <span className="text-sm font-semibold text-primary">{t("petShop")}</span>
+                  <span className="text-center text-[11px] leading-snug text-muted-foreground">{t("petShopSub")}</span>
+                </Link>
+              </div>
+            )}
           </aside>
         </div>
         <footer className="pt-6 text-center">
