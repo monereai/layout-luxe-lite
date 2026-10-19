@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { usePlan } from "@/hooks/usePlan";
 import { ShieldCheck } from "lucide-react";
 import { isSandboxAdmin } from "@/lib/admin";
-import { saveShop } from "@/lib/shop";
+import { resetOnAccount, saveShop } from "@/lib/shop";
 import { saveProperties } from "@/lib/properties";
 
 const ACTIONS = [
@@ -55,7 +55,7 @@ export function QaPanel() {
               if (a.action === "reset_inventory" && !window.confirm("Reset all purchases, pets and habitats on this account?")) return;
               await run({ data: { action: a.action } });
               if (a.action === "reset_inventory") {
-                saveShop({ spent: 0, owned: [], equipped: {} });
+                await resetOnAccount().catch(() => saveShop({ spent: 0, owned: [], equipped: {} }));
                 saveProperties({ unlockedProperties: ["treehouse"], activeProperty: "treehouse", spent: 0 });
                 toast.success("Inventory reset");
                 window.setTimeout(() => window.location.reload(), 600);

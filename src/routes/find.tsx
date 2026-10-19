@@ -8,7 +8,7 @@ import {
   HINT_COST, MAP_UNLOCK_FINDS, MINI_COUNT,
   allMapsComplete, makeSpots, mapUnlocked, recordHintSpend, recordMystery, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
-import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
+import { SHOP_ITEMS, giftOnAccount, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { useCareRound } from "@/hooks/useCare";
@@ -148,8 +148,11 @@ function FindGame() {
       void careRound.complete([...next]);
       const finds = { ...game.finds, [scene.id]: (game.finds[scene.id] ?? 0) + 1 };
       if (!game.mystery && allMapsComplete(finds, SCENES.map((s) => s.id))) {
-        const gift = grantMystery(shop);
-        if (gift && recordMystery(gift.item.id)) { saveShop(gift.state); setMystery(gift.item); }
+        const before = shop.owned;
+        void giftOnAccount("mystery").then((next) => {
+          const item = SHOP_ITEMS.find((i) => i.id === next.mysteryGift && !before.includes(i.id));
+          if (item && recordMystery(item.id)) setMystery(item);
+        }).catch(() => {});
       }
       setTimeout(() => { playChime("win"); setWon(true); }, 600);
     } else {

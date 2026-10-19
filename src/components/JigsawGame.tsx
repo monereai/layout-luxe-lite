@@ -32,8 +32,9 @@ export function JigsawGame() {
   const shop = useShop();
   const prize = SHOP_ITEMS.find((item) => item.id === shop.jigsawReward);
   useEffect(() => {
-    const gift = claimJigsawReward(game);
+    void claimJigsawReward(game).then((gift) => {
     if (gift?.item) notify.success(`All four puzzles complete! ${gift.item.name} unlocked in Points Shop.`, { duration: 5000 });
+    }).catch(() => {});
   }, [game]);
   const [size, setSize] = useState<Size>(3);
   const [roundKey, setRoundKey] = useState(0);
