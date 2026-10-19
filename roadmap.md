@@ -220,3 +220,7 @@
 - [x] Remove the floating "In crisis or feeling unsafe?" bar from phone and tablet layouts so it no longer covers the chat box; keep it in the desktop side navigation and move the entry into the phone menu panel.
 - [x] Verify at 390x844: no crisis bar anywhere on the page, the chat text box is the topmost element at its centre and fully clear of the bottom tabs, and the menu panel still opens the Safety & Support helplines.
 
+
+# Biblical Snap in the main menu
+- [x] Add a Biblical Snap entry to the side navigation and the phone menu panel, opening the game from the home page; closing it clears the address.
+- [x] Verify in the preview at 1280 and 390 px: the link appears with the other menu items, opens the game window, and the address returns to normal after closing; 210 tests pass, build clean.
