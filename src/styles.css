@@ -99,8 +99,10 @@
 }
 
 @theme inline {
-  /* Game-oriented type: Fredoka leads the headings and controls, Nunito carries the reading. */
+  /* Game-oriented type: Fredoka leads the headings, Lilita One drives navigation and menus,
+     and Nunito carries the reading. */
   --font-heading: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-nav: "Lilita One", "Fredoka", system-ui, sans-serif;
   --font-body: "Nunito", system-ui, sans-serif;
   --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
   --font-sans: "Nunito", system-ui, sans-serif;
@@ -111,6 +113,10 @@
 @utility font-display {
   font-family: var(--font-display);
   letter-spacing: 0.01em;
+}
+@utility font-nav {
+  font-family: var(--font-nav);
+  letter-spacing: 0.02em;
 }
 @utility pop-shadow {
   text-shadow: var(--shadow-text);
@@ -128,7 +134,7 @@
   color: var(--primary-foreground);
   box-shadow: var(--shadow-gold);
   border-radius: 9999px;
-  font-family: var(--font-heading);
+  font-family: var(--font-nav);
   font-weight: 700;
   letter-spacing: 0.01em;
   text-shadow: var(--shadow-text-soft);
@@ -234,9 +240,9 @@
   }
 
   button, [role="button"] {
-    font-family: var(--font-heading);
+    font-family: var(--font-nav);
     font-weight: 700;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
     text-shadow: var(--shadow-text-soft);
   }
 }
