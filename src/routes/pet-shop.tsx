@@ -28,8 +28,9 @@ function PetShopPage() {
           <img src={petShopMark} alt="" width={816} height={816} className="h-16 w-16" />
           <h1 className="font-display text-2xl font-semibold">Pet Shop</h1>
         </div>
-        <div className="mb-5 flex justify-center rounded-lg border border-border bg-card/60 py-3">
-          <div className="h-72 w-72 max-w-full">
+        <div className="relative mb-5 flex justify-center overflow-hidden rounded-lg border border-border bg-card/60 py-3">
+          <img src={petShopMark} alt="" width={816} height={816} aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[125%] w-[125%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-50" />
+          <div className="relative z-10 h-72 w-72 max-w-full">
             <MonereCharacterView>
               <MonereFigure bareBase alt="Monere with your companion pet" className="h-full w-full" />
             </MonereCharacterView>
