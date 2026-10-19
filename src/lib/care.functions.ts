@@ -17,7 +17,7 @@ export const startCareRound = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const result = await context.supabase.rpc("care_start_round", { p_kind: data.kind, p_size: data.size });
     if (result.error) throw new Error(result.error.message);
-    return z.object({ id: z.string().uuid(), order: z.array(z.number().int()) }).parse(result.data);
+    return z.object({ id: z.string().uuid(), order: z.array(z.number().int()), spots: z.array(z.object({ x: z.number(), y: z.number(), size: z.number(), rot: z.number() })).default([]) }).parse(result.data);
   });
 export const finishCareRound = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

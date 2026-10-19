@@ -25,7 +25,7 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6 | 7, r
   const start = useServerFn(startCareRound);
   const finish = useServerFn(finishCareRound);
   const find = useServerFn(rewardCareFind);
-  const [round, setRound] = useState<{ id: string; order: number[] } | null>(null);
+  const [round, setRound] = useState<{ id: string; order: number[]; spots: { x: number; y: number; size: number; rot: number }[] } | null>(null);
   const [error, setError] = useState("");
   const [reward, setReward] = useState("");
   const [pending, setPending] = useState(false);
