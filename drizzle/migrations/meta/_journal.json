@@ -190,6 +190,13 @@
       "when": 1792407104768,
       "tag": "0026_tiered_pet_prices_and_daily_login",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792418147577,
+      "tag": "0027_sandbox_admin_free_purchases",
+      "breakpoints": true
     }
   ]
 }

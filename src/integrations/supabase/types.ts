@@ -400,6 +400,7 @@ export type Database = {
         Returns: boolean
       }
       is_premium: { Args: { check_env: string }; Returns: boolean }
+      is_sandbox_admin: { Args: never; Returns: boolean }
       pet_action: { Args: { p_action: string; p_id: string }; Returns: Json }
       property_action: {
         Args: { p_action: string; p_id: string }
