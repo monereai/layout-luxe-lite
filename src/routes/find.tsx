@@ -53,7 +53,7 @@ function EnergyAward({ amount, signedOut = false }: { amount?: number; signedOut
         {signedOut
           ? "Mini-Monere found! Sign in to earn Energy."
           : amount && amount > 0
-            ? `Mini-Monere found! +${amount}`
+            ? `+${amount} Energy Found!`
             : "Mini-Monere found!"}
       </span>
     </span>
