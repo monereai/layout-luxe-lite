@@ -44,6 +44,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     setTokens(profile?.monere_tokens ?? 0);
     setTier(p && profile?.subscription_tier === "monere_club" ? "club" : p ? "plus" : "free");
     window.localStorage.setItem("monereai-tier", p ? "premium" : "free");
+    void claimDailyLogin(u.id).then(() => check(u));
     return p;
   }, []);
 
