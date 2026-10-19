@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { OnboardingModal, ONBOARDED_KEY } from "@/components/OnboardingModal";
 import { useServerFn } from "@tanstack/react-start";
@@ -33,6 +33,10 @@ import { BiblicalSnapModal } from "@/components/BiblicalSnapModal";
 
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
+  validateSearch: (s: Record<string, unknown>): { snap?: number; [key: string]: unknown } => ({
+    ...s,
+    snap: s["snap"] === "1" || s["snap"] === 1 ? 1 : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Talk to Monere — MonereAI" },
@@ -49,8 +53,14 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   usePaymentReturn();
+  const { snap } = Route.useSearch();
+  const navigate = useNavigate();
   const [snapOpen, setSnapOpen] = useState(false);
-  useEffect(() => { if (new URLSearchParams(window.location.search).get('snap') === '1') setSnapOpen(true); }, []);
+  useEffect(() => { if (snap === 1) setSnapOpen(true); }, [snap]);
+  const closeSnap = () => {
+    setSnapOpen(false);
+    if (snap === 1) void navigate({ to: "/", search: (prev) => ({ ...prev, snap: undefined }) });
+  };
   const ask = useServerFn(seekWisdom);
   const [categories, setCategories] = useState<string[]>([]);
   const category = categories.length ? categories.join(" + ") : "General life question";
@@ -206,7 +216,7 @@ function Home() {
       {!wisdom && !safety && !onboarding && <InstallBanner />}
       {paywall && <PassCodeDialog message={paywall === "limit" ? "You've reached today's free limit. Enter your youth group or school access code to keep talking with Monere." : undefined} onClose={() => setPaywall(null)} />}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
-      <BiblicalSnapModal open={snapOpen} onOpenChange={setSnapOpen} />
+      <BiblicalSnapModal open={snapOpen} onOpenChange={(next) => (next ? setSnapOpen(true) : closeSnap())} />
       {onboarding && (
         <OnboardingModal
           onDone={({ category: c, situation: s }) => {

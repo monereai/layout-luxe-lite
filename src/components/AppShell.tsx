@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins, Layers } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
@@ -67,9 +67,14 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   });
   useWebMCP({
     name: "navigate_monere",
-    description: "Open a page from MonereAI's visible menu: Seek, Daily, Journal, Find Monere, Jigsaw, or Points Shop.",
-    inputSchema: { type: "object", properties: { page: { type: "string", enum: menuItems.map(item => item.to), description: "The menu page path to open." } }, required: ["page"], additionalProperties: false },
+    description: "Open a page from MonereAI's visible menu: Seek, Daily, Journal, Find Monere, Jigsaw, Points Shop, or Biblical Snap.",
+    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "snap"], description: "The menu page path to open, or \"snap\" for the Biblical Snap card game." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
+      if (page === "snap") {
+        setMenuOpen(false);
+        await navigate({ to: "/", search: { snap: 1 } });
+        return `Opened ${t("biblicalSnap")}.`;
+      }
       const item = menuItems.find(item => item.to === page);
       if (typeof page !== "string" || !item) throw new Error("Choose a page from the visible menu.");
       setMenuOpen(false);
@@ -118,6 +123,11 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                   </Link>
                 </Button>
               ))}
+              <Button asChild variant="ghost" className={`h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
+                <Link to="/" search={{ snap: 1 }} title={t("biblicalSnap")} aria-label={t("biblicalSnap")}>
+                  <Layers className="shrink-0" />{!collapsed && <span className="min-w-0">{t("biblicalSnap")}</span>}
+                </Link>
+              </Button>
             </nav>
             {!hideCrisisBar && (
               <Button variant="ghost" onClick={() => setOpen(true)} title={t("crisisBar")} aria-label={t("crisisBar")} className={`mt-8 h-auto min-h-11 whitespace-normal text-left text-sm font-semibold text-muted-foreground ${collapsed ? "px-2" : "justify-start px-3 py-3"}`}>
@@ -195,6 +205,10 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 <span className="min-w-0">{t(label)}</span>
               </Link>
             ))}
+            <Link to="/" search={{ snap: 1 }} onClick={() => setMenuOpen(false)} title={t("biblicalSnap")} aria-label={t("biblicalSnap")} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">
+              <Layers className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <span className="min-w-0">{t("biblicalSnap")}</span>
+            </Link>
             <div className="my-2 border-t border-border" />
             <Button variant="ghost" className="h-auto min-h-11 justify-start whitespace-normal px-3 text-left text-sm font-semibold text-muted-foreground" onClick={() => { setMenuOpen(false); setOpen(true); }}>
               <LifeBuoy className="h-4 w-4 shrink-0" aria-hidden="true" />
