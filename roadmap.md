@@ -1,3 +1,8 @@
+# Mobile overlap fixes
+- [x] Move Admin Sandbox into phone page flow, retaining its desktop floating position.
+- [x] Bound the Space Station upgrade window above phone navigation and the safe area.
+- [ ] Verify both controls on narrow and short phone screens without changing account data.
+
 # Daily Dilemma replacement
 - [x] Replace Snap modal/menu with four rotating daily three-choice stories, reflections and companion celebration.
 - [x] Add atomic daily completion/rewards and server-timed next-dilemma countdown; preserve prior Snap daily completions during replacement.

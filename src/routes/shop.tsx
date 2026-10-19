@@ -236,7 +236,7 @@ function ShopPage() {
             </TabsContent>
           ))}
         </Tabs>
-        <Dialog open={stationPreview} onOpenChange={setStationPreview}><DialogContent className="max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Space Station · Monere Club</DialogTitle></DialogHeader><div onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setStationPreview(false); }}><SpaceStationPreview /></div></DialogContent></Dialog>
+        <Dialog open={stationPreview} onOpenChange={setStationPreview}><DialogContent className="top-4 max-h-[calc(100dvh-7rem-env(safe-area-inset-bottom))] -translate-y-0 overflow-y-auto overscroll-contain md:top-1/2 md:max-h-[90dvh] md:-translate-y-1/2"><DialogHeader><DialogTitle>Space Station · Monere Club</DialogTitle></DialogHeader><div onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setStationPreview(false); }}><SpaceStationPreview /></div></DialogContent></Dialog>
         <p className="mt-4 text-center text-xs text-muted-foreground">Tap "Equipped" to take an item off. Find Monere to earn more points.</p>
       </div>
     </AppShell>
