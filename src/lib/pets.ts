@@ -1,0 +1,61 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import puppy from "@/assets/pets/puppy.png";
+import kitten from "@/assets/pets/kitten.png";
+import goldfish from "@/assets/pets/goldfish.png";
+import bunny from "@/assets/pets/bunny.png";
+import parrot from "@/assets/pets/parrot.png";
+import babyDragon from "@/assets/pets/baby-dragon.png";
+
+export type Pet = { id: string; name: string; description: string; cost: number; src: string };
+
+/** Prices must match the pet_action database function, which is the real charge. */
+export const PETS: Pet[] = [
+  { id: "goldfish", name: "Goldfish", description: "A calm little swimmer for quiet moments.", cost: 100, src: goldfish },
+  { id: "puppy", name: "Puppy", description: "Loyal, playful and always happy to see you.", cost: 150, src: puppy },
+  { id: "kitten", name: "Kitten", description: "Curious, cuddly and full of mischief.", cost: 150, src: kitten },
+  { id: "bunny", name: "Bunny", description: "Soft ears, gentle heart, quick feet.", cost: 200, src: bunny },
+  { id: "parrot", name: "Parrot", description: "A chatty friend with brilliant feathers.", cost: 250, src: parrot },
+  { id: "baby-dragon", name: "Baby Dragon", description: "Small, brave and a little bit legendary.", cost: 500, src: babyDragon },
+];
+
+export type PetState = { owned: string[]; active: string | null };
+const EMPTY: PetState = { owned: [], active: null };
+let state: PetState = EMPTY;
+const subs = new Set<(s: PetState) => void>();
+function set(next: PetState) { state = next; subs.forEach((f) => f(next)); }
+
+/** Pure rule used by the UI before calling the server. */
+export function petButtonState(s: PetState, wallet: number, pet: Pet): "equipped" | "owned" | "buy" | "unaffordable" {
+  if (s.active === pet.id) return "equipped";
+  if (s.owned.includes(pet.id)) return "owned";
+  return wallet >= pet.cost ? "buy" : "unaffordable";
+}
+
+export async function loadPets() {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) { set(EMPTY); return; }
+  const { data: row } = await supabase.from("user_pets").select("owned_pets, active_pet").eq("user_id", data.user.id).maybeSingle();
+  set(row ? { owned: row.owned_pets, active: row.active_pet } : EMPTY);
+}
+
+/** Purchases and equips are checked and charged by the server against the shared points balance. */
+export async function petAction(action: "buy" | "equip", id: string): Promise<PetState> {
+  const { data, error } = await supabase.rpc("pet_action", { p_action: action, p_id: id });
+  if (error) throw new Error(error.message);
+  const r = data as { owned: string[]; active: string | null };
+  const next = { owned: r.owned ?? [], active: r.active ?? null };
+  set(next);
+  return next;
+}
+
+export function usePets() {
+  const [s, setS] = useState<PetState>(state);
+  useEffect(() => {
+    setS(state);
+    subs.add(setS);
+    loadPets().catch(() => {});
+    return () => { subs.delete(setS); };
+  }, []);
+  return s;
+}
