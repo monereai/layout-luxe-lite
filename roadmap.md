@@ -1,5 +1,5 @@
 # Companion pet readiness
-- [ ] Verify saved equip/unequip, account-safe loading, clothing coexistence and toasts with separate QA data; do not publish.
+- [x] Verify saved equip/unequip, account-safe loading, clothing coexistence and requested toast with separate QA data: 12 tests pass, live equip/unequip/reload and home/Pet Shop rendering checked, reduced motion respected, points unchanged at 175. Not published.
 
 # Formidable jigsaw
 - [x] Add a fifth, harder 7×7 Formidable level with unique artwork, sequential unlock and verified game rewards; preserve existing earned shop gifts.
