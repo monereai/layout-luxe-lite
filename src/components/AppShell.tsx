@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins, BookOpen } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins, BookOpen, Cross } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
@@ -93,6 +93,9 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               <Compass className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" strokeWidth={1.5} aria-hidden="true" />
             </span>
             <span className="truncate font-display text-3xl font-semibold min-[380px]:text-4xl sm:text-5xl md:text-6xl text-foreground pop-shadow">Monere<span className="text-primary">AI</span></span>
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary sm:h-14 sm:w-14 md:h-16 md:w-16" aria-hidden="true">
+              <Cross className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" strokeWidth={1.5} />
+            </span>
           </Link>
           <div className="flex flex-row flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1 text-xs">
             <Button variant="outline" size="icon" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="md:hidden shrink-0"><Menu className="h-5 w-5" aria-hidden="true" /></Button>
