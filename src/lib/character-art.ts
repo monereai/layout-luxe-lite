@@ -8,7 +8,7 @@ export function clothingFrames(items: ShopItem[], frame: number): ClothingFrame[
   return [...items].sort((a, b) => order[a.category] - order[b.category]).map((item) => ({
     item,
     turnaround: LOOKS_WITH_ART.has(item.id),
-    src: LOOKS_WITH_ART.has(item.id) ? `/monere/looks/${item.id}/${frame}.webp` : item.src,
+    src: item.id === "shell-necklace" ? `/monere/layers/shell-necklace/${frame}.webp` : LOOKS_WITH_ART.has(item.id) ? `/monere/looks/${item.id}/${frame}.webp` : item.src,
   }));
 }
 
@@ -54,6 +54,10 @@ export async function composeCharacterFrame(baseSrc: string, extras: ClothingFra
   extras.forEach(({ item, turnaround }, index) => {
     const image = clothes[index];
     if (!image) return;
+    if (item.id === "shell-necklace") {
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      return;
+    }
     if (!turnaround) {
       const [x, y, w, h] = positions[item.category];
       // Keep newer items without turnaround art attached at every angle, too.
