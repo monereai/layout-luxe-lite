@@ -42,13 +42,13 @@ export function FollowUpThread({
         <div className="mb-4 flex flex-col gap-3">
           {messages.map((m, i) =>
             m.role === "user" ? (
-              <div key={i} className="ml-10 self-end rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm leading-relaxed text-primary-foreground">
+              <div key={i} className="font-body ml-10 self-end rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm leading-relaxed text-primary-foreground">
                 {m.content}
               </div>
             ) : (
               <div key={i} className="mr-6 flex items-end gap-2">
                 <Avatar />
-                <MessageResponse mode="static" className="min-w-0 text-sm leading-relaxed">{m.content}</MessageResponse>
+                <MessageResponse mode="static" className="font-body min-w-0 text-sm leading-relaxed">{m.content}</MessageResponse>
               </div>
             ),
           )}

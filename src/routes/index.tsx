@@ -158,7 +158,7 @@ function Home() {
           {wisdom.personalReply ? (
             <div className="surface-card mt-6 p-5">
               <p className="text-xs font-bold uppercase text-primary">Monere</p>
-              <MessageResponse mode="static" className="mt-2 leading-relaxed">{wisdom.personalReply}</MessageResponse>
+              <MessageResponse mode="static" className="font-body mt-2 leading-relaxed">{wisdom.personalReply}</MessageResponse>
             </div>
           ) : (
           <>

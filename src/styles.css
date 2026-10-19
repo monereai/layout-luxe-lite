@@ -90,16 +90,33 @@
   --shadow-workspace: 0 16px 48px -20px color-mix(in oklab, var(--background) 85%, transparent);
   --shadow-character: 0 18px 12px color-mix(in oklab, var(--background) 75%, transparent);
   --character-ground: color-mix(in oklab, var(--background) 90%, transparent);
+  /* Game-oriented accents: points read gold, energy reads cyan. */
+  --points: oklch(0.83 0.17 81);
+  --energy: oklch(0.94 0.146 209);
+  /* Playful depth: a tight close shadow plus a soft cast, both in the canvas colour. */
+  --shadow-text: 0 1px 0 color-mix(in oklab, var(--background) 72%, transparent), 0 5px 16px color-mix(in oklab, var(--background) 65%, transparent);
+  --shadow-text-soft: 0 1px 2px color-mix(in oklab, var(--background) 55%, transparent);
 }
 
 @theme inline {
+  /* Game-oriented type: Fredoka leads the headings and controls, Nunito carries the reading. */
+  --font-heading: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
   --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
   --font-sans: "Nunito", system-ui, sans-serif;
+  --color-points: var(--points);
+  --color-energy: var(--energy);
 }
 
 @utility font-display {
   font-family: var(--font-display);
   letter-spacing: 0.01em;
+}
+@utility pop-shadow {
+  text-shadow: var(--shadow-text);
+}
+@utility pop-shadow-soft {
+  text-shadow: var(--shadow-text-soft);
 }
 @utility surface-card {
   background: var(--card);
@@ -111,7 +128,10 @@
   color: var(--primary-foreground);
   box-shadow: var(--shadow-gold);
   border-radius: 9999px;
+  font-family: var(--font-heading);
   font-weight: 700;
+  letter-spacing: 0.01em;
+  text-shadow: var(--shadow-text-soft);
 }
 @utility crisis-link {
   display: flex; align-items: center; gap: 0.6rem;
@@ -207,15 +227,17 @@
   }
 
   h1, h2, h3 {
-    font-family: var(--font-display);
+    font-family: var(--font-heading);
     font-weight: 700;
     letter-spacing: 0.01em;
+    text-shadow: var(--shadow-text);
   }
 
   button, [role="button"] {
-    font-family: var(--font-sans);
+    font-family: var(--font-heading);
     font-weight: 700;
     letter-spacing: 0.01em;
+    text-shadow: var(--shadow-text-soft);
   }
 }
 
@@ -278,7 +300,7 @@
 .energy-pop { animation: energy-pop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 @keyframes energy-pop {
   0% { transform: scale(1); box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent); }
-  35% { transform: scale(1.12); box-shadow: 0 0 14px 2px color-mix(in oklab, var(--primary) 42%, transparent); }
+  35% { transform: scale(1.12); box-shadow: 0 0 14px 2px color-mix(in oklab, var(--energy) 42%, transparent); }
   100% { transform: scale(1); box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 0%, transparent); }
 }
 .energy-gain {
@@ -287,9 +309,10 @@
   top: -2px;
   pointer-events: none;
   font-size: 13px;
+  font-family: var(--font-heading);
   font-weight: 800;
   line-height: 1;
-  color: var(--primary);
+  color: var(--energy);
   text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
   animation: energy-gain-float 1.8s ease-out forwards;
 }

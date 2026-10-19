@@ -48,7 +48,7 @@ const BURST = [0, 60, 120, 180, 240, 300];
 function EnergyAward({ amount, signedOut = false }: { amount?: number; signedOut?: boolean }) {
   return (
     <span className="flex items-center gap-1.5">
-      <Zap aria-hidden="true" className="h-4 w-4 shrink-0 fill-primary text-primary" />
+      <Zap aria-hidden="true" className="h-4 w-4 shrink-0 fill-energy text-energy" />
       <span>
         {signedOut
           ? "Mini-Monere found! Sign in to earn Energy."
