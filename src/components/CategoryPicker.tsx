@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { PROPERTIES, useProperties } from "@/lib/properties";
 import { MonereFigure } from "@/components/MonereFigure";
 import { MonereCharacterView } from "@/components/MonereCharacterView";
+import { PetCompanion } from "@/components/PetCompanion";
 import { usePlan } from "@/hooks/usePlan";
 import { canEnterProperty } from "@/lib/properties";
 import { SpaceStationPreview } from "@/components/SpaceStationPreview";
@@ -90,7 +91,7 @@ export function CategoryPicker({
             {interactive ? <MonereCharacterView key={viewKey}>
               <MonereFigure gesture={listening ? "listen" : "wave"} alt="Monere the lion" className="relative h-full w-full" />
             </MonereCharacterView> :
-            <MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" />
+            <><MonereFigure gesture={listening ? "listen" : "wave"} className="mentor-avatar relative h-full w-full" /><PetCompanion /></>
             }
           </div>
         </div>
