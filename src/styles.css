@@ -99,10 +99,10 @@
 }
 
 @theme inline {
-  /* Game-oriented type: Fredoka leads the headings, Lilita One drives navigation and menus,
+  /* Game-oriented type: Fredoka leads the headings, navigation and menus,
      and Nunito carries the reading. */
   --font-heading: "Fredoka", "Nunito", system-ui, sans-serif;
-  --font-nav: "Lilita One", "Fredoka", system-ui, sans-serif;
+  --font-nav: "Fredoka", "Nunito", system-ui, sans-serif;
   --font-body: "Nunito", system-ui, sans-serif;
   --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
   --font-sans: "Nunito", system-ui, sans-serif;
