@@ -371,6 +371,7 @@ export type Database = {
         Args: { p_order: number[]; p_proof: Json; p_size: number }
         Returns: number[]
       }
+      claim_daily_login: { Args: never; Returns: Json }
       consume_advice_quota: { Args: never; Returns: boolean }
       credit_stripe_membership: {
         Args: {
