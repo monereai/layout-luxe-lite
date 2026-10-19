@@ -140,7 +140,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           <aside aria-label="Points Shop" className="sticky top-6 hidden min-w-0 xl:block">
             <div className="flex items-center gap-2 border-b border-border pb-4 text-primary">
               <Compass className="h-5 w-5 shrink-0" />
-              <h2 className="font-display text-lg font-semibold">MonereAI</h2>
+              <h2 className="font-nav text-lg">MonereAI</h2>
               {premium && <span className="ml-auto text-xs font-bold">PLUS</span>}
             </div>
             <div className="border-b border-border py-5">
@@ -186,7 +186,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
       <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md sm:max-w-2xl md:hidden">
         <nav aria-label="Main navigation" className="flex justify-around border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
           {tabs.map(({ to, label, icon: Icon }) => (
-            <Link key={to} to={to} className="flex min-h-12 min-w-0 flex-1 flex-col items-center gap-0.5 px-0.5 py-2 text-xs font-semibold leading-tight text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
+            <Link key={to} to={to} className="font-nav flex min-h-12 min-w-0 flex-1 flex-col items-center gap-0.5 px-0.5 py-2 text-xs font-semibold leading-tight text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
               <Icon className="h-5 w-5 shrink-0" />
               <span className="min-h-[2.5em] text-center leading-tight">{t(label)}</span>
             </Link>
@@ -196,16 +196,16 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent side="left" className="w-72 overflow-y-auto bg-card sm:max-w-72">
           <SheetHeader className="border-b border-border px-4 py-4">
-            <SheetTitle className="font-display text-lg text-foreground">Monere<span className="text-primary">AI</span></SheetTitle>
+            <SheetTitle className="font-nav text-lg text-foreground">Monere<span className="text-primary">AI</span></SheetTitle>
           </SheetHeader>
           <nav aria-label="Main navigation" className="flex flex-col gap-1 p-3">
             {menuItems.map(({ to, label, icon: Icon }) => (
-              <Link key={to} to={to} onClick={() => setMenuOpen(false)} title={t(label)} aria-label={t(label)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary" activeProps={{ className: "bg-primary/10 text-primary" }} activeOptions={{ exact: true }}>
+              <Link key={to} to={to} onClick={() => setMenuOpen(false)} title={t(label)} aria-label={t(label)} className="font-nav flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary" activeProps={{ className: "bg-primary/10 text-primary" }} activeOptions={{ exact: true }}>
                 <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 <span className="min-w-0">{t(label)}</span>
               </Link>
             ))}
-            <Link to="/" search={{ dilemma: 1 }} onClick={() => setMenuOpen(false)} title={t("dailyDilemma")} aria-label={t("dailyDilemma")} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">
+            <Link to="/" search={{ dilemma: 1 }} onClick={() => setMenuOpen(false)} title={t("dailyDilemma")} aria-label={t("dailyDilemma")} className="font-nav flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">
               <BookOpen className="h-5 w-5 shrink-0" aria-hidden="true" />
               <span className="min-w-0">{t("dailyDilemma")}</span>
             </Link>
@@ -218,7 +218,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             {user ? (
               <Button variant="ghost" className="min-h-11 justify-start px-3 text-base font-semibold text-muted-foreground" onClick={() => { setMenuOpen(false); void signOut(); }}>{t("signOut")}</Button>
             ) : (
-              <Link to="/auth" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">{t("signIn")}</Link>
+              <Link to="/auth" onClick={() => setMenuOpen(false)} className="font-nav flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">{t("signIn")}</Link>
             )}
           </nav>
         </SheetContent>
