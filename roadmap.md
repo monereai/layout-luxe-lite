@@ -1,3 +1,6 @@
+# Daily Dilemma developer reset
+- [ ] Add a protected Dev Reset Timer control and verify reset/replay using isolated test data.
+
 # Mobile overlap fixes
 - [x] Move Admin Sandbox into phone page flow, retaining its desktop floating position.
 - [x] Bound the Space Station upgrade window above phone navigation and the safe area.
