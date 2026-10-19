@@ -4,9 +4,9 @@ import { gameStateSnapshot, recordComplete, recordJigsaw, recordMini } from "@/l
 
 describe("Frugal care economy", () => {
   it("starts at 50 energy", () => expect(INITIAL_ENERGY).toBe(50));
-  it("each Mini-Monere gives one energy", () => {
-    expect(MINI_ENERGY).toBe(1);
-    expect(addEnergy(50, MINI_ENERGY)).toBe(51);
+  it("each Mini-Monere gives five energy", () => {
+    expect(MINI_ENERGY).toBe(5);
+    expect(addEnergy(50, MINI_ENERGY)).toBe(55);
   });
   it("a Mini-Monere cannot overfill energy", () => {
     expect(addEnergy(99, MINI_ENERGY)).toBe(100);
@@ -20,14 +20,14 @@ describe("Frugal care economy", () => {
     expect(drainEnergy(5, 0, 3_600_000).energy).toBe(0);
     expect(drainEnergy(50, 0, 3_599_999).energy).toBe(50);
   });
-  it("a completion gives exactly 1 energy and a win gives 5 points", () => {
-    expect(GAME_ENERGY).toBe(1); expect(GAME_POINTS).toBe(5);
-    expect(addEnergy(50, GAME_ENERGY)).toBe(51);
+  it("a completion gives exactly 5 energy and a win gives 5 points", () => {
+    expect(GAME_ENERGY).toBe(5); expect(GAME_POINTS).toBe(5);
+    expect(addEnergy(50, GAME_ENERGY)).toBe(55);
   });
   it("caps energy at 100 without banking excess", () => {
     expect(addEnergy(99, GAME_ENERGY)).toBe(100);
     expect(addEnergy(100, GAME_ENERGY)).toBe(100);
-    expect(addEnergy(drainEnergy(100, 0, 3_600_000).energy, GAME_ENERGY)).toBe(91);
+    expect(addEnergy(drainEnergy(100, 0, 3_600_000).energy, GAME_ENERGY)).toBe(95);
   });
   it("requires full energy to claim", () => {
     expect(canClaimCare(99, false, null, "2026-10-17")).toBe(false);
@@ -60,7 +60,7 @@ describe("Frugal care economy", () => {
     expect(energyGain(50, null)).toBe(0);          // signed out mid-session
     expect(energyGain(50, 50)).toBe(0);            // refresh changed nothing
     expect(energyGain(50, 40)).toBe(0);            // hourly drain must not celebrate
-    expect(energyGain(50, 51)).toBe(1);            // one Mini-Monere found
-    expect(energyGain(0, 1)).toBe(1);             // first mini-game item after draining
+    expect(energyGain(50, 55)).toBe(5);            // one Mini-Monere found
+    expect(energyGain(0, 5)).toBe(5);              // first mini-game item after draining
   });
 });
