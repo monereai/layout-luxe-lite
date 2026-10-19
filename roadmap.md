@@ -1,4 +1,5 @@
 # Companion pet readiness
+- [ ] Repair six reported clothing looks, slot coexistence, account persistence and equip confirmations; verify refresh and rendering.
 - [x] Verify saved equip/unequip, account-safe loading, clothing coexistence and requested toast with separate QA data: 12 tests pass, live equip/unequip/reload and home/Pet Shop rendering checked, reduced motion respected, points unchanged at 175. Not published.
 
 # Formidable jigsaw
