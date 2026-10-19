@@ -40,8 +40,8 @@ describe("Frugal care economy", () => {
   it("claim date still blocks a reward when a stale claimed flag is false", () => {
     expect(canClaimCare(100, false, "2026-10-17", "2026-10-17")).toBe(false);
   });
-  it("pays exactly 20 free, 40 plus or 60 club", () => {
-    expect(dailyAllowance("free")).toBe(20); expect(dailyAllowance("plus")).toBe(40); expect(dailyAllowance("club")).toBe(60);
+  it("pays exactly 100 free, 200 plus or 300 club", () => {
+    expect(dailyAllowance("free")).toBe(100); expect(dailyAllowance("plus")).toBe(200); expect(dailyAllowance("club")).toBe(300);
   });
   it("full energy retains 100 without automatic points", () => {
     expect(FULL_ENERGY_BONUS).toBe(0);
