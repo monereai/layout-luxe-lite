@@ -88,7 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "google-site-verification", content: "7bL8DhthzCeSysH5IPxTMMQED5yo7D8NBg1VPw-4ghM" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "MonereAI" },
-      { name: "description", content: "Guided Christian Wisdom & Decision Integrity for our children" },
+      { name: "description", content: "Guided Christian Wisdom & Decision Integrity For Our Children" },
       { name: "application-name", content: "MonereAI" },
       { name: "apple-mobile-web-app-title", content: "MonereAI" },
       { name: "theme-color", content: "#1E293B" },
