@@ -79,7 +79,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   return (
     <div className="bg-glow relative isolate min-h-screen">
       <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>
-      <div className={`relative mx-auto flex min-h-screen max-w-md flex-col px-4 pt-5 sm:max-w-2xl sm:px-5 sm:pt-8 md:max-w-7xl md:px-6 md:pt-6 ${hideCrisisBar ? "pb-[calc(6rem+env(safe-area-inset-bottom))]" : "pb-[calc(9.5rem+env(safe-area-inset-bottom))]"} md:pb-6`}>
+      <div className="relative mx-auto flex min-h-screen max-w-md flex-col px-4 pt-5 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:max-w-2xl sm:px-5 sm:pt-8 md:max-w-7xl md:px-6 md:pt-6 md:pb-6">
         <header className="mb-5 sm:mb-7 md:mb-6 md:border-b md:border-border md:pb-5">
           <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
             <Link to="/" aria-label="MonereAI home" className="inline-flex min-w-0 items-center gap-3">
@@ -172,12 +172,6 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
         </footer>
       </div>
       <div className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md sm:max-w-2xl md:hidden">
-        {!hideCrisisBar && (
-          <Button onClick={() => setOpen(true)} className="mx-3 mb-1.5 h-auto min-h-10 w-[calc(100%-1.5rem)] justify-start whitespace-normal rounded-2xl bg-accent px-3 py-1.5 text-left text-xs leading-snug text-accent-foreground">
-            <LifeBuoy className="h-4 w-4 shrink-0" />
-            {t("crisisBar")}
-          </Button>
-        )}
         <nav aria-label="Main navigation" className="flex justify-around border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link key={to} to={to} className="flex min-h-12 min-w-0 flex-1 flex-col items-center gap-0.5 px-0.5 py-2 text-xs font-semibold leading-tight text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
@@ -200,6 +194,11 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               </Link>
             ))}
             <div className="my-2 border-t border-border" />
+            <Button variant="ghost" className="h-auto min-h-11 justify-start whitespace-normal px-3 text-left text-sm font-semibold text-muted-foreground" onClick={() => { setMenuOpen(false); setOpen(true); }}>
+              <LifeBuoy className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="min-w-0">{t("crisisBar")}</span>
+            </Button>
+
             {user ? (
               <Button variant="ghost" className="min-h-11 justify-start px-3 text-base font-semibold text-muted-foreground" onClick={() => { setMenuOpen(false); void signOut(); }}>{t("signOut")}</Button>
             ) : (

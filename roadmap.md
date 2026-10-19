@@ -210,3 +210,8 @@
 - [x] Raise the treehouse picture behind Monere on the main page from 20% to 50% (60% and a touch bigger on phones) so the house, lanterns, window and ladder read clearly.
 - [x] Keep the topic buttons and the "Tap up to 3 topics" pill readable over the brighter picture (firmer button fill, stronger blur, solid pill background).
 - [x] Verify in the preview at 1284 and 393 px wide: illustration clearly more visible, all labels legible, no page errors, build clean.
+
+# Crisis bar off phones
+- [x] Remove the floating "In crisis or feeling unsafe?" bar from phone and tablet layouts so it no longer covers the chat box; keep it in the desktop side navigation and move the entry into the phone menu panel.
+- [x] Verify at 390x844: no crisis bar anywhere on the page, the chat text box is the topmost element at its centre and fully clear of the bottom tabs, and the menu panel still opens the Safety & Support helplines.
+
