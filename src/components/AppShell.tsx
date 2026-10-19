@@ -117,13 +117,13 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             </Button>
             <nav aria-label="Main navigation" className="flex flex-col gap-2">
               {tabs.map(({ to, label, icon: Icon }) => (
-                <Button key={to} asChild variant="ghost" className={`h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
+                <Button key={to} asChild variant="ghost" className={`font-nav h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
                   <Link to={to} title={t(label)} aria-label={t(label)} activeProps={{ className: "bg-primary/10 text-primary" }} activeOptions={{ exact: true }}>
                     <Icon className="shrink-0" />{!collapsed && <span className="min-w-0">{t(label)}</span>}
                   </Link>
                 </Button>
               ))}
-              <Button asChild variant="ghost" className={`h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
+              <Button asChild variant="ghost" className={`font-nav h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
                 <Link to="/" search={{ dilemma: 1 }} title={t("dailyDilemma")} aria-label={t("dailyDilemma")}>
                   <BookOpen className="shrink-0" />{!collapsed && <span className="min-w-0">{t("dailyDilemma")}</span>}
                 </Link>
