@@ -65,7 +65,7 @@ const es: Dict = {
 };
 
 const fr: Dict = {
-  seek: "Chercher", daily: "Quotidien", journal: "Journal", game: "Trouve Monere", jigsaw: "Puzzle", signIn: "Connexion", signOut: "Déconnexion", managePlan: "Gérer l'abonnement", shop: "Boutique de points", petShop: "Boutique d.animaux", petShopSub: "Tenues et habitats pour Monere",
+  seek: "Chercher", daily: "Quotidien", journal: "Journal", game: "Trouve Monere", jigsaw: "Puzzle", signIn: "Connexion", signOut: "Déconnexion", managePlan: "Gérer l'abonnement", shop: "Boutique de points", petShop: "Boutique d'animaux", petShopSub: "Tenues et habitats pour Monere",
   tagline: "Sagesse guidée et intégrité pour les ados", language: "Langue",
   crisisBar: "En crise ou en danger ? Touche ici pour une aide gratuite et confidentielle 24h/24.",
   whatsOnMind: "Qu'est-ce qui te préoccupe ?", placeholder: "ex. : Mes amis veulent que je critique quelqu'un, mais je me sens mal...",
