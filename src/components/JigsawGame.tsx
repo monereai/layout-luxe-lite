@@ -75,7 +75,7 @@ export function JigsawGame() {
         rewarded.current.add(i);
         void careRound.rewardFind(i, [...moves.current]).then((state) => {
           if (state) notify.success(
-            <span className="flex items-center gap-1.5"><Zap aria-hidden="true" className="h-4 w-4 shrink-0 fill-primary text-primary" /><span>Piece placed! +{state.energyAwarded ?? 0}</span></span>,
+            <span className="flex items-center gap-1.5"><Zap aria-hidden="true" className="h-4 w-4 shrink-0 fill-primary text-primary" /><span>{state.energyAwarded ? `+${state.energyAwarded} Energy Found!` : "Piece placed!"}</span></span>,
             { duration: 2000 },
           );
         }).catch(() => { rewarded.current.delete(i); });
