@@ -84,6 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
+      { name: "google-site-verification", content: "7bL8DhthzCeSysH5IPxTMMQED5yo7D8NBg1VPw-4ghM" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "MonereAI" },
       { name: "description", content: "Guided Wisdom & Decision Integrity for Teens" },
