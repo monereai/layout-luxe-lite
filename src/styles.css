@@ -296,3 +296,7 @@
   .energy-pop { animation: none; }
   .energy-gain { animation: energy-gain-fade 1.8s linear forwards; }
 }
+
+@keyframes pet-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.pet-bob { animation: pet-bob 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pet-bob { animation: none; } }

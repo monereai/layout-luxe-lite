@@ -35,12 +35,15 @@ export function petButtonState(s: PetState, wallet: number, pet: Pet): "equipped
 export async function loadPets() {
   const { data } = await supabase.auth.getUser();
   if (!data.user) { set(EMPTY); return; }
-  const { data: row } = await supabase.from("user_pets").select("owned_pets, active_pet").eq("user_id", data.user.id).maybeSingle();
-  set(row ? { owned: row.owned_pets, active: row.active_pet } : EMPTY);
+  const [{ data: row }, { data: prof }] = await Promise.all([
+    supabase.from("user_pets").select("owned_pets").eq("user_id", data.user.id).maybeSingle(),
+    supabase.from("profiles").select("equipped_pet_id").eq("user_id", data.user.id).maybeSingle(),
+  ]);
+  set({ owned: row?.owned_pets ?? [], active: prof?.equipped_pet_id ?? null });
 }
 
 /** Purchases and equips are checked and charged by the server against the shared points balance. */
-export async function petAction(action: "buy" | "equip", id: string): Promise<PetState> {
+export async function petAction(action: "buy" | "equip" | "unequip", id: string): Promise<PetState> {
   const { data, error } = await supabase.rpc("pet_action", { p_action: action, p_id: id });
   if (error) throw new Error(error.message);
   const r = data as { owned: string[]; active: string | null };

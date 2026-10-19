@@ -15,14 +15,15 @@ export function PetShop() {
   const { user, refresh } = usePlan();
   const [busy, setBusy] = useState<string | null>(null);
 
-  async function run(action: "buy" | "equip", pet: Pet) {
+  async function run(action: "buy" | "equip" | "unequip", pet: Pet) {
     if (!user) { toast.error("Please sign in to adopt a pet."); return; }
     if (action === "buy" && wallet < pet.cost) { toast.error("Not enough points!"); return; }
     setBusy(pet.id);
     try {
       await petAction(action, pet.id);
       if (action === "buy") { await refresh(); toast.success(`Purchase successful! ${pet.name} is now your pet.`); }
-      else toast.success(`${pet.name} is now by Monere's side.`);
+      else if (action === "equip") toast.success(`${pet.name} equipped — now by Monere's side!`);
+      else toast.success(`${pet.name} unequipped.`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
       toast.error(msg.includes("Not enough points") ? "Not enough points!" : "Something went wrong — please try again.");
@@ -50,9 +51,9 @@ export function PetShop() {
               <p className="text-xs text-muted-foreground">{pet.description}</p>
               <p className="mb-3 mt-1 flex items-center gap-1 text-xs font-medium text-primary"><Award className="h-3.5 w-3.5" />{pet.cost} pts</p>
               {st === "equipped" ? (
-                <Button size="sm" variant="secondary" className={BUTTON} disabled><Check /> Equipped</Button>
+                <Button size="sm" variant="secondary" className={BUTTON} disabled={busy === pet.id} onClick={() => run("unequip", pet)} aria-label={`${pet.name} equipped — tap to unequip`}><Check /> Equipped · Unequip</Button>
               ) : st === "owned" ? (
-                <Button size="sm" variant="outline" className={BUTTON} disabled={busy === pet.id} onClick={() => run("equip", pet)}>Owned · Equip</Button>
+                <Button size="sm" variant="outline" className={BUTTON} disabled={busy === pet.id} onClick={() => run("equip", pet)}>Equip</Button>
               ) : (
                 <Button size="sm" className={`${BUTTON} ${st === "unaffordable" ? "opacity-60" : ""}`} disabled={st === "unaffordable" || busy === pet.id} onClick={() => run("buy", pet)}>
                   {st === "unaffordable" && <Lock />} Buy for {pet.cost} pts
