@@ -176,6 +176,13 @@
       "when": 1792404603086,
       "tag": "0024_energy_reward_five",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792405070938,
+      "tag": "0025_full_energy_reward_tiers",
+      "breakpoints": true
     }
   ]
 }
