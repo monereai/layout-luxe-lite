@@ -12,7 +12,7 @@ export const playBiblicalSnap = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ action: z.enum(['start', 'next', 'snap']), round: z.string().uuid().optional(), turn: z.number().int().nonnegative().optional() }))
   .handler(async ({ data, context }) => {
-    const result = await context.supabase.rpc('biblical_snap_action', { p_action: data.action, p_round: data.round, p_turn: data.turn });
+    const result = await context.supabase.rpc('biblical_snap_action', { p_action: data.action, ...(data.round ? { p_round: data.round } : {}), ...(data.turn === undefined ? {} : { p_turn: data.turn }) });
     if (result.error) throw new Error(result.error.message);
     return snapStateSchema.parse(result.data);
   });

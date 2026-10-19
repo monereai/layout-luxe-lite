@@ -14,6 +14,6 @@ export const snapMatches = (left: number, right: number) => Math.floor(left / 2)
 export const snapEnergyGain = (energy: number) => Math.max(0, Math.min(SNAP_ENERGY, 100 - energy));
 export const snapRewardAvailable = (last: string | null, now: Date) => last !== now.toISOString().slice(0, 10);
 export function snapCard(id: number) {
-  const theme = SNAP_THEMES[Math.floor(id / 2)] ?? SNAP_THEMES[0];
+  const theme = SNAP_THEMES[Math.floor(id / 2)] ?? { title: "God's Promise", symbols: ['🌈'], names: ['Rainbow'], verse: 'I set my rainbow in the cloud.', reference: 'Genesis 9:13 (excerpt, WEB)' };
   return { ...theme, symbol: theme.symbols[id % 2], name: theme.names[id % 2] };
 }
