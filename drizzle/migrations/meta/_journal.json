@@ -183,6 +183,13 @@
       "when": 1792405070938,
       "tag": "0025_full_energy_reward_tiers",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792407104768,
+      "tag": "0026_tiered_pet_prices_and_daily_login",
+      "breakpoints": true
     }
   ]
 }

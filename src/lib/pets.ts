@@ -12,11 +12,11 @@ export type Pet = { id: string; name: string; description: string; cost: number;
 /** Prices must match the pet_action database function, which is the real charge. */
 export const PETS: Pet[] = [
   { id: "goldfish", name: "Goldfish", description: "A calm little swimmer for quiet moments.", cost: 300, src: goldfish },
-  { id: "puppy", name: "Puppy", description: "Loyal, playful and always happy to see you.", cost: 450, src: puppy },
-  { id: "kitten", name: "Kitten", description: "Curious, cuddly and full of mischief.", cost: 450, src: kitten },
-  { id: "bunny", name: "Bunny", description: "Soft ears, gentle heart, quick feet.", cost: 600, src: bunny },
-  { id: "parrot", name: "Parrot", description: "A chatty friend with brilliant feathers.", cost: 750, src: parrot },
-  { id: "baby-dragon", name: "Baby Dragon", description: "Small, brave and a little bit legendary.", cost: 1500, src: babyDragon },
+  { id: "puppy", name: "Puppy", description: "Loyal, playful and always happy to see you.", cost: 300, src: puppy },
+  { id: "kitten", name: "Kitten", description: "Curious, cuddly and full of mischief.", cost: 300, src: kitten },
+  { id: "bunny", name: "Bunny", description: "Soft ears, gentle heart, quick feet.", cost: 800, src: bunny },
+  { id: "parrot", name: "Parrot", description: "A chatty friend with brilliant feathers.", cost: 800, src: parrot },
+  { id: "baby-dragon", name: "Baby Dragon", description: "Small, brave and a little bit legendary.", cost: 2000, src: babyDragon },
 ];
 
 export type PetState = { owned: string[]; active: string | null };

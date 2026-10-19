@@ -3,6 +3,21 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { syncMembership } from "@/lib/payments.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { toast } from "sonner";
+
+/** Accounts that already claimed (or checked) the daily login bonus this session. */
+const dailyLoginChecked = new Set<string>();
+
+async function claimDailyLogin(userId: string) {
+  if (dailyLoginChecked.has(userId)) return;
+  dailyLoginChecked.add(userId);
+  try {
+    const { data, error } = await supabase.rpc("claim_daily_login");
+    if (!error && (data as { claimed?: boolean } | null)?.claimed) {
+      toast.success("Daily Login Bonus: +25 Points Claimed! 🦁");
+    }
+  } catch { /* bonus is best-effort */ }
+}
 
 export type MemberTier = "free" | "plus" | "club";
 type Plan = { user: User | null; premium: boolean; tier: MemberTier; bonusPoints: number; tokens: number; ready: boolean; refresh: () => Promise<boolean>; signOut: () => Promise<void> };
@@ -29,6 +44,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     setTokens(profile?.monere_tokens ?? 0);
     setTier(p && profile?.subscription_tier === "monere_club" ? "club" : p ? "plus" : "free");
     window.localStorage.setItem("monereai-tier", p ? "premium" : "free");
+    void claimDailyLogin(u.id).then(() => check(u));
     return p;
   }, []);
 

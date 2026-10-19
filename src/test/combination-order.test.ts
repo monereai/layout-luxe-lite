@@ -11,14 +11,14 @@ describe("combinations listed by value", () => {
 
   it("prices every set at 25% over its pieces, rounded up to the nearest 5", () => {
     expect(COMBINATIONS_BY_VALUE.map((f) => [f.name, combinationValue(f)])).toEqual([
-      ["Winter Adventurer", 1000],
-      ["Forest Explorer", 1075],
-      ["Party Star", 1175],
-      ["Galaxy Wizard", 1215],
-      ["Dapper Pirate", 1300],
-      ["Royal Hero", 1550],
-      ["Storm Viking", 1565],
-      ["Galaxy Voyager", 1840],
+      ["Forest Explorer", 1750],
+      ["Winter Adventurer", 1750],
+      ["Royal Hero", 2375],
+      ["Galaxy Wizard", 2375],
+      ["Party Star", 2375],
+      ["Dapper Pirate", 2375],
+      ["Storm Viking", 3000],
+      ["Galaxy Voyager", 3000],
     ]);
   });
 });

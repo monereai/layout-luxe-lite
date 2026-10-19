@@ -5,10 +5,10 @@ const puppy = PETS.find((p) => p.id === "puppy")!;
 
 describe("pet shop buttons", () => {
   it("disables buying when points are short", () => {
-    expect(petButtonState({ owned: [], active: null }, 449, puppy)).toBe("unaffordable");
+    expect(petButtonState({ owned: [], active: null }, 299, puppy)).toBe("unaffordable");
   });
   it("allows buying with enough points", () => {
-    expect(petButtonState({ owned: [], active: null }, 450, puppy)).toBe("buy");
+    expect(petButtonState({ owned: [], active: null }, 300, puppy)).toBe("buy");
   });
   it("shows owned pets as owned, never for sale again", () => {
     expect(petButtonState({ owned: ["puppy"], active: null }, 0, puppy)).toBe("owned");
@@ -18,8 +18,8 @@ describe("pet shop buttons", () => {
   });
 });
 
-describe("pet prices (tripled)", () => {
-  it("matches the agreed prices", () => {
-    expect(Object.fromEntries(PETS.map((p) => [p.id, p.cost]))).toEqual({ goldfish: 300, puppy: 450, kitten: 450, bunny: 600, parrot: 750, "baby-dragon": 1500 });
+describe("pet prices (rarity tiers)", () => {
+  it("matches the agreed tier prices", () => {
+    expect(Object.fromEntries(PETS.map((p) => [p.id, p.cost]))).toEqual({ goldfish: 300, puppy: 300, kitten: 300, bunny: 800, parrot: 800, "baby-dragon": 2000 });
   });
 });
