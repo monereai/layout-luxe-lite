@@ -29,6 +29,7 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
   const generation = useRef(0);
   const locked = useRef(false);
   const choose = useMutation({ mutationFn: play });
+  const reset = useMutation({ mutationFn: play });
   useEffect(() => {
     generation.current++; locked.current = false; setFeedback(''); setError(''); setCelebrate(false);
     return () => { generation.current++; };
@@ -47,7 +48,7 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
   }, [open, state?.day, state?.serverNow, state?.nextAt]);
 
   async function decide(choice: number) {
-    if (!user || !state || state.completed || locked.current) return;
+    if (!user || !state || state.completed || locked.current || reset.isPending) return;
     locked.current = true;
     const version = generation.current;
     setError(''); setFeedback('');
@@ -62,6 +63,23 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
       } else setFeedback(story?.feedback ?? 'Take a moment and choose a response grounded in kindness and integrity.');
     } catch (e) {
       if (version === generation.current) setError(e instanceof Error ? e.message : 'Could not save your choice. Please try again.');
+    } finally { if (version === generation.current) locked.current = false; }
+  }
+
+  async function resetTimer() {
+    if (!user || !state?.canReset || locked.current) return;
+    locked.current = true;
+    const version = generation.current;
+    setError('');
+    try {
+      const next = await reset.mutateAsync({ data: { action: 'reset' } });
+      if (version !== generation.current) return;
+      client.setQueryData(key, next);
+      setFeedback(''); setCelebrate(false); setCountdown('');
+      toast.success('Daily Dilemma timer reset!');
+      await accept(next.care);
+    } catch (e) {
+      if (version === generation.current) setError(e instanceof Error ? e.message : 'Could not reset the timer. Please try again.');
     } finally { if (version === generation.current) locked.current = false; }
   }
 
@@ -96,7 +114,7 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
           <p className="font-body mt-3 leading-relaxed">{story.story}</p>
         </article>
         <div className="grid gap-2" aria-label="Decision options">
-          {story.choices.map((choice, index) => <Button key={choice} variant="outline" disabled={choose.isPending} onClick={() => void decide(index)} className="h-auto min-h-14 justify-start gap-3 whitespace-normal px-4 py-3 text-left leading-relaxed">
+          {story.choices.map((choice, index) => <Button key={choice} variant="outline" disabled={choose.isPending || reset.isPending} onClick={() => void decide(index)} className="h-auto min-h-14 justify-start gap-3 whitespace-normal px-4 py-3 text-left leading-relaxed">
             <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">{String.fromCharCode(65 + index)}</span><span className="font-body font-semibold">{choice}</span>
           </Button>)}
         </div>
@@ -104,6 +122,7 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
         <p className="flex flex-wrap items-center justify-center gap-3 font-heading text-sm font-semibold"><span className="flex items-center gap-1.5 text-energy"><Zap className="h-4 w-4" /> +25 Energy</span><span className="flex items-center gap-1.5 text-points"><Trophy className="h-4 w-4" /> +50 Points</span></p>
         <p className="text-center text-xs text-muted-foreground">One completion per day · Energy capped at 100</p>
       </> : null}
+      {user && state?.canReset && <Button variant="outline" size="sm" disabled={choose.isPending || reset.isPending} onClick={() => void resetTimer()} className="mx-auto h-auto whitespace-normal"><Zap className="h-3.5 w-3.5" /> {reset.isPending ? 'Resetting…' : 'Dev Reset Timer'}</Button>}
       {(error || status.isError) && <div role="alert" className="text-center text-sm text-destructive">
         <p>{error || 'Could not open today’s dilemma. Please try again.'}</p>
         <Button variant="outline" className="mt-2" onClick={() => { setError(''); void status.refetch(); }}>Try again</Button>
