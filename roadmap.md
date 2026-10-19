@@ -1,5 +1,5 @@
 # Daily Dilemma developer reset
-- [ ] Add a protected Dev Reset Timer control and verify reset/replay using isolated test data.
+- [x] Add a protected Dev Reset Timer control; isolated QA verified reset, refresh, practice completion and phone button, with one daily credit and unchanged 275 points. Nine focused tests pass; preview build OK; not published.
 
 # Mobile overlap fixes
 - [x] Move Admin Sandbox into phone page flow, retaining its desktop floating position.
