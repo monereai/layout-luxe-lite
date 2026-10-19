@@ -280,6 +280,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_pets: {
+        Row: {
+          active_pet: string | null
+          owned_pets: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_pet?: string | null
+          owned_pets?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_pet?: string | null
+          owned_pets?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_properties: {
         Row: {
           active_property: string
@@ -375,6 +396,7 @@ export type Database = {
         Returns: boolean
       }
       is_premium: { Args: { check_env: string }; Returns: boolean }
+      pet_action: { Args: { p_action: string; p_id: string }; Returns: Json }
       property_action: {
         Args: { p_action: string; p_id: string }
         Returns: Json
