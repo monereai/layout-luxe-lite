@@ -217,6 +217,7 @@ export type Database = {
           full_energy_bonus: boolean
           last_biblical_snap: string | null
           last_care_claim_date: string | null
+          last_daily_dilemma: string | null
           last_energy_claim_date: string | null
           last_energy_drain: string
           monere_energy: number
@@ -233,6 +234,7 @@ export type Database = {
           full_energy_bonus?: boolean
           last_biblical_snap?: string | null
           last_care_claim_date?: string | null
+          last_daily_dilemma?: string | null
           last_energy_claim_date?: string | null
           last_energy_drain?: string
           monere_energy?: number
@@ -249,6 +251,7 @@ export type Database = {
           full_energy_bonus?: boolean
           last_biblical_snap?: string | null
           last_care_claim_date?: string | null
+          last_daily_dilemma?: string | null
           last_energy_claim_date?: string | null
           last_energy_drain?: string
           monere_energy?: number
@@ -466,6 +469,10 @@ export type Database = {
           p_user: string
         }
         Returns: undefined
+      }
+      daily_dilemma_action: {
+        Args: { p_action?: string; p_choice?: number; p_day?: string }
+        Returns: Json
       }
       has_role: {
         Args: {

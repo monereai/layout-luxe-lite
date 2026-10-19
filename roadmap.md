@@ -1,4 +1,9 @@
-# Biblical Snap
+# Daily Dilemma replacement
+- [x] Replace Snap modal/menu with four rotating daily three-choice stories, reflections and companion celebration.
+- [x] Add atomic daily completion/rewards and server-timed next-dilemma countdown; preserve prior Snap daily completions during replacement.
+- [x] Verify with isolated QA: unwise choice pays nothing, wise choice saves energy 50→75 and points 225→275, one 50-point ledger entry, replay pays zero, refresh preserves completion/pet, phone/desktop checked; all 210 tests pass and build OK. Not published; existing CookieYes localhost warning is unrelated.
+
+# Biblical Snap (retired)
 - [x] Add signed-in stage modal, server-validated first-to-3 rounds and daily +25 Energy/+50 Points reward.
 - [x] Verify victory verse, companion, replay protection and phone/desktop play using isolated QA data: first victory saved 25 energy and exactly one 50-point credit; later wins were practice only; 25 tests pass, build OK. Not published. Existing CookieYes localhost warning remains unrelated.
 

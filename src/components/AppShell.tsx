@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
-import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins, Layers } from "lucide-react";
+import { Globe, Compass, Sun, BookHeart, LifeBuoy, Search, Menu, PanelLeftClose, PanelLeftOpen, Award, Puzzle, Zap, Coins, BookOpen } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CrisisDialog } from "./CrisisDialog";
@@ -67,13 +67,13 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   });
   useWebMCP({
     name: "navigate_monere",
-    description: "Open a page from MonereAI's visible menu: Seek, Daily, Journal, Find Monere, Jigsaw, Points Shop, or Biblical Snap.",
-    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "snap"], description: "The menu page path to open, or \"snap\" for the Biblical Snap card game." } }, required: ["page"], additionalProperties: false },
+    description: "Open a page from MonereAI's visible menu: Seek, Daily, Journal, Find Monere, Jigsaw, Points Shop, or Monere’s Daily Dilemma.",
+    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
-      if (page === "snap") {
+      if (page === "dilemma") {
         setMenuOpen(false);
-        await navigate({ to: "/", search: { snap: 1 } });
-        return `Opened ${t("biblicalSnap")}.`;
+        await navigate({ to: "/", search: { dilemma: 1 } });
+        return `Opened ${t("dailyDilemma")}.`;
       }
       const item = menuItems.find(item => item.to === page);
       if (typeof page !== "string" || !item) throw new Error("Choose a page from the visible menu.");
@@ -124,8 +124,8 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 </Button>
               ))}
               <Button asChild variant="ghost" className={`h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
-                <Link to="/" search={{ snap: 1 }} title={t("biblicalSnap")} aria-label={t("biblicalSnap")}>
-                  <Layers className="shrink-0" />{!collapsed && <span className="min-w-0">{t("biblicalSnap")}</span>}
+                <Link to="/" search={{ dilemma: 1 }} title={t("dailyDilemma")} aria-label={t("dailyDilemma")}>
+                  <BookOpen className="shrink-0" />{!collapsed && <span className="min-w-0">{t("dailyDilemma")}</span>}
                 </Link>
               </Button>
             </nav>
@@ -205,9 +205,9 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
                 <span className="min-w-0">{t(label)}</span>
               </Link>
             ))}
-            <Link to="/" search={{ snap: 1 }} onClick={() => setMenuOpen(false)} title={t("biblicalSnap")} aria-label={t("biblicalSnap")} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">
-              <Layers className="h-5 w-5 shrink-0" aria-hidden="true" />
-              <span className="min-w-0">{t("biblicalSnap")}</span>
+            <Link to="/" search={{ dilemma: 1 }} onClick={() => setMenuOpen(false)} title={t("dailyDilemma")} aria-label={t("dailyDilemma")} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">
+              <BookOpen className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <span className="min-w-0">{t("dailyDilemma")}</span>
             </Link>
             <div className="my-2 border-t border-border" />
             <Button variant="ghost" className="h-auto min-h-11 justify-start whitespace-normal px-3 text-left text-sm font-semibold text-muted-foreground" onClick={() => { setMenuOpen(false); setOpen(true); }}>
