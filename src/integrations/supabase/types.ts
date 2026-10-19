@@ -163,6 +163,7 @@ export type Database = {
       profiles: {
         Row: {
           daily_care_claimed: boolean
+          equipped_pet_id: string | null
           full_energy_bonus: boolean
           last_care_claim_date: string | null
           last_energy_claim_date: string | null
@@ -177,6 +178,7 @@ export type Database = {
         }
         Insert: {
           daily_care_claimed?: boolean
+          equipped_pet_id?: string | null
           full_energy_bonus?: boolean
           last_care_claim_date?: string | null
           last_energy_claim_date?: string | null
@@ -191,6 +193,7 @@ export type Database = {
         }
         Update: {
           daily_care_claimed?: boolean
+          equipped_pet_id?: string | null
           full_energy_bonus?: boolean
           last_care_claim_date?: string | null
           last_energy_claim_date?: string | null
