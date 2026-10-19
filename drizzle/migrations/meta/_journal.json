@@ -197,6 +197,13 @@
       "when": 1792418147577,
       "tag": "0027_sandbox_admin_free_purchases",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792419936573,
+      "tag": "0028_persist_clothing_inventory",
+      "breakpoints": true
     }
   ]
 }
