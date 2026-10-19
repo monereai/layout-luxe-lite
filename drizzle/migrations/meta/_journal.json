@@ -204,6 +204,13 @@
       "when": 1792419936573,
       "tag": "0028_persist_clothing_inventory",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792422570759,
+      "tag": "0029_biblical_snap_rounds",
+      "breakpoints": true
     }
   ]
 }
