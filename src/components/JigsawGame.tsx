@@ -69,7 +69,7 @@ export function JigsawGame() {
     [next[a], next[b]] = [second, first];
     moves.current.push([a, b]);
     setOrder(next); setPicked(null); playPop();
-    // Award +1 Energy the first time each piece lands in its correct slot.
+    // Award +5 Energy the first time each piece lands in its correct slot.
     for (let i = 0; i < next.length; i++) {
       if (next[i] === i && !rewarded.current.has(i)) {
         rewarded.current.add(i);

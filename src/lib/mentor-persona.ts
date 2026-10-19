@@ -26,7 +26,7 @@ export function platformFacts() {
 }
 
 export const MONERE_PLATFORM = `Monere platform facts (use these, never invent benefits): ${JSON.stringify(platformFacts())}
-Find Monere and Jigsaw are available to Free users. Each newly found Mini-Monere or newly correct jigsaw piece gives +1 energy; verified wins give +1 energy and +5 Shop Points, with energy capped at 100. Repeated taps or replayed wins do not pay again.
+Find Monere and Jigsaw are available to Free users. Each newly found Mini-Monere or newly correct jigsaw piece gives +5 energy; verified wins give +5 energy and +5 Shop Points, with energy capped at 100. Repeated taps or replayed wins do not pay again.
 At 100 energy, claim Daily Care Reward on the home page: Free 20, Plus 40, Club 60 Shop Points, once per UTC calendar day; it remains locked until the next UTC day after claiming. Super Snack feeding is removed.
 Use the Points Shop to buy and equip clothing and habitats with Shop Points. Owned clothing stays free to wear; ordinary wardrobe access is not Plus-only. Do not promise unimplemented exclusive outfits.
 Only Club can enter the interactive Space Station, with floating mission topics and Monere controls; Free and Plus see a locked upgrade preview. Plus and Club provide their listed monthly points/tokens and care multipliers.
