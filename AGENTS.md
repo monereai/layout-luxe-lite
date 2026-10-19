@@ -39,3 +39,4 @@
 
 - Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps. Why: discover public pages without leaking private destinations.
 - Extend jigsaw sizes across UI, progression, server validation and SQL; retain original gift eligibility. Why: extra levels must play/pay without revoking gifts.
+- Pet purchases/equips go only through the pet_action database function (server prices, shared points balance via negative point_credits, user_pets ownership); clients cannot write user_pets. Why: pets must use the one points balance and cannot be granted locally.
