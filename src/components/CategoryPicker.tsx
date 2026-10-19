@@ -53,6 +53,7 @@ export function CategoryPicker({
   interactive = false,
   listening = false,
   backdrop,
+  wide = false,
 }: {
   value: string[];
   onChange: (titles: string[]) => void;
@@ -60,6 +61,7 @@ export function CategoryPicker({
   interactive?: boolean;
   listening?: boolean;
   backdrop?: string;
+  wide?: boolean;
 }) {
   const toggle = (title: string) => {
     if (value.includes(title)) onChange(value.filter((t) => t !== title));
@@ -78,13 +80,13 @@ export function CategoryPicker({
         <Button variant={stationView === "topics" ? "default" : "outline"} size="sm" onClick={() => setStationView("topics")}><Compass />Mission topics</Button>
         <Button variant={stationView === "character" ? "default" : "outline"} size="sm" onClick={() => setStationView("character")}><MessageCircle />Monere controls</Button>
       </nav>}
-      <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
+      <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className={`orbit-stage ${wide ? "orbit-wide" : ""}`}>
         <div className="orbit-center">
           {backdrop && property.activeProperty === "treehouse" && (
-            <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[160%] w-[160%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-60 sm:h-[135%] sm:w-[135%] sm:opacity-50" />
+            <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[175%] w-[175%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-60 sm:h-[175%] sm:w-[175%] sm:opacity-50" />
           )}
           {backdrop && PROPERTIES.filter((p) => p.src).map((p) => (
-            <img key={p.id} src={p.src ?? ""} alt="" loading="lazy" width={816} height={816} className={`pointer-events-none absolute left-1/2 top-1/2 z-0 h-[110%] w-[110%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none rounded-full object-cover transition-opacity ${property.activeProperty === p.id ? "opacity-100" : "opacity-0"}`} />
+            <img key={p.id} src={p.src ?? ""} alt="" loading="lazy" width={816} height={816} className={`pointer-events-none absolute left-1/2 top-1/2 z-0 h-[122%] w-[122%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none rounded-full object-cover transition-opacity ${property.activeProperty === p.id ? "opacity-100" : "opacity-0"}`} />
           ))}
           <span className="orbit-halo pointer-events-none" aria-hidden="true" />
           <div className="relative z-10 h-full w-full">
@@ -112,7 +114,7 @@ export function CategoryPicker({
                 className={`float-tile ${on ? "float-tile-on" : ""}`}
               >
                 <span className="text-lg leading-none" aria-hidden="true">{emoji}</span>
-                <span className="font-display text-[12px] font-semibold leading-tight">{short}</span>
+                <span className="font-display text-[12px] font-semibold leading-tight whitespace-normal">{short}</span>
                 {on && <Check className="absolute right-1.5 top-1.5 h-3.5 w-3.5 text-primary" strokeWidth={3} aria-hidden="true" />}
               </Button>
             );

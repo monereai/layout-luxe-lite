@@ -174,7 +174,7 @@ function Home() {
           <p className="mb-4 text-center font-display text-lg font-semibold text-primary drop-shadow-[0_2px_8px_color-mix(in_oklab,var(--background)_80%,transparent)]">Welcome to the {habitat}! Choose an option to begin.</p>
 
           <Treehouse>
-            <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} interactive listening={listening} backdrop={TREEHOUSE_BACKDROP} />
+            <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} interactive listening={listening} backdrop={TREEHOUSE_BACKDROP} wide />
             <div role="region" aria-label="Chat with Monere" className="relative z-20 mx-auto mt-5 w-full max-w-lg border-t border-border pt-4">
               <label htmlFor="monere-chat" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 {t("whatsOnMind")}
