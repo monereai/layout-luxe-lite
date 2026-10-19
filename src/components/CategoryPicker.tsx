@@ -114,7 +114,7 @@ export function CategoryPicker({
                 className={`float-tile ${on ? "float-tile-on" : ""}`}
               >
                 <span className="text-lg leading-none" aria-hidden="true">{emoji}</span>
-                <span className="font-display text-[12px] font-semibold leading-tight">{short}</span>
+                <span className="font-display text-[12px] font-semibold leading-tight whitespace-normal">{short}</span>
                 {on && <Check className="absolute right-1.5 top-1.5 h-3.5 w-3.5 text-primary" strokeWidth={3} aria-hidden="true" />}
               </Button>
             );
