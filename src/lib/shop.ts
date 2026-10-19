@@ -105,7 +105,7 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export type EquipmentSlot = "hat" | "outfit" | "glasses" | "accessory" | "footwear";
 export function equipmentSlot(category: ShopCategory): EquipmentSlot { return category === "costume" ? "outfit" : category; }
-export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume" | "feet", string>>; comboUnlocked?: string[]; jigsawReward?: string };
+export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume" | "feet", string>>; comboUnlocked?: string[]; jigsawReward?: string; mysteryGift?: string };
 export function normalizeEquipment(state: ShopState): ShopState {
   const equipped: ShopState["equipped"] = {};
   for (const slot of ["hat", "outfit", "glasses", "accessory", "footwear"] as const) {
@@ -184,19 +184,29 @@ let current = EMPTY;
 let loaded = false;
 const listeners = new Set<() => void>();
 
-let accountSaver: ((state: ShopState) => Promise<void>) | undefined;
-export function setShopAccountSaver(saver: typeof accountSaver) { accountSaver = saver; }
+export type WardrobeRequest = { action: "status" | "buy" | "buy_combo" | "equip" | "gift_mystery" | "gift_jigsaw" | "reset"; id?: string; equipped?: ShopState["equipped"] };
+let accountAction: ((request: WardrobeRequest) => Promise<ShopState>) | undefined;
+/** The signed-in account's wardrobe is changed only through server-checked actions. */
+export function setShopAccountAction(action: typeof accountAction) { accountAction = action; }
 export function shopSnapshot() { load(); return current; }
-export async function persistShop(next: ShopState) {
-  if (!accountSaver) throw new Error("Please sign in and wait for your wardrobe to load.");
-  await accountSaver(normalizeEquipment(next));
-  saveShop(next, true);
+async function runAccount(request: WardrobeRequest) {
+  if (!accountAction) throw new Error("Please sign in and wait for your wardrobe to load.");
+  const next = await accountAction(request);
+  saveShop(next);
+  return current;
 }
-export function saveShop(next: ShopState, localOnly = false) {
+/** Saves which owned items are worn; the server rejects anything not owned. */
+export async function persistShop(next: ShopState) {
+  return runAccount({ action: "equip", equipped: normalizeEquipment(next).equipped });
+}
+export const buyOnAccount = (itemId: string) => runAccount({ action: "buy", id: itemId });
+export const buyComboOnAccount = (comboId: string) => runAccount({ action: "buy_combo", id: comboId });
+export const giftOnAccount = (kind: "mystery" | "jigsaw") => runAccount({ action: kind === "mystery" ? "gift_mystery" : "gift_jigsaw" });
+export const resetOnAccount = () => runAccount({ action: "reset" });
+export function saveShop(next: ShopState) {
   current = normalizeEquipment(next);
   try { localStorage.setItem(SHOP_KEY, JSON.stringify(current)); } catch { /* ignore */ }
   listeners.forEach((l) => l());
-  if (!localOnly && accountSaver) void accountSaver(current).catch(() => {});
 }
 
 function load() {
@@ -256,10 +266,12 @@ export function grantJigsawReward(state: ShopState, game: GameState, rand: () =>
   };
 }
 
-/** Ownership and the claim marker are persisted together before notifying the player. */
-export function claimJigsawReward(game: GameState) {
+/** The server checks the finished puzzles and picks the one-time free item. */
+export async function claimJigsawReward(game: GameState) {
   load();
-  const gift = grantJigsawReward(current, game);
-  if (gift) saveShop(gift.state);
-  return gift;
+  if (current.jigsawReward || !allJigsawsComplete(game) || !accountAction) return null;
+  const before = current.owned;
+  const next = await giftOnAccount("jigsaw");
+  const item = SHOP_ITEMS.find((i) => i.id === next.jigsawReward && !before.includes(i.id)) ?? null;
+  return { item, state: next };
 }

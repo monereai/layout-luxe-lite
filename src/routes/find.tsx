@@ -1,14 +1,14 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { RotateCcw, Trophy, Award, Star, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
   HINT_COST, MAP_UNLOCK_FINDS, MINI_COUNT,
-  allMapsComplete, makeSpots, mapUnlocked, recordHintSpend, recordMystery, recordComplete, recordMini, useGame, type Spot,
+  allMapsComplete, mapUnlocked, recordHintSpend, recordMystery, recordComplete, recordMini, useGame, type Spot,
 } from "@/lib/game";
-import { grantMystery, saveShop, useShop, type ShopItem } from "@/lib/shop";
+import { SHOP_ITEMS, giftOnAccount, useShop, type ShopItem } from "@/lib/shop";
 import { playChime, playPop } from "@/lib/sound";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { useCareRound } from "@/hooks/useCare";
@@ -70,9 +70,8 @@ function FindGame() {
   const [finding, setFinding] = useState(false);
   const [idx, setIdx] = useState(0);
   const scene = SCENES[idx] ?? { id: "jungle", name: "Jungle Park", src: "/find/jungle.webp" };
-  // Spots are shuffled after mount so the server and first client render match.
-  const [spots, setSpots] = useState<Spot[]>([]);
-  useEffect(() => { setSpots(makeSpots()); }, []);
+  // The server hides the Mini-Moneres for each round and checks every tap against them.
+  const spots: Spot[] = careRound.round?.spots ?? [];
   const [found, setFound] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState<React.ReactNode>(null);
   const [won, setWon] = useState(false);
@@ -108,7 +107,7 @@ function FindGame() {
     }
     foundRef.current = new Set();
     setRoundKey((n) => n + 1);
-    setIdx(next); setSpots(makeSpots()); setFound(new Set()); setToast(null); setWon(false); setHint(null);
+    setIdx(next); setFound(new Set()); setToast(null); setWon(false); setHint(null);
   }
 
   /** Cover the whole picture, relocate the Minis while hidden, then reveal. */
@@ -121,13 +120,17 @@ function FindGame() {
     }, 350);
   }
 
-  async function tap(i: number) {
+  async function tap(i: number, event: React.MouseEvent<HTMLElement>) {
     if (findLock.current || foundRef.current.has(i) || won || !careRound.canPlay) return;
     findLock.current = true;
     setFinding(true);
     let awarded = 0;
     try {
-      const state = await careRound.rewardFind(i);
+      const board = event.currentTarget.parentElement?.getBoundingClientRect();
+      const spot = spots[i];
+      const x = board && board.width && event.clientX ? ((event.clientX - board.left) / board.width) * 100 : spot?.x ?? 0;
+      const y = board && board.height && event.clientY ? ((event.clientY - board.top) / board.height) * 100 : spot?.y ?? 0;
+      const state = await careRound.rewardFind(i, [[Math.round(x * 100), Math.round(y * 100)]]);
       awarded = state?.energyAwarded ?? 0;
       if (state) notify.success(<EnergyAward amount={awarded} />, { duration: 2000 });
       else notify(<EnergyAward signedOut />, { duration: 2000 });
@@ -148,8 +151,11 @@ function FindGame() {
       void careRound.complete([...next]);
       const finds = { ...game.finds, [scene.id]: (game.finds[scene.id] ?? 0) + 1 };
       if (!game.mystery && allMapsComplete(finds, SCENES.map((s) => s.id))) {
-        const gift = grantMystery(shop);
-        if (gift && recordMystery(gift.item.id)) { saveShop(gift.state); setMystery(gift.item); }
+        const before = shop.owned;
+        void giftOnAccount("mystery").then((next) => {
+          const item = SHOP_ITEMS.find((i) => i.id === next.mysteryGift && !before.includes(i.id));
+          if (item && recordMystery(item.id)) setMystery(item);
+        }).catch(() => {});
       }
       setTimeout(() => { playChime("win"); setWon(true); }, 600);
     } else {
@@ -217,7 +223,7 @@ function FindGame() {
             return (
               <Button variant="ghost"
                 key={`${idx}-${i}`}
-                onClick={() => tap(i)}
+                onClick={(e) => void tap(i, e)}
                 disabled={finding || !careRound.canPlay || found.size === MINI_COUNT}
                 aria-label={isFound ? "Mini-Monere found" : hint === i ? "Monere's clue points here" : "Hidden spot"}
                 className={`absolute h-auto min-h-0 -translate-x-1/2 -translate-y-1/2 rounded-full p-0 hover:bg-transparent disabled:opacity-100 ${isFound ? "ring-2 ring-primary" : ""} ${hint === i ? "ring-4 ring-primary motion-safe:animate-pulse ring-offset-4 ring-offset-background" : ""}`}

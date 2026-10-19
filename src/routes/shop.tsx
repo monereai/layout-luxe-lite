@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { usePlan } from "@/hooks/usePlan";
-import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, equip, equipmentSlot, persistShop, saveShop, useShop, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, equip, equipmentSlot, persistShop, buyOnAccount, buyComboOnAccount, useShop, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
@@ -61,10 +61,11 @@ function ShopPage() {
   const wallet = usePointsWallet();
   const { tier, refresh: refreshPlan } = usePlan();
 
-  function purchase(id: string) {
-    const next = buy(shop, wallet + shop.spent, id);
-    if (!next) return;
-    saveShop(next);
+  async function purchase(id: string) {
+    if (!buy(shop, wallet + shop.spent, id)) return;
+    let next;
+    try { next = await buyOnAccount(id); } catch (error) { toast.error(error instanceof Error ? error.message : "That purchase could not be saved."); return; }
+    await refreshPlan();
     const item = SHOP_ITEMS.find((i) => i.id === id);
     toast.success(`${item?.name} unlocked${item && next.equipped[equipmentSlot(item.category)] === id ? " and equipped" : " — saved to your inventory"}!`);
   }
@@ -85,14 +86,14 @@ function ShopPage() {
     } catch (error) { toast.error(error instanceof Error ? error.message : "Your outfit could not be saved."); }
   }
 
-  function buyCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
-    const next = buyCombination(shop, wallet, family);
-    if (!next) {
+  async function buyCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
+    if (!buyCombination(shop, wallet, family)) {
       const missingPoints = combinationPrice(shop, family) - wallet;
       if (missingPoints > 0) toast.error(`You need ${missingPoints} more points to buy ${family.name}.`);
       return;
     }
-    saveShop(next);
+    try { await buyComboOnAccount(family.id); } catch (error) { toast.error(error instanceof Error ? error.message : "That purchase could not be saved."); return; }
+    await refreshPlan();
     toast.success(`${family.name} bought — Monere is wearing it!`);
   }
 

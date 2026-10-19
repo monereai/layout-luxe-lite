@@ -1,49 +1,46 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { usePlan } from "@/hooks/usePlan";
-import { supabase } from "@/integrations/supabase/client";
-import { normalizeEquipment, saveShop, setShopAccountSaver, shopSnapshot, type ShopState } from "@/lib/shop";
-import type { Json } from "@/integrations/supabase/types";
+import { saveShop, setShopAccountAction, type ShopState, type WardrobeRequest } from "@/lib/shop";
+import { wardrobeAction } from "@/lib/wardrobe.functions";
 
+const EMPTY: ShopState = { spent: 0, owned: [], equipped: {} };
+
+/** Loads the account wardrobe; every change goes through server-checked wardrobe actions. */
 export function WardrobeSync() {
   const { user, ready } = usePlan();
   const userId = user?.id;
+  const run = useServerFn(wardrobeAction);
   useEffect(() => {
-    setShopAccountSaver(undefined);
+    setShopAccountAction(undefined);
     if (!ready) return;
     if (!userId) {
-      if (localStorage.getItem("monereai-wardrobe-owner")) saveShop({ spent: 0, owned: [], equipped: {} }, true);
+      if (localStorage.getItem("monereai-wardrobe-owner")) { localStorage.removeItem("monereai-wardrobe-owner"); saveShop(EMPTY); }
       return;
     }
     let cancelled = false;
-    let queue = Promise.resolve();
-    const load = async () => {
-      const owner = localStorage.getItem("monereai-wardrobe-owner");
-      const local = !owner || owner === userId ? shopSnapshot() : { spent: 0, owned: [], equipped: {} };
-      if (owner && owner !== userId) saveShop({ spent: 0, owned: [], equipped: {} }, true);
-      const { data, error } = await supabase.from("user_wardrobes").select("shop_state").eq("user_id", userId).maybeSingle();
-      if (cancelled) return;
-      if (error) throw error;
-      const saved = data?.shop_state as ShopState | undefined;
-      const next = saved && Array.isArray(saved.owned) && saved.equipped ? normalizeEquipment(saved) : local;
-      const saver = (state: ShopState) => {
-        const write = queue.catch(() => {}).then(async () => {
-          if (cancelled) throw new Error("Account changed");
-          const { error } = await supabase.from("user_wardrobes").upsert({ user_id: userId, shop_state: state as unknown as Json, updated_at: new Date().toISOString() });
-          if (error || cancelled) throw new Error("Your outfit could not be saved. Please try again.");
-        });
-        queue = write;
-        return write;
-      };
-      // Migrate device purchases only for the first account save, without changing any currency or pets.
-      if (!saved) await saver(next);
+    let queue: Promise<unknown> = Promise.resolve();
+    const action = (request: WardrobeRequest) => {
+      const next = queue.catch(() => {}).then(async () => {
+        if (cancelled) throw new Error("Account changed");
+        const { equipped, ...rest } = request;
+        const state = await run({ data: { ...rest, ...(equipped ? { equipped } : {}) } });
+        if (cancelled) throw new Error("Account changed");
+        return state as ShopState;
+      });
+      queue = next;
+      return next;
+    };
+    const owner = localStorage.getItem("monereai-wardrobe-owner");
+    if (owner && owner !== userId) saveShop(EMPTY);
+    void action({ action: "status" }).then((state) => {
       if (cancelled) return;
       localStorage.setItem("monereai-wardrobe-owner", userId);
-      saveShop(next, true);
-      setShopAccountSaver(saver);
-    };
-    void load().catch(() => { if (!cancelled) toast.error("Your wardrobe could not load. Please refresh before changing outfits."); });
-    return () => { cancelled = true; setShopAccountSaver(undefined); };
-  }, [userId, ready]);
+      saveShop(state);
+      setShopAccountAction(action);
+    }).catch(() => { if (!cancelled) toast.error("Your wardrobe could not load. Please refresh before changing outfits."); });
+    return () => { cancelled = true; setShopAccountAction(undefined); };
+  }, [userId, ready, run]);
   return null;
 }
