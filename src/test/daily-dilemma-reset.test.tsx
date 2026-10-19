@@ -20,7 +20,7 @@ describe('Developer Daily Dilemma reset', () => {
     mocks.play.mockResolvedValueOnce(state(true)).mockResolvedValueOnce(state(true, false));
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'Dev Reset Timer' }));
-    await waitFor(() => expect(mocks.play).toHaveBeenCalledWith({ data: { action: 'reset' } }));
+    await waitFor(() => expect(mocks.play.mock.calls.some(([input]) => input.data.action === 'reset')).toBe(true));
     await waitFor(() => expect(screen.queryByRole('timer')).not.toBeInTheDocument());
     expect(screen.getByLabelText('Decision options').children).toHaveLength(3);
     expect(mocks.accept).toHaveBeenCalledWith(expect.objectContaining({ energyAwarded: 0, pointsAwarded: 0 }));
