@@ -2,8 +2,9 @@ import { Compass, ShieldCheck, Sparkles } from "lucide-react";
 import { MonereFigure } from "@/components/MonereFigure";
 import { useT } from "@/lib/i18n";
 import { useUserName } from "@/lib/username";
+import { PetCompanion } from "@/components/PetCompanion";
 
-export function MonereMentor({ mode = "welcome", portrait = true }: { mode?: "welcome" | "insight" | "results"; portrait?: boolean }) {
+export function MonereMentor({ mode = "welcome", portrait = true, companion = false }: { mode?: "welcome" | "insight" | "results"; portrait?: boolean; companion?: boolean }) {
   const name = useUserName();
   const t = useT();
   const thinking = mode === "insight";
@@ -14,6 +15,7 @@ export function MonereMentor({ mode = "welcome", portrait = true }: { mode?: "we
         <ShieldCheck className="absolute right-2 top-16 h-10 w-10 text-primary/20" strokeWidth={1} aria-hidden="true" />
         <Sparkles className="mentor-spark absolute bottom-10 left-6 h-6 w-6 text-primary/50" aria-hidden="true" />
         <MonereFigure gesture={thinking ? "think" : mode === "results" ? "thumbs" : "wave"} alt={thinking ? "Monere thinking it over" : "Monere the friendly lion, your mentor"} className="mentor-avatar relative h-full w-full" />
+        {companion && <PetCompanion />}
       </div>}
       <p className="mb-2 flex items-center justify-center gap-2 text-xs font-semibold text-primary"><ShieldCheck className="h-3.5 w-3.5" /> {t("motto")}</p>
       <h1 className="font-display text-3xl font-semibold leading-tight">
