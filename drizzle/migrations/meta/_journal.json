@@ -148,6 +148,13 @@
       "when": 1792403671578,
       "tag": "0020_pet_shop",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792403944445,
+      "tag": "0021_pet_action_direct_deduct",
+      "breakpoints": true
     }
   ]
 }
