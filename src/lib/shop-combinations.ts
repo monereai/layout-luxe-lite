@@ -32,6 +32,8 @@ export const LOOKS_WITH_ART = new Set<string>(["amber-snapback", "angel-wings", 
  * outfit, then hat, footwear, glasses, accessory, and finally the default look.
  * Items not drawn in that picture are layered on top by MonereFigure.
  */
+for (const id of ["astro-suit", "pirate-coat", "rocket-boots", "rain-boots", "shell-necklace"]) LOOKS_WITH_ART.add(id);
+
 export function combinationLook(equipped: Selection): string {
   const ids = Object.values(equipped).filter((id): id is string => typeof id === "string");
   if (!ids.length) return "default";

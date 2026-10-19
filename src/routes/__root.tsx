@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { PlanProvider } from "@/hooks/usePlan";
 import { useCare } from "@/hooks/useCare";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { WardrobeSync } from "@/lib/wardrobe-sync";
 
 function NotFoundComponent() {
   return (
@@ -148,6 +149,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <PlanProvider>
         <CareSync />
+        <WardrobeSync />
         <Outlet />
       </PlanProvider>
       <Toaster position="top-center" />

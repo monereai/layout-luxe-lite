@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { usePlan } from "@/hooks/usePlan";
-import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, equip, equipmentSlot, saveShop, useShop, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, equip, equipmentSlot, persistShop, saveShop, useShop, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
@@ -69,13 +69,20 @@ function ShopPage() {
     toast.success(`${item?.name} unlocked${item && next.equipped[equipmentSlot(item.category)] === id ? " and equipped" : " — saved to your inventory"}!`);
   }
 
-  function wear(category: ShopCategory, id: string | null) {
-    saveShop(equip(shop, category, id));
+  async function wear(category: ShopCategory, id: string | null) {
+    try {
+      await persistShop(equip(shop, category, id));
+      const item = SHOP_ITEMS.find((item) => item.id === id);
+      if (item) toast.success(`Equipped ${item.name}!`);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Your outfit could not be saved."); }
   }
 
-  function wearCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
+  async function wearCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
     // Items already bought stay wearable: combinations cost nothing extra.
-    saveShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
+    try {
+      await persistShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
+      toast.success(`Equipped ${family.name}!`);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Your outfit could not be saved."); }
   }
 
   function buyCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
@@ -89,13 +96,13 @@ function ShopPage() {
     toast.success(`${family.name} bought — Monere is wearing it!`);
   }
 
-  function takeOffCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
+  async function takeOffCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
     // Taking a combination off frees its three slots; anything else stays on.
     let next = shop;
     if (next.equipped.hat === family.hat) next = equip(next, "hat", null);
     if (next.equipped.outfit === family.outfit) next = equip(next, "costume", null);
     if (next.equipped.footwear === family.footwear) next = equip(next, "footwear", null);
-    saveShop(next);
+    try { await persistShop(next); } catch { toast.error("Your outfit could not be saved. Please try again."); }
   }
 
   return (
