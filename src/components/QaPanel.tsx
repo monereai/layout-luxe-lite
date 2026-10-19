@@ -7,10 +7,15 @@ import { runQaAction } from "@/lib/qa.functions";
 import { Button } from "@/components/ui/button";
 import { usePlan } from "@/hooks/usePlan";
 import { ShieldCheck } from "lucide-react";
+import { isSandboxAdmin } from "@/lib/admin";
+import { saveShop } from "@/lib/shop";
+import { saveProperties } from "@/lib/properties";
 
 const ACTIONS = [
-  { action: "fill", label: "Fill Energy to 100" },
-  { action: "toggle_tier", label: "Toggle Subscription Tier" },
+  { action: "fill", label: "Fill Energy (100)" },
+  { action: "add_points", label: "Add 1,000 Points" },
+  { action: "toggle_tier", label: "Toggle Tier" },
+  { action: "reset_inventory", label: "Reset Inventory" },
   { action: "reset_claim", label: "Reset daily care cooldown" },
   { action: "topup", label: "+99,999 points & tokens" },
   { action: "club", label: "Club + Space Station access" },
@@ -38,16 +43,24 @@ export function QaPanel() {
     return () => { active = false; };
   }, [user?.id]);
 
-  if (!tester) return null;
+  if (!tester && !isSandboxAdmin(user)) return null;
   return (
-    <aside aria-label="Admin Tester panel" className="fixed bottom-40 right-3 z-40 max-w-[calc(100%-1.5rem)] rounded-lg border border-primary/40 bg-card p-3 shadow-lg md:bottom-6">
-      <Button variant="outline" size="sm" aria-expanded={open} onClick={() => setOpen(!open)}><ShieldCheck />Admin Tester · {tier}</Button>
+    <aside aria-label="Admin Sandbox" className="fixed bottom-40 left-3 z-40 max-w-[calc(100%-1.5rem)] rounded-lg border border-primary/40 bg-card p-3 shadow-lg md:bottom-6">
+      <Button variant="outline" size="sm" aria-expanded={open} onClick={() => setOpen(!open)}><ShieldCheck />Admin Sandbox · {tier}</Button>
       {open && <div className="mt-3 flex max-w-xs flex-wrap gap-2">
         {ACTIONS.map((a) => (
           <Button key={a.action} size="sm" variant="outline" disabled={busy} onClick={async () => {
             setBusy(true);
             try {
+              if (a.action === "reset_inventory" && !window.confirm("Reset all purchases, pets and habitats on this account?")) return;
               await run({ data: { action: a.action } });
+              if (a.action === "reset_inventory") {
+                saveShop({ spent: 0, owned: [], equipped: {} });
+                saveProperties({ unlockedProperties: ["treehouse"], activeProperty: "treehouse", spent: 0 });
+                toast.success("Inventory reset");
+                window.setTimeout(() => window.location.reload(), 600);
+                return;
+              }
               await refresh();
               await qc.invalidateQueries({ queryKey: ["monere-care", user?.id] });
               toast.success(a.label + " done");
