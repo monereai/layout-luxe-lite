@@ -144,7 +144,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             </div>
             {location.pathname === "/" && (
               <div className="border-b border-border py-5">
-                <Link to="/shop" title={t("petShop")} aria-label={`${t("petShop")}: ${t("petShopSub")}`} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
+                <Link to="/pet-shop" title={t("petShop")} aria-label={`${t("petShop")}: ${t("petShopSub")}`} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
                   <img src={petShopMark} alt="" width={816} height={816} loading="lazy" className="h-[11.25rem] w-[11.25rem] max-w-full" />
                   <span className="text-sm font-semibold text-primary">{t("petShop")}</span>
                   <span className="text-center text-[11px] leading-snug text-muted-foreground">{t("petShopSub")}</span>
@@ -154,7 +154,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           </aside>
           {location.pathname === "/" && (
             <Link
-              to="/shop"
+              to="/pet-shop"
               title={t("petShop")}
               aria-label={`${t("petShop")}: ${t("petShopSub")}`}
               className="mt-6 flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10 md:hidden"
