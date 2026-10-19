@@ -105,11 +105,11 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 export type EquipmentSlot = "hat" | "outfit" | "glasses" | "accessory" | "footwear";
 export function equipmentSlot(category: ShopCategory): EquipmentSlot { return category === "costume" ? "outfit" : category; }
-export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume", string>>; comboUnlocked?: string[]; jigsawReward?: string };
+export type ShopState = { spent: number; owned: string[]; equipped: Partial<Record<EquipmentSlot | "costume" | "feet", string>>; comboUnlocked?: string[]; jigsawReward?: string };
 export function normalizeEquipment(state: ShopState): ShopState {
   const equipped: ShopState["equipped"] = {};
   for (const slot of ["hat", "outfit", "glasses", "accessory", "footwear"] as const) {
-    const id = state.equipped[slot] ?? (slot === "outfit" ? state.equipped.costume : undefined);
+    const id = state.equipped[slot] ?? (slot === "outfit" ? state.equipped.costume : slot === "footwear" ? state.equipped.feet : undefined);
     const item = SHOP_ITEMS.find((item) => item.id === id);
     if (item && state.owned.includes(item.id) && equipmentSlot(item.category) === slot) {
       equipped[slot] = item.id;
@@ -184,10 +184,19 @@ let current = EMPTY;
 let loaded = false;
 const listeners = new Set<() => void>();
 
-export function saveShop(next: ShopState) {
+let accountSaver: ((state: ShopState) => Promise<void>) | undefined;
+export function setShopAccountSaver(saver: typeof accountSaver) { accountSaver = saver; }
+export function shopSnapshot() { load(); return current; }
+export async function persistShop(next: ShopState) {
+  if (!accountSaver) throw new Error("Please sign in and wait for your wardrobe to load.");
+  await accountSaver(normalizeEquipment(next));
+  saveShop(next, true);
+}
+export function saveShop(next: ShopState, localOnly = false) {
   current = normalizeEquipment(next);
   try { localStorage.setItem(SHOP_KEY, JSON.stringify(current)); } catch { /* ignore */ }
   listeners.forEach((l) => l());
+  if (!localOnly && accountSaver) void accountSaver(current).catch(() => {});
 }
 
 function load() {
