@@ -1,6 +1,6 @@
 # Biblical Snap
-- [ ] Add signed-in stage modal, server-validated first-to-3 rounds and daily +25 Energy/+50 Points reward.
-- [ ] Verify victory verse, companion, replay protection and phone/desktop play using isolated data.
+- [x] Add signed-in stage modal, server-validated first-to-3 rounds and daily +25 Energy/+50 Points reward.
+- [x] Verify victory verse, companion, replay protection and phone/desktop play using isolated QA data: first victory saved 25 energy and exactly one 50-point credit; later wins were practice only; 25 tests pass, build OK. Not published. Existing CookieYes localhost warning remains unrelated.
 
 # Companion pet readiness
 - [x] Repair six clothing looks with eight-angle art, independent slots, account wardrobe saving and equip toasts; 50 tests pass and all six equip/reload flows verified with isolated QA inventory, then restored. Carl's account untouched; not published.

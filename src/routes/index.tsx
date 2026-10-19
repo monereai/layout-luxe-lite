@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { OnboardingModal, ONBOARDED_KEY } from "@/components/OnboardingModal";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { BookmarkPlus, Share2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { BookmarkPlus, Share2, ArrowLeft, ShieldCheck, Layers } from "lucide-react";
 import { FollowUpThread, type ChatMsg } from "@/components/FollowUpThread";
 import { followUpChat } from "@/lib/followup.functions";
 import { AppShell } from "@/components/AppShell";
@@ -29,6 +29,7 @@ import { propertyName, useProperties } from "@/lib/properties";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
 import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 import { MessageResponse } from "@/components/ai-elements/message";
+import { BiblicalSnapModal } from "@/components/BiblicalSnapModal";
 
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
@@ -48,6 +49,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   usePaymentReturn();
+  const [snapOpen, setSnapOpen] = useState(false);
+  useEffect(() => { if (new URLSearchParams(window.location.search).get('snap') === '1') setSnapOpen(true); }, []);
   const ask = useServerFn(seekWisdom);
   const [categories, setCategories] = useState<string[]>([]);
   const category = categories.length ? categories.join(" + ") : "General life question";
@@ -174,6 +177,7 @@ function Home() {
 
           <Treehouse>
             <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} interactive listening={listening} backdrop={TREEHOUSE_BACKDROP} wide />
+            <Button variant="secondary" onClick={() => setSnapOpen(true)} className="relative z-20 mx-auto mt-4 flex h-auto whitespace-normal py-3"><Layers /> Biblical Snap</Button>
             <div role="region" aria-label="Chat with Monere" className="relative z-20 mx-auto mt-5 w-full max-w-lg border-t border-border pt-4">
               <label htmlFor="monere-chat" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 {t("whatsOnMind")}
@@ -202,6 +206,7 @@ function Home() {
       {!wisdom && !safety && !onboarding && <InstallBanner />}
       {paywall && <PassCodeDialog message={paywall === "limit" ? "You've reached today's free limit. Enter your youth group or school access code to keep talking with Monere." : undefined} onClose={() => setPaywall(null)} />}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
+      <BiblicalSnapModal open={snapOpen} onOpenChange={setSnapOpen} />
       {onboarding && (
         <OnboardingModal
           onDone={({ category: c, situation: s }) => {

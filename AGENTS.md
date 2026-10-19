@@ -9,14 +9,14 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Persist pet-care state in the protected profiles table and use atomic authenticated SQL functions for drain, claims, and replay-safe round rewards; local game storage tracks progression only, preventing duplicate wallet credits.
+- Persist care in protected profiles; atomic authenticated SQL handles drain, claims and replay-safe rewards. Local game storage tracks progression only.
 - Reward unique spots on owned rounds; validate jigsaw moves against the saved initial order. Update care only after atomic success. Why: retries and fabricated placement must not pay.
 - Fund separate token and point ledgers only through verified payments; profile totals project ledger inserts while usePointsWallet preserves local spending. Why: retries cannot duplicate paid grants.
 - Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
 
 - Share identity and breakpoint navigation in AppShell; keep content routes device-independent. Why: consistent branding and flows.
 - Preserve the journal storage key through rebrands. Why: saved reflections must remain accessible.
-- Keep the reusable mentor portrait and welcome/loading/results states in MonereMentor; animate the CGI-style asset with reduced-motion support rather than duplicating character layouts.
+- Reuse MonereMentor portraits and welcome/loading/results states with reduced-motion support; never duplicate character layouts.
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
@@ -40,3 +40,4 @@
 - Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps. Why: discover public pages without leaking private destinations.
 - Extend jigsaw sizes end-to-end; preserve gifts. Why: all levels must play/pay.
 - Mirror legacy clothing in owner-scoped user_wardrobes via WardrobeSync; confirm equips after saving, without touching pets. Why: outfits persist across refresh.
+- Biblical Snap uses SQL-owned turns/scores and atomic daily ledger rewards with the shared care cache. Why: retries cannot pay twice.

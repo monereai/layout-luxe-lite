@@ -32,6 +32,56 @@ export type Database = {
         }
         Relationships: []
       }
+      biblical_snap_rounds: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          left_card: number
+          monere_score: number
+          player_score: number
+          right_card: number
+          shown_at: string
+          snapped: boolean
+          turn: number
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          left_card?: number
+          monere_score?: number
+          player_score?: number
+          right_card?: number
+          shown_at?: string
+          snapped?: boolean
+          turn?: number
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          left_card?: number
+          monere_score?: number
+          player_score?: number
+          right_card?: number
+          shown_at?: string
+          snapped?: boolean
+          turn?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biblical_snap_rounds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       care_game_rounds: {
         Row: {
           completed: boolean
@@ -165,6 +215,7 @@ export type Database = {
           daily_care_claimed: boolean
           equipped_pet_id: string | null
           full_energy_bonus: boolean
+          last_biblical_snap: string | null
           last_care_claim_date: string | null
           last_energy_claim_date: string | null
           last_energy_drain: string
@@ -180,6 +231,7 @@ export type Database = {
           daily_care_claimed?: boolean
           equipped_pet_id?: string | null
           full_energy_bonus?: boolean
+          last_biblical_snap?: string | null
           last_care_claim_date?: string | null
           last_energy_claim_date?: string | null
           last_energy_drain?: string
@@ -195,6 +247,7 @@ export type Database = {
           daily_care_claimed?: boolean
           equipped_pet_id?: string | null
           full_energy_bonus?: boolean
+          last_biblical_snap?: string | null
           last_care_claim_date?: string | null
           last_energy_claim_date?: string | null
           last_energy_drain?: string
@@ -367,6 +420,10 @@ export type Database = {
     }
     Functions: {
       account_tier: { Args: { p_user: string }; Returns: string }
+      biblical_snap_action: {
+        Args: { p_action: string; p_round?: string; p_turn?: number }
+        Returns: Json
+      }
       care_apply: { Args: { p_action?: string }; Returns: Json }
       care_finish_round: {
         Args: { p_proof: Json; p_round: string }
