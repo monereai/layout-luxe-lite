@@ -53,6 +53,7 @@ export function CategoryPicker({
   interactive = false,
   listening = false,
   backdrop,
+  wide = false,
 }: {
   value: string[];
   onChange: (titles: string[]) => void;
@@ -60,6 +61,7 @@ export function CategoryPicker({
   interactive?: boolean;
   listening?: boolean;
   backdrop?: string;
+  wide?: boolean;
 }) {
   const toggle = (title: string) => {
     if (value.includes(title)) onChange(value.filter((t) => t !== title));
@@ -78,7 +80,7 @@ export function CategoryPicker({
         <Button variant={stationView === "topics" ? "default" : "outline"} size="sm" onClick={() => setStationView("topics")}><Compass />Mission topics</Button>
         <Button variant={stationView === "character" ? "default" : "outline"} size="sm" onClick={() => setStationView("character")}><MessageCircle />Monere controls</Button>
       </nav>}
-      <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className="orbit-stage">
+      <div role="group" aria-label={`Which areas of life is this about? Pick up to ${MAX_CATEGORIES}.`} className={`orbit-stage ${wide ? "orbit-wide" : ""}`}>
         <div className="orbit-center">
           {backdrop && property.activeProperty === "treehouse" && (
             <img src={backdrop} alt="" width={640} height={640} className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[160%] w-[160%] max-w-none -translate-x-1/2 -translate-y-1/2 select-none object-contain opacity-60 sm:h-[135%] sm:w-[135%] sm:opacity-50" />
