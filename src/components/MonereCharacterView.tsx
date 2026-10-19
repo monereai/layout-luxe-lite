@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { INITIAL_CHARACTER_VIEW, characterFrame, rotateCharacter, wheelCharacterZoom, zoomCharacter } from "@/lib/character-view";
 import { useLang } from "@/lib/i18n";
 import { CharacterFrameContext } from "@/lib/character-frame";
+import { PetCompanion } from "@/components/PetCompanion";
 
 const RESET_LABELS = { en: "Reset View", es: "Restablecer vista", fr: "Réinitialiser la vue", pt: "Repor vista", de: "Ansicht zurücksetzen" };
 type Point = { x: number; y: number };
@@ -55,6 +56,7 @@ export function MonereCharacterView({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative h-full w-full">
+      <PetCompanion />
       <div
         ref={surface}
         role="group"
