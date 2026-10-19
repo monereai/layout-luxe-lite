@@ -211,6 +211,13 @@
       "when": 1792422570759,
       "tag": "0029_biblical_snap_rounds",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792424445633,
+      "tag": "0030_daily_dilemma",
+      "breakpoints": true
     }
   ]
 }
