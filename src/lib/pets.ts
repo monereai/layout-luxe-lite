@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlan } from "@/hooks/usePlan";
 import puppy from "@/assets/pets/puppy.png";
 import kitten from "@/assets/pets/kitten.png";
 import goldfish from "@/assets/pets/goldfish.png";
@@ -22,6 +23,8 @@ export const PETS: Pet[] = [
 export type PetState = { owned: string[]; active: string | null };
 const EMPTY: PetState = { owned: [], active: null };
 let state: PetState = EMPTY;
+let owner: string | null = null;
+let revision = 0;
 const subs = new Set<(s: PetState) => void>();
 function set(next: PetState) { state = next; subs.forEach((f) => f(next)); }
 
@@ -33,32 +36,43 @@ export function petButtonState(s: PetState, wallet: number, pet: Pet): "equipped
 }
 
 export async function loadPets() {
+  const currentRevision = ++revision;
   const { data } = await supabase.auth.getUser();
-  if (!data.user) { set(EMPTY); return; }
-  const [{ data: row }, { data: prof }] = await Promise.all([
+  if (currentRevision !== revision) return;
+  if (!data.user) { owner = null; set(EMPTY); return; }
+  if (owner !== data.user.id) { owner = data.user.id; set(EMPTY); }
+  const [{ data: row, error: inventoryError }, { data: prof, error: profileError }] = await Promise.all([
     supabase.from("user_pets").select("owned_pets").eq("user_id", data.user.id).maybeSingle(),
     supabase.from("profiles").select("equipped_pet_id").eq("user_id", data.user.id).maybeSingle(),
   ]);
+  if (currentRevision !== revision) return;
+  if (inventoryError || profileError) throw new Error("Could not load your companion.");
   set({ owned: row?.owned_pets ?? [], active: prof?.equipped_pet_id ?? null });
 }
 
 /** Purchases and equips are checked and charged by the server against the shared points balance. */
 export async function petAction(action: "buy" | "equip" | "unequip", id: string): Promise<PetState> {
+  const currentRevision = ++revision;
   const { data, error } = await supabase.rpc("pet_action", { p_action: action, p_id: id });
   if (error) throw new Error(error.message);
   const r = data as { owned: string[]; active: string | null };
   const next = { owned: r.owned ?? [], active: r.active ?? null };
-  set(next);
+  if (currentRevision === revision) set(next);
   return next;
 }
 
 export function usePets() {
+  const { user, ready } = usePlan();
+  const userId = user?.id ?? null;
   const [s, setS] = useState<PetState>(state);
   useEffect(() => {
     setS(state);
     subs.add(setS);
-    loadPets().catch(() => {});
+    if (ready) {
+      if (!userId) { ++revision; owner = null; set(EMPTY); }
+      else void loadPets().catch(() => {});
+    }
     return () => { subs.delete(setS); };
-  }, []);
-  return s;
+  }, [userId, ready]);
+  return userId && owner === userId ? s : EMPTY;
 }

@@ -1,3 +1,6 @@
+# Companion pet readiness
+- [ ] Verify saved equip/unequip, account-safe loading, clothing coexistence and toasts with separate QA data; do not publish.
+
 # Formidable jigsaw
 - [x] Add a fifth, harder 7×7 Formidable level with unique artwork, sequential unlock and verified game rewards; preserve existing earned shop gifts.
 - [x] Verify level selection, 49-piece completion and +1 energy/+5 points on the separate QA account; 25 tests pass and mobile has no horizontal overflow.

@@ -22,7 +22,7 @@ export function PetShop() {
     try {
       await petAction(action, pet.id);
       if (action === "buy") { await refresh(); toast.success(`Purchase successful! ${pet.name} is now your pet.`); }
-      else if (action === "equip") toast.success(`${pet.name} equipped — now by Monere's side!`);
+      else if (action === "equip") toast.success(`Equipped ${pet.name} as your companion! 🦁`);
       else toast.success(`${pet.name} unequipped.`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
