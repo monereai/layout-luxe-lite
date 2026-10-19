@@ -101,7 +101,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             )}
           </div>
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t("tagline")}</p>
+          <p className="mt-3 text-lg font-medium leading-relaxed text-muted-foreground sm:text-xl md:text-2xl">{t("tagline")}</p>
         </header>
         <div className={`flex flex-1 flex-col md:grid md:items-start md:gap-5 ${collapsed ? "md:grid-cols-[3.5rem_minmax(0,1fr)] xl:grid-cols-[3.5rem_minmax(0,1fr)_15rem]" : "md:grid-cols-[11rem_minmax(0,1fr)] xl:grid-cols-[12rem_minmax(0,1fr)_15rem]"}`}>
           <aside className="sticky top-6 hidden min-w-0 md:flex md:flex-col">
