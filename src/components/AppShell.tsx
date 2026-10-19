@@ -68,7 +68,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   useWebMCP({
     name: "navigate_monere",
     description: "Open a page from MonereAI's visible menu: Seek, Daily, Journal, Find Monere, Jigsaw, Points Shop, or Monere’s Daily Dilemma.",
-    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for the Monere’s Daily Dilemma card game." } }, required: ["page"], additionalProperties: false },
+    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
       if (page === "dilemma") {
         setMenuOpen(false);

@@ -187,7 +187,7 @@ function Home() {
 
           <Treehouse>
             <CategoryPicker value={categories} onChange={setCategories} actionLabel={t("talk")} interactive listening={listening} backdrop={TREEHOUSE_BACKDROP} wide />
-            <Button variant="secondary" onClick={() => setDilemmaOpen(true)} className="relative z-20 mx-auto mt-4 flex h-auto whitespace-normal py-3"><BookHeart /> Biblical Dilemma</Button>
+            <Button variant="secondary" onClick={() => setDilemmaOpen(true)} className="relative z-20 mx-auto mt-4 flex h-auto whitespace-normal py-3"><BookHeart /> {t("dailyDilemma")}</Button>
             <div role="region" aria-label="Chat with Monere" className="relative z-20 mx-auto mt-5 w-full max-w-lg border-t border-border pt-4">
               <label htmlFor="monere-chat" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 {t("whatsOnMind")}
