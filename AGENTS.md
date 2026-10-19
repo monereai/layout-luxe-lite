@@ -26,7 +26,7 @@
 - Use build-specific managed Stripe tokens for environment routing and the configured public production key for Stripe.js; keep server secrets gateway-managed. Validate same-origin payment returns through usePaymentReturn after auth hydration. Why: live payments must preserve account sessions and never grant benefits from URL flags.
 - Keep the store catalog visible while signed out and require sign-in for Stripe embedded checkout. Why: purchases must be tied to an account.
 - Membership selection opens a confirmation before mounting Stripe checkout; confirmation never grants entitlements or credits. Why: users must approve recurring billing and benefits must depend on verified payment.
-- Habitat unlocks/equips for signed-in users go only through the property_action database function (server price, account points, Club check); clients cannot write user_properties. Why: local state could grant paid habitats free.
+- Habitat and pet buys/equips for signed-in users go only through property_action / pet_action (server prices, shared points balance, Club check for habitats); clients cannot write user_properties or user_pets. Why: local state could grant paid items free.
 - Space Station admission is checked both by property_action and at the character canvas, regardless of stored ownership. Why: expired Club access and old purchases cannot bypass the exclusive habitat gate.
 - QA tier overrides are honored by account_tier/is_premium only for protected admin/tester role rows and never modify subscriptions or grant monthly credits. Why: test tiers remain stable during care refresh without granting public privileges.
 - AI advice, follow-up, story and story-image endpoints require sign-in. Why: unauthenticated calls spend AI credits.
@@ -39,4 +39,3 @@
 
 - Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps. Why: discover public pages without leaking private destinations.
 - Extend jigsaw sizes across UI, progression, server validation and SQL; retain original gift eligibility. Why: extra levels must play/pay without revoking gifts.
-- Pet purchases/equips go only through the pet_action database function (server prices, shared points balance via negative point_credits, user_pets ownership); clients cannot write user_pets. Why: pets must use the one points balance and cannot be granted locally.
