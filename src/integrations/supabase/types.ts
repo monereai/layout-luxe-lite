@@ -89,8 +89,10 @@ export type Database = {
           id: string
           initial_order: number[]
           kind: string
+          last_reward_at: string | null
           rewarded_finds: number[]
           size: number
+          spots: Json
           user_id: string
         }
         Insert: {
@@ -99,8 +101,10 @@ export type Database = {
           id?: string
           initial_order?: number[]
           kind: string
+          last_reward_at?: string | null
           rewarded_finds?: number[]
           size?: number
+          spots?: Json
           user_id: string
         }
         Update: {
@@ -109,9 +113,50 @@ export type Database = {
           id?: string
           initial_order?: number[]
           kind?: string
+          last_reward_at?: string | null
           rewarded_finds?: number[]
           size?: number
+          spots?: Json
           user_id?: string
+        }
+        Relationships: []
+      }
+      clothing_catalog: {
+        Row: {
+          category: string
+          cost: number
+          id: string
+        }
+        Insert: {
+          category: string
+          cost: number
+          id: string
+        }
+        Update: {
+          category?: string
+          cost?: number
+          id?: string
+        }
+        Relationships: []
+      }
+      clothing_combinations: {
+        Row: {
+          footwear: string
+          hat: string
+          id: string
+          outfit: string
+        }
+        Insert: {
+          footwear: string
+          hat: string
+          id: string
+          outfit: string
+        }
+        Update: {
+          footwear?: string
+          hat?: string
+          id?: string
+          outfit?: string
         }
         Relationships: []
       }
@@ -495,6 +540,10 @@ export type Database = {
           ok: boolean
           organization_name: string
         }[]
+      }
+      wardrobe_action: {
+        Args: { p_action: string; p_equipped?: Json; p_id?: string }
+        Returns: Json
       }
     }
     Enums: {

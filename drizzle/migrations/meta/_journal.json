@@ -225,6 +225,13 @@
       "when": 1792428994147,
       "tag": "0031_daily_dilemma_dev_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792436835299,
+      "tag": "0032_server_owned_wardrobe_and_find_spots",
+      "breakpoints": true
     }
   ]
 }
