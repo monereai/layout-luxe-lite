@@ -92,12 +92,12 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14 md:h-16 md:w-16 border border-primary/30 bg-primary/10 text-primary">
               <Compass className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" strokeWidth={1.5} aria-hidden="true" />
             </span>
-            <span className="truncate font-display text-3xl font-semibold min-[380px]:text-4xl sm:text-5xl md:text-6xl text-foreground">Monere<span className="text-primary">AI</span></span>
+            <span className="truncate font-display text-3xl font-semibold min-[380px]:text-4xl sm:text-5xl md:text-6xl text-foreground pop-shadow">Monere<span className="text-primary">AI</span></span>
           </Link>
           <div className="flex flex-row flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1 text-xs">
             <Button variant="outline" size="icon" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="md:hidden shrink-0"><Menu className="h-5 w-5" aria-hidden="true" /></Button>
-            <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 font-semibold text-primary"><Coins className="h-3.5 w-3.5" aria-hidden="true" /><span className="tabular-nums">{wallet}</span> pts</Link>
-            {user && energy != null && <span key={gain ? `gain-${gain.id}` : "energy"} aria-label={`Monere energy: ${energy} percent`} title="Monere's energy" className={`relative flex items-center gap-1.5 rounded-full border border-primary/40 bg-accent px-3 py-1 text-base font-semibold text-accent-foreground ${gain ? "energy-pop" : ""}`}><Zap className="h-5 w-5" aria-hidden="true" /><span className="tabular-nums">{energy}</span>%{gain && <span className="energy-gain" aria-hidden="true">+{gain.amount}</span>}</span>}
+            <Link to="/shop" aria-label={`Points Shop: ${wallet} points`} className="flex items-center gap-1.5 rounded-full border border-points/45 bg-points/10 px-2 py-0.5 font-semibold text-points pop-shadow"><Coins className="h-3.5 w-3.5" aria-hidden="true" /><span className="font-heading text-sm tabular-nums">{wallet}</span> pts</Link>
+            {user && energy != null && <span key={gain ? `gain-${gain.id}` : "energy"} aria-label={`Monere energy: ${energy} percent`} title="Monere's energy" className={`relative flex items-center gap-1.5 rounded-full border border-energy/45 bg-energy/10 px-3 py-1 text-base font-semibold text-energy pop-shadow ${gain ? "energy-pop" : ""}`}><Zap className="h-5 w-5" aria-hidden="true" /><span className="font-heading text-lg tabular-nums">{energy}</span>%{gain && <span className="energy-gain" aria-hidden="true">+{gain.amount}</span>}</span>}
             <label className="flex items-center gap-1 text-muted-foreground"><Globe className="h-3.5 w-3.5" aria-hidden="true" /><select aria-label={t("language")} value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="rounded-md border border-border bg-card px-1 py-0.5 text-xs text-foreground">{LANGS.map((l) => <option key={l.id} value={l.id}>{l.flag} {l.label}</option>)}</select></label>
             {premium && <span className="rounded-full bg-primary px-2.5 py-0.5 font-bold text-primary-foreground">{tier === "club" ? "CLUB" : "PLUS"}</span>}
             {!premium && <PassCodeLink label="Access code" className="font-semibold !text-primary" />}
@@ -146,7 +146,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             <div className="border-b border-border py-5">
               <Link to="/shop" className="flex items-center justify-between gap-3" aria-label={`Points Shop: ${wallet} Shop Points`}>
                 <span className="flex items-center gap-2 text-sm text-muted-foreground"><Award className="h-4 w-4 text-primary" />Shop Points</span>
-                <span className="font-display text-2xl font-semibold tabular-nums text-primary">{wallet}</span>
+                <span className="font-heading text-2xl font-semibold tabular-nums text-points pop-shadow">{wallet}</span>
               </Link>
               {game.detective && <p className="mt-3 text-xs text-primary">Master Detective</p>}
               <Link to="/shop" title={t("shop")} aria-label={`${t("shop")}: ${wallet} Shop Points`} className="mt-4 flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">

@@ -112,10 +112,10 @@
   font-family: var(--font-display);
   letter-spacing: 0.01em;
 }
-@utility text-pop {
+@utility pop-shadow {
   text-shadow: var(--shadow-text);
 }
-@utility text-pop-soft {
+@utility pop-shadow-soft {
   text-shadow: var(--shadow-text-soft);
 }
 @utility surface-card {
