@@ -1,7 +1,7 @@
 # Mobile overlap fixes
 - [x] Move Admin Sandbox into phone page flow, retaining its desktop floating position.
 - [x] Bound the Space Station upgrade window above phone navigation and the safe area.
-- [ ] Verify both controls on narrow and short phone screens without changing account data.
+- [x] Verify collapsed/expanded Sandbox and Space Station upgrade clearance at 320×568, 390×844 and 430×740 on the separate QA account; upgrade opens memberships, screenshots confirm no overlaps, build OK. No purchases or sandbox actions; existing CookieYes localhost warning remains unrelated. Not published.
 
 # Daily Dilemma replacement
 - [x] Replace Snap modal/menu with four rotating daily three-choice stories, reflections and companion celebration.
