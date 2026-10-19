@@ -181,6 +181,15 @@
 @keyframes tile-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 @media (min-width: 640px) { .float-tile { width: 29%; min-height: 4.6rem; } }
 
+/* Wide stage (home treehouse): tiles drift out past Monere so the habitat picture behind him reads clearly. */
+.orbit-wide { max-width: 30rem; }
+.orbit-wide .orbit-center { inset: 0 4%; }
+@media (min-width: 768px) {
+  .orbit-wide { max-width: 44rem; }
+  .orbit-wide .orbit-center { inset: 0 18%; }
+  .orbit-wide .float-tile { width: 9rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mentor-avatar, .mentor-compass, .mentor-spark, .insight-dot, .float-tile, .float-counter { animation: none; }
 }
