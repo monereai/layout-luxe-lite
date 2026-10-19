@@ -13,7 +13,7 @@ export const LANG_IDS = LANGS.map((l) => l.id) as [Lang, ...Lang[]];
 
 const en = {
   seek: "Seek", daily: "Daily", journal: "Journal", game: "Find Monere", jigsaw: "Jigsaw", signIn: "Sign in", signOut: "Sign out", managePlan: "Manage plan", shop: "Points Shop", petShop: "Pet Shop", petShopSub: "Outfits & habitats for Monere",
-  tagline: "Guided Christian Wisdom & Decision Integrity For Our Children", biblicalSnap: "Biblical Snap", language: "Language",
+  tagline: "Guided Christian Wisdom & Decision Integrity For Our Children", dailyDilemma: "Monere’s Daily Dilemma", language: "Language",
   crisisBar: "In crisis or feeling unsafe? Tap for free, confidential 24/7 help.",
   whatsOnMind: "What's on your mind?", placeholder: "e.g., My friends want me to gossip about someone, but I feel bad...",
   includeSong: "🎵 Include a Song Recommendation", talk: "Talk to Monere", freeLeft: "{n} of {max} free chats left today", getPlus: "Get Monere Plus",
@@ -40,7 +40,7 @@ type Dict = typeof en;
 
 const es: Dict = {
   seek: "Buscar", daily: "Diario", journal: "Diario personal", game: "Encuentra a Monere", jigsaw: "Rompecabezas", signIn: "Entrar", signOut: "Salir", managePlan: "Gestionar plan", shop: "Tienda de puntos", petShop: "Tienda de mascotas", petShopSub: "Ropa y hábitats para Monere",
-  tagline: "Sabiduría cristiana guiada e integridad Para Nuestros Hijos", biblicalSnap: "Biblical Snap", language: "Idioma",
+  tagline: "Sabiduría cristiana guiada e integridad Para Nuestros Hijos", dailyDilemma: "Monere’s Daily Dilemma", language: "Idioma",
   crisisBar: "¿En crisis o te sientes inseguro? Toca para ayuda gratuita y confidencial 24/7.",
   whatsOnMind: "¿Qué tienes en mente?", placeholder: "p. ej., Mis amigos quieren que hable mal de alguien, pero me siento mal...",
   includeSong: "🎵 Incluir una canción recomendada", talk: "Habla con Monere", freeLeft: "Te quedan {n} de {max} charlas gratis hoy", getPlus: "Obtener Monere Plus",
@@ -66,7 +66,7 @@ const es: Dict = {
 
 const fr: Dict = {
   seek: "Chercher", daily: "Quotidien", journal: "Journal", game: "Trouve Monere", jigsaw: "Puzzle", signIn: "Connexion", signOut: "Déconnexion", managePlan: "Gérer l'abonnement", shop: "Boutique de points", petShop: "Boutique d'animaux", petShopSub: "Tenues et habitats pour Monere",
-  tagline: "Sagesse chrétienne guidée et intégrité Pour Nos Enfants", biblicalSnap: "Biblical Snap", language: "Langue",
+  tagline: "Sagesse chrétienne guidée et intégrité Pour Nos Enfants", dailyDilemma: "Monere’s Daily Dilemma", language: "Langue",
   crisisBar: "En crise ou en danger ? Touche ici pour une aide gratuite et confidentielle 24h/24.",
   whatsOnMind: "Qu'est-ce qui te préoccupe ?", placeholder: "ex. : Mes amis veulent que je critique quelqu'un, mais je me sens mal...",
   includeSong: "🎵 Inclure une chanson recommandée", talk: "Parler à Monere", freeLeft: "Il te reste {n} sur {max} discussions gratuites aujourd'hui", getPlus: "Obtenir Monere Plus",
@@ -92,7 +92,7 @@ const fr: Dict = {
 
 const pt: Dict = {
   seek: "Procurar", daily: "Diário", journal: "Diário pessoal", game: "Encontre o Monere", jigsaw: "Quebra-cabeça", signIn: "Entrar", signOut: "Sair", managePlan: "Gerir plano", shop: "Loja de pontos", petShop: "Loja de animais", petShopSub: "Roupa e habitats para o Monere",
-  tagline: "Sabedoria cristã guiada e integridade Para os Nossos Filhos", biblicalSnap: "Biblical Snap", language: "Idioma",
+  tagline: "Sabedoria cristã guiada e integridade Para os Nossos Filhos", dailyDilemma: "Monere’s Daily Dilemma", language: "Idioma",
   crisisBar: "Em crise ou a sentir-te inseguro? Toca para ajuda gratuita e confidencial 24/7.",
   whatsOnMind: "O que tens em mente?", placeholder: "ex.: Os meus amigos querem que eu fale mal de alguém, mas sinto-me mal...",
   includeSong: "🎵 Incluir uma música recomendada", talk: "Falar com o Monere", freeLeft: "Restam {n} de {max} conversas grátis hoje", getPlus: "Obter Monere Plus",
@@ -118,7 +118,7 @@ const pt: Dict = {
 
 const de: Dict = {
   seek: "Suchen", daily: "Täglich", journal: "Tagebuch", game: "Finde Monere", jigsaw: "Puzzle", signIn: "Anmelden", signOut: "Abmelden", managePlan: "Abo verwalten", shop: "Punkt-Shop", petShop: "Tier-Shop", petShopSub: "Outfits und Habitate für Monere",
-  tagline: "Geführte christliche Weisheit & Entscheidungsintegrität Für Unsere Kinder", biblicalSnap: "Biblical Snap", language: "Sprache",
+  tagline: "Geführte christliche Weisheit & Entscheidungsintegrität Für Unsere Kinder", dailyDilemma: "Monere’s Daily Dilemma", language: "Sprache",
   crisisBar: "In einer Krise oder fühlst du dich unsicher? Tippe für kostenlose, vertrauliche Hilfe rund um die Uhr.",
   whatsOnMind: "Was beschäftigt dich?", placeholder: "z. B. Meine Freunde wollen, dass ich über jemanden lästere, aber ich fühle mich schlecht...",
   includeSong: "🎵 Songempfehlung einbeziehen", talk: "Mit Monere sprechen", freeLeft: "Noch {n} von {max} kostenlosen Chats heute", getPlus: "Monere Plus holen",

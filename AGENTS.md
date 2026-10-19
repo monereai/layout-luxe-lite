@@ -40,4 +40,4 @@
 - Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps. Why: discover public pages without leaking private destinations.
 - Extend jigsaw sizes end-to-end; preserve gifts. Why: all levels must play/pay.
 - Mirror legacy clothing in owner-scoped user_wardrobes via WardrobeSync; confirm equips after saving, without touching pets. Why: outfits persist across refresh.
-- Biblical Snap uses SQL-owned turns/scores and atomic daily ledger rewards with the shared care cache. Why: retries cannot pay twice.
+- Daily Dilemma uses SQL-owned UTC choices and atomic daily rewards with shared care cache. Why: retries cannot pay twice.
