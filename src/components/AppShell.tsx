@@ -13,6 +13,7 @@ import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import shopMark from "@/assets/shop/store-front.png";
 import petShopMark from "@/assets/shop/pet-shop.png";
+import crossAsset from "@/assets/monere-cross.png.asset.json";
 
 import { useWebMCP } from "use-webmcp-tool";
 import { runWebMCPTool } from "@/lib/webmcp-telemetry";
@@ -93,11 +94,8 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               <Compass className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" strokeWidth={1.5} aria-hidden="true" />
             </span>
             <span className="truncate font-display text-3xl font-semibold min-[380px]:text-4xl sm:text-5xl md:text-6xl text-foreground pop-shadow">Monere<span className="text-primary">AI</span></span>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary sm:h-14 sm:w-14 md:h-16 md:w-16" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10" aria-hidden="true" focusable="false">
-                <rect x="9.75" y="2" width="4.5" height="20" rx="2.25" />
-                <rect x="4.5" y="6.25" width="15" height="4.5" rx="2.25" />
-              </svg>
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 sm:h-14 sm:w-14 md:h-16 md:w-16" aria-hidden="true">
+              <img src={crossAsset.url} alt="" width={432} height={692} decoding="async" className="h-7 w-auto object-contain sm:h-9 md:h-11" />
             </span>
           </Link>
           <div className="flex flex-row flex-wrap items-center justify-end gap-x-3 gap-y-1 pt-1 text-xs">
