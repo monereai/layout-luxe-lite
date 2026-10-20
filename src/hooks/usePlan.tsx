@@ -34,17 +34,23 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   const check = useCallback(async (u: User | null) => {
     if (!u) { setPremium(false); setTier("free"); setBonus(0); setTokens(0); return false; }
-    const [{ data }, { data: profile }] = await Promise.all([
+    await claimDailyLogin(u.id);
+    const [{ data, error }, { data: profile, error: profileError }] = await Promise.all([
       supabase.rpc("is_premium", { check_env: getStripeEnvironment() }),
       supabase.from("profiles").select("monere_points,monere_tokens,subscription_tier").eq("user_id", u.id).maybeSingle(),
     ]);
+    if (!profileError) {
+      setBonus(profile?.monere_points ?? 0);
+      setTokens(profile?.monere_tokens ?? 0);
+    }
+    if (error || profileError) {
+      toast.error("Couldn't check your membership. Please try again.", { id: "membership-check-error" });
+      return false;
+    }
     const p = data === true;
     setPremium(p);
-    setBonus(profile?.monere_points ?? 0);
-    setTokens(profile?.monere_tokens ?? 0);
     setTier(p && profile?.subscription_tier === "monere_club" ? "club" : p ? "plus" : "free");
     window.localStorage.setItem("monereai-tier", p ? "premium" : "free");
-    void claimDailyLogin(u.id).then(() => check(u));
     return p;
   }, []);
 

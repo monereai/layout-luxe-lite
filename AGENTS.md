@@ -18,6 +18,7 @@
 - Preserve the journal storage key through rebrands. Why: saved reflections must remain accessible.
 - Reuse MonereMentor portraits and welcome/loading/results states with reduced-motion support; never duplicate character layouts.
 - Premium status comes only from the is_premium database function (subscriptions + pass-code redemptions); never trust client-side tier flags for access. Why: one source of truth across devices.
+- Claim login before balance reads; never recursively check membership or downgrade on read errors. Why: avoid request storms and false Free status.
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
 - Use usePointsWallet for all spendable-points displays, deducting clothing and habitat spending from game and credited points. Why: displayed points must match purchasing power everywhere.
