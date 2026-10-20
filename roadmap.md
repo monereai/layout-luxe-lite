@@ -1,6 +1,6 @@
 # Account-check monitoring fixes
-- [ ] Stop recursive membership reads and verify daily login balances still refresh.
-- [ ] Verify authenticated membership permissions, error handling, and signed-in request counts on the isolated QA account.
+- [x] Stop recursive membership reads; claim login before balances, with 15 focused regression tests passing.
+- [x] Confirm authenticated execute permission; preserve verified membership on read errors. Isolated QA browser checks settle at three successful startup reads and remain unchanged five seconds later; preview build OK. Not published.
 
 # Daily Dilemma developer reset
 - [x] Add a protected Dev Reset Timer control; isolated QA verified reset, refresh, practice completion and phone button, with one daily credit and unchanged 275 points. Nine focused tests pass; preview build OK; not published.
