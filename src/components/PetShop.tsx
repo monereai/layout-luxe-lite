@@ -6,15 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { usePlan } from "@/hooks/usePlan";
-import { PETS, petAction, petButtonState, usePets, type Pet } from "@/lib/pets";
+import { PETS, PET_RARITIES, petAction, petButtonState, usePets, type Pet } from "@/lib/pets";
 
 const BUTTON = "mt-auto h-auto min-h-8 w-full whitespace-normal px-2 py-2 text-center leading-tight";
 const PET_CATEGORIES = ["All Pets", "Common", "Rare", "Legendary"] as const;
-const PET_RARITIES: Record<string, "Common" | "Rare" | "Legendary"> = {
-  goldfish: "Common", puppy: "Common", kitten: "Common", hedgehog: "Common", turtle: "Common",
-  bunny: "Rare", parrot: "Rare", fox: "Rare", owl: "Rare",
-  "baby-dragon": "Legendary", unicorn: "Legendary",
-};
 const RARITY_STYLE = {
   Common: "border-border bg-secondary text-secondary-foreground",
   Rare: "border-energy/30 bg-energy/10 text-energy",

@@ -30,6 +30,13 @@ export const PETS: Pet[] = [
   { id: "unicorn", name: "Unicorn", description: "A magical friend with a rainbow mane.", cost: 2000, src: unicorn },
 ];
 
+export type PetRarity = "Common" | "Rare" | "Legendary";
+export const PET_RARITIES: Record<string, PetRarity> = {
+  goldfish: "Common", puppy: "Common", kitten: "Common", hedgehog: "Common", turtle: "Common",
+  bunny: "Rare", parrot: "Rare", fox: "Rare", owl: "Rare",
+  "baby-dragon": "Legendary", unicorn: "Legendary",
+};
+
 export type PetState = { owned: string[]; active: string | null };
 const EMPTY: PetState = { owned: [], active: null };
 let state: PetState = EMPTY;
