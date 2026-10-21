@@ -24,6 +24,9 @@ describe("story fallback art", () => {
     const painted = new Promise<string>((resolve) => setTimeout(() => resolve("painted.jpg"), 5));
     expect(await raceSceneBackup("backup.jpg", painted, 2000)).toBe("painted.jpg");
   });
+  it("returns ready-made art immediately after generation fails", async () => {
+    expect(await raceSceneBackup("backup.jpg", Promise.reject(new Error("Picture refused")), 10000)).toBe("backup.jpg");
+  });
 });
 
 import { sceneFallbackArt } from "@/lib/story-art";

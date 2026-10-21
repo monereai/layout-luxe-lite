@@ -1,7 +1,8 @@
 # Story picture recovery
-- [ ] Show ready-made story art immediately, surface generation failures, and never retry refusals.
-- [ ] Return a private saved-picture URL on cache hits and test two-request reuse.
-- [ ] Verify fallback in the signed-in QA browser; live generation is blocked by confirmed safety refusal.
+- [x] Show ready-made story art immediately, surface generation failures, and never retry refusals.
+- [x] Return a private saved-picture URL on cache hits; controlled two-request regression confirms one generation, one stored image, then a URL-only hit.
+- [x] Verify fallback in signed-in QA browser with simulated refusal: art/text/choices appear in 0.19s, art loads, one image request, no replay. Existing CookieYes localhost warning only.
+- [ ] Verify real generated-image reuse after provider refusal is resolved; no cached production image exists and confirmed moderation refusal blocks further generation checks. Not published.
 
 # Account-check monitoring fixes
 - [x] Stop recursive membership reads; claim login before balances, with 15 focused regression tests passing.
