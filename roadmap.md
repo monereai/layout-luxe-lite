@@ -1,3 +1,7 @@
+# Clothing equip reliability
+- [ ] Repair ambiguous clothing price evaluation while preserving server-owned prices and free owned equips.
+- [ ] Verify saved equipment and immediate character updates on the separate QA account.
+
 # Admin account email alerts
 - [x] Add fixed-recipient registration/subscription templates: confirmed new users notify on first authenticated app visit; verified live active subscriptions notify through shared Stripe sync. Managed event keys deduplicate sends; email failures never block paid benefits. No email queues/tables or new provider key.
 - [x] Verify details/auth rejection and stable managed event keys with focused tests; sign-up page renders and protected template preview returns 200 with project authorization / 401 without. No real registration/payment or email delivery tested while sender verification is pending.
