@@ -109,7 +109,7 @@ function Home() {
     const payload = { category, situation, includeSong, userName: userName || undefined, profile, lang };
     const res = await (user ? ask({ data: payload }) : askGuest({ data: payload })).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
-    if (!res.ok) { toast.error(res.error); if (!user) setGuestModal(true); return; }
+    if (!res.ok) { toast.error(res.error); if (!user && res.error.includes("guest messages")) setGuestModal(true); return; }
     if (!user) { recordQuery(); setUsed(getUsedToday()); if (!canAsk(getUsedToday(), false)) window.setTimeout(() => setGuestModal(true), 2500); }
     else if (!premium && !res.wisdom.personalReply) { recordQuery(); setUsed(getUsedToday()); }
     setWisdom(res.wisdom);
