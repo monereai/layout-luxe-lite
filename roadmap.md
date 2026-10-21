@@ -1,6 +1,6 @@
 # Pet Shop interior
-- [ ] Replace the storefront backdrop with a warm pet-store interior and preserve the interactive Monere view.
-- [ ] Keep rarity tabs and pet cards readable; verify phone/desktop filtering and unchanged shop behavior.
+- [x] Replace the storefront backdrop with a warm pet-store interior and preserve the interactive Monere view.
+- [x] Verify loaded interior art, unobstructed Monere, rarity filters (3 Common / 2 Rare / 1 Legendary) and no horizontal overflow at 320, 454 and 1280px; nine existing pet tests pass and build OK. No purchase/account changes; preview-only. Existing CookieYes localhost warning remains unrelated.
 
 # Story picture recovery
 - [x] Show ready-made story art immediately, surface generation failures, and never retry refusals.
