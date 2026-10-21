@@ -66,8 +66,8 @@ export function GuestSignupModal({ open, onOpenChange, next = "/", points = 0 }:
         <MonereMentor mode="results" companion />
         <DialogDescription className="font-body text-base leading-relaxed text-foreground">{guestRewardText(points)}</DialogDescription>
         <div className="mt-2 grid gap-2">
-          <Button asChild className="btn-gold h-auto whitespace-normal py-3.5 text-base"><Link to="/auth" search={{ next }}>Save My Progress (Free Sign-Up)</Link></Button>
-          <Button variant="outline" disabled={busy} onClick={async () => { setBusy(true); await googleSignIn(); setBusy(false); }} className="h-auto whitespace-normal py-3">
+          <Button asChild className="btn-gold h-auto whitespace-normal py-3.5 text-base"><Link to="/auth" search={{ next }} onClick={() => localStorage.setItem("monere-signup-source", "guest conversion")}>Save My Progress (Free Sign-Up)</Link></Button>
+          <Button variant="outline" disabled={busy} onClick={async () => { localStorage.setItem("monere-signup-source", "guest conversion"); setBusy(true); await googleSignIn(); setBusy(false); }} className="h-auto whitespace-normal py-3">
             {busy ? "Opening Google…" : "Continue with Google"}
           </Button>
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground">Maybe later</Button>

@@ -1,3 +1,8 @@
+# Admin account email alerts
+- [x] Add fixed-recipient registration/subscription templates: confirmed new users notify on first authenticated app visit; verified live active subscriptions notify through shared Stripe sync. Managed event keys deduplicate sends; email failures never block paid benefits. No email queues/tables or new provider key.
+- [x] Verify details/auth rejection and stable managed event keys with focused tests; sign-up page renders and protected template preview returns 200 with project authorization / 401 without. No real registration/payment or email delivery tested while sender verification is pending.
+- [ ] Enable delivery after notify.monereai.com verification and publishing (owner action).
+
 # Pet Shop interior
 - [x] Replace the storefront backdrop with a warm pet-store interior and preserve the interactive Monere view.
 - [x] Verify loaded interior art, unobstructed Monere, rarity filters (3 Common / 2 Rare / 1 Legendary) and no horizontal overflow at 320, 454 and 1280px; nine existing pet tests pass and build OK. No purchase/account changes; preview-only. Existing CookieYes localhost warning remains unrelated.

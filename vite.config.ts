@@ -7,6 +7,8 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
+import path from "node:path";
+import { loadEnv } from "vite";
 
 export default defineConfig({
   tanstackStart: {
@@ -15,7 +17,13 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    resolve: { alias: {
+      "entities/lib/decode.js": path.resolve("node_modules/entities/lib/decode.js"),
+      "entities/lib/encode.js": path.resolve("node_modules/entities/lib/encode.js"),
+      entities: path.resolve("node_modules/entities"),
+    } },
     plugins: [
+      { name: "email-server-env", config: (_, { mode }) => { Object.assign(process.env, loadEnv(mode, process.cwd(), "")); } },
       mcpPlugin(),
       VitePWA({
         registerType: "autoUpdate",

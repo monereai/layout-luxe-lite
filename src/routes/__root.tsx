@@ -19,6 +19,7 @@ import { PlanProvider } from "@/hooks/usePlan";
 import { useCare } from "@/hooks/useCare";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { WardrobeSync } from "@/lib/wardrobe-sync";
+import { RegistrationAlertSync } from "@/lib/registration-alert-sync";
 
 function NotFoundComponent() {
   return (
@@ -148,6 +149,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <PlanProvider>
+        <RegistrationAlertSync />
         <CareSync />
         <WardrobeSync />
         <Outlet />

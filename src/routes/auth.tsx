@@ -51,7 +51,8 @@ function AuthPage() {
       return;
     }
     if (mode === "up") {
-      const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: new URL(target, window.location.origin).href } });
+      const signupSource = localStorage.getItem("monere-signup-source") === "guest conversion" ? "guest conversion" : "direct";
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: new URL(target, window.location.origin).href, data: { signup_source: signupSource } } });
       setBusy(false);
       if (error) { toast.error(error.message); return; }
       if (!data.session) setSent(true);
