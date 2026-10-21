@@ -77,8 +77,11 @@ export const Route = createFileRoute("/api/story-image")({
         const capture = new TransformStream<Uint8Array, Uint8Array>({
           transform(chunk, ctl) { text += decoder.decode(chunk, { stream: true }); ctl.enqueue(chunk); },
           async flush() {
-            const m = text.match(/"type"\s*:\s*"image_generation\.completed"[^\n]*/);
-            const b64 = m?.[0].match(/"b64_json"\s*:\s*"([^"]+)"/)?.[1];
+            let b64: string | undefined;
+            for (const line of text.split("\n")) {
+              if (!line.startsWith("data:")) continue;
+              try { const p = JSON.parse(line.slice(5)) as { type?: string; b64_json?: string }; if (p.type === "image_generation.completed" && p.b64_json) b64 = p.b64_json; } catch { /* partial frame */ }
+            }
             if (b64) await save(b64).catch(() => {});
           },
         });
