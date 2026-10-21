@@ -6,6 +6,7 @@ import { PassCodeLink } from "@/components/PassCodeDialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlan } from "@/hooks/usePlan";
+import { googleSignIn } from "@/components/GuestSignupModal";
 
 import { oauthReturnPath } from "@/lib/oauth-return-path";
 
@@ -88,6 +89,7 @@ function AuthPage() {
               autoComplete={mode === "up" ? "new-password" : "current-password"} className="rounded-xl border border-border bg-background/60 px-4 py-3 outline-none focus:border-primary" />
           )}
           <Button type="submit" disabled={busy} className="btn-gold mt-2 h-auto py-3.5">{busy ? "Please wait…" : forgot ? "Send reset link" : mode === "up" ? "Create account" : "Sign in"}</Button>
+          {!forgot && <Button type="button" variant="outline" onClick={() => { if (next) window.sessionStorage.setItem("monereai-auth-next", next); void googleSignIn(); }} className="h-auto py-3">Continue with Google</Button>}
           {mode === "in" && !forgot && (
             <button type="button" onClick={() => setForgot(true)} className="mt-1 text-sm text-muted-foreground hover:text-primary">
               Forgotten password?
