@@ -11,7 +11,8 @@ import { useCare } from '@/hooks/useCare';
 import { playDailyDilemma } from '@/lib/daily-dilemma.functions';
 import { DAILY_DILEMMAS, DAILY_DILEMMAS as STORIES, dilemmaCountdown, dilemmaIndex } from '@/lib/daily-dilemma';
 import { playChime } from '@/lib/sound';
-import { openGuestReward } from '@/components/GuestSignupModal';
+import { completeGuestActivity, openGuestReward } from '@/components/GuestSignupModal';
+import { guestCompleted } from '@/lib/guest-preview';
 
 export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { user, ready } = usePlan();
@@ -87,7 +88,7 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
     <DialogContent className="max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-xl overflow-y-auto rounded-lg p-4 sm:p-6">
       <DialogTitle className="flex items-start gap-2 pr-6 font-display text-2xl"><BookHeart className="mt-1 shrink-0 text-primary" /> Monere’s Daily Dilemma</DialogTitle>
       <DialogDescription>{state?.completed ? 'A lionhearted choice for today.' : 'One day. One choice. A little more wisdom.'}</DialogDescription>
-      {!ready ? <p role="status">Getting ready…</p> : !user ? <GuestDilemma onDone={() => { onOpenChange(false); openGuestReward(); }} /> : status.isPending ? <p role="status" className="py-8 text-center">Monere is opening today’s dilemma…</p> : state && story ? state.completed ? <div className="text-center">
+      {!ready ? <p role="status">Getting ready…</p> : !user ? <GuestDilemma onDone={(won) => { onOpenChange(false); if (won) completeGuestActivity(50); else openGuestReward(); }} /> : status.isPending ? <p role="status" className="py-8 text-center">Monere is opening today’s dilemma…</p> : state && story ? state.completed ? <div className="text-center">
         <div className={`relative ${celebrate ? 'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-700' : ''}`}>
           <MonereMentor mode="results" companion />
           {celebrate && <Sparkles aria-hidden="true" className="absolute right-4 top-4 h-10 w-10 text-primary motion-safe:animate-bounce" />}
@@ -130,22 +131,22 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
 const GUEST_KEY = 'monereai-guest-dilemma';
 
 /** One browser-local Daily Dilemma for guests; nothing is credited until they sign up and play signed in. */
-function GuestDilemma({ onDone }: { onDone: () => void }) {
+function GuestDilemma({ onDone }: { onDone: (won: boolean) => void }) {
   const [day] = useState(() => new Date().toISOString().slice(0, 10));
   const story = STORIES[dilemmaIndex(day)] ?? STORIES[0];
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState('');
-  useEffect(() => { setDone(window.localStorage.getItem(GUEST_KEY) === day); }, [day]);
+  useEffect(() => { setDone(guestCompleted() || window.localStorage.getItem(GUEST_KEY) === day); }, [day]);
   function pick(i: number) {
     if (i !== story.wise) { setFeedback(story.feedback); return; }
     window.localStorage.setItem(GUEST_KEY, day);
     playChime('win');
-    onDone();
+    onDone(true);
   }
   if (done) return <div className="text-center">
     <MonereMentor mode="results" companion />
     <p className="font-body mt-4">You've already completed today's dilemma as a guest.</p>
-    <Button className="btn-gold mt-4 h-auto whitespace-normal py-3" onClick={onDone}>Save my progress</Button>
+    <Button className="btn-gold mt-4 h-auto whitespace-normal py-3" onClick={() => onDone(false)}>Save my progress</Button>
   </div>;
   return <>
     <MonereMentor portrait={false} />

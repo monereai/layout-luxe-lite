@@ -22,9 +22,8 @@
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
 - Use usePointsWallet for all spendable-points displays, deducting clothing and habitat spending from game and credited points. Why: displayed points must match purchasing power everywhere.
-- Anything purchased stays wearable forever with no further charge: combinations of owned items are free (no combo unlock fee), and shop.ts loads saved state eagerly at module init so a fast click can never overwrite purchases with the empty state. Why: paying twice or losing purchases breaks trust.
-- Stripe purchases are verified server-side (payments.functions.ts confirmCheckout + stripe-sync.server.ts + /api/public/payments/webhook) before writing point_credits / subscriptions; the browser never grants points or tiers. Why: client completion callbacks can be faked.
-- Use build-specific managed Stripe tokens for environment routing and the configured public production key for Stripe.js; keep server secrets gateway-managed. Validate same-origin payment returns through usePaymentReturn after auth hydration. Why: live payments must preserve account sessions and never grant benefits from URL flags.
+- Purchases stay owned free forever (owned combos cost nothing); shop.ts loads saved state eagerly so fast clicks can't overwrite purchases. Why: trust.
+- Stripe payments are verified server-side (confirmCheckout, stripe-sync, payments webhook) before granting; managed build tokens route environments; usePaymentReturn validates same-origin returns after auth hydration. Why: client callbacks/URL flags can be faked.
 - Store catalog is visible signed out; Stripe checkout requires sign-in and, for memberships, a prior confirmation that grants nothing. Why: purchases tie to accounts and benefits depend on verified payment.
 - Pets, habitats and clothing are bought/equipped only via pet_action/property_action/wardrobe_action (server prices, shared points, owned checks, Club gates); the browser never writes inventories. Load equipped_pet_id on identity changes. Why: prevent free grants and stale pets.
 - Space Station admission is checked both by property_action and at the character canvas, regardless of stored ownership. Why: expired Club access and old purchases cannot bypass the exclusive habitat gate.
@@ -41,3 +40,4 @@
 - Extend jigsaw sizes end-to-end; preserve gifts. Why: all levels must play/pay.
 - Find Monere spots come from care_start_round; taps are checked against them. Why: fabricated finds must not pay.
 - Daily Dilemma uses SQL-owned choices, protected dev resets and daily ledger keys with shared care cache. Why: resets/retries cannot pay twice.
+- Story pictures are reused by scene-text hash (server-only story_images cache). Guest points (local monere_guest_*) reach accounts only via claim_guest_points, once and capped. Why: cut AI cost; browser totals untrusted.

@@ -30,6 +30,7 @@ import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage
 import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { openGuestReward } from "@/components/GuestSignupModal";
+import { guestCompleted } from "@/lib/guest-preview";
 import { DailyDilemmaModal } from "@/components/DailyDilemmaModal";
 
 export const Route = createFileRoute("/")({
@@ -102,7 +103,7 @@ function Home() {
       return;
     }
     if (!ready) return;
-    if (!user && !canAsk(getUsedToday(), false)) { openGuestReward(); return; }
+    if (!user && (guestCompleted() || !canAsk(getUsedToday(), false))) { openGuestReward(); return; }
     if (user && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
     const payload = { category, situation, includeSong, userName: userName || undefined, profile, lang };

@@ -327,6 +327,24 @@ export type Database = {
         }
         Relationships: []
       }
+      story_images: {
+        Row: {
+          created_at: string
+          path: string
+          scene_hash: string
+        }
+        Insert: {
+          created_at?: string
+          path: string
+          scene_hash: string
+        }
+        Update: {
+          created_at?: string
+          path?: string
+          scene_hash?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -513,6 +531,7 @@ export type Database = {
         Returns: number[]
       }
       claim_daily_login: { Args: never; Returns: Json }
+      claim_guest_points: { Args: { p_points: number }; Returns: number }
       consume_advice_quota: { Args: never; Returns: boolean }
       consume_guest_quota: {
         Args: { p_limit: number; p_visitor: string }
