@@ -30,8 +30,8 @@ export const PETS: Pet[] = [
   { id: "owl", name: "Owl", description: "A wise little watcher for late-night talks.", cost: 800, src: owl },
   { id: "baby-dragon", name: "Baby Dragon", description: "Small, brave and a little bit legendary.", cost: 2000, src: babyDragon },
   { id: "unicorn", name: "Unicorn", description: "A magical friend with a rainbow mane.", cost: 2000, src: unicorn },
-  { id: "thunderbird", name: "Thunderbird", description: "A brave little storm with a heart of gold.", cost: 2000, src: thunderbird },
-  { id: "phoenix", name: "Phoenix", description: "Warm wings that rise again with you.", cost: 2000, src: phoenix },
+  { id: "thunderbird", name: "Thunderbird", description: "A brave little storm with a heart of gold.", cost: 3000, src: thunderbird },
+  { id: "phoenix", name: "Phoenix", description: "Warm wings that rise again with you.", cost: 3000, src: phoenix },
 ];
 
 export type PetRarity = "Common" | "Rare" | "Legendary";
