@@ -253,6 +253,13 @@
       "when": 1792573306656,
       "tag": "0035_add_new_pet_shop_pets",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792573607326,
+      "tag": "0036_add_thunderbird_phoenix_pets",
+      "breakpoints": true
     }
   ]
 }
