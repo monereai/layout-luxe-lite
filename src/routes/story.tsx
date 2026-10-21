@@ -10,7 +10,7 @@ import { CHAPTER_BONUS, daysUntilNextEpisode, episodeFor, episodeNumber, type St
 import { recordChapterComplete } from "@/lib/game";
 import { tellStory, type StoryResult } from "@/lib/story.functions";
 import { useUserName } from "@/lib/username";
-import { fallbackArt, raceSceneBackup, sceneFallbackArt } from "@/lib/story-art";
+import { fallbackArt, sceneFallbackArt } from "@/lib/story-art";
 import { streamImage } from "@/lib/stream-image";
 import { supabase } from "@/integrations/supabase/client";
 import { playChime, playFanfare } from "@/lib/sound";
@@ -72,14 +72,15 @@ function StoryMode() {
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const [images, setImages] = useState<Record<number, SceneImg>>({});
+  const [imageErrors, setImageErrors] = useState<Record<number, string>>({});
   const runId = useRef(0);
 
-  // Paint the scene and resolve with the finished picture (or the matching ready-made one if it's too slow / fails).
-  // If the painting finishes after the backup was shown, it replaces the backup in place.
-  function paintScene(segment: number, scene: string, picked: StoryThemeId): Promise<string> {
+  // Reveal ready-made art immediately; generation never holds back the story text.
+  function paintScene(segment: number, scene: string, picked: StoryThemeId): void {
     const previous = images[segment - 1]?.src ?? undefined;
     const backup = sceneFallbackArt(picked, segment, scene, previous);
-    if (!scene) return Promise.resolve(backup);
+    setImages((m) => ({ ...m, [segment]: { src: backup, final: true, fallback: true } }));
+    if (!scene) return;
     const id = runId.current;
     let painted_: string | null = null;
     const painted = new Promise<string>((resolve, reject) => {
@@ -97,8 +98,11 @@ function StoryMode() {
         if (runId.current !== id) return;
         setImages((m) => (m[segment] && m[segment].src !== src ? { ...m, [segment]: { src, final: true, fallback: false } } : m));
       })
-      .catch(() => {});
-    return raceSceneBackup(backup, painted);
+      .catch((err: unknown) => {
+        if (runId.current !== id) return;
+        setImages((m) => ({ ...m, [segment]: { src: backup, final: true, fallback: true } }));
+        setImageErrors((m) => ({ ...m, [segment]: err instanceof Error ? err.message : "The story picture couldn't be generated." }));
+      });
   }
 
   async function run(nextTurns: StoryTurn[], picked: StoryThemeId) {
@@ -116,19 +120,8 @@ function StoryMode() {
       setError(res.error);
       return;
     }
-    // Hold the text back until its illustration is ready so both appear together.
     const segment = nextTurns.length;
-    const src = await paintScene(segment, res.story.scene, picked);
-    if (runId.current !== id) return;
-    // Make sure the browser has decoded the picture before revealing it.
-    await new Promise<void>((resolve) => {
-      const probe = new Image();
-      probe.onload = () => resolve();
-      probe.onerror = () => resolve();
-      probe.src = src;
-    });
-    if (runId.current !== id) return;
-    setImages((m) => ({ ...m, [segment]: { src, final: true, fallback: false } }));
+    paintScene(segment, res.story.scene, picked);
     setCurrent(res.story);
     setBusy(false);
     if (res.story.isEnding) {
@@ -141,6 +134,7 @@ function StoryMode() {
     playChime("select");
     runId.current += 1;
     setImages({});
+    setImageErrors({});
     setBonus(null);
     setTheme(id);
     setTurns([]);
@@ -160,6 +154,7 @@ function StoryMode() {
   function reset() {
     runId.current += 1;
     setImages({});
+    setImageErrors({});
     setTheme(null);
     setTurns([]);
     setCurrent(null);
@@ -215,6 +210,7 @@ function StoryMode() {
         {turns.map((turn, i) => (
           <div key={i} className="flex flex-col gap-2">
           <SceneFrame img={images[i]} alt={`Scene ${i + 1} of the story`} />
+          {imageErrors[i] && <p role="status" className="text-sm text-muted-foreground">{imageErrors[i]}</p>}
           <article className="rounded-2xl border border-border/60 bg-card/60 px-4 py-3">
             <p className="whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground">{turn.narration}</p>
             <p className="mt-2 text-xs font-semibold text-primary">→ {turn.choice}</p>
@@ -223,6 +219,7 @@ function StoryMode() {
         ))}
 
         {current && <SceneFrame img={images[turns.length]} alt="Illustration of the current scene" />}
+        {current && imageErrors[turns.length] && <p role="status" className="text-sm text-muted-foreground">{imageErrors[turns.length]}</p>}
         {current && (
           <article className="rounded-2xl border border-primary/30 bg-card px-4 py-4">
             <p className="whitespace-pre-line text-[16px] leading-relaxed text-foreground">{current.narration}</p>

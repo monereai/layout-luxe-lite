@@ -3,6 +3,16 @@ import { flushSync } from "react-dom";
 
 type ImagePayload = { type?: string; b64_json?: string; error?: { message?: string } };
 
+async function responseError(res: Response): Promise<string> {
+  const text = await res.text().catch(() => "");
+  try {
+    const payload = JSON.parse(text) as { error?: { message?: string }; message?: string };
+    return payload.error?.message ?? payload.message ?? `Image generation failed (${res.status})`;
+  } catch {
+    return text || `Image generation failed (${res.status})`;
+  }
+}
+
 export async function streamImage(
   endpoint: string,
   input: Record<string, unknown> | FormData,
@@ -31,7 +41,16 @@ export async function streamImage(
   };
   const res = await send(true);
   if (!res.ok || !res.body) {
-    throw new Error(`Image generation failed: ${res.status} ${await res.text().catch(() => "")}`);
+    throw new Error(await responseError(res));
+  }
+  // Private cache hits return a short-lived storage URL, not a second generation.
+  if (res.headers.get("Content-Type")?.includes("application/json")) {
+    const payload = await res.json() as { url?: string; data?: { b64_json?: string }[] };
+    if (payload.url) { onFrame(payload.url, true); return; }
+    const b64 = payload.data?.[0]?.b64_json;
+    if (!b64) throw new Error("Image generation returned no image");
+    onFrame(`data:image/png;base64,${b64}`, true);
+    return;
   }
 
   let sawCompleted = false;
@@ -50,6 +69,7 @@ export async function streamImage(
         streamError = payload?.error?.message ?? "Image generation failed";
         return;
       }
+      if (streamError) return;
       const type = event.event || payload?.type;
       if (
         type !== "image_generation.partial_image" &&
@@ -91,9 +111,10 @@ export async function streamImage(
   if (!sawAnyEvent) {
     const replay = await send(false);
     if (!replay.ok) {
-      throw new Error(`Image generation failed: ${replay.status} ${await replay.text().catch(() => "")}`);
+      throw new Error(await responseError(replay));
     }
-    const json = (await replay.json()) as { data?: { b64_json?: string }[] };
+    const json = (await replay.json()) as { url?: string; data?: { b64_json?: string }[] };
+    if (json.url) { onFrame(json.url, true); return; }
     const b64 = json.data?.[0]?.b64_json;
     if (!b64) throw new Error("Image generation returned no image");
     onFrame(`data:image/png;base64,${b64}`, true);
