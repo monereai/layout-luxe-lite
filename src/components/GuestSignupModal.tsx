@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
-import { Lock, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { MonereMentor } from "@/components/MonereMentor";
@@ -50,20 +50,6 @@ export function GuestPointsTransfer({ userId, onCredited }: { userId: string; on
     });
   }, [userId, onCredited]);
   return null;
-}
-
-/** Shows a locked card instead of a game once a guest has finished their preview. */
-export function GuestLock({ signedIn, children }: { signedIn: boolean; children: ReactNode }) {
-  useGuestState();
-  const hydrated = useSyncExternalStore(() => () => {}, () => true, () => false);
-  if (signedIn || !hydrated || !guestCompleted()) return <>{children}</>;
-  return (
-    <div className="mx-auto mt-6 max-w-md rounded-lg border border-primary/30 bg-secondary p-6 text-center">
-      <Lock className="mx-auto text-primary" />
-      <p className="font-body mt-3 leading-relaxed">{guestRewardText(guestPoints())}</p>
-      <Button className="btn-gold mt-4 h-auto whitespace-normal py-3" onClick={openGuestReward}>Save My Progress (Free Sign-Up)</Button>
-    </div>
-  );
 }
 
 export async function googleSignIn() {
