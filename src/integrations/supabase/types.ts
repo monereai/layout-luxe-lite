@@ -189,6 +189,24 @@ export type Database = {
           },
         ]
       }
+      guest_ai_usage: {
+        Row: {
+          count: number
+          day: string
+          visitor: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          visitor: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          visitor?: string
+        }
+        Relationships: []
+      }
       organization_codes: {
         Row: {
           code: string
@@ -496,6 +514,10 @@ export type Database = {
       }
       claim_daily_login: { Args: never; Returns: Json }
       consume_advice_quota: { Args: never; Returns: boolean }
+      consume_guest_quota: {
+        Args: { p_limit: number; p_visitor: string }
+        Returns: boolean
+      }
       credit_stripe_membership: {
         Args: {
           p_period_key: string

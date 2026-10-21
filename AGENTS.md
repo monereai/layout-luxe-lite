@@ -29,8 +29,8 @@
 - Pets, habitats and clothing are bought/equipped only via pet_action/property_action/wardrobe_action (server prices, shared points, owned checks, Club gates); the browser never writes inventories. Load equipped_pet_id on identity changes. Why: prevent free grants and stale pets.
 - Space Station admission is checked both by property_action and at the character canvas, regardless of stored ownership. Why: expired Club access and old purchases cannot bypass the exclusive habitat gate.
 - QA tier overrides are honored by account_tier/is_premium only for protected admin/tester role rows and never modify subscriptions or grant monthly credits. Why: test tiers remain stable during care refresh without granting public privileges.
-- AI advice, follow-up, story and story-image endpoints require sign-in. Why: unauthenticated calls spend AI credits.
-- Share mentor-persona facts and MessageResponse formatting. Why: accurate readable guidance.
+- AI endpoints need sign-in except seekWisdomGuest (first questions, server-capped per hashed visitor/day); guest rewards are display-only. Why: guests spend credits, own nothing.
+- Share mentor-persona facts and MessageResponse formatting.
 
 - Subdirectories have their own AGENTS.md (src/components covers character art, wardrobe and shop) — read it before changing files there.
 

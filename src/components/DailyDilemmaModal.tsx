@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookHeart, CheckCircle2, Clock, Sparkles, Trophy, Zap } from 'lucide-react';
@@ -10,8 +9,9 @@ import { MonereMentor } from '@/components/MonereMentor';
 import { usePlan } from '@/hooks/usePlan';
 import { useCare } from '@/hooks/useCare';
 import { playDailyDilemma } from '@/lib/daily-dilemma.functions';
-import { DAILY_DILEMMAS, dilemmaCountdown } from '@/lib/daily-dilemma';
+import { DAILY_DILEMMAS, DAILY_DILEMMAS as STORIES, dilemmaCountdown, dilemmaIndex } from '@/lib/daily-dilemma';
 import { playChime } from '@/lib/sound';
+import { GuestSignupModal } from '@/components/GuestSignupModal';
 
 export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { user, ready } = usePlan();
@@ -26,6 +26,7 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
   const [error, setError] = useState('');
   const [celebrate, setCelebrate] = useState(false);
   const [countdown, setCountdown] = useState('');
+  const [guestModal, setGuestModal] = useState(false);
   const generation = useRef(0);
   const locked = useRef(false);
   const choose = useMutation({ mutationFn: play });
@@ -83,15 +84,11 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
     } finally { if (version === generation.current) locked.current = false; }
   }
 
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+  return <><Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-xl overflow-y-auto rounded-lg p-4 sm:p-6">
       <DialogTitle className="flex items-start gap-2 pr-6 font-display text-2xl"><BookHeart className="mt-1 shrink-0 text-primary" /> Monere’s Daily Dilemma</DialogTitle>
       <DialogDescription>{state?.completed ? 'A lionhearted choice for today.' : 'One day. One choice. A little more wisdom.'}</DialogDescription>
-      {!ready ? <p role="status">Getting ready…</p> : !user ? <>
-        <MonereMentor companion />
-        <p>Create a free MonereAI account or sign in to play mini-games, earn points, and unlock outfits!</p>
-        <Button asChild className="btn-gold h-auto whitespace-normal py-3"><Link to="/auth" search={{ next: '/?dilemma=1' }}>Create account / Sign in</Link></Button>
-      </> : status.isPending ? <p role="status" className="py-8 text-center">Monere is opening today’s dilemma…</p> : state && story ? state.completed ? <div className="text-center">
+      {!ready ? <p role="status">Getting ready…</p> : !user ? <GuestDilemma onDone={() => { onOpenChange(false); setGuestModal(true); }} /> : status.isPending ? <p role="status" className="py-8 text-center">Monere is opening today’s dilemma…</p> : state && story ? state.completed ? <div className="text-center">
         <div className={`relative ${celebrate ? 'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-700' : ''}`}>
           <MonereMentor mode="results" companion />
           {celebrate && <Sparkles aria-hidden="true" className="absolute right-4 top-4 h-10 w-10 text-primary motion-safe:animate-bounce" />}
@@ -128,5 +125,42 @@ export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpe
         <Button variant="outline" className="mt-2" onClick={() => { setError(''); void status.refetch(); }}>Try again</Button>
       </div>}
     </DialogContent>
-  </Dialog>;
+  </Dialog>
+  <GuestSignupModal open={guestModal} onOpenChange={setGuestModal} next="/?dilemma=1" /></>;
+}
+
+const GUEST_KEY = 'monereai-guest-dilemma';
+
+/** One browser-local Daily Dilemma for guests; nothing is credited until they sign up and play signed in. */
+function GuestDilemma({ onDone }: { onDone: () => void }) {
+  const [day] = useState(() => new Date().toISOString().slice(0, 10));
+  const story = STORIES[dilemmaIndex(day)] ?? STORIES[0];
+  const [done, setDone] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  useEffect(() => { setDone(window.localStorage.getItem(GUEST_KEY) === day); }, [day]);
+  function pick(i: number) {
+    if (i !== story.wise) { setFeedback(story.feedback); return; }
+    window.localStorage.setItem(GUEST_KEY, day);
+    playChime('win');
+    onDone();
+  }
+  if (done) return <div className="text-center">
+    <MonereMentor mode="results" companion />
+    <p className="font-body mt-4">You've already completed today's dilemma as a guest.</p>
+    <Button className="btn-gold mt-4 h-auto whitespace-normal py-3" onClick={onDone}>Save My Progress (Free Sign-Up)</Button>
+  </div>;
+  return <>
+    <MonereMentor portrait={false} />
+    <article className="rounded-lg border border-border bg-secondary p-4 sm:p-5">
+      <p className="text-xs font-semibold uppercase text-primary">{story.theme}</p>
+      <h2 className="mt-2 font-display text-xl font-semibold">{story.title}</h2>
+      <p className="font-body mt-3 leading-relaxed">{story.story}</p>
+    </article>
+    <div className="grid gap-2" aria-label="Decision options">
+      {story.choices.map((choice, index) => <Button key={choice} variant="outline" onClick={() => pick(index)} className="h-auto min-h-14 justify-start gap-3 whitespace-normal px-4 py-3 text-left leading-relaxed">
+        <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">{String.fromCharCode(65 + index)}</span><span className="font-body font-semibold">{choice}</span>
+      </Button>)}
+    </div>
+    {feedback && <p role="status" className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm leading-relaxed">{feedback}</p>}
+  </>;
 }
