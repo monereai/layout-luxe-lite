@@ -281,6 +281,13 @@
       "when": 1792575768735,
       "tag": "0039_add_lions_den_habitat",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792575992876,
+      "tag": "0040_fix_habitat_points_deduction",
+      "breakpoints": true
     }
   ]
 }
