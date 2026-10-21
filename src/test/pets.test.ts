@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PETS, petButtonState } from "@/lib/pets";
+import { PETS, PET_RARITIES, petButtonState } from "@/lib/pets";
 
 const puppy = PETS.find((p) => p.id === "puppy")!;
 
@@ -22,8 +22,7 @@ describe("pet prices (rarity tiers)", () => {
   it("matches the agreed tier prices", () => {
     expect(Object.fromEntries(PETS.map((p) => [p.id, p.cost]))).toEqual({ goldfish: 300, puppy: 300, kitten: 300, hedgehog: 300, turtle: 300, bunny: 800, parrot: 800, fox: 800, owl: 800, "baby-dragon": 2000, unicorn: 2000 });
   });
-  it("maps every pet to a shop rarity", async () => {
-    const { PET_RARITIES } = await import("@/components/PetShop");
+  it("maps every pet to a shop rarity", () => {
     expect(PETS.every((p) => p.id in PET_RARITIES)).toBe(true);
   });
 });
