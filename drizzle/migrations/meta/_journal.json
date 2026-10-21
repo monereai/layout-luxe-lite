@@ -260,6 +260,13 @@
       "when": 1792573607326,
       "tag": "0036_add_thunderbird_phoenix_pets",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792573905744,
+      "tag": "0037_set_thunderbird_phoenix_prices_3000",
+      "breakpoints": true
     }
   ]
 }
