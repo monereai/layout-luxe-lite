@@ -18,9 +18,10 @@ export default defineConfig({
   },
   vite: {
     resolve: { alias: {
+      // Only legacy React Email subpaths need aliases. Leave the package root
+      // untouched so parse5 resolves its own entities v6 (including /decode).
       "entities/lib/decode.js": path.resolve("node_modules/entities/lib/decode.js"),
       "entities/lib/encode.js": path.resolve("node_modules/entities/lib/encode.js"),
-      entities: path.resolve("node_modules/entities"),
     } },
     plugins: [
       { name: "email-server-env", config: (_, { mode }) => { Object.assign(process.env, loadEnv(mode, process.cwd(), "")); } },
