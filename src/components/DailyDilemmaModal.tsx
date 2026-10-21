@@ -134,7 +134,7 @@ const GUEST_KEY = 'monereai-guest-dilemma';
 /** One browser-local Daily Dilemma for guests; nothing is credited until they sign up and play signed in. */
 function GuestDilemma({ onDone }: { onDone: () => void }) {
   const [day] = useState(() => new Date().toISOString().slice(0, 10));
-  const story = STORIES[dilemmaIndex(day)];
+  const story = STORIES[dilemmaIndex(day)] ?? STORIES[0];
   const [done, setDone] = useState(false);
   const [feedback, setFeedback] = useState('');
   useEffect(() => { setDone(window.localStorage.getItem(GUEST_KEY) === day); }, [day]);
