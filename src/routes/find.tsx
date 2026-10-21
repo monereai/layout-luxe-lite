@@ -13,7 +13,6 @@ import { playChime, playPop } from "@/lib/sound";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { useCareRound } from "@/hooks/useCare";
 import { toast as notify } from "sonner";
-import { requireAuth } from "@/lib/require-auth";
 
 const MINI = "/find/mini.webp";
 const SCENES = [
@@ -27,7 +26,6 @@ const SCENES = [
 
 export const Route = createFileRoute("/find")({
   staticData: { sitemap: false },
-  beforeLoad: ({ location }) => requireAuth(location),
   ssr: false,
   head: () => ({
     meta: [

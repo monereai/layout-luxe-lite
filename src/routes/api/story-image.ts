@@ -36,7 +36,7 @@ export const Route = createFileRoute("/api/story-image")({
           status: upstream.status,
           headers: {
             "Content-Type": upstream.headers.get("Content-Type") ?? "application/json",
-            "Cache-Control": "no-cache",
+            "Cache-Control": body.stream === false ? "private, max-age=86400" : "no-cache",
           },
         });
       },
