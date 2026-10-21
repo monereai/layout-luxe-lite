@@ -1,4 +1,9 @@
 # Clothing equip reliability
+# Lion’s Den habitat
+- [ ] Add Lion’s Den scenery and a 3,000-point server-checked purchase/equip.
+- [ ] Verify price, ownership, reload and active habitat on separate QA data.
+
+# Clothing equip reliability
 - [x] Repair ambiguous SQL clothing costs, validate IDs, preserve server prices and free owned equips; queue selections through account loading and save completion.
 - [x] Verify shop/inventory equip, reload and home appearance on separate QA; 51 focused tests pass, build OK, 780 points and puppy unchanged, original hat restored. Existing CookieYes localhost warning only. Frontend not published.
 
