@@ -27,7 +27,7 @@
 - Stripe payments are verified server-side (confirmCheckout, stripe-sync, payments webhook) before granting; managed build tokens route environments; usePaymentReturn validates same-origin returns after auth hydration. Why: client callbacks/URL flags can be faked.
 - Store catalog is visible signed out; Stripe checkout requires sign-in and, for memberships, a prior confirmation that grants nothing. Why: purchases tie to accounts and benefits depend on verified payment.
 - Pets, habitats and clothing are bought/equipped only via pet_action/property_action/wardrobe_action (server prices, shared points, owned checks, Club gates); the browser never writes inventories. Load equipped_pet_id on identity changes. Why: prevent free grants and stale pets.
-- Space Station admission is checked both by property_action and at the character canvas, regardless of stored ownership. Why: expired Club access and old purchases cannot bypass the exclusive habitat gate.
+- Habitats share PROPERTIES scenery/shop/inventory and property_action prices. Space Station checks Club at purchase and canvas despite ownership. Why: consistent scenery and no expired-access bypass.
 - QA tier overrides are honored by account_tier/is_premium only for protected admin/tester role rows and never modify subscriptions or grant monthly credits. Why: test tiers remain stable during care refresh without granting public privileges.
 - AI endpoints need sign-in except seekWisdomGuest (first questions, server-capped per hashed visitor/day); guest rewards are display-only. Why: guests spend credits, own nothing.
 - Share mentor facts and MessageResponse.
