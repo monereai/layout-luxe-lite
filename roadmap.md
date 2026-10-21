@@ -1,6 +1,6 @@
 # Three additional glasses
-- [ ] Add three glasses with matching wearable art, explicit catalogue prices and server-checked ownership/equip.
-- [ ] Test purchases, equips and reload persistence on isolated QA; keep Carl’s account untouched.
+- [x] Add Heart Specs, Aviator Shades and Rainbow Specs at 300 points each, with eight-angle wearable layers and server catalogue entries.
+- [x] Verify all three QA purchases (1780→880), free re-equips, reload persistence and worn home/shop appearance; original hat and puppy preserved, Carl untouched. 43 focused tests pass; build OK. Preview-only.
 
 # Lion’s Den habitat
 - [x] Add Lion’s Den scenery and a 3,000-point server-checked purchase/equip; use atomic profile deduction like other stores instead of the credit-only ledger.
