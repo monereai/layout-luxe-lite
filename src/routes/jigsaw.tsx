@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { JigsawGame } from "@/components/JigsawGame";
-import { requireAuth } from "@/lib/require-auth";
 
 export const Route = createFileRoute("/jigsaw")({
   staticData: { sitemap: false },
-  beforeLoad: ({ location }) => requireAuth(location),
   ssr: false,
   head: () => ({
     meta: [

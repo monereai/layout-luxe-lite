@@ -29,7 +29,7 @@ import { propertyName, useProperties } from "@/lib/properties";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
 import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 import { MessageResponse } from "@/components/ai-elements/message";
-import { GuestSignupModal } from "@/components/GuestSignupModal";
+import { openGuestReward } from "@/components/GuestSignupModal";
 import { DailyDilemmaModal } from "@/components/DailyDilemmaModal";
 
 export const Route = createFileRoute("/")({
@@ -64,7 +64,6 @@ function Home() {
   };
   const ask = useServerFn(seekWisdom);
   const askGuest = useServerFn(seekWisdomGuest);
-  const [guestModal, setGuestModal] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const category = categories.length ? categories.join(" + ") : "General life question";
   const [situation, setSituation] = useState("");
@@ -103,14 +102,14 @@ function Home() {
       return;
     }
     if (!ready) return;
-    if (!user && !canAsk(getUsedToday(), false)) { setGuestModal(true); return; }
+    if (!user && !canAsk(getUsedToday(), false)) { openGuestReward(); return; }
     if (user && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
     const payload = { category, situation, includeSong, userName: userName || undefined, profile, lang };
     const res = await (user ? ask({ data: payload }) : askGuest({ data: payload })).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
-    if (!res.ok) { toast.error(res.error); if (!user && res.error.includes("guest messages")) setGuestModal(true); return; }
-    if (!user) { recordQuery(); setUsed(getUsedToday()); if (!canAsk(getUsedToday(), false)) window.setTimeout(() => setGuestModal(true), 2500); }
+    if (!res.ok) { toast.error(res.error); if (!user && res.error.includes("guest messages")) openGuestReward(); return; }
+    if (!user) { recordQuery(); setUsed(getUsedToday()); if (!canAsk(getUsedToday(), false)) window.setTimeout(() => openGuestReward(), 2500); }
     else if (!premium && !res.wisdom.personalReply) { recordQuery(); setUsed(getUsedToday()); }
     setWisdom(res.wisdom);
     setChat([]);
@@ -121,7 +120,7 @@ function Home() {
 
   async function sendFollowUp(q: string) {
     if (!wisdom) return;
-    if (!user && !detectCrisis(q)) { setGuestModal(true); return; }
+    if (!user && !detectCrisis(q)) { openGuestReward(); return; }
     if (detectCrisis(q)) {
       setWisdom(null); setChat([]); setSafety(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -221,7 +220,6 @@ function Home() {
       {!wisdom && !safety && !onboarding && <InstallBanner />}
       {paywall && <PassCodeDialog message={paywall === "limit" ? "You've reached today's free limit. Enter your youth group or school access code to keep talking with Monere." : undefined} onClose={() => setPaywall(null)} />}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
-      <GuestSignupModal open={guestModal} onOpenChange={setGuestModal} />
       <DailyDilemmaModal open={dilemmaOpen} onOpenChange={(next) => (next ? setDilemmaOpen(true) : closeDilemma())} />
       {onboarding && (
         <OnboardingModal

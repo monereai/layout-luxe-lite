@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { usePlan } from "@/hooks/usePlan";
+import { openGuestReward } from "@/components/GuestSignupModal";
+import { makeSpots } from "@/lib/game";
 import { updateCare, startCareRound, finishCareRound, rewardCareFind } from "@/lib/care.functions";
 import type { CareState } from "@/lib/care";
 
@@ -37,7 +39,13 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6 | 7, r
     const version = ++generation.current;
     lock.current = false;
     setRound(null); setError(""); setReward(""); setPending(false);
-    if (!user || !ready) return;
+    if (!ready) return;
+    if (!user) {
+      // Guests get one local, unpaid practice round per game; nothing is sent to the server.
+      if (window.localStorage.getItem(`monereai-guest-${kind}`) === "done") { setError("You've played your free guest round. Create a free account to keep playing!"); openGuestReward(); }
+      else if (kind === "find") setRound({ id: "guest", order: [], spots: makeSpots() });
+      return;
+    }
     void start({ data: { kind, size } }).then((r) => {
       if (generation.current === version) setRound(r);
     }).catch(() => { if (generation.current === version) setError("Couldn't start the reward round. Try again."); });
@@ -45,7 +53,12 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6 | 7, r
   }, [user?.id, ready, kind, size, roundKey, attempt, start]);
   const complete = useCallback(async (result: number[] | [number, number][]) => {
     proof.current = result;
-    if (!user) { setReward("Sign in to earn energy and points."); return; }
+    if (!user) {
+      window.localStorage.setItem(`monereai-guest-${kind}`, "done");
+      setReward("+50 Points — sign up to save them!");
+      window.setTimeout(openGuestReward, 1200);
+      return;
+    }
     if (!round || lock.current) return;
     lock.current = true; setPending(true); setError("");
     const version = generation.current;
@@ -65,5 +78,5 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6 | 7, r
     await accept(state);
     return state;
   };
-  return { round, error, reward, pending, rewardFind, canPlay: ready && (!user || !!round), complete, retry: () => round ? void complete(proof.current) : setAttempt((n) => n + 1) };
+  return { round, error, reward, pending, rewardFind, canPlay: ready && (user ? !!round : !error), complete, retry: () => round ? void complete(proof.current) : setAttempt((n) => n + 1) };
 }
