@@ -1,3 +1,8 @@
+# Story picture recovery
+- [ ] Show ready-made story art immediately, surface generation failures, and never retry refusals.
+- [ ] Return a private saved-picture URL on cache hits and test two-request reuse.
+- [ ] Verify fallback in the signed-in QA browser; live generation is blocked by confirmed safety refusal.
+
 # Account-check monitoring fixes
 - [x] Stop recursive membership reads; claim login before balances, with 15 focused regression tests passing.
 - [x] Confirm authenticated execute permission; preserve verified membership on read errors. Isolated QA browser checks settle at three successful startup reads and remain unchanged five seconds later; preview build OK. Not published.
