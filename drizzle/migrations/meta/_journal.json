@@ -246,6 +246,13 @@
       "when": 1792566389482,
       "tag": "0034_story_image_cache_and_guest_points",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792573306656,
+      "tag": "0035_add_new_pet_shop_pets",
+      "breakpoints": true
     }
   ]
 }
