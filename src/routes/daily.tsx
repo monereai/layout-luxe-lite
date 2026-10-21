@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import bibleArt from "@/assets/daily-bible-faded.jpg";
 
 export const Route = createFileRoute("/daily")({
   staticData: { sitemap: true },
@@ -36,10 +37,21 @@ function Daily() {
     <AppShell>
       <p className="text-sm font-semibold text-primary">{date}</p>
       <h1 className="mt-2 font-display text-4xl">Daily Reflection</h1>
-      <div className="surface-card mt-6 p-6">
-        <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent-foreground">{d.theme}</span>
-        <blockquote className="mt-5 font-display text-2xl italic leading-snug">"{d.text}"</blockquote>
-        <p className="mt-3 font-semibold text-primary">— {d.ref}</p>
+      <div className="surface-card relative mt-6 overflow-hidden p-6">
+        <img
+          src={bibleArt}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          width={1536}
+          height={1024}
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70 [mask-image:radial-gradient(130%_110%_at_72%_50%,black_30%,transparent_88%)]"
+        />
+        <div className="relative">
+          <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent-foreground">{d.theme}</span>
+          <blockquote className="mt-5 font-display text-2xl italic leading-snug">"{d.text}"</blockquote>
+          <p className="mt-3 font-semibold text-primary">— {d.ref}</p>
+        </div>
       </div>
       <div className="surface-card mt-4 p-6">
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Today's thought</p>
