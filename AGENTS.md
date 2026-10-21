@@ -41,3 +41,4 @@
 - Extend jigsaw sizes end-to-end; preserve gifts. Why: all levels must play/pay.
 - Find Monere spots come from care_start_round; taps are checked against them. Why: fabricated finds must not pay.
 - Daily Dilemma uses SQL-owned choices, protected dev resets and daily ledger keys with shared care cache. Why: resets/retries cannot pay twice.
+- Story pictures are reused by a hash of the scene text (story_images + private story-images bucket, server-only access). Guest preview points live in localStorage (monere_guest_*) and reach an account only via claim_guest_points (once per account, server-capped). Why: cut repeat AI cost; browser totals cannot be trusted.
