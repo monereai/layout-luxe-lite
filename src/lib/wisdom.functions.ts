@@ -92,17 +92,10 @@ const Input = z.object({
   lang: z.enum(LANG_IDS).optional(),
 });
 
-export const seekWisdom = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => Input.parse(d))
-  .handler(async ({ data, context }): Promise<{ ok: true; wisdom: Wisdom } | { ok: false; error: string }> => {
-    const key = process.env["LOVABLE_API_KEY"];
-    if (!key) return { ok: false, error: "The advice service isn't configured yet." };
-    if (!(data.previous && data.followUp)) {
-      const quota = await context.supabase.rpc("consume_advice_quota");
-      if (quota.error || quota.data !== true) return { ok: false, error: "You've used today's free questions. Upgrade to Monere Plus for unlimited advice, or come back tomorrow." };
-    }
+type WisdomInput = z.infer<typeof Input>;
+type WisdomResult = { ok: true; wisdom: Wisdom } | { ok: false; error: string };
 
+async function generateWisdom(key: string, data: WisdomInput): Promise<WisdomResult> {
     const profileGuidance = data.profile === "young-man"
       ? "Selected profile: Young Man. Tailor relevant guidance around courage, servant leadership, steady strength, and responsibility without stereotypes."
       : data.profile === "young-woman"
@@ -182,4 +175,35 @@ export const seekWisdom = createServerFn({ method: "POST" })
     let result = await attempt();
     if (!result.ok && result.retry) result = await attempt();
     return result.ok ? result : { ok: false, error: result.error };
+}
+
+export const seekWisdom = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => Input.parse(d))
+  .handler(async ({ data, context }): Promise<WisdomResult> => {
+    const key = process.env["LOVABLE_API_KEY"];
+    if (!key) return { ok: false, error: "The advice service isn't configured yet." };
+    if (!(data.previous && data.followUp)) {
+      const quota = await context.supabase.rpc("consume_advice_quota");
+      if (quota.error || quota.data !== true) return { ok: false, error: "You've used today's free questions. Upgrade to Monere Plus for unlimited advice, or come back tomorrow." };
+    }
+    return generateWisdom(key, data);
   });
+
+/** Guests: first questions only (no follow-ups), capped per hashed visitor per UTC day on the server. */
+const GUEST_SERVER_DAILY_CAP = 6;
+export const seekWisdomGuest = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => Input.omit({ followUp: true, previous: true }).parse(d))
+  .handler(async ({ data }): Promise<WisdomResult> => {
+    const key = process.env["LOVABLE_API_KEY"];
+    if (!key) return { ok: false, error: "The advice service isn't configured yet." };
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`monere-guest:${ip}:${getRequestHeader("user-agent") ?? ""}`));
+    const visitor = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const quota = await supabaseAdmin.rpc("consume_guest_quota", { p_visitor: visitor, p_limit: GUEST_SERVER_DAILY_CAP });
+    if (quota.error || quota.data !== true) return { ok: false, error: "You've used today's guest messages. Create a free account to keep talking with Monere." };
+    return generateWisdom(key, data);
+  });
+
