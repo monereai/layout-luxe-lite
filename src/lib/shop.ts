@@ -40,6 +40,9 @@ import friendshipBeads from "@/assets/shop/friendship-beads.webp";
 import partyHat from "@/assets/shop/party-hat.png";
 import vikingHelmet from "@/assets/shop/viking-helmet.png";
 import starShades from "@/assets/shop/star-shades.png";
+import heartSpecs from "@/assets/shop/heart-specs.png";
+import aviatorShades from "@/assets/shop/aviator-shades.png";
+import rainbowSpecs from "@/assets/shop/rainbow-specs.png";
 import pirateCoat from "@/assets/shop/pirate-coat.png";
 import astroSuit from "@/assets/shop/astro-suit.png";
 import rainBoots from "@/assets/shop/rain-boots.png";
@@ -86,6 +89,9 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "sunglasses", name: "Sunglasses", category: "glasses", cost: 300, src: sunglasses },
   { id: "round-specs", name: "Scholar Specs", category: "glasses", cost: 300, src: roundSpecs },
   { id: "star-shades", name: "Star Shades", category: "glasses", cost: 300, src: starShades },
+  { id: "heart-specs", name: "Heart Specs", category: "glasses", cost: 300, src: heartSpecs },
+  { id: "aviator-shades", name: "Aviator Shades", category: "glasses", cost: 300, src: aviatorShades },
+  { id: "rainbow-specs", name: "Rainbow Specs", category: "glasses", cost: 300, src: rainbowSpecs },
   // Costumes — themed outfits are rare
   { id: "storm-cloak", name: "Storm Cloak", category: "costume", cost: 800, src: stormCloak },
   { id: "crimson-cape", name: "Crimson Warrior Cape", category: "costume", cost: 800, src: crimsonCape },
