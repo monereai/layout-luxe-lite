@@ -1,3 +1,7 @@
+# Three additional glasses
+- [ ] Add three glasses with matching wearable art, explicit catalogue prices and server-checked ownership/equip.
+- [ ] Test purchases, equips and reload persistence on isolated QA; keep Carl’s account untouched.
+
 # Lion’s Den habitat
 - [x] Add Lion’s Den scenery and a 3,000-point server-checked purchase/equip; use atomic profile deduction like other stores instead of the credit-only ledger.
 - [x] Verify isolated QA purchase (3780→780), saved ownership and active loaded home scenery after reload; 19 focused tests pass. Not published.
