@@ -1,4 +1,3 @@
-# Clothing equip reliability
 # Lion’s Den habitat
 - [ ] Add Lion’s Den scenery and a 3,000-point server-checked purchase/equip.
 - [ ] Verify price, ownership, reload and active habitat on separate QA data.

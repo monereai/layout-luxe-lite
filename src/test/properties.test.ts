@@ -28,6 +28,17 @@ describe("properties", () => {
   it("Space Station cannot be bought with points", () => {
     expect(buyProperty(base, 99999, "space-station")).toBeNull();
   });
+  it("Lion’s Den costs exactly 3,000 points and equips free once owned", () => {
+    expect(buyProperty(base, 2999, "lions-den")).toBeNull();
+    expect(equipProperty(base, "lions-den")).toEqual(base);
+    const purchased = buyProperty(base, 3000, "lions-den");
+    if (!purchased) throw new Error("Expected Lion’s Den purchase");
+    expect(purchased.spent).toBe(3000);
+    expect(purchased.activeProperty).toBe("lions-den");
+    expect(purchased.unlockedProperties).toContain("lions-den");
+    expect(buyProperty(purchased, 3000, "lions-den")).toBeNull();
+    expect(equipProperty({ ...purchased, activeProperty: "treehouse" }, "lions-den", "free")).toEqual(purchased);
+  });
   it.each(["free", "plus"])("%s cannot enter an old owned Space Station", (tier) => {
     const owned = { ...base, unlockedProperties: ["treehouse", "space-station"] };
     expect(canEnterProperty("space-station", tier)).toBe(false);
