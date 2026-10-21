@@ -35,6 +35,7 @@ export async function syncStripeSubscription(stripe: Stripe, subscriptionId: str
     }
   }
   if (env === "live" && sub.status === "active" && sub.created * 1000 >= Date.parse(ALERTS_STARTED_AT)) {
+    try {
     const { data: owner, error: ownerError } = await supabaseAdmin.auth.admin.getUserById(userId);
     if (ownerError || !owner.user) throw new Error("Could not read subscription notification details");
     const { sendAccountAlert } = await import("./admin-alerts.server");
@@ -44,6 +45,11 @@ export async function syncStripeSubscription(stripe: Stripe, subscriptionId: str
       signupAt: owner.user.created_at, eventAt: new Date(sub.created * 1000).toISOString(),
       source: signupSource(owner.user.user_metadata?.["signup_source"]), tier: plan.tier,
     }, subscriptionAlertKey(env, sub.id));
+    } catch {
+      // Notification availability must never block a paid membership or wallet grant.
+      // Later verified syncs use the same managed idempotency key.
+      console.warn("Subscription admin alert pending; will retry on the next verified membership sync.");
+    }
   }
   return { ok: sub.status === "active" || sub.status === "trialing", tier: plan.tier as string | null };
 }
