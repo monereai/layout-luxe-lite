@@ -45,7 +45,7 @@ function Daily() {
           loading="lazy"
           width={1536}
           height={1024}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-70 [mask-image:radial-gradient(130%_110%_at_72%_50%,black_30%,transparent_88%)]"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-90 [mask-image:radial-gradient(140%_120%_at_72%_50%,black_45%,transparent_92%)]"
         />
         <div className="relative">
           <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent-foreground">{d.theme}</span>
