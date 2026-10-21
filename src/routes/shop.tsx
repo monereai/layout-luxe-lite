@@ -72,7 +72,7 @@ function ShopPage() {
 
   async function wear(category: ShopCategory, id: string | null) {
     try {
-      await persistShop(equip(shop, category, id));
+      await persistShop((current) => equip(current, category, id));
       const item = SHOP_ITEMS.find((item) => item.id === id);
       if (item) toast.success(`Equipped ${item.name}!`);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Your outfit could not be saved."); }
@@ -81,7 +81,7 @@ function ShopPage() {
   async function wearCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
     // Items already bought stay wearable: combinations cost nothing extra.
     try {
-      await persistShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
+      await persistShop((current) => equip(equip(equip(current, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
       toast.success(`Equipped ${family.name}!`);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Your outfit could not be saved."); }
   }
@@ -99,11 +99,13 @@ function ShopPage() {
 
   async function takeOffCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
     // Taking a combination off frees its three slots; anything else stays on.
-    let next = shop;
-    if (next.equipped.hat === family.hat) next = equip(next, "hat", null);
-    if (next.equipped.outfit === family.outfit) next = equip(next, "costume", null);
-    if (next.equipped.footwear === family.footwear) next = equip(next, "footwear", null);
-    try { await persistShop(next); } catch { toast.error("Your outfit could not be saved. Please try again."); }
+    try { await persistShop((current) => {
+      let next = current;
+      if (next.equipped.hat === family.hat) next = equip(next, "hat", null);
+      if (next.equipped.outfit === family.outfit) next = equip(next, "costume", null);
+      if (next.equipped.footwear === family.footwear) next = equip(next, "footwear", null);
+      return next;
+    }); } catch { toast.error("Your outfit could not be saved. Please try again."); }
   }
 
   return (

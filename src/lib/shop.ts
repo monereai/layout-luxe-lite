@@ -119,6 +119,17 @@ export function normalizeEquipment(state: ShopState): ShopState {
 }
 const EMPTY: ShopState = { spent: 0, owned: [], equipped: {} };
 
+/** Owned/default selections are free; malformed display prices fall back to the known catalog, never a free purchase. */
+export function clothingCost(itemId: unknown, price: unknown, owned: readonly string[] = []): number {
+  if (itemId === null || itemId === undefined || itemId === "default") return 0;
+  if (typeof itemId !== "string" || !itemId.trim()) throw new Error("Invalid clothing ID");
+  const item = SHOP_ITEMS.find((item) => item.id === itemId);
+  if (!item) throw new Error("Unknown clothing item");
+  if (owned.includes(itemId)) return 0;
+  const parsed = typeof price === "number" ? price : typeof price === "string" && price.trim() ? Number(price) : NaN;
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : item.cost;
+}
+
 /** Wallet balance = points earned in "Where's Monere?" minus points spent in the shop. */
 export function walletBalance(earned: number, state: ShopState, habitatSpent = 0) {
   return Math.max(0, earned - state.spent - habitatSpent);
@@ -128,15 +139,16 @@ export function walletBalance(earned: number, state: ShopState, habitatSpent = 0
 export function buy(state: ShopState, earned: number, itemId: string): ShopState | null {
   const item = SHOP_ITEMS.find((i) => i.id === itemId);
   if (!item || state.owned.includes(itemId)) return null;
-  if (walletBalance(earned, state) < item.cost) return null;
-  const purchased = { ...state, spent: state.spent + item.cost, owned: [...state.owned, itemId] };
+  const cost = clothingCost(itemId, item.cost);
+  if (walletBalance(earned, state) < cost) return null;
+  const purchased = { ...state, spent: state.spent + cost, owned: [...state.owned, itemId] };
   return equip(purchased, item.category, itemId);
 }
 
 /** A ready-made set costs a quarter more than buying its pieces one by one. */
 export const COMBINATION_UPLIFT = 1.25;
 
-const pieceCost = (id: string) => SHOP_ITEMS.find((item) => item.id === id)?.cost ?? 0;
+const pieceCost = (id: string) => clothingCost(id, SHOP_ITEMS.find((item) => item.id === id)?.cost);
 
 /** Set price: the pieces' combined cost plus 25%, rounded up to the nearest 5 points. */
 function setPrice(piecesCost: number) {
@@ -186,6 +198,7 @@ const listeners = new Set<() => void>();
 
 export type WardrobeRequest = { action: "status" | "buy" | "buy_combo" | "equip" | "gift_mystery" | "gift_jigsaw" | "reset"; id?: string; equipped?: ShopState["equipped"] };
 let accountAction: ((request: WardrobeRequest) => Promise<ShopState>) | undefined;
+let accountQueue: Promise<unknown> = Promise.resolve();
 /** The signed-in account's wardrobe is changed only through server-checked actions. */
 export function setShopAccountAction(action: typeof accountAction) { accountAction = action; }
 export function shopSnapshot() { load(); return current; }
@@ -196,8 +209,15 @@ async function runAccount(request: WardrobeRequest) {
   return current;
 }
 /** Saves which owned items are worn; the server rejects anything not owned. */
-export async function persistShop(next: ShopState) {
-  return runAccount({ action: "equip", equipped: normalizeEquipment(next).equipped });
+export async function persistShop(next: ShopState | ((state: ShopState) => ShopState)) {
+  const action = accountAction;
+  const pending = accountQueue.catch(() => {}).then(() => {
+    if (!action || action !== accountAction) throw new Error("Please sign in and wait for your wardrobe to load.");
+    const selection = typeof next === "function" ? next(shopSnapshot()) : next;
+    return runAccount({ action: "equip", equipped: normalizeEquipment(selection).equipped });
+  });
+  accountQueue = pending;
+  return pending;
 }
 export const buyOnAccount = (itemId: string) => runAccount({ action: "buy", id: itemId });
 export const buyComboOnAccount = (comboId: string) => runAccount({ action: "buy_combo", id: comboId });
