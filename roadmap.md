@@ -256,3 +256,7 @@
 # Biblical Snap in the main menu
 - [x] Add a Biblical Snap entry to the side navigation and the phone menu panel, opening the game from the home page; closing it clears the address.
 - [x] Verify in the preview at 1280 and 390 px: the link appears with the other menu items, opens the game window, and the address returns to normal after closing; 210 tests pass, build clean.
+
+# Legendary pets: Thunderbird & Phoenix
+- [x] Add Thunderbird and Phoenix to the Pet Shop Legendary section at 2,000 pts each, with matching artwork and a server-side price entry.
+- [x] Verify the Legendary tab shows exactly Baby Dragon, Unicorn, Thunderbird, Phoenix at 1280px; 237 tests pass, build clean. Not published.
