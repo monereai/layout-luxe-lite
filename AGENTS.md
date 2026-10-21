@@ -43,4 +43,5 @@
 - Daily Dilemma uses SQL-owned choices, protected dev resets and daily ledger keys with shared care cache. Why: resets/retries cannot pay twice.
 - Story images use scene hashes, private signed cache URLs and immediate ready-made art on failure; refusals never replay. Why: avoid repeat AI cost and blocked stories.
 - Guest points (local monere_guest_*) reach accounts only via claim_guest_points, once and capped. Why: browser totals are untrusted.
-- Admin emails use managed fixed-recipient templates and event keys after confirmed auth/verified Stripe; no queues or email tables. Why: secure deduped sends.
+- Managed admin emails: fixed recipients/event keys after confirmed auth/Stripe; no queues/tables (deduplication).
+- Never alias entities root: parse5 needs its own version.
