@@ -7,6 +7,11 @@ import goldfish from "@/assets/pets/goldfish.png";
 import bunny from "@/assets/pets/bunny.png";
 import parrot from "@/assets/pets/parrot.png";
 import babyDragon from "@/assets/pets/baby-dragon.png";
+import hedgehog from "@/assets/pets/hedgehog.png";
+import turtle from "@/assets/pets/turtle.png";
+import fox from "@/assets/pets/fox.png";
+import owl from "@/assets/pets/owl.png";
+import unicorn from "@/assets/pets/unicorn.png";
 
 export type Pet = { id: string; name: string; description: string; cost: number; src: string };
 
@@ -17,8 +22,20 @@ export const PETS: Pet[] = [
   { id: "kitten", name: "Kitten", description: "Curious, cuddly and full of mischief.", cost: 300, src: kitten },
   { id: "bunny", name: "Bunny", description: "Soft ears, gentle heart, quick feet.", cost: 800, src: bunny },
   { id: "parrot", name: "Parrot", description: "A chatty friend with brilliant feathers.", cost: 800, src: parrot },
+  { id: "hedgehog", name: "Hedgehog", description: "Prickly on the outside, sweet on the inside.", cost: 300, src: hedgehog },
+  { id: "turtle", name: "Turtle", description: "Slow, steady and always by your side.", cost: 300, src: turtle },
+  { id: "fox", name: "Fox", description: "Clever, cosy and wonderfully curious.", cost: 800, src: fox },
+  { id: "owl", name: "Owl", description: "A wise little watcher for late-night talks.", cost: 800, src: owl },
   { id: "baby-dragon", name: "Baby Dragon", description: "Small, brave and a little bit legendary.", cost: 2000, src: babyDragon },
+  { id: "unicorn", name: "Unicorn", description: "A magical friend with a rainbow mane.", cost: 2000, src: unicorn },
 ];
+
+export type PetRarity = "Common" | "Rare" | "Legendary";
+export const PET_RARITIES: Record<string, PetRarity> = {
+  goldfish: "Common", puppy: "Common", kitten: "Common", hedgehog: "Common", turtle: "Common",
+  bunny: "Rare", parrot: "Rare", fox: "Rare", owl: "Rare",
+  "baby-dragon": "Legendary", unicorn: "Legendary",
+};
 
 export type PetState = { owned: string[]; active: string | null };
 const EMPTY: PetState = { owned: [], active: null };
