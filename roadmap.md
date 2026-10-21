@@ -1,3 +1,7 @@
+# Pet Shop interior
+- [ ] Replace the storefront backdrop with a warm pet-store interior and preserve the interactive Monere view.
+- [ ] Keep rarity tabs and pet cards readable; verify phone/desktop filtering and unchanged shop behavior.
+
 # Story picture recovery
 - [x] Show ready-made story art immediately, surface generation failures, and never retry refusals.
 - [x] Return a private saved-picture URL on cache hits; controlled two-request regression confirms one generation, one stored image, then a URL-only hit.
