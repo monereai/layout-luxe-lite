@@ -1,6 +1,6 @@
 # Admin account email alerts
-- [ ] Add fixed-recipient registration/subscription templates and authenticated or verified-payment triggers without changing account benefits.
-- [ ] Verify alert details, repeat-event protection and unauthorized rejection with isolated tests.
+- [x] Add fixed-recipient registration/subscription templates: confirmed new users notify on first authenticated app visit; verified live active subscriptions notify through shared Stripe sync. Managed event keys deduplicate sends; email failures never block paid benefits. No email queues/tables or new provider key.
+- [x] Verify details/auth rejection and stable managed event keys with focused tests; sign-up page renders and protected template preview returns 200 with project authorization / 401 without. No real registration/payment or email delivery tested while sender verification is pending.
 - [ ] Enable delivery after notify.monereai.com verification and publishing (owner action).
 
 # Pet Shop interior
