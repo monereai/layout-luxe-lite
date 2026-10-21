@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 import type { StripeEnv } from "./stripe.server";
 import { membershipPrice } from "./store-config";
+import { ALERTS_STARTED_AT, signupSource, subscriptionAlertKey } from "./admin-alert-data";
 
 /** Saves a Stripe subscription for its owner and credits each elapsed month's Points + Tokens once. */
 export async function syncStripeSubscription(stripe: Stripe, subscriptionId: string, env: StripeEnv, expectedUser?: string) {
@@ -32,6 +33,17 @@ export async function syncStripeSubscription(stripe: Stripe, subscriptionId: str
       const grant = await supabaseAdmin.rpc("credit_stripe_membership" as any, { p_user: userId, p_subscription: sub.id, p_period_key: `${start}:${m}`, p_tier: plan.tier });
       if (grant.error) throw new Error("Your membership is active, but its wallet grant needs a retry.");
     }
+  }
+  if (env === "live" && sub.status === "active" && sub.created * 1000 >= Date.parse(ALERTS_STARTED_AT)) {
+    const { data: owner, error: ownerError } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (ownerError || !owner.user) throw new Error("Could not read subscription notification details");
+    const { sendAccountAlert } = await import("./admin-alerts.server");
+    await sendAccountAlert({
+      event: "Subscription", email: owner.user.email ?? "Not provided",
+      username: owner.user.user_metadata?.["full_name"] ?? owner.user.user_metadata?.["name"] ?? owner.user.user_metadata?.["username"] ?? "Not provided",
+      signupAt: owner.user.created_at, eventAt: new Date(sub.created * 1000).toISOString(),
+      source: signupSource(owner.user.user_metadata?.["signup_source"]), tier: plan.tier,
+    }, subscriptionAlertKey(env, sub.id));
   }
   return { ok: sub.status === "active" || sub.status === "trialing", tier: plan.tier as string | null };
 }
