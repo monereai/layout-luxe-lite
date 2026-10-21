@@ -232,6 +232,13 @@
       "when": 1792436835299,
       "tag": "0032_server_owned_wardrobe_and_find_spots",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792564789172,
+      "tag": "0033_guest_ai_quota",
+      "breakpoints": true
     }
   ]
 }
