@@ -4,6 +4,16 @@ import { SHOP_ITEMS, equip, normalizeEquipment, type ShopState } from "@/lib/sho
 import { COMBINATION_FAMILIES } from "@/lib/shop-combinations";
 import { clothingFrames } from "@/lib/character-art";
 
+it.each(["heart-specs", "aviator-shades", "rainbow-specs"])("uses eight angle-matched layers for %s", (id) => {
+  const item = SHOP_ITEMS.find((item) => item.id === id);
+  if (!item) throw new Error(`Missing glasses: ${id}`);
+  for (let frame = 0; frame < 8; frame++) {
+    const src = `/monere/layers/${id}/${frame}.webp`;
+    expect(clothingFrames([item], frame)[0]?.src).toBe(src);
+    expect(existsSync(`public${src}`)).toBe(true);
+  }
+});
+
 it("keeps every extra equipped item in all eight turning frames", () => {
   const items = SHOP_ITEMS.filter((item) => ["crown", "sunglasses", "bow-tie", "crisp-sneakers", "party-hat"].includes(item.id));
   for (let frame = 0; frame < 8; frame++) {
