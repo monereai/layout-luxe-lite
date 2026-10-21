@@ -258,5 +258,5 @@
 - [x] Verify in the preview at 1280 and 390 px: the link appears with the other menu items, opens the game window, and the address returns to normal after closing; 210 tests pass, build clean.
 
 # Legendary pets: Thunderbird & Phoenix
-- [x] Add Thunderbird and Phoenix to the Pet Shop Legendary section at 2,000 pts each, with matching artwork and a server-side price entry.
-- [x] Verify the Legendary tab shows exactly Baby Dragon, Unicorn, Thunderbird, Phoenix at 1280px; 237 tests pass, build clean. Not published.
+- [x] Add Thunderbird and Phoenix to the Pet Shop Legendary section at 3,000 pts each, with matching artwork and a server-side price entry.
+- [x] Verify the Legendary tab shows exactly Baby Dragon, Unicorn, Thunderbird, Phoenix at 1280px; 237 tests pass, build clean, live purchase check confirmed at 3,000. Not published.
