@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { usePlan } from "@/hooks/usePlan";
 import { openGuestReward } from "@/components/GuestSignupModal";
+import { guestCompleted, markGuestComplete } from "@/lib/guest-preview";
 import { makeSpots } from "@/lib/game";
 import { updateCare, startCareRound, finishCareRound, rewardCareFind } from "@/lib/care.functions";
 import type { CareState } from "@/lib/care";
@@ -42,7 +43,7 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6 | 7, r
     if (!ready) return;
     if (!user) {
       // Guests get one local, unpaid practice round per game; nothing is sent to the server.
-      if (window.localStorage.getItem(`monereai-guest-${kind}`) === "done") { setError("You've played your free guest round. Create a free account to keep playing!"); openGuestReward(); }
+      if (guestCompleted() || window.localStorage.getItem(`monereai-guest-${kind}`) === "done") { setError("You've played your free guest round. Create a free account to keep playing!"); openGuestReward(); }
       else if (kind === "find") setRound({ id: "guest", order: [], spots: makeSpots() });
       return;
     }
@@ -56,6 +57,7 @@ export function useCareRound(kind: "find" | "jigsaw", size: 3 | 4 | 5 | 6 | 7, r
     if (!user) {
       window.localStorage.setItem(`monereai-guest-${kind}`, "done");
       setReward("+50 Points — sign up to save them!");
+      markGuestComplete(50);
       window.setTimeout(openGuestReward, 1200);
       return;
     }
