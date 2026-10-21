@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookHeart, CheckCircle2, Clock, Sparkles, Trophy, Zap } from 'lucide-react';
@@ -10,9 +9,8 @@ import { MonereMentor } from '@/components/MonereMentor';
 import { usePlan } from '@/hooks/usePlan';
 import { useCare } from '@/hooks/useCare';
 import { playDailyDilemma } from '@/lib/daily-dilemma.functions';
-import { DAILY_DILEMMAS, dilemmaCountdown } from '@/lib/daily-dilemma';
+import { DAILY_DILEMMAS, DAILY_DILEMMAS as STORIES, dilemmaCountdown, dilemmaIndex } from '@/lib/daily-dilemma';
 import { playChime } from '@/lib/sound';
-import { DAILY_DILEMMAS as STORIES, dilemmaIndex } from '@/lib/daily-dilemma';
 import { GuestSignupModal } from '@/components/GuestSignupModal';
 
 export function DailyDilemmaModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {

@@ -14,7 +14,7 @@ import { CrisisDialog } from "@/components/CrisisDialog";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { useUserName } from "@/lib/username";
 import { useProfile } from "@/lib/profile";
-import { seekWisdom, type Wisdom } from "@/lib/wisdom.functions";
+import { seekWisdom, seekWisdomGuest, type Wisdom } from "@/lib/wisdom.functions";
 import { detectCrisis } from "@/lib/crisis";
 import { saveEntry } from "@/lib/journal";
 import { MonereMentor } from "@/components/MonereMentor";
@@ -29,6 +29,7 @@ import { propertyName, useProperties } from "@/lib/properties";
 import { canAsk, getUsedToday, recordQuery, FREE_DAILY_LIMIT } from "@/lib/usage";
 import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 import { MessageResponse } from "@/components/ai-elements/message";
+import { GuestSignupModal } from "@/components/GuestSignupModal";
 import { DailyDilemmaModal } from "@/components/DailyDilemmaModal";
 
 export const Route = createFileRoute("/")({
@@ -62,6 +63,8 @@ function Home() {
     if (dilemma === 1) void navigate({ to: "/", search: (prev) => ({ ...prev, dilemma: undefined }) });
   };
   const ask = useServerFn(seekWisdom);
+  const askGuest = useServerFn(seekWisdomGuest);
+  const [guestModal, setGuestModal] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const category = categories.length ? categories.join(" + ") : "General life question";
   const [situation, setSituation] = useState("");
@@ -99,15 +102,16 @@ function Home() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    if (ready && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
-    if (!user) { toast("Please sign in to talk with Monere."); return; }
+    if (!ready) return;
+    if (!user && !canAsk(getUsedToday(), false)) { setGuestModal(true); return; }
+    if (user && !canAsk(getUsedToday(), premium)) { setPaywall("limit"); return; }
     setLoading(true);
-    const res = await ask({
-      data: { category, situation, includeSong, userName: userName || undefined, profile, lang },
-    }).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
+    const payload = { category, situation, includeSong, userName: userName || undefined, profile, lang };
+    const res = await (user ? ask({ data: payload }) : askGuest({ data: payload })).catch(() => ({ ok: false as const, error: "Couldn't connect. Please try again." }));
     setLoading(false);
-    if (!res.ok) { toast.error(res.error); return; }
-    if (!premium && !res.wisdom.personalReply) { recordQuery(); setUsed(getUsedToday()); }
+    if (!res.ok) { toast.error(res.error); if (!user) setGuestModal(true); return; }
+    if (!user) { recordQuery(); setUsed(getUsedToday()); if (!canAsk(getUsedToday(), false)) window.setTimeout(() => setGuestModal(true), 2500); }
+    else if (!premium && !res.wisdom.personalReply) { recordQuery(); setUsed(getUsedToday()); }
     setWisdom(res.wisdom);
     setChat([]);
     setSaved(false);
@@ -117,6 +121,7 @@ function Home() {
 
   async function sendFollowUp(q: string) {
     if (!wisdom) return;
+    if (!user && !detectCrisis(q)) { setGuestModal(true); return; }
     if (detectCrisis(q)) {
       setWisdom(null); setChat([]); setSafety(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -216,6 +221,7 @@ function Home() {
       {!wisdom && !safety && !onboarding && <InstallBanner />}
       {paywall && <PassCodeDialog message={paywall === "limit" ? "You've reached today's free limit. Enter your youth group or school access code to keep talking with Monere." : undefined} onClose={() => setPaywall(null)} />}
       <CrisisDialog open={crisis} triggered onClose={() => setCrisis(false)} />
+      <GuestSignupModal open={guestModal} onOpenChange={setGuestModal} />
       <DailyDilemmaModal open={dilemmaOpen} onOpenChange={(next) => (next ? setDilemmaOpen(true) : closeDilemma())} />
       {onboarding && (
         <OnboardingModal
