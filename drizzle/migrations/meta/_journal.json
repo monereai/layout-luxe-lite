@@ -239,6 +239,13 @@
       "when": 1792564789172,
       "tag": "0033_guest_ai_quota",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792566389482,
+      "tag": "0034_story_image_cache_and_guest_points",
+      "breakpoints": true
     }
   ]
 }
