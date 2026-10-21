@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import lionsDen from "@/assets/habitats/lions-den.jpg";
 
 export type Property = { id: string; name: string; cost: number; src: string | null };
 
@@ -7,6 +8,7 @@ export const PROPERTIES: Property[] = [
   { id: "treehouse", name: "Treehouse", cost: 0, src: null },
   { id: "beach-bungalow", name: "Beach Bungalow", cost: 540, src: "/properties/beach-bungalow.jpg" },
   { id: "cozy-bedroom", name: "Cozy Bedroom", cost: 720, src: "/properties/cozy-bedroom.jpg" },
+  { id: "lions-den", name: "Lion’s Den", cost: 3000, src: lionsDen },
   { id: "space-station", name: "Space Station", cost: 0, src: "/properties/space-station.jpg" },
 ];
 
