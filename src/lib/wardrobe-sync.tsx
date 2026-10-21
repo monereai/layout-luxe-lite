@@ -39,7 +39,9 @@ export function WardrobeSync() {
       localStorage.setItem("monereai-wardrobe-owner", userId);
       saveShop(state);
       setShopAccountAction(action);
-    }).catch(() => { if (!cancelled) toast.error("Your wardrobe could not load. Please refresh before changing outfits."); });
+    }).catch(() => { if (!cancelled) { setShopAccountAction(undefined); toast.error("Your wardrobe could not load. Please refresh before changing outfits."); } });
+    // Clicks during the initial read wait behind status instead of failing while the wardrobe loads.
+    setShopAccountAction(action);
     return () => { cancelled = true; setShopAccountAction(undefined); };
   }, [userId, ready, run]);
   return null;

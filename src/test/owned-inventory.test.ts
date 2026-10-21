@@ -11,6 +11,12 @@ const habitats = (unlocked: string[], active = "treehouse"): PropertyState => ({
 });
 
 describe("owned collection listing", () => {
+  it("gives owned inventory items explicit string IDs and zero equip costs", () => {
+    const { groups } = ownedCollection(shop(["crown", "astro-suit"]), habitats([]));
+    expect(groups.flatMap((group) => group.items.map(({ id, cost }) => ({ id, cost })))).toEqual([
+      { id: "crown", cost: 0 }, { id: "astro-suit", cost: 0 },
+    ]);
+  });
   it("lists every owned item once, grouped by category", () => {
     const { groups, total } = ownedCollection(shop(["crown", "crisp-sneakers", "bandana"]), habitats(["treehouse"]));
     expect(total).toBe(3);

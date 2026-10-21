@@ -23,7 +23,7 @@
 - Keep the onboarding profile in a dedicated local-storage module and send only its validated enum to advice functions. Why: one profile choice consistently tailors initial and follow-up guidance.
 - Register the service worker only through src/lib/pwa.ts (blocked in dev, preview and iframes); vite-plugin-pwa writes sw.js into dist/client. Why: stale caches must never break previews.
 - Use usePointsWallet for all spendable-points displays, deducting clothing and habitat spending from game and credited points. Why: displayed points must match purchasing power everywhere.
-- Purchases stay owned free forever (owned combos cost nothing); shop.ts loads saved state eagerly so fast clicks can't overwrite purchases. Why: trust.
+- Owned equips are free; eagerly load shop state, queue equip transforms, and qualify SQL catalog costs. Why: preserve slots and avoid ambiguous prices.
 - Stripe payments are verified server-side (confirmCheckout, stripe-sync, payments webhook) before granting; managed build tokens route environments; usePaymentReturn validates same-origin returns after auth hydration. Why: client callbacks/URL flags can be faked.
 - Store catalog is visible signed out; Stripe checkout requires sign-in and, for memberships, a prior confirmation that grants nothing. Why: purchases tie to accounts and benefits depend on verified payment.
 - Pets, habitats and clothing are bought/equipped only via pet_action/property_action/wardrobe_action (server prices, shared points, owned checks, Club gates); the browser never writes inventories. Load equipped_pet_id on identity changes. Why: prevent free grants and stale pets.

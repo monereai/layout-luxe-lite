@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { usePlan } from "@/hooks/usePlan";
-import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, equip, equipmentSlot, persistShop, buyOnAccount, buyComboOnAccount, useShop, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, clothingCost, equip, equipmentSlot, persistShop, buyOnAccount, buyComboOnAccount, useShop, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
@@ -72,7 +72,7 @@ function ShopPage() {
 
   async function wear(category: ShopCategory, id: string | null) {
     try {
-      await persistShop(equip(shop, category, id));
+      await persistShop((current) => equip(current, category, id));
       const item = SHOP_ITEMS.find((item) => item.id === id);
       if (item) toast.success(`Equipped ${item.name}!`);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Your outfit could not be saved."); }
@@ -81,7 +81,7 @@ function ShopPage() {
   async function wearCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
     // Items already bought stay wearable: combinations cost nothing extra.
     try {
-      await persistShop(equip(equip(equip(shop, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
+      await persistShop((current) => equip(equip(equip(current, "hat", family.hat), "costume", family.outfit), "footwear", family.footwear));
       toast.success(`Equipped ${family.name}!`);
     } catch (error) { toast.error(error instanceof Error ? error.message : "Your outfit could not be saved."); }
   }
@@ -99,11 +99,13 @@ function ShopPage() {
 
   async function takeOffCombo(family: (typeof COMBINATION_FAMILIES)[number]) {
     // Taking a combination off frees its three slots; anything else stays on.
-    let next = shop;
-    if (next.equipped.hat === family.hat) next = equip(next, "hat", null);
-    if (next.equipped.outfit === family.outfit) next = equip(next, "costume", null);
-    if (next.equipped.footwear === family.footwear) next = equip(next, "footwear", null);
-    try { await persistShop(next); } catch { toast.error("Your outfit could not be saved. Please try again."); }
+    try { await persistShop((current) => {
+      let next = current;
+      if (next.equipped.hat === family.hat) next = equip(next, "hat", null);
+      if (next.equipped.outfit === family.outfit) next = equip(next, "costume", null);
+      if (next.equipped.footwear === family.footwear) next = equip(next, "footwear", null);
+      return next;
+    }); } catch { toast.error("Your outfit could not be saved. Please try again."); }
   }
 
   return (
@@ -211,14 +213,15 @@ function ShopPage() {
                 {SHOP_ITEMS.filter((i) => i.category === id).map((item) => {
                   const owned = shop.owned.includes(item.id);
                   const on = shop.equipped[equipmentSlot(item.category)] === item.id;
-                  const afford = wallet >= item.cost;
+                  const cost = clothingCost(item.id, item.cost, shop.owned);
+                  const afford = wallet >= cost;
                   return (
                     <div key={item.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                       <div className="mb-2 flex h-24 items-center justify-center">
                         <img src={item.src} alt="" loading="lazy" className={`max-h-full max-w-full object-contain ${owned ? "" : "opacity-80"}`} />
                       </div>
                       <p className="font-heading text-sm font-semibold">{item.name}</p>
-                      <p className="mb-3 font-heading text-xs font-semibold text-points">{item.cost} pts</p>
+                      <p className="mb-3 font-heading text-xs font-semibold text-points">{owned ? "Free — item owned" : `${cost} pts`}</p>
                       {on ? (
                           <Button size="sm" variant="secondary" className={CLOTHING_BUTTON_CLASS} onClick={() => wear(item.category, null)} aria-label={`${item.name} equipped — tap to take off`}>
                           <Check /> Equipped
@@ -227,7 +230,7 @@ function ShopPage() {
                         <Button size="sm" variant="outline" className={CLOTHING_BUTTON_CLASS} onClick={() => wear(item.category, item.id)}>Equip</Button>
                       ) : (
                         <Button size="sm" className={CLOTHING_BUTTON_CLASS} disabled={!afford} onClick={() => purchase(item.id)}>
-                          {!afford && <Lock />} Buy Now for {item.cost} pts
+                          {!afford && <Lock />} Buy Now for {cost} pts
                         </Button>
                       )}
                     </div>

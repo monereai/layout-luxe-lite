@@ -1,6 +1,6 @@
 # Clothing equip reliability
-- [ ] Repair ambiguous clothing price evaluation while preserving server-owned prices and free owned equips.
-- [ ] Verify saved equipment and immediate character updates on the separate QA account.
+- [x] Repair ambiguous SQL clothing costs, validate IDs, preserve server prices and free owned equips; queue selections through account loading and save completion.
+- [x] Verify shop/inventory equip, reload and home appearance on separate QA; 51 focused tests pass, build OK, 780 points and puppy unchanged, original hat restored. Existing CookieYes localhost warning only. Frontend not published.
 
 # Admin account email alerts
 - [x] Add fixed-recipient registration/subscription templates: confirmed new users notify on first authenticated app visit; verified live active subscriptions notify through shared Stripe sync. Managed event keys deduplicate sends; email failures never block paid benefits. No email queues/tables or new provider key.
