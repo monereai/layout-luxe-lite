@@ -20,6 +20,10 @@ describe("pet shop buttons", () => {
 
 describe("pet prices (rarity tiers)", () => {
   it("matches the agreed tier prices", () => {
-    expect(Object.fromEntries(PETS.map((p) => [p.id, p.cost]))).toEqual({ goldfish: 300, puppy: 300, kitten: 300, bunny: 800, parrot: 800, "baby-dragon": 2000 });
+    expect(Object.fromEntries(PETS.map((p) => [p.id, p.cost]))).toEqual({ goldfish: 300, puppy: 300, kitten: 300, hedgehog: 300, turtle: 300, bunny: 800, parrot: 800, fox: 800, owl: 800, "baby-dragon": 2000, unicorn: 2000 });
+  });
+  it("maps every pet to a shop rarity", () => {
+    const { PET_RARITIES } = await import("@/components/PetShop");
+    expect(PETS.every((p) => p.id in PET_RARITIES)).toBe(true);
   });
 });
