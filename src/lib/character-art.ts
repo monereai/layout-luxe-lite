@@ -2,13 +2,14 @@ import type { ShopItem } from "@/lib/shop";
 import { LOOKS_WITH_ART } from "@/lib/shop-combinations";
 
 export type ClothingFrame = { item: ShopItem; src: string; turnaround: boolean };
+const LAYER_ITEMS = new Set(["shell-necklace", "heart-specs", "aviator-shades", "rainbow-specs"]);
 
 /** Every selected extra uses the current angle, never a front-only visibility gate. */
 export function clothingFrames(items: ShopItem[], frame: number): ClothingFrame[] {
   return [...items].sort((a, b) => order[a.category] - order[b.category]).map((item) => ({
     item,
     turnaround: LOOKS_WITH_ART.has(item.id),
-    src: item.id === "shell-necklace" ? `/monere/layers/shell-necklace/${frame}.webp` : LOOKS_WITH_ART.has(item.id) ? `/monere/looks/${item.id}/${frame}.webp` : item.src,
+    src: LAYER_ITEMS.has(item.id) ? `/monere/layers/${item.id}/${frame}.webp` : LOOKS_WITH_ART.has(item.id) ? `/monere/looks/${item.id}/${frame}.webp` : item.src,
   }));
 }
 
@@ -54,7 +55,7 @@ export async function composeCharacterFrame(baseSrc: string, extras: ClothingFra
   extras.forEach(({ item, turnaround }, index) => {
     const image = clothes[index];
     if (!image) return;
-    if (item.id === "shell-necklace") {
+    if (LAYER_ITEMS.has(item.id)) {
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
       return;
     }
