@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, Home } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { usePlan } from "@/hooks/usePlan";
 import { PROPERTIES, useProperties, type Property, type PropertyState } from "@/lib/properties";
 import {
   SHOP_ITEMS,
   equipmentSlot,
+  clothingCost,
+  equip,
+  persistShop,
   useShop,
   type ShopCategory,
   type ShopItem,
@@ -31,7 +36,8 @@ export function ownedCollection(shop: ShopState, props: PropertyState, club = fa
   const groups: OwnedGroup[] = GROUPS.map(({ id, label }) => ({
     id,
     label,
-    items: SHOP_ITEMS.filter((item) => item.category === id && shop.owned.includes(item.id)),
+    items: SHOP_ITEMS.filter((item) => item.category === id && shop.owned.includes(item.id))
+      .map((item) => ({ ...item, cost: clothingCost(item.id, item.cost, shop.owned) })),
   })).filter((group) => group.items.length > 0);
   const habitats: Property[] = PROPERTIES.filter(
     (p) => props.unlockedProperties.includes(p.id) || (club && p.id === "space-station"),
@@ -45,7 +51,18 @@ export function OwnedInventory() {
   const props = useProperties();
   const { tier } = usePlan();
   const [mounted, setMounted] = useState(false);
+  const [equipping, setEquipping] = useState<string | null>(null);
   useEffect(() => setMounted(true), []);
+
+  async function wear(item: ShopItem) {
+    setEquipping(item.id);
+    try {
+      await persistShop((current) => equip(current, item.category, item.id));
+      toast.success(`Equipped ${item.name}!`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Your outfit could not be saved.");
+    } finally { setEquipping(null); }
+  }
 
   const { groups, habitats, total } = ownedCollection(shop, props, tier === "club");
   if (!mounted) return null;
@@ -94,6 +111,7 @@ export function OwnedInventory() {
                       <Check className="h-3 w-3" /> Wearing
                     </p>
                   )}
+                  {!wearing && <Button size="sm" variant="outline" className="mt-2 w-full" disabled={equipping !== null} onClick={() => wear(item)} aria-label={`Equip ${item.name}`}>Equip</Button>}
                 </li>
               );
             })}

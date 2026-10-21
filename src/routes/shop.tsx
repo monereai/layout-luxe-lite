@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import { usePlan } from "@/hooks/usePlan";
-import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, equip, equipmentSlot, persistShop, buyOnAccount, buyComboOnAccount, useShop, type ShopCategory } from "@/lib/shop";
+import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPrice, clothingCost, equip, equipmentSlot, persistShop, buyOnAccount, buyComboOnAccount, useShop, type ShopCategory } from "@/lib/shop";
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
@@ -213,14 +213,15 @@ function ShopPage() {
                 {SHOP_ITEMS.filter((i) => i.category === id).map((item) => {
                   const owned = shop.owned.includes(item.id);
                   const on = shop.equipped[equipmentSlot(item.category)] === item.id;
-                  const afford = wallet >= item.cost;
+                  const cost = clothingCost(item.id, item.cost, shop.owned);
+                  const afford = wallet >= cost;
                   return (
                     <div key={item.id} className={`flex flex-col rounded-lg border bg-card p-3 ${on ? "border-primary ring-2 ring-primary" : "border-border"}`}>
                       <div className="mb-2 flex h-24 items-center justify-center">
                         <img src={item.src} alt="" loading="lazy" className={`max-h-full max-w-full object-contain ${owned ? "" : "opacity-80"}`} />
                       </div>
                       <p className="font-heading text-sm font-semibold">{item.name}</p>
-                      <p className="mb-3 font-heading text-xs font-semibold text-points">{item.cost} pts</p>
+                      <p className="mb-3 font-heading text-xs font-semibold text-points">{owned ? "Free — item owned" : `${cost} pts`}</p>
                       {on ? (
                           <Button size="sm" variant="secondary" className={CLOTHING_BUTTON_CLASS} onClick={() => wear(item.category, null)} aria-label={`${item.name} equipped — tap to take off`}>
                           <Check /> Equipped
@@ -229,7 +230,7 @@ function ShopPage() {
                         <Button size="sm" variant="outline" className={CLOTHING_BUTTON_CLASS} onClick={() => wear(item.category, item.id)}>Equip</Button>
                       ) : (
                         <Button size="sm" className={CLOTHING_BUTTON_CLASS} disabled={!afford} onClick={() => purchase(item.id)}>
-                          {!afford && <Lock />} Buy Now for {item.cost} pts
+                          {!afford && <Lock />} Buy Now for {cost} pts
                         </Button>
                       )}
                     </div>
