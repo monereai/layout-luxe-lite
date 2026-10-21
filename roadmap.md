@@ -1,3 +1,8 @@
+# Admin account email alerts
+- [ ] Add fixed-recipient registration/subscription templates and authenticated or verified-payment triggers without changing account benefits.
+- [ ] Verify alert details, repeat-event protection and unauthorized rejection with isolated tests.
+- [ ] Enable delivery after notify.monereai.com verification and publishing (owner action).
+
 # Pet Shop interior
 - [x] Replace the storefront backdrop with a warm pet-store interior and preserve the interactive Monere view.
 - [x] Verify loaded interior art, unobstructed Monere, rarity filters (3 Common / 2 Rare / 1 Legendary) and no horizontal overflow at 320, 454 and 1280px; nine existing pet tests pass and build OK. No purchase/account changes; preview-only. Existing CookieYes localhost warning remains unrelated.
