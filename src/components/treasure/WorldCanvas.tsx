@@ -107,7 +107,7 @@ export function WorldCanvas(props: Props) {
           const sx = this.base * this.depthScale * (1 - squash - breathe * .5);
           const sy = this.base * this.depthScale * (1 + squash + breathe);
           p.setFlipX(this.facing < 0).setScale(sx, sy);
-          p.setOrigin(.5, .8 + bounce / p.height / sy * this.base * this.base / this.base);
+          p.setOrigin(.5, .8 + bounce / (p.height * sy));
           p.setRotation(this.stride * Math.sin(this.phase) * .05);
           this.shadow?.setPosition(p.x, p.y + 4).setScale(1 - bounce / 40, 1 - bounce / 40).setAlpha(.28 - bounce / 80);
           if (walking && step < .25 && this.time.now - this.lastStep > 160) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
