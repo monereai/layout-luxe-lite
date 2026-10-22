@@ -409,3 +409,12 @@
 @keyframes walk-bounce { 0% { transform: translateY(0) rotate(-4deg) scale(1.06, .92); } 25% { transform: translateY(-9%) rotate(0deg) scale(.96, 1.06); } 50% { transform: translateY(0) rotate(4deg) scale(1.06, .92); } 75% { transform: translateY(-9%) rotate(0deg) scale(.96, 1.06); } 100% { transform: translateY(0) rotate(-4deg) scale(1.06, .92); } }
 @keyframes idle-breath { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.015, 1.03); } }
 @media (prefers-reduced-motion: reduce) { .walk-bounce { animation-duration: .7s; } .idle-breath { animation: none; } }
+.treasure-pet:not([style]) { visibility: hidden; }
+.treasure-pet { position: absolute; left: 0; top: 0; pointer-events: none; width: 0; height: 0; will-change: transform; }
+.treasure-pet > div { position: absolute; left: calc(var(--pet-size, 70px) * -.9); top: calc(var(--pet-size, 70px) * -.95); width: var(--pet-size, 70px); height: var(--pet-size, 70px); transform-origin: 50% 90%; }
+.treasure-pet > div > div { width: 100%; height: 100%; }
+.treasure-pet img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 4px hsl(0 0% 0% / .3)); transition: transform .15s ease-out; }
+.treasure-pet[data-facing="west"] img { transform: scaleX(-1); }
+.pet-celebrate { animation: pet-celebrate .9s ease-in-out 3; }
+@keyframes pet-celebrate { 0% { transform: translateY(0) rotate(0) scale(1); } 30% { transform: translateY(-45%) rotate(180deg) scale(1.1); } 60% { transform: translateY(0) rotate(360deg) scale(.92, 1.08); } 80% { transform: translateY(-15%) rotate(360deg) scale(1); } 100% { transform: translateY(0) rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pet-celebrate { animation: none; } }
