@@ -302,6 +302,13 @@
       "when": 1792661325441,
       "tag": "0042_treasure_batched_travel",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1792665290559,
+      "tag": "0043_treasure_progressive_puzzles",
+      "breakpoints": true
     }
   ]
 }
