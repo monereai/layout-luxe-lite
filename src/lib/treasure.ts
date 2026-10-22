@@ -1,7 +1,9 @@
 // The Rescue of the Golden Griffin — pure rules shared by the browser and mirrored in SQL (treasure_v3_action).
 export type ZoneId = "meadow" | "wood" | "ravine" | "lair";
 export type Position = { x: number; y: number };
-export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean };
+export type Gear = "lantern" | "boots" | "goggles";
+export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean;
+  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>> };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
 export const ZONES: { id: ZoneId; name: string; subtitle: string; icon: string }[] = [
@@ -46,7 +48,7 @@ export const PORTALS: Record<ZoneId, Portal[]> = {
   lair: [{ x: 12, y: 21, target: "ravine", arrive: { x: 20, y: 17 }, forward: false }],
 };
 export const near = (a: Position, b: Position) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 1;
-export function initialAdventure(): AdventureState { return { version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false }; }
+export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {} }); }
 export function walkable(zone: ZoneId, x: number, y: number): boolean {
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 2 || x > 21 || y < 2 || y > 21) return false;
   if (zone === "meadow") return y < 21 || (x >= 11 && x <= 13);
@@ -54,9 +56,22 @@ export function walkable(zone: ZoneId, x: number, y: number): boolean {
   if (zone === "ravine") return !(y >= 10 && y <= 13 && (x < 10 || x > 13));
   return !((y === 9 || y === 10) && x !== 12) && (y < 21 || x === 12);
 }
-export function canStep(s: AdventureState, x: number, y: number) { return walkable(s.zone, x, y) && !(s.zone === "lair" && (y === 9 || y === 10) && !s.gates.includes("lair")); }
+export function canStep(s: AdventureState, x: number, y: number) {
+  if (!walkable(s.zone, x, y) || (s.zone === "lair" && (y === 9 || y === 10) && !s.gates.includes("lair"))) return false;
+  if (s.zone === "wood") {
+    if (inCave(x, y) && !s.gear.includes("lantern")) return false;
+    if (y === 17) return x === LILY_ROWS[0][s.lily];
+    if (y === 18) return x === LILY_ROWS[1][s.lily];
+  }
+  if (s.zone === "ravine" && onCliff(x, y) && !s.gear.includes("boots")) return false;
+  if (s.zone === "lair") {
+    if (inChasm(x, y)) return onPlatform(x, y) || (isHiddenPath(x, y) && s.gear.includes("goggles"));
+    if (isTrap(x, y) && s.gear.includes("goggles")) return false;
+  }
+  return true;
+}
 export function canEnter(s: AdventureState, zone: ZoneId) { const i = ZONES.findIndex(z => z.id === zone); return i === 0 || (i > 0 && s.gates.includes(ZONES[i - 1]!.id)); }
-export type AdventureAction = { action: "status" | "move" | "collect" | "answer" | "portal" | "duel"; x?: number; y?: number; id?: string };
+export type AdventureAction = { action: "status" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
 /** Gate riddle for this zone's exit is answerable once the zone's scroll is found and Monere stands at the gate. */
 export function gateHere(s: AdventureState): ZoneId | null {
   if (!s.scrolls.includes(s.zone) || s.gates.includes(s.zone)) return null;
@@ -64,11 +79,24 @@ export function gateHere(s: AdventureState): ZoneId | null {
   return at && near(s, at) ? s.zone : null;
 }
 export function duelTileAt(s: AdventureState): number { return s.zone === "lair" && s.gates.includes("lair") && !s.rescued ? DUEL_TILES.findIndex(t => t.x === s.x && t.y === s.y) : -1; }
-export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState {
-  if (a.action === "move") return typeof a.x === "number" && typeof a.y === "number" && Math.abs(s.x - a.x) + Math.abs(s.y - a.y) === 1 && canStep(s, a.x, a.y) ? { ...s, x: a.x, y: a.y } : s;
+export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
+function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
+  if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
+  if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
+  if (a.action === "talk" || a.action === "deliver") {
+    const n = NPCS.find(n => n.id === a.id); if (!n || n.zone !== s.zone || !near(s, n)) return s;
+    let next = s.met.includes(n.id) ? s : { ...s, met: [...s.met, n.id] };
+    if (a.action === "deliver" && !next.quests.includes(n.id) && n.need.every(i => next.items.includes(i))) next = { ...next, quests: [...next.quests, n.id], gear: n.gear && !next.gear.includes(n.gear) ? [...next.gear, n.gear] : next.gear, items: n.item && !next.items.includes(n.item) ? [...next.items, n.item] : next.items };
+    return next;
+  }
+  if (a.action === "dig") { const d = DIGS.find(d => d.id === a.id); if (!d || d.zone !== s.zone || !near(s, d) || s.dug.includes(d.id)) return s; return { ...s, dug: [...s.dug, d.id], items: d.item && !s.items.includes(d.item) ? [...s.items, d.item] : s.items }; }
+  if (a.action === "bell") return s.zone === "wood" && near(s, BELL) ? { ...s, lily: (s.lily + 1) % 3 } : s;
+  if (a.action === "stay") return s.zone === "ravine" && s.x === PLATE_PET.x && s.y === PLATE_PET.y ? { ...s, pet: { ...PLATE_PET } } : s;
+  if (a.action === "switch") { if (s.zone !== "ravine" || s.x !== PLATE_HERO.x || s.y !== PLATE_HERO.y || s.pet?.x !== PLATE_PET.x) return s; return { ...s, pet: null, quests: s.quests.includes("vault") ? s.quests : [...s.quests, "vault"], items: s.items.includes(VAULT_RELIC) ? s.items : [...s.items, VAULT_RELIC] }; }
+  if (a.action === "call") return { ...s, pet: null };
   if (a.action === "collect") return !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
   if (a.action === "answer") return gateHere(s) === a.id && a.x === GATES[s.zone].answer ? { ...s, gates: [...s.gates, s.zone] } : s;
-  if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && (!p.forward || s.gates.includes(s.zone)) ? { ...s, zone: p.target, ...p.arrive } : s; }
+  if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && (!p.forward || s.gates.includes(s.zone)) ? { ...s, zone: p.target, ...p.arrive, pet: null } : s; }
   if (a.action === "duel") {
     const tile = duelTileAt(s); if (tile < 0 || tile !== a.x) return s;
     if (tile !== DUEL[s.duel]!.answer) return { ...s, ...DUEL_START };
@@ -88,10 +116,17 @@ export function parseAdventure(value: unknown): AdventureState {
   const s = value as Record<string, unknown>; if (s["version"] !== 3) return f;
   const ids = ZONES.map(z => z.id); const list = (k: string) => Array.isArray(s[k]) ? ids.filter(id => (s[k] as unknown[]).includes(id)) : [];
   const duel = typeof s["duel"] === "number" && Number.isInteger(s["duel"]) ? Math.max(0, Math.min(3, s["duel"])) : 0;
-  let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true };
+  const strs = (k: string, allowed: readonly string[]) => Array.isArray(s[k]) ? allowed.filter(id => (s[k] as unknown[]).includes(id)) : [];
+  const lily = typeof s["lily"] === "number" && [0, 1, 2].includes(s["lily"]) ? s["lily"] : 0;
+  const rawPet = s["pet"] as Record<string, unknown> | null | undefined; const pet = rawPet && rawPet["x"] === PLATE_PET.x && rawPet["y"] === PLATE_PET.y ? { ...PLATE_PET } : null;
+  const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
+  for (const id of ids) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 36); }
+  let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
+    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog };
   const zone = ids.find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
-  return canStep(st, x, y) ? { ...st, x, y } : { ...st, ...(st.zone === "meadow" ? { x: 10, y: 12 } : PORTALS[ZONES[ZONES.findIndex(z => z.id === st.zone) - 1]!.id].find(p => p.forward)!.arrive) };
+  if (st.zone !== "ravine") st = { ...st, pet: null };
+  return reveal(canStep(st, x, y) ? { ...st, x, y } : { ...st, ...(st.zone === "meadow" ? { x: 10, y: 12 } : PORTALS[ZONES[ZONES.findIndex(z => z.id === st.zone) - 1]!.id].find(p => p.forward)!.arrive) });
 }
 
 /** Hot/cold hint for the hidden scroll in the current zone. */
@@ -101,3 +136,87 @@ export function scrollWarmth(s: AdventureState): string {
 }
 /** The scroll only appears when Monere is within this many steps. */
 export const SCROLL_REVEAL = 2;
+
+// ---------- Expanded world: gear, NPCs, side quests, digging, puzzles, fog (mirrored in SQL treasure_v4_action) ----------
+export const GEAR: Record<Gear, { name: string; icon: string; use: string }> = {
+  lantern: { name: "Lantern", icon: "🏮", use: "Lights the dark cave in Lonely Wood." },
+  boots: { name: "Climbing Boots", icon: "🥾", use: "Climb the rocky cliffs of Shadow Ravine." },
+  goggles: { name: "Goggles of Truth", icon: "🥽", use: "Reveal invisible paths and hidden traps in Razor's Lair." },
+};
+export type Npc = Position & { id: string; zone: ZoneId; name: string; icon: string; ask: string; thanks: string; hint: string; need: string[]; gear?: Gear; item?: string; points: number };
+export const NPCS: Npc[] = [
+  { id: "barnaby", zone: "meadow", x: 14, y: 8, name: "Barnaby the Owl", icon: "🦉", ask: "Hoo! The wind blew away 3 of my golden feathers. Find them and I'll lend you my Lantern.", thanks: "My feathers! Take this Lantern — it lights the dark cave in Lonely Wood.", hint: "A gatekeeper's riddle tip: the answer keeps time, tick-tock!", need: ["feather-1", "feather-2", "feather-3"], gear: "lantern", points: 30 },
+  { id: "pippa", zone: "wood", x: 9, y: 9, name: "Pippa the Squirrel", icon: "🐿️", ask: "I lost 3 golden acorns! One's in the open, one's in the dark cave, and one's across the river.", thanks: "All my acorns! These Climbing Boots will get you up any cliff.", hint: "Riddle tip: think of what you grab after a bath.", need: ["acorn-1", "acorn-2", "acorn-3"], gear: "boots", points: 30 },
+  { id: "rocco", zone: "ravine", x: 12, y: 4, name: "Rocco the Ram", icon: "🐏", ask: "My silver bell fell on the high cliffs to the north-east. Climb up and bring it back?", thanks: "Ding-ding! Here are my Goggles of Truth — they show what is hidden.", hint: "Riddle tip: you tap on the answer to type.", need: ["bell"], gear: "goggles", points: 30 },
+  { id: "tilly", zone: "lair", x: 17, y: 19, name: "Tilly the Tortoise", icon: "🐢", ask: "Razor broke my Ancient Key into 3 fragments and buried them across the lands. Your pet could dig them up!", thanks: "The key is whole again! Please take the Griffin Feather Crown.", hint: "Riddle tip: everyone calls you by it.", need: ["fragment-1", "fragment-2", "fragment-3"], item: "griffin-crown", points: 50 },
+];
+export type Item = Position & { id: string; zone: ZoneId; name: string; icon: string };
+export const ITEMS: Item[] = [
+  { id: "feather-1", zone: "meadow", x: 4, y: 4, name: "Golden Feather", icon: "🪶" },
+  { id: "feather-2", zone: "meadow", x: 18, y: 4, name: "Golden Feather", icon: "🪶" },
+  { id: "feather-3", zone: "meadow", x: 16, y: 18, name: "Golden Feather", icon: "🪶" },
+  { id: "acorn-1", zone: "wood", x: 6, y: 4, name: "Golden Acorn", icon: "🌰" },
+  { id: "acorn-2", zone: "wood", x: 20, y: 3, name: "Golden Acorn", icon: "🌰" },
+  { id: "acorn-3", zone: "wood", x: 17, y: 20, name: "Golden Acorn", icon: "🌰" },
+  { id: "bell", zone: "ravine", x: 19, y: 3, name: "Rocco's Silver Bell", icon: "🔔" },
+];
+export type Dig = Position & { id: string; zone: ZoneId; item?: string; points: number };
+export const DIGS: Dig[] = [
+  { id: "m-coins", zone: "meadow", x: 5, y: 17, points: 10 }, { id: "m-frag", zone: "meadow", x: 19, y: 15, item: "fragment-1", points: 0 },
+  { id: "w-coins", zone: "wood", x: 10, y: 4, points: 10 }, { id: "w-relic", zone: "wood", x: 12, y: 20, item: "relic-acorn-charm", points: 0 },
+  { id: "r-coins", zone: "ravine", x: 8, y: 4, points: 10 }, { id: "r-frag", zone: "ravine", x: 19, y: 19, item: "fragment-2", points: 0 },
+  { id: "l-frag", zone: "lair", x: 16, y: 16, item: "fragment-3", points: 0 }, { id: "l-coins", zone: "lair", x: 19, y: 13, points: 15 },
+];
+export const VAULT_RELIC = "relic-sun-stone";
+export const TREASURES: Record<string, { name: string; icon: string; lore: string }> = {
+  "fragment-1": { name: "Key Fragment I", icon: "🗝️", lore: "One third of Tilly's Ancient Key." },
+  "fragment-2": { name: "Key Fragment II", icon: "🗝️", lore: "Still warm from the ravine sun." },
+  "fragment-3": { name: "Key Fragment III", icon: "🗝️", lore: "Hidden right under Razor's nose." },
+  "relic-acorn-charm": { name: "Acorn Charm", icon: "🍀", lore: "Small beginnings grow mighty oaks." },
+  [VAULT_RELIC]: { name: "Sun Stone", icon: "☀️", lore: "Two friends together opened the vault." },
+  "griffin-crown": { name: "Griffin Feather Crown", icon: "👑", lore: "A gift from Tilly for a kind heart." },
+};
+const ALL_ITEMS = [...ITEMS.map(i => i.id), ...Object.keys(TREASURES)];
+export const BELL: Position = { x: 3, y: 16 };
+/** Lily pad columns for river rows 17 and 18 at each bell phase; phase 1 lines them up. */
+export const LILY_ROWS: [number[], number[]] = [[5, 10, 15], [15, 10, 5]];
+export const PLATE_HERO: Position = { x: 5, y: 20 };
+export const PLATE_PET: Position = { x: 8, y: 20 };
+export const TRAPS: Position[] = [{ x: 12, y: 15 }, { x: 14, y: 17 }, { x: 10, y: 13 }, { x: 16, y: 14 }];
+export const TRAP_RESET: Position = { x: 12, y: 19 };
+export const inCave = (x: number, y: number) => x >= 18 && y <= 6;
+export const onCliff = (x: number, y: number) => x >= 15 && y <= 7;
+export const inChasm = (x: number, y: number) => x >= 2 && x <= 9 && y >= 12 && y <= 18;
+export const onPlatform = (x: number, y: number) => x >= 4 && x <= 6 && y >= 14 && y <= 16;
+export const isHiddenPath = (x: number, y: number) => y === 15 && x >= 7 && x <= 9;
+export const isTrap = (x: number, y: number) => TRAPS.some(t => t.x === x && t.y === y);
+/** Fog of war: 6×6 chunks of 4×4 tiles; Monere uncovers his chunk and its neighbours. */
+export function reveal(s: AdventureState): AdventureState {
+  const cx = Math.floor(s.x / 4), cy = Math.floor(s.y / 4); const seen = new Set(s.fog[s.zone] ?? []); const before = seen.size;
+  for (let i = Math.max(0, cx - 1); i <= Math.min(5, cx + 1); i++) for (let j = Math.max(0, cy - 1); j <= Math.min(5, cy + 1); j++) seen.add(j * 6 + i);
+  return seen.size === before && s.fog[s.zone] ? s : { ...s, fog: { ...s.fog, [s.zone]: [...seen] } };
+}
+export const isRevealed = (s: AdventureState, zone: ZoneId, x: number, y: number) => (s.fog[zone] ?? []).includes(Math.floor(y / 4) * 6 + Math.floor(x / 4));
+export type Interaction = { kind: "scroll" | "gate" | "portal" | "npc" | "item" | "dig" | "bell" | "stay" | "switch"; id?: string; label: string; icon: string };
+/** The single thing Monere can do where he stands, in priority order. */
+export function interactionHere(s: AdventureState): Interaction | null {
+  if (!s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
+  const g = gateHere(s); if (g) return { kind: "gate", label: "Answer riddle", icon: "❓" };
+  const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
+  const n = NPCS.find(n => n.zone === s.zone && near(s, n)); if (n) return { kind: "npc", id: n.id, label: `Talk to ${n.name.split(" ")[0]}`, icon: n.icon };
+  const d = DIGS.find(d => d.zone === s.zone && near(s, d) && !s.dug.includes(d.id)); if (d) return { kind: "dig", id: d.id, label: "Pet, dig here!", icon: "🐾" };
+  if (s.zone === "wood" && near(s, BELL)) return { kind: "bell", label: "Ring the frog bell", icon: "🛎️" };
+  if (s.zone === "ravine" && !s.quests.includes("vault")) {
+    if (s.x === PLATE_PET.x && s.y === PLATE_PET.y && !s.pet) return { kind: "stay", label: "Ask pet to wait here", icon: "🐾" };
+    if (s.x === PLATE_HERO.x && s.y === PLATE_HERO.y && s.pet) return { kind: "switch", label: "Press the plate", icon: "⚖️" };
+  }
+  const p = PORTALS[s.zone].find(p => near(s, p)); if (p) return { kind: "portal", id: p.target, label: "Enter portal", icon: "🌀" };
+  return null;
+}
+export type SideQuest = { id: string; title: string; giver: string; progress: number; total: number; done: boolean; reward: string };
+export function sideQuests(s: AdventureState): SideQuest[] {
+  const list: SideQuest[] = NPCS.map(n => ({ id: n.id, title: n.need.length === 1 ? `Find ${TREASURES[n.need[0]!]?.name ?? ITEMS.find(i => i.id === n.need[0])?.name}` : `Collect ${n.need.length} ${n.id === "tilly" ? "key fragments" : ITEMS.find(i => i.id === n.need[0])?.name.toLowerCase() + "s"}`, giver: n.name, progress: n.need.filter(i => s.items.includes(i)).length, total: n.need.length, done: s.quests.includes(n.id), reward: `${n.gear ? GEAR[n.gear].name : TREASURES[n.item!]!.name} + ${n.points} points` }));
+  list.push({ id: "vault", title: "Open the Stone Vault (paired plates)", giver: "Shadow Ravine", progress: s.quests.includes("vault") ? 1 : 0, total: 1, done: s.quests.includes("vault"), reward: "Sun Stone + 40 points" });
+  list.push({ id: "digs", title: "Dig up every buried treasure", giver: "Your pet", progress: s.dug.length, total: DIGS.length, done: s.dug.length === DIGS.length, reward: "Points, key fragments and relics" });
+  return list;
+}
