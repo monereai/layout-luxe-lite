@@ -106,6 +106,21 @@ export function canStep(s: AdventureState, x: number, y: number) {
   return true;
 }
 export function canEnter(s: AdventureState, zone: ZoneId) { const i = ZONES.findIndex(z => z.id === zone); return i === 0 || (i > 0 && s.gates.includes(ZONES[i - 1]!.id)); }
+/** Tap navigation follows the same collision rules as keyboard movement. */
+export function worldPath(s: AdventureState, target: Position): Position[] | null {
+  if (!canStep(s, target.x, target.y)) return null;
+  const paths: Position[][] = [[{ x: s.x, y: s.y }]];
+  const seen = new Set([`${s.x},${s.y}`]);
+  for (const path of paths) {
+    const end = path.at(-1); if (!end) continue;
+    if (end.x === target.x && end.y === target.y) return path.slice(1);
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const next = { x: end.x + (dx ?? 0), y: end.y + (dy ?? 0) }; const key = `${next.x},${next.y}`;
+      if (!seen.has(key) && canStep(s, next.x, next.y)) { seen.add(key); paths.push([...path, next]); }
+    }
+  }
+  return null;
+}
 export type AdventureAction = { action: "status" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
 /** Gate riddle for this zone's exit is answerable once the zone's scroll is found and Monere stands at the gate. */
 export function gateHere(s: AdventureState): ZoneId | null {
