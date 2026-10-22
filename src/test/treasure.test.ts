@@ -1,16 +1,37 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, initialAdventure, parseAdventure, GATES, DUEL_START, type AdventureState } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, DUEL_START, type AdventureState } from "@/lib/treasure";
 import { PETS, petButtonState } from "@/lib/pets";
 
 const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
 
 describe("Griffin rescue rules", () => {
-  it("gate answers match the riddles", () => {
-    expect(GATES.meadow.options[GATES.meadow.answer]).toBe("A Clock");
-    expect(GATES.wood.options[GATES.wood.answer]).toBe("A Towel");
-    expect(GATES.ravine.options[GATES.ravine.answer]).toBe("A Keyboard");
-    expect(GATES.lair.options[GATES.lair.answer]).toBe("Your Name");
+  it("default riddles keep their correct answers", () => {
+    const s = initialAdventure();
+    expect(gateRiddle(s, "meadow").options[gateRiddle(s, "meadow").answer]).toBe("A Clock");
+    expect(gateRiddle(s, "lair").options[gateRiddle(s, "lair").answer]).toBe("Your Name");
   });
+  it("random playthroughs pick 7 unique pool riddles with shuffled answers", () => {
+    const r = randomRiddles(); expect(r).toHaveLength(7); expect(new Set(r.map(x => x.i)).size).toBe(7);
+    expect(validRiddles(r)).toEqual(r);
+    const draws = new Set(Array.from({ length: 20 }, () => JSON.stringify(randomRiddles()))); expect(draws.size).toBeGreaterThan(1);
+  });
+  it("shuffled gate accepts only the moved correct option", () => {
+    const riddles = defaultRiddles(); riddles[0] = { i: 0, o: [2, 1, 0] }; // "A Clock" now shown third
+    const s = at({ x: 20, y: 10, scrolls: ["meadow"], riddles });
+    expect(applyAdventure(s, { action: "answer", id: "meadow", x: 0 }).gates).toEqual([]);
+    expect(applyAdventure(s, { action: "answer", id: "meadow", x: 2 }).gates).toEqual(["meadow"]);
+  });
+  it("shuffled duel tile follows the riddle", () => {
+    const riddles = defaultRiddles(); riddles[4] = { i: 6, o: [1, 2, 0] }; // "Rain" on tile C
+    const s = at({ zone: "lair", gates: ["meadow", "wood", "ravine", "lair"], riddles, x: 14, y: 6 });
+    expect(applyAdventure(s, { action: "duel", x: 2 }).duel).toBe(1);
+  });
+  it("goggle bridge is three tiles wide", () => {
+    const s = at({ zone: "lair", gear: ["goggles"] });
+    for (const y of [14, 15, 16]) expect(canStep(s, 8, y)).toBe(true);
+    expect(canStep({ ...s, gear: [] }, 8, 15)).toBe(false);
+  });
+  it("invalid saved riddles are rejected", () => { expect(validRiddles([{ i: 0, o: [0, 0, 1] }])).toBeNull(); });
   it("gate needs the scroll first", () => {
     const s = at({ x: 20, y: 10 });
     expect(applyAdventure(s, { action: "answer", id: "meadow", x: 0 }).gates).toEqual([]);
