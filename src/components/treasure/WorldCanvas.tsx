@@ -92,25 +92,28 @@ export function WorldCanvas(props: Props) {
           this.moving = true;
           if (next.x !== s.x) this.facing = next.x < s.x ? -1 : 1;
           this.depthScale = next.y < s.y ? .94 : next.y > s.y ? 1.03 : 1;
-          this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 90 : 150, onComplete: () => { this.moving = false; } });
+          this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 160 : 210, onComplete: () => { this.moving = false; } });
         }
         animate() {
           const p = this.player; if (!p) return;
-          const dt = this.game.loop.delta / 1000;
-          const walking = this.moving && !this.reduced;
-          this.stride += ((walking ? 1 : 0) - this.stride) * Math.min(1, dt * 10);
-          if (walking) this.phase += dt * 13; else this.phase += dt * 2.2;
+          const dt = Math.min(.05, this.game.loop.delta / 1000);
+          const keys = this.keys;
+          const held = !!(this.direction.x || this.direction.y || ["LEFT", "RIGHT", "UP", "DOWN", "W", "A", "S", "D"].some(k => keys?.[k]?.isDown));
+          const walking = !this.paused && (this.moving || this.path.length > 0 || held);
+          const amp = this.reduced ? .45 : 1;
+          this.stride += ((walking ? 1 : 0) - this.stride) * Math.min(1, dt * (walking ? 14 : 8));
+          this.phase += dt * (walking ? 15 : 2.4);
           const step = Math.abs(Math.sin(this.phase));
-          const bounce = walking || this.stride > .05 ? step * 10 * this.stride : 0;
-          const breathe = this.reduced ? 0 : Math.sin(this.phase) * .015 * (1 - this.stride);
-          const squash = this.stride * (step - .5) * .1;
+          const bounce = step * 22 * this.stride * amp;
+          const breathe = Math.sin(this.phase) * .02 * (1 - this.stride);
+          const squash = this.stride * (step - .5) * .18 * amp;
           const sx = this.base * this.depthScale * (1 - squash - breathe * .5);
           const sy = this.base * this.depthScale * (1 + squash + breathe);
           p.setFlipX(this.facing < 0).setScale(sx, sy);
           p.setOrigin(.5, .8 + bounce / (p.height * sy));
-          p.setRotation(this.stride * Math.sin(this.phase) * .05);
-          this.shadow?.setPosition(p.x, p.y + 4).setScale(1 - bounce / 40, 1 - bounce / 40).setAlpha(.28 - bounce / 80);
-          if (walking && step < .25 && this.time.now - this.lastStep > 160) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
+          p.setRotation(this.stride * Math.sin(this.phase) * .13 * amp);
+          this.shadow?.setPosition(p.x, p.y + 4).setScale(1 - bounce / 50, 1 - bounce / 60).setAlpha(.32 - bounce / 90);
+          if (walking && step < .3 && this.time.now - this.lastStep > 180) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
         }
         dust(x: number, y: number) {
           for (let i = 0; i < 3; i++) {
