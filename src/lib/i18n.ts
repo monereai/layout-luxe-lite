@@ -35,6 +35,7 @@ const en = {
   followPh: "Ask Monere a follow-up question...",
   story: "Story", storyTitle: "Story Mode", storySub: "Pick an adventure. Monere narrates a chunk, then you decide what happens next.",
   storyChoose: "Choose your story", storyLoading: "Monere is opening the story…", storyEnd: "The End", storyAgain: "Play again", storyNew: "Pick another story",
+  constructionTitle: "Under Construction", constructionBody: "Monere is getting ready for his next big adventure — sharpening his claws, packing his compass and saying a prayer. The Rescue of the Golden Griffin will be back soon!", constructionBack: "Back to Dashboard",
 };
 type Dict = typeof en;
 
@@ -62,6 +63,7 @@ const es: Dict = {
   followPh: "Hazle a Monere otra pregunta...",
   story: "Historias", storyTitle: "Modo Historia", storySub: "Elige una aventura. Monere narra un trozo y tú decides qué pasa después.",
   storyChoose: "Elige tu historia", storyLoading: "Monere está abriendo la historia…", storyEnd: "Fin", storyAgain: "Jugar otra vez", storyNew: "Elegir otra historia",
+  constructionTitle: "En construcción", constructionBody: "Monere se está preparando para su próxima gran aventura: afilando sus garras, guardando su brújula y rezando. ¡El Rescate del Grifo Dorado volverá pronto!", constructionBack: "Volver al panel",
 };
 
 const fr: Dict = {
@@ -88,6 +90,7 @@ const fr: Dict = {
   followPh: "Pose une autre question à Monere...",
   story: "Histoires", storyTitle: "Mode Histoire", storySub: "Choisis une aventure. Monere raconte un passage, puis tu décides la suite.",
   storyChoose: "Choisis ton histoire", storyLoading: "Monere ouvre l'histoire…", storyEnd: "Fin", storyAgain: "Rejouer", storyNew: "Choisir une autre histoire",
+  constructionTitle: "En construction", constructionBody: "Monere se prépare pour sa prochaine grande aventure — il aiguise ses griffes, range sa boussole et fait ses prières. Le Sauvetage du Griffon doré revient bientôt !", constructionBack: "Retour au tableau de bord",
 };
 
 const pt: Dict = {
@@ -114,6 +117,7 @@ const pt: Dict = {
   followPh: "Faz outra pergunta ao Monere...",
   story: "Histórias", storyTitle: "Modo História", storySub: "Escolhe uma aventura. O Monere conta um trecho e tu decides o que acontece a seguir.",
   storyChoose: "Escolhe a tua história", storyLoading: "O Monere está a abrir a história…", storyEnd: "Fim", storyAgain: "Jogar outra vez", storyNew: "Escolher outra história",
+  constructionTitle: "Em construção", constructionBody: "O Monere está a preparar-se para a sua próxima grande aventura — a amolar as garras, a guardar a bússola e a rezar. O Resgate do Grifo Dourado regressa em breve!", constructionBack: "Voltar ao painel",
 };
 
 const de: Dict = {
@@ -140,6 +144,7 @@ const de: Dict = {
   followPh: "Stell Monere eine Folgefrage...",
   story: "Geschichten", storyTitle: "Geschichten-Modus", storySub: "Wähl ein Abenteuer. Monere erzählt einen Abschnitt, dann entscheidest du, wie es weitergeht.",
   storyChoose: "Wähl deine Geschichte", storyLoading: "Monere öffnet die Geschichte…", storyEnd: "Das Ende", storyAgain: "Nochmal spielen", storyNew: "Andere Geschichte wählen",
+  constructionTitle: "Im Aufbau", constructionBody: "Monere bereitet sich auf sein nächstes großes Abenteuer vor — er wetzt seine Krallen, packt seinen Kompass und sagt ein Gebet. Die Rettung des Goldenen Greifen ist bald zurück!", constructionBack: "Zurück zum Dashboard",
 };
 
 const DICTS: Record<Lang, Dict> = { en, es, fr, pt, de };

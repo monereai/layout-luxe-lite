@@ -2,11 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/AppShell";
 import { TreasureGame } from "@/components/treasure/TreasureGame";
+import { TreasureConstructionGate } from "@/components/treasure/TreasureConstructionGate";
 import { DailyDilemmaModal } from "@/components/DailyDilemmaModal";
 import { usePaymentReturn } from "@/hooks/usePaymentReturn";
+import { TREASURE_MAINTENANCE } from "@/lib/treasureGate";
 
 export const Route = createFileRoute("/treasure")({
-  staticData: { sitemap: true },
+  staticData: { sitemap: !TREASURE_MAINTENANCE },
   validateSearch: (s: Record<string, unknown>): { dilemma?: number | undefined } => ({ dilemma: s["dilemma"] === "1" || s["dilemma"] === 1 ? 1 : undefined }),
   head: () => ({ meta: [
     { title: "Monere Treasure Hunt — MonereAI" },
@@ -23,5 +25,10 @@ function AdventureHome() {
   const { dilemma } = Route.useSearch();
   const [open, setOpen] = useState(false);
   useEffect(() => { if (dilemma === 1) setOpen(true); }, [dilemma]);
-  return <AppShell adventure><TreasureGame /><DailyDilemmaModal open={open} onOpenChange={setOpen} /></AppShell>;
+  return (
+    <AppShell adventure>
+      {TREASURE_MAINTENANCE ? <TreasureConstructionGate /> : <TreasureGame />}
+      <DailyDilemmaModal open={open} onOpenChange={setOpen} />
+    </AppShell>
+  );
 }
