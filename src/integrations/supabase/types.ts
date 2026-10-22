@@ -420,6 +420,24 @@ export type Database = {
         }
         Relationships: []
       }
+      treasure_saves: {
+        Row: {
+          state: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          state?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          state?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_pets: {
         Row: {
           active_pet: string | null
@@ -581,6 +599,20 @@ export type Database = {
           ok: boolean
           organization_name: string
         }[]
+      }
+      treasure_action: {
+        Args: {
+          p_action: string
+          p_gear?: Json
+          p_id?: string
+          p_x?: number
+          p_y?: number
+        }
+        Returns: Json
+      }
+      treasure_walkable: {
+        Args: { x: number; y: number; z: string }
+        Returns: boolean
       }
       wardrobe_action: {
         Args: { p_action: string; p_equipped?: Json; p_id?: string }

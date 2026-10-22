@@ -288,6 +288,13 @@
       "when": 1792575992876,
       "tag": "0040_fix_habitat_points_deduction",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1792661289432,
+      "tag": "0041_treasure_adventure_progression",
+      "breakpoints": true
     }
   ]
 }
