@@ -1,29 +1,41 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, canCollect, canEnter, canStep, chestVisible, initialAdventure, MATCH_TILES, parseAdventure, RELICS, REWARD_SETS, terrain, zoneComplete, type AdventureState } from "@/lib/treasure";
-const meadow = ["cat-stone", "daisy-seal", "bridge-coin"];
-const forest = [...meadow, "oak-heart", "fern-scroll"];
-const forestState = (): AdventureState => ({ ...initialAdventure(), zone: "forest", relics: meadow, tools: ["magnifying-glass"], gear: ["magnifying-glass"], x: 3, y: 10 });
-const skyState = (): AdventureState => ({ ...forestState(), zone: "sky", relics: forest, tools: ["magnifying-glass", "lantern"], gear: ["lantern"], x: 12, y: 10 });
-const relic = (id: string) => { const r = RELICS.find(r => r.id === id); if (!r) throw new Error("Missing relic"); return r; };
-describe("Progressive treasure adventure", () => {
-  it("has exactly 3 Meadow, 2 Forest and 1 Sky chests", () => { expect(RELICS.filter(r => r.zone === "meadow")).toHaveLength(3); expect(RELICS.filter(r => r.zone === "forest")).toHaveLength(2); expect(RELICS.filter(r => r.zone === "sky")).toHaveLength(1); });
-  it("makes all three Meadow chests visible and both Forest chests hidden", () => { expect(RELICS.filter(r => r.zone === "meadow").every(r => chestVisible(initialAdventure(), r))).toBe(true); expect(RELICS.filter(r => r.zone === "forest").every(r => !chestVisible(forestState(), r))).toBe(true); });
-  it("reveals Forest chests only near Monere with equipped magnifying glass", () => { const s = { ...forestState(), x: 12, y: 6 }; expect(chestVisible(s, relic("oak-heart"))).toBe(true); expect(chestVisible({ ...s, gear: [] }, relic("oak-heart"))).toBe(false); });
-  it("requires all 3 Meadow chests before Forest opens, not merely its tool", () => { expect(canEnter({ ...initialAdventure(), tools: ["magnifying-glass"], relics: ["cat-stone"] }, "forest")).toBe(false); expect(canEnter(forestState(), "forest")).toBe(true); });
-  it("requires both Forest chests before Sky opens", () => { expect(canEnter({ ...skyState(), relics: [...meadow, "oak-heart"] }, "sky")).toBe(false); expect(canEnter(skyState(), "sky")).toBe(true); });
-  it("requires 2 distinct Key Fragments for Forest collection", () => { const s = { ...forestState(), x: 12, y: 6 }; expect(canCollect(s, relic("oak-heart"))).toBe(false); expect(canCollect({ ...s, fragments: ["root-fragment"] }, relic("oak-heart"))).toBe(false); expect(canCollect({ ...s, fragments: ["root-fragment", "pool-fragment"] }, relic("oak-heart"))).toBe(true); });
-  it("finds fragments only at landmarks and only once", () => { const s = { ...forestState(), x: 5, y: 5 }; const next = applyAdventure(s, { action: "inspect", id: "roots" }); expect(next.fragments).toEqual(["root-fragment"]); expect(applyAdventure(next, { action: "inspect", id: "roots" })).toBe(next); expect(applyAdventure(forestState(), { action: "inspect", id: "pool" })).toEqual(forestState()); });
-  it("slows mud steps and places pushback gusts in Sky", () => { expect(terrain("meadow", 9, 12)).toBe("mud"); expect(terrain("forest", 9, 10)).toBe("mud"); expect(terrain("sky", 14, 10)).toBe("wind"); expect(terrain("meadow", 10, 12)).toBeNull(); });
-  it("pushes Monere back on the first wind attempt then allows a safe crossing", () => { const s = { ...skyState(), x: 13 }; const pushed = applyAdventure(s, { action: "move", x: 14, y: 10 }); expect(pushed.x).toBe(13); expect(pushed.wind).toBe(1); expect(applyAdventure(pushed, { action: "move", x: 14, y: 10 }).x).toBe(14); });
-  it("requires Monere and pet simultaneously on different plates", () => { const s = { ...forestState(), x: 7, y: 10, pinned: true, pet: { x: 6, y: 10 } }; expect(applyAdventure(s, { action: "move", x: 8, y: 10 }).gates).toEqual([]); expect(applyAdventure({ ...s, pet: { x: 7, y: 10 } }, { action: "move", x: 8, y: 10 }).gates).toEqual(["forest-gate"]); });
-  it("blocks bypassing the locked Forest barrier", () => { expect(canStep(forestState(), 10, 5)).toBe(false); expect(canStep({ ...forestState(), gates: ["forest-gate"] }, 10, 5)).toBe(true); });
-  it("lets a pinned pet stay while Monere moves", () => { const s = { ...forestState(), x: 7, y: 10, pet: { x: 7, y: 10 }, pinned: true }; expect(applyAdventure(s, { action: "move", x: 8, y: 10 }).pet).toEqual({ x: 7, y: 10 }); });
-  it("reads Dawn before the Echoing Pillars", () => { const s = { ...skyState(), x: 17, y: 7 }; expect(applyAdventure(s, { action: "inspect", id: "ruins" })).toBe(s); expect(applyAdventure({ ...s, landmarks: ["dawn"] }, { action: "inspect", id: "ruins" }).landmarks).toEqual(["dawn", "ruins"]); });
-  it("locks Master Chest until all 4 pairs match", () => { const s = { ...skyState(), landmarks: ["dawn", "ruins"] }; expect(canCollect(s, relic("wisdom-star"))).toBe(false); expect(canCollect({ ...s, matched: [0,1,2,3,4,5] }, relic("wisdom-star"))).toBe(false); expect(canCollect({ ...s, matched: [0,1,2,3,4,5,6,7] }, relic("wisdom-star"))).toBe(true); });
-  it("rejects remote puzzle moves and same-tile pairs", () => { const s = { ...skyState(), landmarks: ["dawn", "ruins"] }; const first = applyAdventure(s, { action: "match", id: "0" }); expect(first.first).toBe(0); expect(applyAdventure(first, { action: "match", id: "0" })).toBe(first); expect(applyAdventure({ ...s, x: 3 }, { action: "match", id: "0" }).first).toBeNull(); });
-  it("matches all four pairs while mismatches award nothing", () => { let s = { ...skyState(), landmarks: ["dawn", "ruins"] }; s = applyAdventure(s, { action: "match", id: "0" }); s = applyAdventure(s, { action: "match", id: "1" }); expect(s.matched).toEqual([]); for (const [a,b] of [[0,5],[1,7],[2,4],[3,6]]) { expect(MATCH_TILES[a ?? 0]).toBe(MATCH_TILES[b ?? 0]); s = applyAdventure(s, { action: "match", id: String(a) }); s = applyAdventure(s, { action: "match", id: String(b) }); } expect(s.matched).toHaveLength(8); expect(zoneComplete(applyAdventure(s, { action: "collect", id: "wisdom-star" }), "sky")).toBe(true); });
-  it("awards Magnifying Glass once and never collects remotely", () => { const s = { ...initialAdventure(), x: 11, y: 11 }; const next = applyAdventure(s, { action: "collect", id: "cat-stone" }); expect(next.tools).toEqual(["magnifying-glass"]); expect(applyAdventure(next, { action: "collect", id: "cat-stone" })).toBe(next); expect(canCollect(initialAdventure(), relic("cat-stone"))).toBe(false); });
-  it("rejects teleports and requires reaching unlocked portals", () => { const s = forestState(); expect(applyAdventure(s, { action: "move", x: 20, y: 11 })).toBe(s); expect(applyAdventure({ ...s, zone: "meadow" }, { action: "portal", id: "forest" }).zone).toBe("meadow"); expect(applyAdventure({ ...s, zone: "meadow", x: 20, y: 10 }, { action: "portal", id: "forest" }).zone).toBe("forest"); });
-  it("preserves completed legacy adventures and wardrobe reward identities", () => { const s = parseAdventure({ zone: "sky", x: 16, y: 20, relics: [...forest,"wisdom-star","cloud-quill"], gear: ["lantern"] }); expect(s.zone).toBe("sky"); expect(s.relics).toHaveLength(6); expect(s.matched).toHaveLength(8); expect(s.fragments).toHaveLength(2); expect(REWARD_SETS.map(r => r.item)).toEqual(["explorer-hat","emerald-cloak","trail-boots"]); });
-  it("normalizes forged tools and invalid zones", () => { const s = parseAdventure({ zone: "sky", x: -100, y: 99, relics: ["invented"], tools: ["lantern"], gear: ["lantern"] }); expect(s.zone).toBe("meadow"); expect(s.relics).toEqual([]); expect(s.gear).toEqual([]); });
+import { applyAdventure, initialAdventure, parseAdventure, GATES, DUEL_START, type AdventureState } from "@/lib/treasure";
+import { PETS, petButtonState } from "@/lib/pets";
+
+const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
+
+describe("Griffin rescue rules", () => {
+  it("gate answers match the riddles", () => {
+    expect(GATES.meadow.options[GATES.meadow.answer]).toBe("A Clock");
+    expect(GATES.wood.options[GATES.wood.answer]).toBe("A Towel");
+    expect(GATES.ravine.options[GATES.ravine.answer]).toBe("A Keyboard");
+    expect(GATES.lair.options[GATES.lair.answer]).toBe("Your Name");
+  });
+  it("gate needs the scroll first", () => {
+    const s = at({ x: 20, y: 10 });
+    expect(applyAdventure(s, { action: "answer", id: "meadow", x: 0 }).gates).toEqual([]);
+    expect(applyAdventure({ ...s, scrolls: ["meadow"] }, { action: "answer", id: "meadow", x: 0 }).gates).toEqual(["meadow"]);
+    expect(applyAdventure({ ...s, scrolls: ["meadow"] }, { action: "answer", id: "meadow", x: 1 }).gates).toEqual([]);
+  });
+  it("forward portal stays locked until the riddle is solved", () => {
+    const s = at({ x: 20, y: 10, scrolls: ["meadow"] });
+    expect(applyAdventure(s, { action: "portal", id: "wood" }).zone).toBe("meadow");
+    expect(applyAdventure({ ...s, gates: ["meadow"] }, { action: "portal", id: "wood" }).zone).toBe("wood");
+  });
+  it("wrong duel tile sends Monere back to the start mark", () => {
+    const s = at({ zone: "lair", gates: ["meadow", "wood", "ravine", "lair"], scrolls: ["meadow", "wood", "ravine", "lair"], x: 10, y: 6 });
+    expect(applyAdventure(s, { action: "duel", x: 0 })).toMatchObject(DUEL_START);
+  });
+  it("three correct tiles rescue the Griffin", () => {
+    let s = at({ zone: "lair", gates: ["meadow", "wood", "ravine", "lair"], x: 12, y: 6 });
+    s = applyAdventure(s, { action: "duel", x: 1 }); expect(s.duel).toBe(1);
+    s = applyAdventure({ ...s, x: 14 }, { action: "duel", x: 2 });
+    s = applyAdventure({ ...s, x: 10 }, { action: "duel", x: 0 });
+    expect(s.rescued).toBe(true);
+  });
+  it("old saves restart the new adventure", () => { expect(parseAdventure({ zone: "sky", relics: ["wisdom-star"] })).toEqual(initialAdventure()); });
+  it("Golden Griffin cannot be bought", () => {
+    const g = PETS.find(p => p.id === "golden-griffin")!;
+    expect(petButtonState({ owned: [], active: null }, 99999, g)).toBe("reward");
+  });
 });
