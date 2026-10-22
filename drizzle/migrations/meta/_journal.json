@@ -316,6 +316,13 @@
       "when": 1792675143959,
       "tag": "0044_griffin_rescue",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1792676292471,
+      "tag": "0045_griffin_world_expansion",
+      "breakpoints": true
     }
   ]
 }
