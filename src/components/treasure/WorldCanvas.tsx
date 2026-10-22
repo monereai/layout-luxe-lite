@@ -26,7 +26,7 @@ export function WorldCanvas(props: Props) {
         portals: Phaser.GameObjects.Container[] = [];
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
-        shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = 1; depthScale = 1; lastStep = 0; reduced = false;
+        shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false;
         preload() { this.load.image("meadow", meadow); this.load.image("forest", forest); this.load.image("sky", sky); this.load.image("chest", chest); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
@@ -90,7 +90,7 @@ export function WorldCanvas(props: Props) {
           if (!next || !walkable(s.zone, next.x, next.y)) return;
           live.current.onMove(next);
           this.moving = true;
-          if (next.x !== s.x) this.facing = next.x < s.x ? -1 : 1;
+          this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
           
           this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 160 : 210, onComplete: () => { this.moving = false; } });
         }
@@ -104,7 +104,7 @@ export function WorldCanvas(props: Props) {
           if (el) {
             el.style.transform = `translate(${(p.x - cam.worldView.x) * cam.zoom}px, ${(p.y - cam.worldView.y) * cam.zoom}px)`;
             el.style.setProperty("--monere-size", `${140 * cam.zoom}px`);
-            el.dataset["facing"] = this.facing < 0 ? "left" : "right";
+            el.dataset["facing"] = this.facing;
             el.dataset["moving"] = walking ? "true" : "false";
             const body = el.firstElementChild; body?.classList.toggle("walk-bounce", walking); body?.classList.toggle("idle-breath", !walking);
           }
@@ -113,7 +113,7 @@ export function WorldCanvas(props: Props) {
         dust(x: number, y: number) {
           for (let i = 0; i < 3; i++) {
             const puff = this.add.circle(x + (Math.random() - .5) * 30, y, 4 + Math.random() * 4, 0xf3e3c3, .55).setDepth(8);
-            this.tweens.add({ targets: puff, x: puff.x - this.facing * (8 + Math.random() * 10), y: y - 6 - Math.random() * 8, scale: 1.8, alpha: 0, duration: 420, onComplete: () => puff.destroy() });
+            this.tweens.add({ targets: puff, x: puff.x - (this.facing === "east" ? 1 : this.facing === "west" ? -1 : 0) * (8 + Math.random() * 10), y: y - 6 - Math.random() * 8, scale: 1.8, alpha: 0, duration: 420, onComplete: () => puff.destroy() });
           }
         }
         setAvatar(src: string) {
