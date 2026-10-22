@@ -363,6 +363,7 @@
 .treasure-hud { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 24px; background: var(--card); border-bottom: 1px solid var(--border); }
 .treasure-viewport { position: relative; flex: 1; min-height: 300px; overflow: hidden; }
 .treasure-viewport canvas { display: block; }
+.treasure-viewport:has(canvas) > img { visibility: hidden; }
 .treasure-loading { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: var(--adventure-panel); color: var(--primary); }
 .treasure-quest { position: absolute; top: 20px; left: 24px; width: 310px; max-width: calc(100% - 48px); padding: 12px 16px; border: 1px solid var(--primary); border-radius: 8px; background: var(--adventure-panel); box-shadow: var(--adventure-shadow); }
 .treasure-map-chip { position: absolute; right: 24px; top: 20px; display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 12px; background: var(--adventure-panel); box-shadow: var(--adventure-shadow); }

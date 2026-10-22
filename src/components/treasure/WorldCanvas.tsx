@@ -31,7 +31,9 @@ export function WorldCanvas(props: Props) {
           sceneRef.current = this;
           this.background = this.add.image(768, 768, live.current.state.zone).setDisplaySize(1536, 1536);
           this.player = this.add.image(0, 0, "lion").setDisplaySize(140, 140).setOrigin(.5, .8).setDepth(10);
-          this.cameras.main.setBounds(0, 0, 1536, 1536).setZoom(.85);
+          const fitCamera = () => this.cameras.main.setZoom(Math.max(.85, this.scale.width / 1536, this.scale.height / 1536));
+          this.cameras.main.setBounds(0, 0, 1536, 1536);
+          fitCamera(); this.scale.on("resize", fitCamera);
           this.cameras.main.startFollow(this.player, false, .12, .12);
           this.keys = this.input.keyboard?.addKeys("UP,DOWN,LEFT,RIGHT,W,A,S,D,E,SPACE") as Record<string, Phaser.Input.Keyboard.Key> | undefined;
           this.input.keyboard?.on("keydown-E", () => { if (!this.paused) live.current.onInteract(); });
@@ -62,7 +64,7 @@ export function WorldCanvas(props: Props) {
           RELICS.filter(r => r.zone === s.zone && !s.relics.includes(r.id) && (!r.requires || s.gear.includes(r.requires))).forEach(r => {
             const marker = this.add.image((r.x + .5) * 64, (r.y + .5) * 64, "chest").setDisplaySize(57, 57).setDepth(3).setInteractive({ useHandCursor: true });
             marker.on("pointerdown", (_: unknown, __: unknown, ___: unknown, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (!this.paused) this.seek(r); });
-            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) this.tweens.add({ targets: marker, y: marker.y - 5, duration: 1300, yoyo: true, repeat: -1 });
+            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) this.tweens.add({ targets: marker, y: marker.y - 5, alpha: .8, duration: 1300, yoyo: true, repeat: -1 });
             this.markers.push(marker);
           });
           PORTALS[s.zone].forEach(p => {
