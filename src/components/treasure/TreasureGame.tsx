@@ -27,6 +27,8 @@ export function TreasureGame() {
   const [sound, setSound] = useState(true);
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
+  // Turnaround angles of the main-page Monere: East 0°, South 90°, West 180°, North 270°.
+  const [turn, setTurn] = useState<Record<string, string>>({});
   const shop = useShop();
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +36,11 @@ export function TreasureGame() {
     const drawn = new Set(itemsDrawnIn(look, shop.equipped)); const extras = equippedItems(shop).filter(i => !drawn.has(i.id));
     if (!extras.length) setAvatar(src);
     else void composeCharacterFrame(src, clothingFrames(extras, 0), 0).then(image => { if (!cancelled) setAvatar(image); }).catch(() => { if (!cancelled) setAvatar(src); });
+    const angles = { east: 2, south: 0, west: 6, north: 4 } as const;
+    void Promise.all(Object.entries(angles).map(async ([dir, frame]) => {
+      const base = `/monere/looks/${look}/${frame}.webp`;
+      return [dir, extras.length ? await composeCharacterFrame(base, clothingFrames(extras, frame), frame).catch(() => base) : base] as const;
+    })).then(entries => { if (!cancelled) setTurn(Object.fromEntries(entries)); });
     return () => { cancelled = true; };
   }, [shop.equipped]);
   useEffect(() => { controls.current?.pause(!!panel || !!reward || busy); }, [panel, reward, busy]);
@@ -73,7 +80,7 @@ export function TreasureGame() {
     <div className="treasure-viewport">
       <img src={maps[state.zone]} alt="" width={1536} height={1536} className="absolute inset-0 h-full w-full object-cover" />
       {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} onMove={game.move} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
-      <div ref={figure} className="treasure-monere" data-facing="right" data-moving="false" aria-hidden="true"><div className="idle-breath"><img src={avatar} alt="" draggable={false} /></div></div>
+      <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" aria-hidden="true"><div className="idle-breath">{(["east", "south", "west", "north"] as const).map(dir => <img key={dir} data-dir={dir} src={turn[dir] ?? avatar} alt="" draggable={false} />)}</div></div>
       <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{quest ? "Your next discovery" : "Zone complete"}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Open quest scroll" onClick={() => setPanel("quests")}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{quest?.clue ?? (state.relics.length === 18 ? "All 18 relics found. The greatest treasure is the wisdom you share." : "Every relic found! A new wardrobe reward is waiting in your logbook.")}</p><div className="mt-2 flex gap-1" aria-label={`${zoneRelics.filter(r => state.relics.includes(r.id)).length} of 6 zone relics found`}>{zoneRelics.map(r => <span key={r.id} className={`h-1.5 flex-1 rounded-full ${state.relics.includes(r.id) ? "bg-primary" : "bg-muted"}`} />)}</div></div>
       <div className="treasure-map-chip"><span>{zone?.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
       {notice && <div role="status" className="treasure-notice">{notice}</div>}

@@ -1,5 +1,6 @@
 # Treasure Hunt RPG
 - [x] Monere map walk: CSS walk-bounce while moving, left/right flip, idle-breath when stopped.
+- [x] Map Monere uses the main-page turnaround angles to face East/South/West/North, with squash-and-stretch hops.
 - [x] Make the three-zone treasure adventure the main experience, retaining mentor and existing activities.
 - [x] Add exploration controls, tool gates, riddles, relic logbook, saved account/guest progression and atomic wardrobe unlocks.
 - [x] Verify all 18 relics, locks, reload persistence and three wardrobe rewards on isolated QA; phone/desktop checked, invalid actions rejected, 262 tests passed. Preview-only.
