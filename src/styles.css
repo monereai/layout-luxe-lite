@@ -375,6 +375,10 @@
 .treasure-interact { height: 54px; padding: 12px 20px; border-radius: 8px; box-shadow: var(--adventure-shadow); }
 .treasure-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--card); padding: 11px 24px calc(11px + env(safe-area-inset-bottom)); color: var(--muted-foreground); font-size: 12px; }
 .treasure-notice { position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--primary); background: var(--adventure-panel); box-shadow: var(--adventure-shadow); font-size: 14px; text-align: center; }
+.treasure-petshop { position: absolute; right: 12px; bottom: 192px; z-index: 20; display: flex; width: 68px; flex-direction: column; align-items: center; gap: 2px; padding: 6px; border: 1px solid var(--primary); border-radius: 16px; background: var(--adventure-panel); box-shadow: var(--adventure-shadow); }
+.treasure-petshop img { width: 40px; height: 40px; object-fit: contain; }
+.treasure-petshop span { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--primary); }
+@media (min-width: 640px) { .treasure-petshop { right: 12px; top: 214px; bottom: auto; width: 76px; } .treasure-petshop img { width: 48px; height: 48px; } }
 .treasure-reward { animation: treasure-pop .45s ease-out; }
 @keyframes treasure-pop { from { transform: scale(.5) rotate(-8deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
 @media (max-width: 639px) {
