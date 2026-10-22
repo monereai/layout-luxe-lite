@@ -17,10 +17,10 @@ export const SCROLLS: Record<ZoneId, Position & { name: string; lore: string }> 
   lair: { x: 5, y: 15, name: "Scroll of Wisdom", lore: "Wisdom is more precious than rubies — Proverbs 3:15." },
 };
 export const SCROLL_CLUES: Record<ZoneId, string> = {
-  meadow: "Razor dropped something by the cottage daisies to the northwest. Find the first scroll!",
-  wood: "Deep in Lonely Wood, an old oak to the north guards a rolled-up secret.",
-  ravine: "Cross the rope bridge. The third scroll lies in the southwest canyon.",
-  lair: "Search the western corner of the entry hall for the final scroll.",
+  meadow: "Razor hid a scroll somewhere in the meadow — it's invisible until you're right beside it.",
+  wood: "A secret sleeps where the trees stand tall. Only a close look will reveal it.",
+  ravine: "The canyon keeps its scroll well hidden. Search carefully on both sides of the bridge.",
+  lair: "Even in Razor's den a scroll lies hidden. Sniff out every corner.",
 };
 export const GATES: Record<ZoneId, { riddle: string; options: string[]; answer: number }> = {
   meadow: { riddle: "I have hands, but I cannot clap. I have a face, but I cannot smile. What am I?", options: ["A Clock", "A Mirror", "A Book"], answer: 0 },
@@ -78,7 +78,7 @@ export function applyAdventure(s: AdventureState, a: AdventureAction): Adventure
 }
 export function questClue(s: AdventureState): string {
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
-  if (!s.scrolls.includes(s.zone)) return SCROLL_CLUES[s.zone];
+  if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
   if (!s.gates.includes(s.zone)) return s.zone === "lair" ? "Scroll found! Go to the carved inner door in the middle of the lair and answer its riddle." : "Scroll found! Walk to the eastern gate and answer the gatekeeper's riddle.";
   if (s.zone === "lair") return `Riddle Duel ${s.duel + 1}/3: ${DUEL[s.duel]!.riddle} Hop onto the right tile.`;
   return "The gate is open. Travel onward through the portal!";
@@ -93,3 +93,11 @@ export function parseAdventure(value: unknown): AdventureState {
   const x = Number(s["x"]); const y = Number(s["y"]);
   return canStep(st, x, y) ? { ...st, x, y } : { ...st, ...(st.zone === "meadow" ? { x: 10, y: 12 } : PORTALS[ZONES[ZONES.findIndex(z => z.id === st.zone) - 1]!.id].find(p => p.forward)!.arrive) };
 }
+
+/** Hot/cold hint for the hidden scroll in the current zone. */
+export function scrollWarmth(s: AdventureState): string {
+  const t = SCROLLS[s.zone]; const d = Math.abs(t.x - s.x) + Math.abs(t.y - s.y);
+  return d <= 2 ? "🔥 Burning hot!" : d <= 5 ? "♨️ Warmer…" : d <= 10 ? "🌤️ Getting warm." : "❄️ Cold.";
+}
+/** The scroll only appears when Monere is within this many steps. */
+export const SCROLL_REVEAL = 2;
