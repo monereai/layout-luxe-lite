@@ -4,7 +4,7 @@ import meadow from "@/assets/treasure/meadow.jpg";
 import forest from "@/assets/treasure/forest.jpg";
 import sky from "@/assets/treasure/sky.jpg";
 import chest from "@/assets/treasure/chest.png";
-import { PORTALS, RELICS, TILE_SIZE, walkable, type AdventureState, type Position } from "@/lib/treasure";
+import { PORTALS, RELICS, LANDMARKS, PLATES, TILE_SIZE, canStep, chestVisible, applyAdventure, terrain, type AdventureState, type Position } from "@/lib/treasure";
 
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
 type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void };
@@ -23,7 +23,7 @@ export function WorldCanvas(props: Props) {
         player?: Phaser.GameObjects.Image;
         background?: Phaser.GameObjects.Image;
         markers: Phaser.GameObjects.Image[] = [];
-        portals: Phaser.GameObjects.Container[] = [];
+        portals: Phaser.GameObjects.Container[] = []; scenery: Phaser.GameObjects.GameObject[] = [];
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
@@ -47,16 +47,16 @@ export function WorldCanvas(props: Props) {
           this.game.events.on(P.Core.Events.BLUR, () => { this.direction = { x: 0, y: 0 }; this.path = []; });
         }
         seek(target: Position) {
-          if (!walkable(live.current.state.zone, target.x, target.y)) return;
+          if (!canStep(live.current.state, target.x, target.y)) return;
           const s = live.current.state; const open: Position[][] = [[{ x: s.x, y: s.y }]]; const seen = new Set([`${s.x},${s.y}`]);
           for (let i = 0; i < open.length; i++) {
             const path = open[i]; const end = path?.at(-1); if (!path || !end) continue;
             if (end.x === target.x && end.y === target.y) { this.path = path.slice(1); return; }
-            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const next = { x: end.x + (dx ?? 0), y: end.y + (dy ?? 0) }; const key = `${next.x},${next.y}`; if (!seen.has(key) && walkable(s.zone, next.x, next.y)) { seen.add(key); open.push([...path, next]); } }
+            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const next = { x: end.x + (dx ?? 0), y: end.y + (dy ?? 0) }; const key = `${next.x},${next.y}`; if (!seen.has(key) && canStep(s, next.x, next.y)) { seen.add(key); open.push([...path, next]); } }
           }
         }
         sync(force = false) {
-          const s = live.current.state; const key = `${s.zone}:${s.relics.join()}:${s.gear.join()}:${live.current.revision}`;
+          const s = live.current.state; const key = `${s.zone}:${s.relics.join()}:${s.gear.join()}:${live.current.revision}:${s.x},${s.y}:${s.gates.join()}:${s.landmarks.join()}`;
           if (key === this.lastState && !force) return;
           const changedZone = this.lastState.split(":")[0] !== s.zone || this.lastState.split(":")[3] !== String(live.current.revision);
           this.lastState = key;
@@ -64,12 +64,37 @@ export function WorldCanvas(props: Props) {
           if (changedZone || force) { this.path = []; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.markers.forEach(m => m.destroy()); this.markers = [];
           this.portals.forEach(p => p.destroy()); this.portals = [];
-          RELICS.filter(r => r.zone === s.zone && !s.relics.includes(r.id) && (!r.requires || s.gear.includes(r.requires))).forEach(r => {
+          RELICS.filter(r => r.zone === s.zone && chestVisible(s, r)).forEach(r => {
             const marker = this.add.image((r.x + .5) * 64, (r.y + .5) * 64, "chest").setDisplaySize(57, 57).setDepth(3).setInteractive({ useHandCursor: true });
             marker.on("pointerdown", (_: unknown, __: unknown, ___: unknown, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (!this.paused) this.seek(r); });
             if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) this.tweens.add({ targets: marker, y: marker.y - 5, alpha: .8, duration: 1300, yoyo: true, repeat: -1 });
             this.markers.push(marker);
           });
+          this.scenery.forEach(item => item.destroy()); this.scenery = [];
+          const color = (token: string) => P.Display.Color.HexStringToColor(getComputedStyle(document.documentElement).getPropertyValue(token).trim()).color;
+          for (let x = 2; x <= 21; x++) for (let y = 2; y <= 21; y++) {
+            const hazard = terrain(s.zone, x, y);
+            if (hazard) {
+              const tile = this.add.rectangle((x + .5) * 64, (y + .5) * 64, 62, 62, color(hazard === "mud" ? "--muted" : "--energy"), .35).setDepth(2);
+              const label = this.add.text((x + .5) * 64, (y + .5) * 64, hazard === "mud" ? "≋" : "⇠", { fontSize: "32px" }).setOrigin(.5).setDepth(3);
+              this.scenery.push(tile, label);
+            }
+          }
+          LANDMARKS.filter(l => l.zone === s.zone).forEach(l => {
+            const label = this.add.text((l.x + .5) * 64, (l.y + .5) * 64, s.landmarks.includes(l.id) ? "✓" : l.icon, { fontSize: "32px" }).setOrigin(.5).setDepth(3);
+            this.scenery.push(label);
+          });
+          if (s.zone === "forest") {
+            for (const [role, plate] of Object.entries(PLATES)) {
+              const circle = this.add.circle((plate.x + .5) * 64, (plate.y + .5) * 64, 25, color("--primary"), .5).setDepth(2);
+              const label = this.add.text((plate.x + .5) * 64, (plate.y + .5) * 64, role === "pet" ? "🐾" : "☀", { fontSize: "24px" }).setOrigin(.5).setDepth(3);
+              this.scenery.push(circle, label);
+            }
+            if (!s.gates.includes("forest-gate")) {
+              const gate = this.add.rectangle(10.5 * 64, 12 * 64, 32, 20 * 64, color("--primary"), .4).setDepth(4);
+              this.scenery.push(gate);
+            }
+          }
           PORTALS[s.zone].forEach(p => {
             const ring = this.add.text(0, 0, s.unlocked.includes(p.target) ? "🌀" : "🔒", { fontSize: "44px" }).setOrigin(.5);
             const label = this.add.text(0, 34, p.target === "forest" ? "FOREST" : p.target === "sky" ? "SKY ISLES" : "MEADOW", { fontFamily: "Nunito", fontSize: "12px", backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--background").trim(), padding: { x: 8, y: 4 } }).setOrigin(.5);
@@ -87,12 +112,13 @@ export function WorldCanvas(props: Props) {
           if (keys?.['UP']?.isDown || keys?.['W']?.isDown) dy = -1; else if (keys?.['DOWN']?.isDown || keys?.['S']?.isDown) dy = 1;
           const s = live.current.state;
           const next = dx || dy ? { x: s.x + dx, y: s.y + (dx ? 0 : dy) } : this.path.shift();
-          if (!next || !walkable(s.zone, next.x, next.y)) return;
+          if (!next || !canStep(s, next.x, next.y)) return;
+          const result = applyAdventure(s, { action: "move", ...next });
           live.current.onMove(next);
           this.moving = true;
           this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
           
-          this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 160 : 210, onComplete: () => { this.moving = false; } });
+          this.tweens.add({ targets: this.player, x: (result.x + .5) * 64, y: (result.y + .5) * 64, duration: terrain(s.zone, next.x, next.y) === "mud" ? 520 : 210, onComplete: () => { this.moving = false; } });
         }
         animate() {
           const p = this.player; const el = live.current.figure.current; if (!p) return;
@@ -119,7 +145,8 @@ export function WorldCanvas(props: Props) {
           const past = this.trail[0]; const pet = live.current.pet.current;
           if (pet && past) {
             const lag = this.trail.find(e => e.t >= now - 500) ?? past;
-            pet.style.transform = `translate(${(lag.x - cam.worldView.x) * cam.zoom}px, ${(lag.y - cam.worldView.y) * cam.zoom}px)`;
+            const s = live.current.state; const px = s.pinned || s.zone === "forest" ? (s.pet.x + .5) * 64 : lag.x; const py = s.pinned || s.zone === "forest" ? (s.pet.y + .5) * 64 : lag.y;
+            pet.style.transform = `translate(${(px - cam.worldView.x) * cam.zoom}px, ${(py - cam.worldView.y) * cam.zoom}px)`;
             pet.style.setProperty("--pet-size", `${70 * cam.zoom}px`);
             pet.dataset["facing"] = lag.x > p.x + 2 ? "west" : lag.x < p.x - 2 ? "east" : pet.dataset["facing"] ?? "east";
             const body = pet.firstElementChild; body?.classList.toggle("walk-bounce", lag.walking); body?.classList.toggle("idle-breath", !lag.walking);
