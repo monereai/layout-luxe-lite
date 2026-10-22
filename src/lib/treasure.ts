@@ -24,17 +24,52 @@ export const SCROLL_CLUES: Record<ZoneId, string> = {
   ravine: "The canyon keeps its scroll well hidden. Search carefully on both sides of the bridge.",
   lair: "The last scroll rests on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
 };
-export const GATES: Record<ZoneId, { riddle: string; options: string[]; answer: number }> = {
-  meadow: { riddle: "I have hands, but I cannot clap. I have a face, but I cannot smile. What am I?", options: ["A Clock", "A Mirror", "A Book"], answer: 0 },
-  wood: { riddle: "What gets wetter and wetter the more it dries?", options: ["A Sponge", "A Towel", "A Cloud"], answer: 1 },
-  ravine: { riddle: "I have keys, but no locks. I have space, but no room. You can enter, but you can't go outside. What am I?", options: ["A Door", "A Keyboard", "A Treasure Chest"], answer: 1 },
-  lair: { riddle: "What belongs to you, but other people use it far more than you do?", options: ["Your Shoes", "Your Toys", "Your Name"], answer: 2 },
-};
-export const DUEL = [
-  { riddle: "I fly without wings and cry without eyes. Wherever I go, darkness flies. What am I?", tiles: ["A Bird", "A Cloud", "An Airplane"], answer: 1 },
-  { riddle: "I am tall when I am young, and I am short when I am old. What am I?", tiles: ["A Tree", "A Pencil", "A Candle"], answer: 2 },
-  { riddle: "What comes down, but never goes up?", tiles: ["Rain", "An Elevator", "A Ball"], answer: 0 },
+/** Master riddle pool (mirrored in SQL treasure_v5_riddle_answers). `answer` indexes the unshuffled options. */
+export type PoolRiddle = { riddle: string; options: [string, string, string]; answer: number; hint: string };
+export const RIDDLE_POOL: PoolRiddle[] = [
+  { riddle: "I have hands, but I cannot clap. I have a face, but I cannot smile. What am I?", options: ["A Clock", "A Mirror", "A Book"], answer: 0, hint: "The answer keeps time, tick-tock!" },
+  { riddle: "What gets wetter and wetter the more it dries?", options: ["A Sponge", "A Towel", "A Cloud"], answer: 1, hint: "You use it after a bath." },
+  { riddle: "I have keys, but no locks. I have space, but no room. You can enter, but you can't go outside. What am I?", options: ["A Door", "A Keyboard", "A Treasure Chest"], answer: 1, hint: "You type on it." },
+  { riddle: "What belongs to you, but other people use it far more than you do?", options: ["Your Shoes", "Your Toys", "Your Name"], answer: 2, hint: "Friends call you by it." },
+  { riddle: "I fly without wings and cry without eyes. Wherever I go, darkness flies. What am I?", options: ["A Bird", "A Cloud", "An Airplane"], answer: 1, hint: "Look up on a rainy day." },
+  { riddle: "I am tall when I am young, and I am short when I am old. What am I?", options: ["A Tree", "A Pencil", "A Candle"], answer: 2, hint: "It melts as it glows." },
+  { riddle: "What comes down, but never goes up?", options: ["Rain", "An Elevator", "A Ball"], answer: 0, hint: "Bring an umbrella!" },
+  { riddle: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter"], answer: 1, hint: "It's the fourth planet from the Sun." },
+  { riddle: "How many legs does a spider have?", options: ["Six", "Eight", "Ten"], answer: 1, hint: "Two more than an insect." },
+  { riddle: "What has a neck but no head?", options: ["A Bottle", "A Snake", "A Chair"], answer: 0, hint: "You can pour from it." },
+  { riddle: "What do bees make?", options: ["Milk", "Honey", "Silk"], answer: 1, hint: "It's sweet and sticky." },
+  { riddle: "What is full of holes but still holds water?", options: ["A Bucket", "A Sponge", "A Net"], answer: 1, hint: "You squeeze it when washing up." },
+  { riddle: "Which is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Pacific"], answer: 2, hint: "Its name means peaceful." },
+  { riddle: "What has to be broken before you can use it?", options: ["An Egg", "A Window", "A Pencil"], answer: 0, hint: "Think breakfast!" },
+  { riddle: "Which gas do plants take in that we breathe out?", options: ["Oxygen", "Carbon Dioxide", "Helium"], answer: 1, hint: "Its short name is CO₂." },
+  { riddle: "What can travel around the world while staying in a corner?", options: ["A Stamp", "A Spider", "A Shadow"], answer: 0, hint: "You find it on a letter." },
 ];
+/** Slots 0–3 are the zone gates (meadow, wood, ravine, lair); 4–6 are Razor's duel. `o` maps shown position → pool option. */
+export type RiddleSlot = { i: number; o: number[] };
+export const RIDDLE_SLOTS = 7;
+export const defaultRiddles = (): RiddleSlot[] => Array.from({ length: RIDDLE_SLOTS }, (_, i) => ({ i, o: [0, 1, 2] }));
+export function randomRiddles(rand: () => number = Math.random): RiddleSlot[] {
+  const shuffle = <T,>(a: T[]) => { const b = [...a]; for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(rand() * (k + 1)); [b[k], b[j]] = [b[j]!, b[k]!]; } return b; };
+  return shuffle(RIDDLE_POOL.map((_, i) => i)).slice(0, RIDDLE_SLOTS).map(i => ({ i, o: shuffle([0, 1, 2]) }));
+}
+export function validRiddles(v: unknown): RiddleSlot[] | null {
+  if (!Array.isArray(v) || v.length !== RIDDLE_SLOTS) return null;
+  const out: RiddleSlot[] = []; const used = new Set<number>();
+  for (const r of v) {
+    const i = (r as RiddleSlot)?.i; const o = (r as RiddleSlot)?.o;
+    if (!Number.isInteger(i) || i < 0 || i >= RIDDLE_POOL.length || used.has(i) || !Array.isArray(o) || o.length !== 3 || [...o].sort().join() !== "0,1,2") return null;
+    used.add(i); out.push({ i, o: [...o] });
+  }
+  return out;
+}
+export type ShownRiddle = { riddle: string; options: string[]; answer: number; hint: string };
+export function riddleAt(s: AdventureState, slot: number): ShownRiddle {
+  const r = s.riddles[slot] ?? { i: slot, o: [0, 1, 2] }; const p = RIDDLE_POOL[r.i]!;
+  return { riddle: p.riddle, options: r.o.map(k => p.options[k]!), answer: r.o.indexOf(p.answer), hint: p.hint };
+}
+export const gateRiddle = (s: AdventureState, zone: ZoneId) => riddleAt(s, ZONES.findIndex(z => z.id === zone));
+export const duelRiddle = (s: AdventureState, round = s.duel) => riddleAt(s, 4 + Math.min(round, 2));
+export const DUEL_ROUNDS = 3;
 export const DUEL_TILES: Position[] = [{ x: 10, y: 6 }, { x: 12, y: 6 }, { x: 14, y: 6 }];
 export const DUEL_START: Position = { x: 12, y: 8 };
 export const LAIR_DOOR: Position = { x: 12, y: 10 };
