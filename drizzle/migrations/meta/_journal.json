@@ -295,6 +295,13 @@
       "when": 1792661289432,
       "tag": "0041_treasure_adventure_progression",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1792661325441,
+      "tag": "0042_treasure_batched_travel",
+      "breakpoints": true
     }
   ]
 }

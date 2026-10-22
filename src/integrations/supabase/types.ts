@@ -610,6 +610,7 @@ export type Database = {
         }
         Returns: Json
       }
+      treasure_travel: { Args: { p_steps: Json }; Returns: Json }
       treasure_walkable: {
         Args: { x: number; y: number; z: string }
         Returns: boolean
