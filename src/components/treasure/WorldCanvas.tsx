@@ -26,7 +26,7 @@ export function WorldCanvas(props: Props) {
         portals: Phaser.GameObjects.Container[] = [];
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
-        shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
+        shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
         preload() { this.load.image("meadow", meadow); this.load.image("forest", forest); this.load.image("sky", sky); this.load.image("chest", chest); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
@@ -105,6 +105,11 @@ export function WorldCanvas(props: Props) {
             el.style.transform = `translate(${(p.x - cam.worldView.x) * cam.zoom}px, ${(p.y - cam.worldView.y) * cam.zoom}px)`;
             el.style.setProperty("--monere-size", `${140 * cam.zoom}px`);
             el.dataset["facing"] = this.facing;
+            // Turn smoothly through the turnaround's in-between angles (45° each): South 0, East 90, North 180, West 270.
+            const target = ({ south: 0, east: 90, north: 180, west: 270 } as Record<string, number>)[this.facing] ?? 0;
+            const diff = ((target - this.yaw + 540) % 360) - 180;
+            this.yaw = (this.yaw + diff * Math.min(1, this.game.loop.delta / 70) + 360) % 360;
+            el.dataset["frame"] = String(Math.round(this.yaw / 45) % 8);
             el.dataset["moving"] = walking ? "true" : "false";
             const body = el.firstElementChild; body?.classList.toggle("walk-bounce", walking); body?.classList.toggle("idle-breath", !walking);
           }
