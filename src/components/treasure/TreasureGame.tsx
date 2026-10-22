@@ -1,23 +1,27 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ClientOnly, Link } from "@tanstack/react-router";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Backpack, BookOpen, Check, Compass, Flag, Gem, LockKeyhole, Map, ScrollText, Shirt, Volume2, VolumeX } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Award, Backpack, BookOpen, Check, Compass, Flag, LockKeyhole, Map, ScrollText, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { MatchingPuzzle } from "./MatchingPuzzle";
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { RELICS, REWARD_SETS, TOOLS, ZONES, PORTALS, LANDMARKS, near, questClue, zoneComplete, canCollect, type Relic } from "@/lib/treasure";
-import { equippedItems, SHOP_ITEMS, useShop } from "@/lib/shop";
+import { ZONES, PORTALS, SCROLLS, GATES, DUEL, near, questClue, gateHere, duelTileAt, type ZoneId } from "@/lib/treasure";
+import { equippedItems, useShop } from "@/lib/shop";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
-import type { WorldControls } from "./WorldCanvas";
+import type { WorldControls, WorldEffect } from "./WorldCanvas";
 import meadow from "@/assets/treasure/meadow.jpg";
 import forest from "@/assets/treasure/forest.jpg";
-import sky from "@/assets/treasure/sky.jpg";
+import ravine from "@/assets/treasure/ravine.jpg";
+import lair from "@/assets/treasure/lair.jpg";
+import griffin from "@/assets/pets/golden-griffin.png";
+import razor from "@/assets/treasure/razor.png";
 
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
-const maps = { meadow, forest, sky };
+const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair };
+const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin.";
+
 export function TreasureGame() {
   const game = useAdventure(); const { state } = game;
   const controls = useRef<WorldControls | null>(null);
@@ -25,16 +29,19 @@ export function TreasureGame() {
   const petRef = useRef<HTMLDivElement | null>(null);
   const pets = usePets();
   const companion = PETS.find(p => p.id === pets.active) ?? PETS.find(p => p.id === "puppy");
-  const [panel, setPanel] = useState<"logbook" | "map" | "quests" | null>(null);
-  const [tab, setTab] = useState<"relics" | "gear" | "wardrobe">("relics");
-  const [reward, setReward] = useState<Relic | null>(null);
-  const [puzzle, setPuzzle] = useState(false);
-  const [victory, setVictory] = useState<string | null>(null);
+  const [panel, setPanel] = useState<"logbook" | "map" | null>(null);
+  const [intro, setIntro] = useState(true);
+  const [found, setFound] = useState<ZoneId | null>(null);
+  const [riddle, setRiddle] = useState<ZoneId | null>(null);
+  const [wrong, setWrong] = useState<number | null>(null);
+  const [victory, setVictory] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
+  const [effect, setEffect] = useState<WorldEffect>({ kind: null, n: 0 });
   const [busy, setBusy] = useState(false);
   const [sound, setSound] = useState(true);
+  const [notice, setNotice] = useState<string | null>(null);
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
-  // The main page's Monere turnaround (8 angles, every equipped layer composed in) — same art, same outfit.
   const [turn, setTurn] = useState<Record<number, string>>({});
   const shop = useShop();
   useEffect(() => {
@@ -49,67 +56,94 @@ export function TreasureGame() {
     })).then(entries => { if (!cancelled) setTurn(Object.fromEntries(entries)); });
     return () => { cancelled = true; };
   }, [shop.equipped]);
-  useEffect(() => { controls.current?.pause(!!panel || !!reward || !!victory || puzzle || busy); }, [panel, reward, victory, puzzle, busy]);
+  const blocked = !!panel || intro || !!found || !!riddle || victory || busy;
+  useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
   useEffect(() => { try { setSound(localStorage.getItem("monere-treasure-sound") !== "off"); } catch { /* default on */ } return () => { void audio.current?.close(); }; }, []);
-  function chime() {
+  useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
+  function tone(notes: number[]) {
     if (!sound) return;
-    try { const context = audio.current ?? new AudioContext(); audio.current = context; void context.resume(); [523, 659, 784].forEach((frequency, i) => { const oscillator = context.createOscillator(); const gain = context.createGain(); oscillator.connect(gain); gain.connect(context.destination); oscillator.frequency.value = frequency; gain.gain.setValueAtTime(.07, context.currentTime + i * .1); gain.gain.exponentialRampToValueAtTime(.001, context.currentTime + i * .1 + .35); oscillator.start(context.currentTime + i * .1); oscillator.stop(context.currentTime + i * .1 + .36); }); } catch { /* sound optional */ }
+    try { const c = audio.current ?? new AudioContext(); audio.current = c; void c.resume(); notes.forEach((f, i) => { const o = c.createOscillator(); const g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = f; g.gain.setValueAtTime(.07, c.currentTime + i * .1); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + i * .1 + .35); o.start(c.currentTime + i * .1); o.stop(c.currentTime + i * .1 + .36); }); } catch { /* sound optional */ }
   }
-  const zone = ZONES.find(z => z.id === state.zone) ?? ZONES[0];
-  const zoneRelics = RELICS.filter(r => r.zone === state.zone);
-  const clue = questClue(state);
-  const landmark = LANDMARKS.find(l => l.zone === state.zone && near(state, l) && !state.landmarks.includes(l.id));
-  const lockedChest = zoneRelics.find(r => !state.relics.includes(r.id) && near(state, r));
-  const nearby = zoneRelics.find(r => canCollect(state, r));
-  const portal = PORTALS[state.zone].find(p => Math.abs(p.x - state.x) + Math.abs(p.y - state.y) <= 1);
-  const [notice, setNotice] = useState<string | null>(null);
+  const chime = () => tone([523, 659, 784]);
+  const zone = ZONES.find(z => z.id === state.zone) ?? ZONES[0]!;
+  const scrollNear = !state.scrolls.includes(state.zone) && near(state, SCROLLS[state.zone]);
+  const gate = gateHere(state);
+  const portal = PORTALS[state.zone].find(p => near(state, p));
+
+  // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
+  const settled = useRef("");
+  useEffect(() => {
+    const tile = duelTileAt(state); const key = `${state.x},${state.y},${state.duel}`;
+    if (tile < 0 || busy || settled.current === key) return;
+    const timer = setTimeout(async () => {
+      settled.current = key; setBusy(true);
+      try {
+        const step = state.duel; const next = await game.act({ action: "duel", x: tile });
+        if (next.duel > step) { chime(); if (next.rescued) { tone([523, 659, 784, 1046]); setEffect(e => ({ kind: "victory", n: e.n + 1 })); setCelebrate(true); setTimeout(() => { setCelebrate(false); setVictory(true); }, 2300); } else setNotice(`Correct! Riddle ${next.duel + 1} of 3…`); }
+        else { tone([330, 247]); setEffect(e => ({ kind: "gust", n: e.n + 1 })); setNotice("Whoosh! Razor's gust blows you back to the start mark. Try again!"); }
+      } catch { /* hook reports */ } finally { setBusy(false); }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [state.x, state.y, state.duel, state.zone, busy]);
+
   async function interact() {
-    if (busy || panel || reward || puzzle || victory) return;
-    if (landmark) { setBusy(true); try { const next = await game.act({ action: "inspect", id: landmark.id }); if (next.landmarks.includes(landmark.id)) { chime(); setNotice(landmark.fragment ? `Key Fragment found · ${next.fragments.length}/2` : landmark.id === "dawn" ? "Dawn speaks: seek the echoing eastern pillars." : "The pillars answer: reunite four twins at the sun’s heart."); } } catch { /* hook reports */ } finally { setBusy(false); } return; }
-    if (nearby) {
-      setBusy(true);
-      try { const next = await game.act({ action: "collect", id: nearby.id }); if (next.relics.includes(nearby.id)) { chime(); setReward(nearby); if (zoneComplete(next, state.zone)) setVictory(state.zone); } } catch { /* hook reports failure */ } finally { setBusy(false); }
-    } else if (lockedChest) {
-      if (state.zone === "sky" && state.landmarks.includes("ruins")) setPuzzle(true);
-      else setNotice(state.zone === "forest" ? `Both Key Fragments are needed (${state.fragments.length}/2). Equip your Magnifying Glass.` : "Read the Dawn Circle, then the Echoing Pillars. Equip your Lantern.");
-    } else if (portal) {
-      if (!state.unlocked.includes(portal.target)) { setNotice("Open every chest in the previous stage to unlock this gateway."); return; }
-      setBusy(true); try { await game.act({ action: "portal", id: portal.target }); } catch { /* hook reports */ } finally { setBusy(false); }
-    } else setNotice("No treasure within reach. Follow the clue on your quest scroll.");
+    if (blocked) return;
+    if (scrollNear) { setBusy(true); try { const next = await game.act({ action: "collect" }); if (next.scrolls.includes(state.zone)) { chime(); setFound(state.zone); } } catch { /* hook reports */ } finally { setBusy(false); } return; }
+    if (gate) { setWrong(null); setRiddle(gate); return; }
+    if (portal) {
+      if (portal.forward && !state.gates.includes(state.zone)) { setNotice(state.scrolls.includes(state.zone) ? "Answer the gatekeeper's riddle to open this gate." : "Find this land's hidden scroll first."); return; }
+      setBusy(true); try { await game.act({ action: "portal", id: portal.target }); } catch { /* hook reports */ } finally { setBusy(false); } return;
+    }
+    if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
+    setNotice("Nothing here. Follow the clue on your quest scroll.");
   }
-  useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(timer); }, [notice]);
-  const value = RELICS.filter(r => state.relics.includes(r.id)).reduce((total, r) => total + r.value, 0);
-  return <section className="treasure-game" aria-label="Monere Treasure Hunt">
+  async function answer(i: number) {
+    if (!riddle) return;
+    if (i !== GATES[riddle].answer) { setWrong(i); tone([330, 247]); return; }
+    setBusy(true);
+    try { await game.act({ action: "answer", id: riddle, x: i }); chime(); setRiddle(null); setNotice(riddle === "lair" ? "The inner door rumbles open. Razor awaits!" : "Correct! The gate swings open."); }
+    catch { setNotice("That answer couldn't be saved. Please try again."); } finally { setBusy(false); }
+  }
+  const action = scrollNear ? "Pick up scroll" : gate ? "Answer riddle" : portal ? "Enter portal" : "Search";
+  return <section className="treasure-game" aria-label="The Rescue of the Golden Griffin">
     <header className="treasure-hud">
-      <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">MonereAI · Treasure Hunt</p><h1 className="truncate font-display text-lg sm:text-2xl">{zone?.name}</h1></div></div>
+      <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">The Rescue of the Golden Griffin</p><h1 className="truncate font-display text-lg sm:text-2xl">{zone.name}</h1></div></div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-        <span className="flex items-center gap-1.5 font-display text-lg text-points" aria-label={`${state.relics.length} treasures collected`}><Gem className="h-4 w-4" />{state.relics.length}<span className="text-xs text-muted-foreground">/{RELICS.length}</span></span>
+        <span className="flex items-center gap-1.5 font-display text-lg text-points" aria-label={`${state.scrolls.length} of 4 scrolls collected`}><ScrollText className="h-4 w-4" />{state.scrolls.length}<span className="text-xs text-muted-foreground">/4</span></span>
         <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
         <Button size="icon" variant="outline" aria-label="Open world map" title="World map" onClick={() => setPanel("map")}><Map /></Button>
-        <Button variant="default" className="gap-2" aria-label="Open collector's logbook" onClick={() => setPanel("logbook")}><Backpack /><span className="hidden sm:inline">Logbook</span></Button>
+        <Button variant="default" className="gap-2" aria-label="Open logbook" onClick={() => setPanel("logbook")}><Backpack /><span className="hidden sm:inline">Logbook</span></Button>
       </div>
     </header>
     <div className="treasure-viewport">
       <img src={maps[state.zone]} alt="" width={1536} height={1536} className="absolute inset-0 h-full w-full object-cover" />
-      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} onMove={game.move} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
-      {companion && <div ref={petRef} className="treasure-pet" data-facing="east" aria-hidden="true"><div className="idle-breath"><div className={reward ? "pet-celebrate" : undefined}><img src={companion.src} alt="" draggable={false} /></div></div></div>}
-      <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" aria-hidden="true"><div className="idle-breath">{[0, 1, 2, 3, 4, 5, 6, 7].map(frame => <img key={frame} data-frame={frame} src={turn[frame] ?? avatar} alt="" draggable={false} />)}</div></div>
-      <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{zoneComplete(state, state.zone) ? "Stage complete" : `Stage ${ZONES.findIndex(z => z.id === state.zone) + 1} · Quest`}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Open quest scroll" onClick={() => setPanel("quests")}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{clue}</p><div className="mt-2 flex gap-1" aria-label={`${zoneRelics.filter(r => state.relics.includes(r.id)).length} of ${zoneRelics.length} stage chests opened`}>{zoneRelics.map(r => <span key={r.id} className={`h-1.5 flex-1 rounded-full ${state.relics.includes(r.id) ? "bg-primary" : "bg-muted"}`} />)}</div></div>
-      <div className="treasure-map-chip"><span>{zone?.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
+      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} effect={effect} onMove={game.move} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
+      {companion && <div ref={petRef} className="treasure-pet" data-facing="east" aria-hidden="true"><div className="idle-breath"><div className={celebrate ? "spin-360" : undefined}><img src={companion.src} alt="" draggable={false} /></div></div></div>}
+      <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" aria-hidden="true"><div className="idle-breath"><div className={celebrate ? "spin-360" : undefined}>{[0, 1, 2, 3, 4, 5, 6, 7].map(frame => <img key={frame} data-frame={frame} src={turn[frame] ?? avatar} alt="" draggable={false} />)}</div></div></div>
+      <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{state.rescued ? "Griffin rescued" : `Land ${ZONES.findIndex(z => z.id === state.zone) + 1} of 4 · Quest`}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Read the story again" onClick={() => setIntro(true)}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{questClue(state)}</p>
+        {state.zone === "lair" && state.gates.includes("lair") && !state.rescued && <div className="mt-2 grid grid-cols-3 gap-1 text-center text-xs font-bold">{DUEL[state.duel]!.tiles.map((t, i) => <span key={t} className="rounded-md border border-primary/40 bg-primary/10 px-1 py-1">{"ABC"[i]}: {t}</span>)}</div>}
+        <div className="mt-2 flex gap-1" aria-hidden="true">{ZONES.map(z => <span key={z.id} className={`h-1.5 flex-1 rounded-full ${state.scrolls.includes(z.id) ? "bg-primary" : "bg-muted"}`} />)}</div></div>
+      <div className="treasure-map-chip"><span>{zone.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
       {notice && <div role="status" className="treasure-notice">{notice}</div>}
       <div className="treasure-controls">
-        <div className="treasure-dpad" aria-label="Movement controls">{[{ x: 0, y: -1, Icon: ArrowUp, name: "Move up", css: "col-start-2" }, { x: -1, y: 0, Icon: ArrowLeft, name: "Move left", css: "row-start-2" }, { x: 0, y: 1, Icon: ArrowDown, name: "Move down", css: "col-start-2 row-start-2" }, { x: 1, y: 0, Icon: ArrowRight, name: "Move right", css: "col-start-3 row-start-2" }].map(({ x, y, Icon, name, css }) => <Button key={name} variant="secondary" size="icon" aria-label={name} title={name} className={`treasure-direction ${css}`} disabled={!game.loaded || busy || !!panel || !!reward} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); controls.current?.direction(x, y); }} onPointerUp={() => controls.current?.release()} onPointerCancel={() => controls.current?.release()} onLostPointerCapture={() => controls.current?.release()}><Icon /></Button>)}</div>
-        <div className="flex flex-col items-end gap-2"><Button variant="secondary" size="sm" disabled={busy || !!panel || !!reward || puzzle || !!victory} onClick={() => void game.act({ action: "pet" }).catch(() => {})}><span aria-hidden="true">🐾</span>{state.pinned ? "Call companion" : "Companion stay"}</Button><div className="flex gap-1.5">{TOOLS.filter(t => state.tools.includes(t.id)).map(t => <Button key={t.id} variant={state.gear.includes(t.id) ? "default" : "secondary"} size="icon" title={t.name} aria-label={`${state.gear.includes(t.id) ? "Unequip" : "Equip"} ${t.name}`} disabled={busy} onClick={() => void game.act({ action: "gear", gear: state.gear.includes(t.id) ? state.gear.filter(id => id !== t.id) : [...state.gear, t.id] }).catch(() => {})}>{t.icon}</Button>)}</div><Button className="treasure-interact" disabled={busy || !game.loaded} onClick={() => void interact()}><span className="text-xl">{nearby ? "✨" : portal ? "🌀" : "🔎"}</span>{landmark ? "Inspect landmark" : nearby ? "Open treasure" : lockedChest && state.zone === "sky" ? "Match tiles" : portal ? "Enter portal" : "Search"}</Button></div>
+        <div className="treasure-dpad" aria-label="Movement controls">{[{ x: 0, y: -1, Icon: ArrowUp, name: "Move up", css: "col-start-2" }, { x: -1, y: 0, Icon: ArrowLeft, name: "Move left", css: "row-start-2" }, { x: 0, y: 1, Icon: ArrowDown, name: "Move down", css: "col-start-2 row-start-2" }, { x: 1, y: 0, Icon: ArrowRight, name: "Move right", css: "col-start-3 row-start-2" }].map(({ x, y, Icon, name, css }) => <Button key={name} variant="secondary" size="icon" aria-label={name} title={name} className={`treasure-direction ${css}`} disabled={!game.loaded || blocked} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); controls.current?.direction(x, y); }} onPointerUp={() => controls.current?.release()} onPointerCancel={() => controls.current?.release()} onLostPointerCapture={() => controls.current?.release()}><Icon /></Button>)}</div>
+        <Button className="treasure-interact" disabled={blocked || !game.loaded} onClick={() => void interact()}><span className="text-xl">{scrollNear ? "📜" : gate ? "❓" : portal ? "🌀" : "🔎"}</span>{action}</Button>
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/mentor" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
-    <Dialog open={!!panel} onOpenChange={open => { if (!open) setPanel(null); }}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto rounded-lg"><DialogTitle className="flex items-center gap-2 text-2xl"><Compass className="text-primary" />{panel === "map" ? "The world awaits" : panel === "quests" ? "Quest scroll" : "Collector's Logbook"}</DialogTitle><DialogDescription>{panel === "map" ? "Three stages. Six chests. One brave team." : `${state.relics.length} relics discovered · ${value} collection value (not spendable points)`}</DialogDescription>
-      {panel === "map" ? <div className="grid gap-4 sm:grid-cols-3">{ZONES.map(z => <div key={z.id} className="overflow-hidden rounded-lg border border-border"><img src={maps[z.id]} alt={z.name} width={1536} height={1536} loading="lazy" className="aspect-square w-full object-cover" /><div className="p-3"><h2 className="text-lg">{z.name}</h2><p className="mt-1 text-sm text-muted-foreground">{z.subtitle}</p><p className="mt-3 flex items-center gap-2 text-xs text-primary">{state.unlocked.includes(z.id) ? <><Check className="h-4 w-4" />{state.zone === z.id ? "Exploring now" : "Portal unlocked"}</> : <><LockKeyhole className="h-4 w-4" />Complete {z.id === "forest" ? "Meadow’s three chests" : "Forest’s two chests"}</>}</p><p className="mt-2 text-xs">{RELICS.filter(r => r.zone === z.id && state.relics.includes(r.id)).length}/{RELICS.filter(r => r.zone === z.id).length} chests</p></div></div>)}</div> : panel === "quests" ? <div className="grid gap-3">{zoneRelics.map(r => <div key={r.id} className="flex items-start gap-3 border-b border-border pb-3"><span className="text-2xl">{state.relics.includes(r.id) ? "✅" : "📜"}</span><div><h2 className="text-base">{state.relics.includes(r.id) ? r.name : "Undiscovered relic"}</h2><p className="mt-1 text-sm text-muted-foreground">{state.relics.includes(r.id) ? r.lore : clue}</p></div></div>)}</div> : <><div className="flex gap-2 border-b border-border pb-3">{[{ id: "relics" as const, label: "Relics", Icon: Gem }, { id: "gear" as const, label: "Tools", Icon: Backpack }, { id: "wardrobe" as const, label: "Wardrobe", Icon: Shirt }].map(t => <Button key={t.id} variant={tab === t.id ? "default" : "ghost"} onClick={() => setTab(t.id)}><t.Icon className="h-4 w-4" />{t.label}</Button>)}</div>
-        {tab === "relics" ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{RELICS.map(r => { const found = state.relics.includes(r.id); return <div key={r.id} className={`rounded-lg border p-3 ${found ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30"}`}><span className="mb-2 block text-3xl">{found ? r.icon : "🔒"}</span><h2 className="text-base">{found ? r.name : "Undiscovered"}</h2><p className="mt-1 text-xs leading-relaxed text-muted-foreground">{found ? r.lore : ZONES.find(z => z.id === r.zone)?.name}</p></div>; })}</div> : tab === "gear" ? <div className="grid gap-3 sm:grid-cols-2">{TOOLS.map(t => <div key={t.id} className="rounded-lg border border-border p-4"><span className="text-3xl">{t.icon}</span><h2 className="mt-2 text-lg">{t.name}</h2><p className="my-3 text-sm text-muted-foreground">{t.description}</p><Button disabled={!state.tools.includes(t.id) || busy} variant={state.gear.includes(t.id) ? "secondary" : "default"} onClick={() => void game.act({ action: "gear", gear: state.gear.includes(t.id) ? state.gear.filter(id => id !== t.id) : [...state.gear, t.id] }).catch(() => {})}>{state.tools.includes(t.id) ? state.gear.includes(t.id) ? "Equipped · take off" : "Equip tool" : "Not found yet"}</Button></div>)}</div> : <div className="grid gap-3 sm:grid-cols-3">{REWARD_SETS.map(set => { const item = SHOP_ITEMS.find(i => i.id === set.item); const count = RELICS.filter(r => r.zone === set.zone && state.relics.includes(r.id)).length; return <div key={set.zone} className="rounded-lg border border-border p-3">{item && <img src={item.src} width={816} height={816} alt={item.name} loading="lazy" className="aspect-square w-full object-contain" />}<h2 className="text-lg">{set.name}</h2><p className="mt-1 text-xs text-muted-foreground">{set.label} · {count}/{RELICS.filter(r => r.zone === set.zone).length} chests</p><p className="mt-2 text-xs text-primary">{count === RELICS.filter(r => r.zone === set.zone).length ? game.user ? "Unlocked in your wardrobe" : "Guest discovery · sign in to earn account rewards" : "Find this zone's complete relic set"}</p></div>; })}<Button asChild className="sm:col-span-3"><Link to={game.user ? "/shop" : "/auth"}><Shirt />{game.user ? "Open wardrobe" : "Sign in for wardrobe rewards"}</Link></Button></div>}
-      </>}
+
+    <Dialog open={intro} onOpenChange={setIntro}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Rescue of the Golden Griffin</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">{INTRO}</DialogDescription><div className="flex items-end justify-center gap-4"><img src={razor} alt="Razor the Hyena" width={768} height={768} className="h-28 w-28 object-contain" /><img src={griffin} alt="The Golden Griffin" width={816} height={816} className="h-24 w-24 object-contain" /></div><Button onClick={() => setIntro(false)}>{state.scrolls.length ? "Continue the rescue" : "Begin the rescue"}<ArrowRight /></Button></DialogContent></Dialog>
+
+    <Dialog open={!!found} onOpenChange={o => { if (!o) setFound(null); }}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">Scroll {found ? ZONES.findIndex(z => z.id === found) + 1 : ""} of 4 found!</DialogTitle><DialogDescription>{found && SCROLLS[found].name}</DialogDescription><span className="treasure-reward block text-6xl">📜</span><p className="font-body text-sm">{found && SCROLLS[found].lore}</p><p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">The scroll reveals the gatekeeper's riddle: “{found && GATES[found].riddle}” {found === "lair" ? "Answer it at the carved inner door." : "Answer it at the eastern gate."}</p><Button onClick={() => setFound(null)}>Keep exploring<ArrowRight /></Button></DialogContent></Dialog>
+
+    <Dialog open={!!riddle} onOpenChange={o => { if (!o) setRiddle(null); }}><DialogContent className="max-w-md rounded-lg"><DialogTitle className="text-2xl text-primary">{riddle === "lair" ? "The Inner Door" : "The Gatekeeper asks…"}</DialogTitle><DialogDescription className="font-body text-base text-foreground">{riddle && GATES[riddle].riddle}</DialogDescription><div className="grid gap-2">{riddle && GATES[riddle].options.map((o, i) => <Button key={o} variant={wrong === i ? "destructive" : "secondary"} disabled={busy} onClick={() => void answer(i)}>{o}</Button>)}</div>{wrong !== null && <p role="status" className="text-sm text-muted-foreground">Not quite — think again!</p>}</DialogContent></Dialog>
+
+    <Dialog open={victory} onOpenChange={setVictory}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Griffin is free!</DialogTitle><DialogDescription>Razor dropped the key and ran off. Your wisdom won the Riddle Duel.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-28 w-28"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="Golden Griffin" width={816} height={816} className="treasure-reward h-28 w-28 object-contain" /></div><p className="flex items-center justify-center gap-2 rounded-lg border border-points/40 bg-points/10 p-3 font-display text-points"><Award className="h-5 w-5" />Badge earned: Griffin Savior</p><p className="text-sm">{game.user ? "The Golden Griffin is now in your Pet Shop — equip it as your companion!" : "Sign in and rescue the Griffin on your account to keep it as a pet."}</p><Button asChild><Link to={game.user ? "/pet-shop" : "/auth"}>{game.user ? "Meet your Griffin" : "Sign in"}<ArrowRight /></Link></Button></DialogContent></Dialog>
+
+    <Dialog open={!!panel} onOpenChange={o => { if (!o) setPanel(null); }}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto rounded-lg"><DialogTitle className="flex items-center gap-2 text-2xl"><Compass className="text-primary" />{panel === "map" ? "The road to Razor's Lair" : "Rescue Logbook"}</DialogTitle><DialogDescription>{panel === "map" ? "Four lands. Four scrolls. One Golden Griffin." : `${state.scrolls.length} of 4 scrolls · ${state.gates.length} of 4 riddles solved`}</DialogDescription>
+      {panel === "map" ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ZONES.map((z, i) => <div key={z.id} className="overflow-hidden rounded-lg border border-border"><img src={maps[z.id]} alt={z.name} width={1536} height={1536} loading="lazy" className="aspect-square w-full object-cover" /><div className="p-3"><h2 className="text-lg">{z.name}</h2><p className="mt-1 text-sm text-muted-foreground">{z.subtitle}</p><p className="mt-3 flex items-center gap-2 text-xs text-primary">{i === 0 || state.gates.includes(ZONES[i - 1]!.id) ? <><Check className="h-4 w-4" />{state.zone === z.id ? "Exploring now" : "Unlocked"}</> : <><LockKeyhole className="h-4 w-4" />Solve the previous gate riddle</>}</p></div></div>)}</div>
+      : <div className="grid gap-3 sm:grid-cols-2">{ZONES.map(z => { const has = state.scrolls.includes(z.id); return <div key={z.id} className={`rounded-lg border p-3 ${has ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30"}`}><span className="mb-2 block text-3xl">{has ? "📜" : "🔒"}</span><h2 className="text-base">{has ? SCROLLS[z.id].name : "Undiscovered scroll"}</h2><p className="mt-1 text-xs text-muted-foreground">{has ? SCROLLS[z.id].lore : z.name}</p>{state.gates.includes(z.id) && <p className="mt-2 text-xs text-primary">Riddle solved ✓</p>}</div>; })}
+        <div className={`rounded-lg border p-3 sm:col-span-2 ${state.rescued ? "border-points/40 bg-points/10" : "border-border"}`}><p className="flex items-center gap-2 font-display text-lg"><Award className="h-5 w-5 text-points" />Griffin Savior badge</p><p className="text-sm text-muted-foreground">{state.rescued ? "Earned! You rescued the Golden Griffin." : "Win Razor's Riddle Duel to earn it."}</p></div></div>}
     </DialogContent></Dialog>
-    <MatchingPuzzle open={puzzle} onClose={() => setPuzzle(false)} state={state} choose={async tile => { await game.act({ action: "match", id: String(tile) }); }} />
-    <Dialog open={!!victory && !reward} onOpenChange={open => { if (!open) setVictory(null); }}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">{victory === "sky" ? "Adventure complete!" : "Stage cleared!"}</DialogTitle><DialogDescription>{victory === "sky" ? "The Master Chest is open. Courage, patience and teamwork brought you here." : "Every chest is open. The eastern gateway to the next, harder land is now unlocked."}</DialogDescription><div className="mx-auto h-32 w-32"><MonereFigure gesture="thumbs" /></div><Button onClick={() => setVictory(null)}>{victory === "sky" ? "Keep exploring" : "On to the gateway"}<ArrowRight /></Button></DialogContent></Dialog>
-    <Dialog open={!!reward} onOpenChange={open => { if (!open) setReward(null); }}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">Treasure discovered!</DialogTitle><DialogDescription>{reward?.name}</DialogDescription><div className="mx-auto h-28 w-28"><MonereFigure gesture="thumbs" /></div><span className="treasure-reward block text-6xl">{reward?.icon}</span><p className="font-body text-sm leading-relaxed">{reward?.lore}</p>{reward?.tool && <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">New tool: {TOOLS.find(t => t.id === reward.tool)?.name}! {TOOLS.find(t => t.id === reward.tool)?.description}</p>}<p className="text-xs text-muted-foreground">+{reward?.value} collection value · {game.user ? "Saved to your account" : "Saved on this device"}</p><Button onClick={() => setReward(null)}>Keep exploring<ArrowRight /></Button></DialogContent></Dialog>
   </section>;
 }
