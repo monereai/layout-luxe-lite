@@ -21,8 +21,8 @@ import { QaPanel } from "@/components/QaPanel";
 import { GuestRewardHost, GuestPointsTransfer } from "@/components/GuestSignupModal";
 
 const tabs = [
-  { to: "/", label: "seek", icon: Compass },
-  { to: "/mentor", label: "talk", icon: BookOpen },
+  { to: "/", label: "talk", icon: BookOpen },
+  { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -30,8 +30,8 @@ const tabs = [
 ] as const;
 
 const menuItems = [
-  { to: "/", label: "seek", icon: Compass },
-  { to: "/mentor", label: "talk", icon: BookOpen },
+  { to: "/", label: "talk", icon: BookOpen },
+  { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -60,7 +60,7 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
     return () => clearTimeout(timer);
   }, [energy]);
   const t = useT();
-  const navigationLabel = (to: string, label: Parameters<typeof t>[0]) => to === "/" ? "Treasure Hunt" : to === "/shop" ? `${t(label)} / Wardrobe` : to === "/mentor" ? `Dashboard / ${t(label)}` : t(label);
+  const navigationLabel = (to: string, label: Parameters<typeof t>[0]) => to === "/treasure" ? "Treasure Hunt" : to === "/shop" ? `${t(label)} / Wardrobe` : to === "/" ? `Dashboard / ${t(label)}` : t(label);
   const lang = useLang();
   const navigate = useNavigate();
   const location = useLocation();
@@ -196,7 +196,7 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link key={to} to={to} className="font-nav flex min-h-12 min-w-0 flex-1 flex-col items-center gap-0.5 px-0.5 py-2 text-xs font-semibold leading-tight text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
               <Icon className="h-5 w-5 shrink-0" />
-              <span className="min-h-[2.5em] text-center leading-tight">{to === "/" ? "Treasure Hunt" : t(label)}</span>
+              <span className="min-h-[2.5em] text-center leading-tight">{to === "/treasure" ? "Treasure Hunt" : t(label)}</span>
             </Link>
           ))}
         </nav>
