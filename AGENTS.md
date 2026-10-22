@@ -15,6 +15,7 @@
 - Refresh care on app entry, focus, and each minute through a shared account-keyed query; retain partial elapsed hours and use UTC for daily claims so device clocks cannot change payouts.
 
 - Share identity/navigation in AppShell. Mobile QA stays in flow; habitat dialogs clear tabs.
+- Use the shared AppShell menu list for desktop and drawer navigation; fullscreen adventure keeps the menu and Pet Shop header link available. Why: game layout must not orphan existing stores or dashboard views.
 - Pet Shop separates scene from rarity controls; rarity never sets prices.
 - Preserve the journal storage key through rebrands.
 - Reuse MonereMentor portraits and welcome/loading/results states with reduced-motion support; never duplicate character layouts.

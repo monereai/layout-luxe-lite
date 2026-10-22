@@ -1,3 +1,7 @@
+# Pet Shop and app navigation restoration
+- [ ] Restore Pet Shop and Points Shop/Wardrobe in the shared menu on every page, including the full-screen adventure.
+- [ ] Verify dashboard, adventure and shop navigation plus pet inventory, buying, equipping and reload on isolated QA.
+
 # Treasure Hunt RPG
 - [x] Monere map walk: CSS walk-bounce while moving, left/right flip, idle-breath when stopped.
 - [x] Map Monere uses the main-page turnaround angles to face East/South/West/North, with squash-and-stretch hops.
