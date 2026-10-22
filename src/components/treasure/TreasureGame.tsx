@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { ZONES, PORTALS, SCROLLS, GATES, DUEL, near, questClue, gateHere, duelTileAt, type ZoneId } from "@/lib/treasure";
+import { ZONES, PORTALS, SCROLLS, GATES, DUEL, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, interactionHere, sideQuests, isRevealed, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
@@ -30,6 +30,7 @@ export function TreasureGame() {
   const pets = usePets();
   const companion = PETS.find(p => p.id === pets.active) ?? PETS.find(p => p.id === "puppy");
   const [panel, setPanel] = useState<"logbook" | "map" | null>(null);
+  const [npc, setNpc] = useState<Npc | null>(null);
   const [intro, setIntro] = useState(true);
   const [found, setFound] = useState<ZoneId | null>(null);
   const [riddle, setRiddle] = useState<ZoneId | null>(null);
@@ -56,7 +57,7 @@ export function TreasureGame() {
     })).then(entries => { if (!cancelled) setTurn(Object.fromEntries(entries)); });
     return () => { cancelled = true; };
   }, [shop.equipped]);
-  const blocked = !!panel || intro || !!found || !!riddle || victory || busy;
+  const blocked = !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
   useEffect(() => { try { setSound(localStorage.getItem("monere-treasure-sound") !== "off"); } catch { /* default on */ } return () => { void audio.current?.close(); }; }, []);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
@@ -66,9 +67,8 @@ export function TreasureGame() {
   }
   const chime = () => tone([523, 659, 784]);
   const zone = ZONES.find(z => z.id === state.zone) ?? ZONES[0]!;
-  const scrollNear = !state.scrolls.includes(state.zone) && near(state, SCROLLS[state.zone]);
-  const gate = gateHere(state);
-  const portal = PORTALS[state.zone].find(p => near(state, p));
+  const here = interactionHere(state);
+  const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
   const settled = useRef("");
@@ -86,16 +86,34 @@ export function TreasureGame() {
     return () => clearTimeout(timer);
   }, [state.x, state.y, state.duel, state.zone, busy]);
 
+  async function run(action: Parameters<typeof game.act>[0]) { setBusy(true); try { return await game.act(action); } catch { return null; } finally { setBusy(false); } }
   async function interact() {
     if (blocked) return;
-    if (scrollNear) { setBusy(true); try { const next = await game.act({ action: "collect" }); if (next.scrolls.includes(state.zone)) { chime(); setFound(state.zone); } } catch { /* hook reports */ } finally { setBusy(false); } return; }
-    if (gate) { setWrong(null); setRiddle(gate); return; }
-    if (portal) {
-      if (portal.forward && !state.gates.includes(state.zone)) { setNotice(state.scrolls.includes(state.zone) ? "Answer the gatekeeper's riddle to open this gate." : "Find this land's hidden scroll first."); return; }
-      setBusy(true); try { await game.act({ action: "portal", id: portal.target }); } catch { /* hook reports */ } finally { setBusy(false); } return;
+    const h = interactionHere(state);
+    if (!h) {
+      if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
+      setNotice("Nothing here. Explore the fog, talk to friends and follow your quest scroll."); return;
     }
-    if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
-    setNotice("Nothing here. Follow the clue on your quest scroll.");
+    if (h.kind === "scroll") { const next = await run({ action: "collect" }); if (next?.scrolls.includes(state.zone)) { chime(); setFound(state.zone); } return; }
+    if (h.kind === "gate") { setWrong(null); setRiddle(state.zone); return; }
+    if (h.kind === "item") { const it = ITEMS.find(i => i.id === h.id)!; const next = await run({ action: "pick", id: it.id }); if (next?.items.includes(it.id)) { chime(); setNotice(`You found a ${it.name}! ${it.icon}`); } return; }
+    if (h.kind === "npc") { const n = NPCS.find(n => n.id === h.id)!; void run({ action: "talk", id: n.id }); setNpc(n); return; }
+    if (h.kind === "dig") {
+      const d = DIGS.find(d => d.id === h.id)!; const next = await run({ action: "dig", id: d.id });
+      if (next?.dug.includes(d.id)) { tone([392, 523, 659]); const t = d.item ? TREASURES[d.item] : null; setNotice(t ? `Your pet dug up ${t.name}! ${t.icon}` : game.user ? `Your pet dug up ${d.points} coins! 🪙` : `Your pet dug up ${d.points} coins! 🪙 Sign in to keep them as points.`); }
+      return;
+    }
+    if (h.kind === "bell") { const next = await run({ action: "bell" }); if (next) { tone([784, 988]); setNotice(next.lily === 1 ? "Ribbit! The lily pads line up — hop across now!" : "Ding! The lily pads drift to new spots…"); } return; }
+    if (h.kind === "stay") { const next = await run({ action: "stay" }); if (next?.pet) setNotice("Your pet sits on the paw plate. Now step onto the lion plate!"); return; }
+    if (h.kind === "switch") { const next = await run({ action: "switch" }); if (next?.quests.includes("vault")) { chime(); setNotice(game.user ? "Click-clunk! The Stone Vault opens: Sun Stone ☀️ + 40 points!" : "Click-clunk! The Stone Vault opens: Sun Stone ☀️! Sign in to earn the points."); } return; }
+    if (h.kind === "portal" && portal) {
+      if (portal.forward && !state.gates.includes(state.zone)) { setNotice(state.scrolls.includes(state.zone) ? "Answer the gatekeeper's riddle to open this gate." : "Find this land's hidden scroll first."); return; }
+      await run({ action: "portal", id: portal.target });
+    }
+  }
+  async function deliver(n: Npc) {
+    const next = await run({ action: "deliver", id: n.id });
+    if (next?.quests.includes(n.id)) { tone([523, 659, 784, 1046]); setNotice(`${n.name}: “${n.thanks}”${game.user ? "" : " Sign in to keep reward points."}`); setNpc(null); }
   }
   async function answer(i: number) {
     if (!riddle) return;
@@ -104,7 +122,7 @@ export function TreasureGame() {
     try { await game.act({ action: "answer", id: riddle, x: i }); chime(); setRiddle(null); setNotice(riddle === "lair" ? "The inner door rumbles open. Razor awaits!" : "Correct! The gate swings open."); }
     catch { setNotice("That answer couldn't be saved. Please try again."); } finally { setBusy(false); }
   }
-  const action = scrollNear ? "Pick up scroll" : gate ? "Answer riddle" : portal ? "Enter portal" : "Search";
+  const action = here?.label ?? "Search";
   return <section className="treasure-game" aria-label="The Rescue of the Golden Griffin">
     <header className="treasure-hud">
       <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">The Rescue of the Golden Griffin</p><h1 className="truncate font-display text-lg sm:text-2xl">{zone.name}</h1></div></div>
@@ -124,10 +142,11 @@ export function TreasureGame() {
         {state.zone === "lair" && state.gates.includes("lair") && !state.rescued && <div className="mt-2 grid grid-cols-3 gap-1 text-center text-xs font-bold">{DUEL[state.duel]!.tiles.map((t, i) => <span key={t} className="rounded-md border border-primary/40 bg-primary/10 px-1 py-1">{"ABC"[i]}: {t}</span>)}</div>}
         <div className="mt-2 flex gap-1" aria-hidden="true">{ZONES.map(z => <span key={z.id} className={`h-1.5 flex-1 rounded-full ${state.scrolls.includes(z.id) ? "bg-primary" : "bg-muted"}`} />)}</div></div>
       <div className="treasure-map-chip"><span>{zone.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
+      <MiniMap state={state} className="absolute right-3 top-14 z-20 hidden w-32 sm:block" />
       {notice && <div role="status" className="treasure-notice">{notice}</div>}
       <div className="treasure-controls">
         <div className="treasure-dpad" aria-label="Movement controls">{[{ x: 0, y: -1, Icon: ArrowUp, name: "Move up", css: "col-start-2" }, { x: -1, y: 0, Icon: ArrowLeft, name: "Move left", css: "row-start-2" }, { x: 0, y: 1, Icon: ArrowDown, name: "Move down", css: "col-start-2 row-start-2" }, { x: 1, y: 0, Icon: ArrowRight, name: "Move right", css: "col-start-3 row-start-2" }].map(({ x, y, Icon, name, css }) => <Button key={name} variant="secondary" size="icon" aria-label={name} title={name} className={`treasure-direction ${css}`} disabled={!game.loaded || blocked} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); controls.current?.direction(x, y); }} onPointerUp={() => controls.current?.release()} onPointerCancel={() => controls.current?.release()} onLostPointerCapture={() => controls.current?.release()}><Icon /></Button>)}</div>
-        <Button className="treasure-interact" disabled={blocked || !game.loaded} onClick={() => void interact()}><span className="text-xl">{scrollNear ? "📜" : gate ? "❓" : portal ? "🌀" : "🔎"}</span>{action}</Button>
+        <Button className="treasure-interact" disabled={blocked || !game.loaded} onClick={() => void interact()}><span className="text-xl">{here?.icon ?? "🔎"}</span>{action}</Button>
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/mentor" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
@@ -138,12 +157,38 @@ export function TreasureGame() {
 
     <Dialog open={!!riddle} onOpenChange={o => { if (!o) setRiddle(null); }}><DialogContent className="max-w-md rounded-lg"><DialogTitle className="text-2xl text-primary">{riddle === "lair" ? "The Inner Door" : "The Gatekeeper asks…"}</DialogTitle><DialogDescription className="font-body text-base text-foreground">{riddle && GATES[riddle].riddle}</DialogDescription><div className="grid gap-2">{riddle && GATES[riddle].options.map((o, i) => <Button key={o} variant={wrong === i ? "destructive" : "secondary"} disabled={busy} onClick={() => void answer(i)}>{o}</Button>)}</div>{wrong !== null && <p role="status" className="text-sm text-muted-foreground">Not quite — think again!</p>}</DialogContent></Dialog>
 
+    <Dialog open={!!npc} onOpenChange={o => { if (!o) setNpc(null); }}><DialogContent className="max-w-md rounded-lg text-center">{npc && (() => { const done = state.quests.includes(npc.id); const have = npc.need.filter(i => state.items.includes(i)).length; const ready = have === npc.need.length; return <>
+      <DialogTitle className="text-2xl text-primary">{npc.icon} {npc.name}</DialogTitle><DialogDescription className="font-body text-base text-foreground">“{done ? npc.thanks : npc.ask}”</DialogDescription>
+      {!done && <p className="text-sm text-muted-foreground">Found {have} of {npc.need.length} · Reward: {npc.gear ? `${GEAR[npc.gear].icon} ${GEAR[npc.gear].name}` : `${TREASURES[npc.item!]!.icon} ${TREASURES[npc.item!]!.name}`} + {npc.points} points{game.user ? "" : " (sign in to keep points)"}</p>}
+      {done && <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">💡 {npc.hint}</p>}
+      {!done && <Button disabled={!ready || busy} onClick={() => void deliver(npc)}>{ready ? "Hand them over" : "Keep searching"}</Button>}
+      <Button variant="ghost" onClick={() => setNpc(null)}>Goodbye</Button></>; })()}</DialogContent></Dialog>
+
     <Dialog open={victory} onOpenChange={setVictory}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Griffin is free!</DialogTitle><DialogDescription>Razor dropped the key and ran off. Your wisdom won the Riddle Duel.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-28 w-28"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="Golden Griffin" width={816} height={816} className="treasure-reward h-28 w-28 object-contain" /></div><p className="flex items-center justify-center gap-2 rounded-lg border border-points/40 bg-points/10 p-3 font-display text-points"><Award className="h-5 w-5" />Badge earned: Griffin Savior</p><p className="text-sm">{game.user ? "The Golden Griffin is now in your Pet Shop — equip it as your companion!" : "Sign in and rescue the Griffin on your account to keep it as a pet."}</p><Button asChild><Link to={game.user ? "/pet-shop" : "/auth"}>{game.user ? "Meet your Griffin" : "Sign in"}<ArrowRight /></Link></Button></DialogContent></Dialog>
 
-    <Dialog open={!!panel} onOpenChange={o => { if (!o) setPanel(null); }}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto rounded-lg"><DialogTitle className="flex items-center gap-2 text-2xl"><Compass className="text-primary" />{panel === "map" ? "The road to Razor's Lair" : "Rescue Logbook"}</DialogTitle><DialogDescription>{panel === "map" ? "Four lands. Four scrolls. One Golden Griffin." : `${state.scrolls.length} of 4 scrolls · ${state.gates.length} of 4 riddles solved`}</DialogDescription>
+    <Dialog open={!!panel} onOpenChange={o => { if (!o) setPanel(null); }}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto rounded-lg"><DialogTitle className="flex items-center gap-2 text-2xl"><Compass className="text-primary" />{panel === "map" ? "The road to Razor's Lair" : "Rescue Logbook"}</DialogTitle><DialogDescription>{panel === "map" ? "Four lands. Four scrolls. One Golden Griffin. Explore to lift the fog." : `${state.scrolls.length} of 4 scrolls · ${state.gates.length} of 4 riddles · ${state.quests.length} of ${NPCS.length + 1} side quests`}</DialogDescription>
       {panel === "map" ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ZONES.map((z, i) => <div key={z.id} className="overflow-hidden rounded-lg border border-border"><img src={maps[z.id]} alt={z.name} width={1536} height={1536} loading="lazy" className="aspect-square w-full object-cover" /><div className="p-3"><h2 className="text-lg">{z.name}</h2><p className="mt-1 text-sm text-muted-foreground">{z.subtitle}</p><p className="mt-3 flex items-center gap-2 text-xs text-primary">{i === 0 || state.gates.includes(ZONES[i - 1]!.id) ? <><Check className="h-4 w-4" />{state.zone === z.id ? "Exploring now" : "Unlocked"}</> : <><LockKeyhole className="h-4 w-4" />Solve the previous gate riddle</>}</p></div></div>)}</div>
       : <div className="grid gap-3 sm:grid-cols-2">{ZONES.map(z => { const has = state.scrolls.includes(z.id); return <div key={z.id} className={`rounded-lg border p-3 ${has ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30"}`}><span className="mb-2 block text-3xl">{has ? "📜" : "🔒"}</span><h2 className="text-base">{has ? SCROLLS[z.id].name : "Undiscovered scroll"}</h2><p className="mt-1 text-xs text-muted-foreground">{has ? SCROLLS[z.id].lore : z.name}</p>{state.gates.includes(z.id) && <p className="mt-2 text-xs text-primary">Riddle solved ✓</p>}</div>; })}
-        <div className={`rounded-lg border p-3 sm:col-span-2 ${state.rescued ? "border-points/40 bg-points/10" : "border-border"}`}><p className="flex items-center gap-2 font-display text-lg"><Award className="h-5 w-5 text-points" />Griffin Savior badge</p><p className="text-sm text-muted-foreground">{state.rescued ? "Earned! You rescued the Golden Griffin." : "Win Razor's Riddle Duel to earn it."}</p></div></div>}
+        <div className={`rounded-lg border p-3 sm:col-span-2 ${state.rescued ? "border-points/40 bg-points/10" : "border-border"}`}><p className="flex items-center gap-2 font-display text-lg"><Award className="h-5 w-5 text-points" />Griffin Savior badge</p><p className="text-sm text-muted-foreground">{state.rescued ? "Earned! You rescued the Golden Griffin." : "Win Razor's Riddle Duel to earn it."}</p></div>
+        <div className="rounded-lg border border-primary/30 p-3 sm:col-span-2"><h2 className="font-display text-lg text-primary">Main quest</h2><p className="mt-1 font-body text-sm">{questClue(state)}</p></div>
+        <div className="rounded-lg border border-border p-3 sm:col-span-2"><h2 className="font-display text-lg">Side quests</h2><ul className="mt-2 grid gap-2">{sideQuests(state).map(q => <li key={q.id} className={`flex items-start gap-3 rounded-md border p-2 text-sm ${q.done ? "border-primary/30 bg-primary/5" : "border-border"}`}><span className="text-lg">{q.done ? "✅" : "🧭"}</span><span className="min-w-0 flex-1"><span className="block font-semibold">{q.title}</span><span className="block text-xs text-muted-foreground">{q.giver} · Reward: {q.reward}</span></span><span className="font-display text-points">{q.progress}/{q.total}</span></li>)}</ul></div>
+        <div className="rounded-lg border border-border p-3"><h2 className="font-display text-lg">Explorer gear</h2><ul className="mt-2 grid gap-2">{(Object.keys(GEAR) as (keyof typeof GEAR)[]).map(g => { const has = state.gear.includes(g); return <li key={g} className={`flex items-center gap-2 text-sm ${has ? "" : "opacity-50"}`}><span className="text-2xl">{has ? GEAR[g].icon : "❔"}</span><span><span className="block font-semibold">{has ? GEAR[g].name : "Not found yet"}</span><span className="block text-xs text-muted-foreground">{GEAR[g].use}</span></span></li>; })}</ul></div>
+        <div className="rounded-lg border border-border p-3"><h2 className="font-display text-lg">Treasures & finds</h2>{state.items.length ? <ul className="mt-2 grid grid-cols-2 gap-2">{state.items.map(id => { const t = TREASURES[id] ?? ITEMS.find(i => i.id === id); return t ? <li key={id} className="flex items-center gap-2 text-xs"><span className="text-xl">{t.icon}</span>{t.name}</li> : null; })}</ul> : <p className="mt-2 text-sm text-muted-foreground">Nothing yet — dig spots (✖) and lost items are hidden in the fog.</p>}</div>
+        <div className="sm:col-span-2"><h2 className="mb-2 font-display text-lg">Mini-map · {zone.name}</h2><MiniMap state={state} className="mx-auto w-full max-w-xs" /></div></div>}
     </DialogContent></Dialog>
   </section>;
+}
+
+/** Fog-of-war mini-map of the current land: explored chunks, friends, portals and Monere. */
+function MiniMap({ state, className }: { state: AdventureState; className?: string }) {
+  const chunks = Array.from({ length: 36 }, (_, i) => i);
+  return <div className={`overflow-hidden rounded-lg border-2 border-primary/50 bg-background/80 shadow-lg ${className ?? ""}`} aria-label="Mini-map">
+    <svg viewBox="0 0 24 24" className="block aspect-square w-full"><image href={maps[state.zone]} x="0" y="0" width="24" height="24" preserveAspectRatio="none" />
+      {chunks.map(c => !isRevealed(state, state.zone, (c % 6) * 4, Math.floor(c / 6) * 4) && <rect key={c} x={(c % 6) * 4} y={Math.floor(c / 6) * 4} width="4.05" height="4.05" className="fill-background" />)}
+      {PORTALS[state.zone].filter(p => isRevealed(state, state.zone, p.x, p.y)).map(p => <circle key={p.target} cx={p.x + .5} cy={p.y + .5} r=".9" className="fill-energy" />)}
+      {NPCS.filter(n => n.zone === state.zone && isRevealed(state, state.zone, n.x, n.y)).map(n => <circle key={n.id} cx={n.x + .5} cy={n.y + .5} r=".8" className="fill-points" />)}
+      <circle cx={state.x + .5} cy={state.y + .5} r="1.1" className="fill-primary stroke-foreground" strokeWidth=".3" />
+    </svg>
+    <p className="bg-background/90 px-2 py-0.5 text-center text-[10px] font-bold uppercase text-primary">{ZONES.find(z => z.id === state.zone)?.name}</p>
+  </div>;
 }
