@@ -48,3 +48,4 @@
 - Never alias entities root: parse5 needs its own version.
 
 - Treasure uses lazy browser-only Phaser and account-scoped SQL step/collection validation; wardrobe_action grants fixed relic-set gifts. Guest saves never import into rewards.
+- Treasure v2 keeps legacy RPCs for the published client; new RPCs validate fragment, landmark, matching and companion-plate progression per saved step, preserving earned wardrobe gifts. Why: staged deployment and optimistic movement must not bypass puzzle gates.
