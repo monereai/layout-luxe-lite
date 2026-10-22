@@ -30,11 +30,13 @@ export function WorldCanvas(props: Props) {
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
-        effectN = 0; lastLily = -1;
+        effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
         preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
-          this.background = this.add.image(768, 768, live.current.state.zone).setDisplaySize(1536, 1536);
+          // Oversized base layer so no empty canvas shows past the map edges while the camera eases.
+          this.background = this.add.image(768, 768, live.current.state.zone).setDisplaySize(1536, 1536).setDepth(0);
+          this.cameras.main.setRoundPixels(true);
           this.player = this.add.image(0, 0, "lion").setDisplaySize(140, 140).setOrigin(.5, .8).setDepth(10).setAlpha(0);
           this.base = this.player.scaleX; this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           this.shadow = this.add.ellipse(0, 0, 70, 18, 0x000000, .28).setDepth(9);
@@ -102,15 +104,24 @@ export function WorldCanvas(props: Props) {
           if (s.zone === "lair") {
             const goggles = s.gear.includes("goggles");
             rect(2, 12, 8, 7, 0x000000, .72, 1); rect(4, 14, 3, 3, 0x6b4a2a, .85, 1);
-            if (goggles) for (let x = 7; x <= 9; x++) { const t = rect(x, 15, 1, 1, color("--energy"), .45, 2); if (!this.reduced) this.tweens.add({ targets: t, alpha: .2, duration: 900, yoyo: true, repeat: -1 }); }
+            if (goggles) for (let x = 7; x <= 9; x++) { const t = rect(x, 14, 1, 3, color("--points"), .35, 2); if (!this.reduced) this.tweens.add({ targets: t, alpha: .2, duration: 900, yoyo: true, repeat: -1 }); }
             label({ x: 5, y: 16 }, goggles ? "Ledge · path revealed" : "Ledge across the chasm");
             if (goggles) TRAPS.forEach(t => { rect(t.x, t.y, 1, 1, 0xff3030, .3, 2); text(t, "⚠️", 28); });
           }
           NPCS.filter(n => n.zone === s.zone).forEach(n => { bob(text(n, n.icon, 50)); label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26); });
           ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => { const o = bob(text(i, i.icon, 34)); if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 }); });
           DIGS.filter(d => d.zone === s.zone).forEach(d => { const done = s.dug.includes(d.id); const m = this.add.ellipse(...at(d), 46, 20, 0x5a3a1c, done ? .35 : .8).setDepth(2); this.scenery.push(m); if (!done) { const x = text(d, "✖", 22); x.setY(x.y - 2); if (!this.reduced) this.tweens.add({ targets: x, alpha: .4, duration: 800, yoyo: true, repeat: -1 }); } });
-          // Fog of war: unexplored 4×4 chunks stay hidden.
-          for (let cx = 0; cx < 6; cx++) for (let cy = 0; cy < 6; cy++) if (!isRevealed(s, s.zone, cx * 4, cy * 4)) rect(cx * 4, cy * 4, 4, 4, 0x0b0d1a, .9, 7);
+          // Fog of war: one soft-edged canvas mask over the whole map. Terrain stays faintly visible underneath,
+          // and each explored chunk is erased with a radial gradient so edges blend instead of forming dark blocks.
+          const FOG = 384, k = FOG / 1536; const fogTex = (this.textures.exists("fog") ? this.textures.get("fog") : this.textures.createCanvas("fog", FOG, FOG)) as Phaser.Textures.CanvasTexture;
+          const ctx = fogTex.getContext(); ctx.globalCompositeOperation = "source-over"; ctx.clearRect(0, 0, FOG, FOG); ctx.fillStyle = "rgba(20, 16, 12, 0.8)"; ctx.fillRect(0, 0, FOG, FOG);
+          ctx.globalCompositeOperation = "destination-out";
+          for (let cx = 0; cx < 6; cx++) for (let cy = 0; cy < 6; cy++) if (isRevealed(s, s.zone, cx * 4, cy * 4)) {
+            const gx = (cx * 4 + 2) * 64 * k, gy = (cy * 4 + 2) * 64 * k, r = 256 * 1.15 * k; const grad = ctx.createRadialGradient(gx, gy, r * .35, gx, gy, r);
+            grad.addColorStop(0, "rgba(0,0,0,1)"); grad.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = grad; ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
+          }
+          ctx.globalCompositeOperation = "source-over"; fogTex.refresh();
+          if (!this.fog) this.fog = this.add.image(768, 768, "fog").setDisplaySize(1536, 1536).setDepth(7);
           if (s.zone === "lair") {
             if (!s.gates.includes("lair")) { const door = this.add.rectangle((LAIR_DOOR.x + .5) * 64, 10 * 64, 64, 128, color("--primary"), .55).setDepth(4); this.scenery.push(door); text(LAIR_DOOR, s.scrolls.includes("lair") ? "❓" : "🔒", 32).setY(10 * 64); }
             DUEL_TILES.forEach((t, i) => {
@@ -224,7 +235,7 @@ export function WorldCanvas(props: Props) {
           this.load.start();
         }
       }
-      game = new P.Game({ type: P.AUTO, parent: element, transparent: true, width: element.clientWidth, height: element.clientHeight, scale: { mode: P.Scale.RESIZE, autoCenter: P.Scale.CENTER_BOTH }, scene: World, render: { antialias: true }, audio: { noAudio: true }, input: { keyboard: { capture: [37, 38, 39, 40, 32] } } });
+      game = new P.Game({ type: P.AUTO, parent: element, backgroundColor: "#1d1710", width: element.clientWidth, height: element.clientHeight, scale: { mode: P.Scale.RESIZE, autoCenter: P.Scale.CENTER_BOTH }, scene: World, render: { antialias: true }, audio: { noAudio: true }, input: { keyboard: { capture: [37, 38, 39, 40, 32] } } });
       const resize = new ResizeObserver(() => game?.scale.resize(element.clientWidth, element.clientHeight)); resize.observe(element);
       game.events.once("destroy", () => resize.disconnect());
     });
