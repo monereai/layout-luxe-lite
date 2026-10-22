@@ -339,3 +339,60 @@
 @keyframes pet-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 .pet-bob { animation: pet-bob 2.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .pet-bob { animation: none; } }
+
+/* Full-bleed treasure workspace keeps the shared identity and menu. */
+:root {
+  --adventure-shadow: 0 4px 18px color-mix(in oklab, var(--background) 35%, transparent);
+  --adventure-panel: color-mix(in oklab, var(--card) 96%, transparent);
+}
+.adventure-shell > .wisdom-pattern { display: none; }
+.adventure-shell > div.relative { max-width: none; min-height: 100dvh; height: 100dvh; padding: 0; }
+.adventure-shell header:first-child { margin: 0; padding: 12px 24px; border-bottom: 1px solid var(--border); }
+.adventure-shell header:first-child > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.adventure-shell header:first-child > div > a > span:first-child { width: 34px; height: 34px; border-radius: 8px; }
+.adventure-shell header:first-child > div > a > span:first-child svg { width: 22px; height: 22px; }
+.adventure-shell header:first-child > div > a > span:nth-child(2) { font-size: 26px; }
+.adventure-shell header:first-child > div > a > img { height: 30px; }
+.adventure-shell header:first-child > p { display: none; }
+.adventure-shell header:first-child button[aria-label="Open menu"] { display: inline-flex; }
+.adventure-content { flex: 1; min-height: 0; display: flex; }
+.adventure-content > aside, .adventure-content > a { display: none; }
+.adventure-content > main { min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.adventure-shell > div.relative > footer, .adventure-shell > div.fixed { display: none; }
+.treasure-game { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.treasure-hud { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 24px; background: var(--card); border-bottom: 1px solid var(--border); }
+.treasure-viewport { position: relative; flex: 1; min-height: 300px; overflow: hidden; }
+.treasure-viewport canvas { display: block; }
+.treasure-loading { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; background: var(--adventure-panel); color: var(--primary); }
+.treasure-quest { position: absolute; top: 20px; left: 24px; width: 310px; max-width: calc(100% - 48px); padding: 12px 16px; border: 1px solid var(--primary); border-radius: 8px; background: var(--adventure-panel); box-shadow: var(--adventure-shadow); }
+.treasure-map-chip { position: absolute; right: 24px; top: 20px; display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 12px; background: var(--adventure-panel); box-shadow: var(--adventure-shadow); }
+.treasure-controls { position: absolute; bottom: 24px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+.treasure-controls > * { pointer-events: auto; }
+.treasure-dpad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); gap: 5px; }
+.treasure-direction { width: 48px; height: 48px; border-radius: 8px; background: var(--adventure-panel); border: 1px solid var(--border); box-shadow: var(--adventure-shadow); touch-action: none; user-select: none; }
+.treasure-direction:active { background: var(--primary); color: var(--primary-foreground); }
+.treasure-interact { height: 54px; padding: 12px 20px; border-radius: 8px; box-shadow: var(--adventure-shadow); }
+.treasure-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--card); padding: 11px 24px calc(11px + env(safe-area-inset-bottom)); color: var(--muted-foreground); font-size: 12px; }
+.treasure-notice { position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--primary); background: var(--adventure-panel); box-shadow: var(--adventure-shadow); font-size: 14px; text-align: center; }
+.treasure-reward { animation: treasure-pop .45s ease-out; }
+@keyframes treasure-pop { from { transform: scale(.5) rotate(-8deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+@media (max-width: 639px) {
+  .adventure-shell header:first-child { padding: 9px 12px; }
+  .adventure-shell header:first-child > div > a { gap: 6px; }
+  .adventure-shell header:first-child > div > a > span:first-child { display: none; }
+  .adventure-shell header:first-child > div > a > span:nth-child(2) { font-size: 23px; }
+  .adventure-shell header:first-child > div > div > label, .adventure-shell header:first-child > div > div > a[aria-label^="Points"], .adventure-shell header:first-child > div > div > span, .adventure-shell header:first-child > div > div > button:not([aria-label="Open menu"]) { display: none; }
+  .treasure-hud { padding: 10px 12px; gap: 5px; }
+  .treasure-hud button { width: 34px; height: 34px; padding: 8px; }
+  .treasure-hud h1 { max-width: 160px; font-size: 16px; }
+  .treasure-hud p { font-size: 8px; }
+  .treasure-quest { top: 12px; left: 12px; width: 250px; max-width: calc(100% - 24px); padding: 8px 12px; }
+  .treasure-quest p { font-size: 12px; line-height: 1.45; }
+  .treasure-map-chip { top: auto; bottom: 137px; right: 12px; font-size: 10px; gap: 6px; }
+  .treasure-controls { bottom: 18px; left: 12px; right: 12px; }
+  .treasure-dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(2, 42px); gap: 4px; }
+  .treasure-direction { width: 42px; height: 42px; }
+  .treasure-interact { height: 46px; padding: 10px 12px; font-size: 12px; }
+  .treasure-footer { padding-left: 12px; padding-right: 12px; font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .treasure-reward { animation: none; } }
