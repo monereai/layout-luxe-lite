@@ -1,83 +1,111 @@
 export type ZoneId = "meadow" | "forest" | "sky";
 export type ToolId = "magnifying-glass" | "lantern";
 export type Position = { x: number; y: number };
-export type AdventureState = Position & { zone: ZoneId; relics: string[]; tools: ToolId[]; gear: ToolId[]; unlocked: ZoneId[] };
-export type Relic = Position & { id: string; zone: ZoneId; name: string; icon: string; lore: string; clue: string; value: number; requires?: ToolId; tool?: ToolId };
+export type AdventureState = Position & { version: 2; zone: ZoneId; relics: string[]; tools: ToolId[]; gear: ToolId[]; unlocked: ZoneId[]; fragments: string[]; landmarks: string[]; gates: string[]; pet: Position; pinned: boolean; matched: number[]; first: number | null; wind: number };
+export type Relic = Position & { id: string; zone: ZoneId; name: string; icon: string; lore: string; clue: string; value: number; requires?: ToolId; tool?: ToolId; hidden?: boolean };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
 export const ZONES: { id: ZoneId; name: string; subtitle: string; icon: string; requires?: ToolId }[] = [
-  { id: "meadow", name: "Monere's Meadow", subtitle: "Every brave journey starts with a small step.", icon: "🌼" },
-  { id: "forest", name: "Whispering Forest", subtitle: "Look closer. Light the way. Listen with care.", icon: "🌲", requires: "magnifying-glass" },
-  { id: "sky", name: "Sky Isles", subtitle: "Let courage carry you higher.", icon: "☁️", requires: "lantern" },
+  { id: "meadow", name: "Monere's Meadow", subtitle: "Stage 1 · Three chests, one brave beginning.", icon: "🌼" },
+  { id: "forest", name: "Whispering Forest", subtitle: "Stage 2 · Two fragments, two hidden treasures.", icon: "🌲", requires: "magnifying-glass" },
+  { id: "sky", name: "Sky Isles", subtitle: "Stage 3 · One Master Chest. Four matching pairs.", icon: "☁️", requires: "lantern" },
 ];
 export const TOOLS = [
-  { id: "magnifying-glass" as const, name: "Magnifying Glass", icon: "🔎", description: "Reveals secret tracks and hidden chests. Opens Whispering Forest." },
-  { id: "lantern" as const, name: "Lantern", icon: "🏮", description: "Illuminates invisible treasures and the gateway to Sky Isles." },
+  { id: "magnifying-glass" as const, name: "Magnifying Glass", icon: "🔎", description: "Reveals nearby hidden forest chests." },
+  { id: "lantern" as const, name: "Lantern", icon: "🏮", description: "Lights the landmarks and Master Chest in Sky Isles." },
 ];
 export const RELICS: Relic[] = [
-  { id: "cat-stone", zone: "meadow", x: 11, y: 10, name: "Watchful Pebble", icon: "🪨", value: 10, clue: "Find the stone shaped like a sleeping cat in the Meadow.", lore: "Even a small stone can remind us to pause and notice the good around us. Be still — Psalm 46:10.", tool: "magnifying-glass" },
-  { id: "daisy-seal", zone: "meadow", x: 7, y: 6, name: "Kindness Seal", icon: "🌼", value: 15, clue: "Where the cottage path meets the daisies, a kindness is waiting.", lore: "A gentle word can brighten someone's whole day. Kind words are like honey — Proverbs 16:24." },
-  { id: "bridge-coin", zone: "meadow", x: 12, y: 20, name: "Bridgekeeper's Coin", icon: "🪙", value: 20, clue: "The wooden bridge joins two banks. Search just before the water.", lore: "Build bridges with others, not walls. Blessed are the peacemakers — Matthew 5:9." },
-  { id: "meadow-feather", zone: "meadow", x: 18, y: 15, name: "Courage Feather", icon: "🪶", value: 20, clue: "Tiny tracks hide among the eastern flowers. Look closer with your Magnifying Glass.", lore: "Courage is taking a good step even when you feel unsure. Be strong and courageous — Joshua 1:9.", requires: "magnifying-glass" },
-  { id: "garden-key", zone: "meadow", x: 5, y: 16, name: "Garden Key", icon: "🗝️", value: 25, clue: "A mossy stone in the southwest keeps a secret underneath.", lore: "Small faithful choices open important doors. Faithful in little — Luke 16:10." },
-  { id: "sunflower-gem", zone: "meadow", x: 16, y: 5, name: "Gratitude Amber", icon: "💎", value: 30, clue: "Head north to the sunlit rock, where golden flowers grow.", lore: "Notice what you have, not only what you wish for. Give thanks in all circumstances — 1 Thessalonians 5:18." },
-  { id: "oak-heart", zone: "forest", x: 12, y: 6, name: "Oakheart Lantern", icon: "🏮", value: 35, clue: "The ancient oak has a hollow heart. A light waits beneath its roots.", lore: "Wisdom lights the next step, not always the whole journey. Your word is a lamp — Psalm 119:105.", tool: "lantern" },
-  { id: "fern-scroll", zone: "forest", x: 7, y: 10, name: "Patient Scroll", icon: "📜", value: 35, clue: "The western path bends around the ferns. Follow the quiet curve.", lore: "Good things grow with patience. Be patient with everyone — 1 Thessalonians 5:14." },
-  { id: "firefly-jar", zone: "forest", x: 17, y: 8, name: "Firefly Promise", icon: "✨", value: 40, clue: "Lift your Lantern beside the eastern grove; unseen lights will answer.", lore: "Keep a promise, even when nobody is watching. Let your yes be yes — Matthew 5:37.", requires: "lantern" },
-  { id: "pool-pearl", zone: "forest", x: 18, y: 19, name: "Stillwater Pearl", icon: "🫧", value: 45, clue: "Still water holds a pearl. Search at the edge of the forest pool.", lore: "Listening carefully is a gift to others. Be quick to listen — James 1:19." },
-  { id: "moss-compass", zone: "forest", x: 11, y: 17, name: "True North Compass", icon: "🧭", value: 45, clue: "Use your Magnifying Glass on the mossy southern trail.", lore: "Let truth guide your direction. Trust in the Lord — Proverbs 3:5–6.", requires: "magnifying-glass" },
-  { id: "root-crown", zone: "forest", x: 5, y: 5, name: "Humble Crown", icon: "👑", value: 50, clue: "A crown lies low among the northwest roots, not high on a throne.", lore: "Greatness begins with serving. Whoever wants to become great must be a servant — Mark 10:43." },
-  { id: "sun-medallion", zone: "sky", x: 12, y: 10, name: "Dawn Medallion", icon: "☀️", value: 75, clue: "At the heart of the island, the sun rests in a circle of stone.", lore: "Bring light wherever you go. Let your light shine — Matthew 5:16." },
-  { id: "cloud-quill", zone: "sky", x: 8, y: 6, name: "Hope Quill", icon: "🪶", value: 80, clue: "A quill drifted beside the northern pool. Follow the water's shimmer.", lore: "Hope does not give up on tomorrow. Those who hope in the Lord renew their strength — Isaiah 40:31." },
-  { id: "starlight-crystal", zone: "sky", x: 18, y: 7, name: "Starlight Crystal", icon: "🔮", value: 90, clue: "Light your Lantern at the eastern ruins to reveal a crystal.", lore: "Choose what is good, even in secret. Walk as children of light — Ephesians 5:8.", requires: "lantern" },
-  { id: "sky-harp", zone: "sky", x: 6, y: 15, name: "Harmony Harp", icon: "🎵", value: 90, clue: "The southwest ruins hold a song without a singer.", lore: "Different voices can make a beautiful harmony. Live in harmony — Romans 12:16." },
-  { id: "eagle-sigil", zone: "sky", x: 17, y: 17, name: "Eagle's Sigil", icon: "🦅", value: 100, clue: "Small claw marks circle the southern arch. Examine them closely.", lore: "Use strength to protect, not to overpower. Speak up for those who cannot speak — Proverbs 31:8.", requires: "magnifying-glass" },
-  { id: "wisdom-star", zone: "sky", x: 12, y: 20, name: "Star of Wisdom", icon: "⭐", value: 150, clue: "The last star rests at the southern lookout, above the clouds.", lore: "The greatest treasure is wisdom shared with others. Wisdom is more precious than rubies — Proverbs 3:15." },
+  { id: "cat-stone", zone: "meadow", x: 11, y: 10, name: "Watchful Pebble", icon: "🪨", value: 10, clue: "Walk north from the meadow entrance. A sleeping stone keeps watch.", lore: "Pause and notice the good. Be still — Psalm 46:10.", tool: "magnifying-glass" },
+  { id: "daisy-seal", zone: "meadow", x: 7, y: 6, name: "Kindness Seal", icon: "🌼", value: 15, clue: "Follow the path northwest to the cottage and its daisies.", lore: "Kind words are like honey — Proverbs 16:24." },
+  { id: "bridge-coin", zone: "meadow", x: 12, y: 20, name: "Bridgekeeper's Coin", icon: "🪙", value: 20, clue: "Travel south to the bridge. Look where two banks become one.", lore: "Build bridges, not walls. Blessed are the peacemakers — Matthew 5:9." },
+  { id: "oak-heart", zone: "forest", x: 12, y: 6, name: "Oakheart Lantern", icon: "🏮", value: 35, hidden: true, requires: "magnifying-glass", tool: "lantern", clue: "An elder with wooden arms keeps a light inside its heart.", lore: "Your word is a lamp — Psalm 119:105." },
+  { id: "fern-scroll", zone: "forest", x: 7, y: 10, name: "Patient Scroll", icon: "📜", value: 35, hidden: true, requires: "magnifying-glass", clue: "Where green fingers curl beside the quiet bend, patience waits unseen.", lore: "Be patient with everyone — 1 Thessalonians 5:14." },
+  { id: "wisdom-star", zone: "sky", x: 12, y: 10, name: "Master Chest · Star of Wisdom", icon: "⭐", value: 150, requires: "lantern", clue: "Dawn gives a sign; broken pillars echo it. Unite the sky's four twins at the sun's heart.", lore: "Wisdom is more precious than rubies — Proverbs 3:15." },
 ];
 export const REWARD_SETS = [
   { zone: "meadow" as const, item: "explorer-hat", name: "Explorer Hat", label: "Meadow Explorer" },
   { zone: "forest" as const, item: "emerald-cloak", name: "Emerald Cloak", label: "Forest Guardian" },
   { zone: "sky" as const, item: "trail-boots", name: "Trail Boots", label: "Sky Pathfinder" },
 ];
-export const PORTALS: Record<ZoneId, (Position & { target: ZoneId })[]> = {
-  meadow: [{ x: 21, y: 10, target: "forest" }],
-  forest: [{ x: 2, y: 10, target: "meadow" }, { x: 21, y: 10, target: "sky" }],
-  sky: [{ x: 2, y: 10, target: "forest" }],
-};
-export function initialAdventure(): AdventureState { return { zone: "meadow", x: 10, y: 12, relics: [], tools: [], gear: [], unlocked: ["meadow"] }; }
+export const PORTALS: Record<ZoneId, (Position & { target: ZoneId })[]> = { meadow: [{ x: 21, y: 10, target: "forest" }], forest: [{ x: 2, y: 10, target: "meadow" }, { x: 21, y: 10, target: "sky" }], sky: [{ x: 2, y: 10, target: "forest" }] };
+export const LANDMARKS = [
+  { id: "roots", zone: "forest" as const, x: 5, y: 5, name: "Ancient Roots", icon: "🌳", fragment: "root-fragment" },
+  { id: "pool", zone: "forest" as const, x: 18, y: 19, name: "Stillwater Pool", icon: "💧", fragment: "pool-fragment" },
+  { id: "dawn", zone: "sky" as const, x: 12, y: 8, name: "Dawn Circle", icon: "☀️" },
+  { id: "ruins", zone: "sky" as const, x: 17, y: 7, name: "Echoing Pillars", icon: "🏛️" },
+];
+export const PLATES = { player: { x: 8, y: 10 }, pet: { x: 7, y: 10 } };
+export const MATCH_TILES = ["☀️", "🌙", "⭐", "☁️", "⭐", "☀️", "☁️", "🌙"];
+export const near = (a: Position, b: Position) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 1;
+export function zoneComplete(s: AdventureState, z: ZoneId) { return RELICS.filter(r => r.zone === z).every(r => s.relics.includes(r.id)); }
+export function initialAdventure(): AdventureState { return { version: 2, zone: "meadow", x: 10, y: 12, relics: [], tools: [], gear: [], unlocked: ["meadow"], fragments: [], landmarks: [], gates: [], pet: { x: 9, y: 12 }, pinned: false, matched: [], first: null, wind: 0 }; }
 export function walkable(zone: ZoneId, x: number, y: number): boolean {
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 2 || x > 21 || y < 2 || y > 21) return false;
   if (zone === "meadow") return y < 21 || (x >= 11 && x <= 13);
   if (zone === "forest") return !((x >= 4 && x <= 8 && y >= 12 && y <= 15) || (x >= 14 && x <= 17 && y >= 12 && y <= 15));
   return Math.abs(x - 12) + Math.abs(y - 11) <= 17;
 }
-export function canEnter(state: AdventureState, zone: ZoneId): boolean { const requirement = ZONES.find(z => z.id === zone)?.requires; return !requirement || state.tools.includes(requirement); }
-export function canCollect(state: AdventureState, relic: Relic): boolean { return state.zone === relic.zone && !state.relics.includes(relic.id) && Math.abs(state.x - relic.x) + Math.abs(state.y - relic.y) <= 1 && (!relic.requires || state.gear.includes(relic.requires)); }
-export type AdventureAction = { action: "status" | "move" | "collect" | "portal" | "gear"; x?: number; y?: number; id?: string; gear?: ToolId[] };
-export function applyAdventure(state: AdventureState, action: AdventureAction): AdventureState {
-  if (action.action === "move" && typeof action.x === "number" && typeof action.y === "number" && Math.abs(state.x - action.x) + Math.abs(state.y - action.y) === 1 && walkable(state.zone, action.x, action.y)) return { ...state, x: action.x, y: action.y };
-  if (action.action === "gear") return { ...state, gear: (action.gear ?? []).filter((id, i, all) => state.tools.includes(id) && all.indexOf(id) === i) };
-  if (action.action === "collect") {
-    const relic = RELICS.find(r => r.id === action.id);
-    if (!relic || !canCollect(state, relic)) return state;
-    const tools = relic.tool && !state.tools.includes(relic.tool) ? [...state.tools, relic.tool] : state.tools;
-    return { ...state, relics: [...state.relics, relic.id], tools, gear: relic.tool ? [...new Set([...state.gear, relic.tool])] : state.gear, unlocked: ZONES.filter(z => canEnter({ ...state, tools }, z.id)).map(z => z.id) };
+export function canStep(s: AdventureState, x: number, y: number) { return walkable(s.zone, x, y) && !(s.zone === "forest" && x === 10 && !s.gates.includes("forest-gate")); }
+export function terrain(z: ZoneId, x: number, y: number): "mud" | "wind" | null { if ((z === "meadow" && x === 9 && y >= 11 && y <= 13) || (z === "forest" && x === 9 && y >= 8 && y <= 11)) return "mud"; return z === "sky" && x === 14 && y >= 9 && y <= 12 ? "wind" : null; }
+export function canEnter(s: AdventureState, zone: ZoneId): boolean { return zone === "meadow" || (zone === "forest" ? zoneComplete(s, "meadow") && s.tools.includes("magnifying-glass") : zoneComplete(s, "forest") && s.tools.includes("lantern")); }
+export function chestVisible(s: AdventureState, r: Relic) { return !s.relics.includes(r.id) && (!r.hidden || (near(s, r) && s.gear.includes("magnifying-glass"))); }
+export function canCollect(s: AdventureState, r: Relic): boolean { return s.zone === r.zone && !s.relics.includes(r.id) && near(s, r) && (!r.requires || s.gear.includes(r.requires)) && (r.zone !== "forest" || s.fragments.length === 2) && (r.zone !== "sky" || (s.matched.length === 8 && s.landmarks.includes("ruins"))); }
+export type AdventureAction = { action: "status" | "move" | "collect" | "portal" | "gear" | "inspect" | "pet" | "match"; x?: number; y?: number; id?: string; gear?: ToolId[] };
+function unlock(s: AdventureState): AdventureState { return { ...s, unlocked: ZONES.filter(z => canEnter(s, z.id)).map(z => z.id) }; }
+export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState {
+  if (a.action === "move" && typeof a.x === "number" && typeof a.y === "number" && Math.abs(s.x - a.x) + Math.abs(s.y - a.y) === 1 && canStep(s, a.x, a.y)) {
+    let x = a.x; const y = a.y; let wind = s.wind;
+    if (terrain(s.zone, x, y) === "wind") { wind++; if (wind % 2 === 1) x--; }
+    const pet = s.pinned ? s.pet : { x: s.x, y: s.y };
+    const gates = s.zone === "forest" && x === PLATES.player.x && y === PLATES.player.y && pet.x === PLATES.pet.x && pet.y === PLATES.pet.y ? [...new Set([...s.gates, "forest-gate"])] : s.gates;
+    return { ...s, x, y, pet, gates, wind };
   }
-  if (action.action === "portal") {
-    const portal = PORTALS[state.zone].find(p => p.target === action.id && Math.abs(p.x - state.x) + Math.abs(p.y - state.y) <= 1);
-    if (portal && canEnter(state, portal.target)) return { ...state, zone: portal.target, x: portal.target === "meadow" || (state.zone === "sky" && portal.target === "forest") ? 20 : 3, y: 10 };
+  if (a.action === "pet") return { ...s, pinned: !s.pinned };
+  if (a.action === "gear") return { ...s, gear: (a.gear ?? []).filter((id, i, all) => s.tools.includes(id) && all.indexOf(id) === i) };
+  if (a.action === "inspect") {
+    const l = LANDMARKS.find(l => l.id === a.id && l.zone === s.zone && near(s, l));
+    if (!l || s.landmarks.includes(l.id) || (l.id === "ruins" && !s.landmarks.includes("dawn"))) return s;
+    return { ...s, landmarks: [...s.landmarks, l.id], fragments: l.fragment ? [...new Set([...s.fragments, l.fragment])] : s.fragments };
   }
-  return state;
+  if (a.action === "match") {
+    const tile = Number(a.id);
+    if (s.zone !== "sky" || !near(s, { x: 12, y: 10 }) || !s.landmarks.includes("ruins") || !Number.isInteger(tile) || tile < 0 || tile >= 8 || s.matched.includes(tile) || s.first === tile) return s;
+    if (s.first === null) return { ...s, first: tile };
+    return { ...s, matched: MATCH_TILES[s.first] === MATCH_TILES[tile] ? [...s.matched, s.first, tile] : s.matched, first: null };
+  }
+  if (a.action === "collect") {
+    const r = RELICS.find(r => r.id === a.id); if (!r || !canCollect(s, r)) return s;
+    const tools = r.tool ? [...new Set([...s.tools, r.tool])] : s.tools;
+    return unlock({ ...s, relics: [...s.relics, r.id], tools, gear: r.tool ? [...new Set([...s.gear, r.tool])] : s.gear });
+  }
+  if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); if (p && canEnter(s, p.target)) { const x = p.target === "meadow" || s.zone === "sky" ? 20 : 3; return { ...s, zone: p.target, x, y: 10, pet: { x: x - 1, y: 10 }, pinned: false }; } }
+  return s;
+}
+export function questClue(s: AdventureState): string {
+  if (zoneComplete(s, s.zone)) return s.zone === "sky" ? "The Master Chest is open. Carry this wisdom into the world." : "Stage complete! The eastern gateway now leads onward.";
+  if (s.zone === "meadow") return RELICS.find(r => r.zone === "meadow" && !s.relics.includes(r.id))?.clue ?? "";
+  if (s.zone === "forest") {
+    if (!s.fragments.includes("root-fragment")) return "An elder wears no crown: its fingers reach beneath the earth. Search where the forest first remembers.";
+    if (!s.gates.includes("forest-gate")) return "Two friends, two stones. Let small paws rest on the western moon while the lion stands beside the eastern sun.";
+    if (!s.fragments.includes("pool-fragment")) return "Beyond the twin stones, a mirror never speaks. Where the southern water rests, the other half sleeps.";
+    return RELICS.find(r => r.zone === "forest" && !s.relics.includes(r.id))?.clue ?? "";
+  }
+  if (!s.landmarks.includes("dawn")) return "Above the sun's heart, dawn has left a circle. Read its silent sign.";
+  if (!s.landmarks.includes("ruins")) return "Follow dawn's promise to the broken pillars where the eastern sky echoes.";
+  return "At the sun's heart, four twins are separated. Remember their faces, reunite each pair, and wisdom will open.";
 }
 export function parseAdventure(value: unknown): AdventureState {
-  const fallback = initialAdventure();
-  if (!value || typeof value !== "object") return fallback;
+  const f = initialAdventure(); if (!value || typeof value !== "object") return f;
   const s = value as Record<string, unknown>;
-  const relics = Array.isArray(s['relics']) ? RELICS.filter(r => (s['relics'] as unknown[]).includes(r.id)).map(r => r.id) : [];
+  const strings = (key: string, allowed: string[]) => Array.isArray(s[key]) ? allowed.filter(id => (s[key] as unknown[]).includes(id)) : [];
+  const relics = strings("relics", RELICS.map(r => r.id)); const legacy = s['version'] !== 2;
   const tools = TOOLS.filter(t => RELICS.some(r => r.tool === t.id && relics.includes(r.id))).map(t => t.id);
-  const zone = ZONES.find(z => z.id === s['zone'])?.id ?? "meadow";
-  const partial = { ...fallback, relics, tools };
-  const validZone = canEnter(partial, zone) ? zone : "meadow";
-  const x = typeof s['x'] === "number" ? s['x'] : fallback.x; const y = typeof s['y'] === "number" ? s['y'] : fallback.y;
-  return { ...partial, zone: validZone, ...(walkable(validZone, x, y) ? { x, y } : {}), gear: Array.isArray(s['gear']) ? tools.filter(t => (s['gear'] as unknown[]).includes(t)) : tools, unlocked: ZONES.filter(z => canEnter(partial, z.id)).map(z => z.id) };
+  const rawPet = s['pet'] as Position | undefined;
+  let partial: AdventureState = { ...f, relics, tools, fragments: strings("fragments", ["root-fragment", "pool-fragment"]), landmarks: strings("landmarks", LANDMARKS.map(l => l.id)), gates: strings("gates", ["forest-gate"]), pinned: s['pinned'] === true, matched: Array.isArray(s['matched']) ? [...new Set(s['matched'].filter((n): n is number => typeof n === "number" && Number.isInteger(n) && n >= 0 && n < 8))] : [], first: typeof s['first'] === "number" && Number.isInteger(s['first']) && s['first'] >= 0 && s['first'] < 8 ? s['first'] : null, wind: typeof s['wind'] === "number" && Number.isInteger(s['wind']) && s['wind'] >= 0 ? s['wind'] : 0 };
+  if (legacy && relics.some(id => ["oak-heart", "fern-scroll", "wisdom-star"].includes(id))) partial = { ...partial, fragments: ["root-fragment", "pool-fragment"], gates: ["forest-gate"] };
+  if (legacy && relics.includes("wisdom-star")) partial = { ...partial, landmarks: ["roots", "pool", "dawn", "ruins"], matched: [0,1,2,3,4,5,6,7] };
+  const zone = ZONES.find(z => z.id === s['zone'])?.id ?? "meadow"; const validZone = canEnter(partial, zone) ? zone : "meadow";
+  const x = typeof s['x'] === "number" ? s['x'] : f.x; const y = typeof s['y'] === "number" ? s['y'] : f.y;
+  partial = { ...partial, zone: validZone }; const position = canStep(partial, x, y) ? { x, y } : validZone === "meadow" ? { x: 10, y: 12 } : { x: 3, y: 10 };
+  return unlock({ ...partial, ...position, pet: rawPet && canStep(partial, rawPet.x, rawPet.y) ? { x: rawPet.x, y: rawPet.y } : { x: position.x - 1, y: position.y }, gear: Array.isArray(s['gear']) ? tools.filter(t => (s['gear'] as unknown[]).includes(t)) : tools });
 }
