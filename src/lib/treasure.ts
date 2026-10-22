@@ -22,7 +22,7 @@ export const SCROLL_CLUES: Record<ZoneId, string> = {
   meadow: "Razor hid a scroll somewhere in the meadow — it's invisible until you're right beside it.",
   wood: "A secret sleeps where the trees stand tall. Only a close look will reveal it.",
   ravine: "The canyon keeps its scroll well hidden. Search carefully on both sides of the bridge.",
-  lair: "Even in Razor's den a scroll lies hidden. Sniff out every corner.",
+  lair: "The last scroll rests on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
 };
 export const GATES: Record<ZoneId, { riddle: string; options: string[]; answer: number }> = {
   meadow: { riddle: "I have hands, but I cannot clap. I have a face, but I cannot smile. What am I?", options: ["A Clock", "A Mirror", "A Book"], answer: 0 },
