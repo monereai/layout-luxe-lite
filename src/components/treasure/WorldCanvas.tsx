@@ -71,7 +71,8 @@ export function WorldCanvas(props: Props) {
           if (changedZone || force || (far && !this.moving)) { this.path = []; this.tweens.killTweensOf(this.player!); this.moving = false; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.portals.forEach(p => p.destroy()); this.portals = [];
           this.scenery.forEach(item => item.destroy()); this.scenery = [];
-          const color = (token: string) => P.Display.Color.HexStringToColor(getComputedStyle(document.documentElement).getPropertyValue(token).trim()).color;
+          const hex = (token: string) => { const c = document.createElement("canvas").getContext("2d")!; c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#888"; c.fillRect(0, 0, 1, 1); const [r, g, b] = c.getImageData(0, 0, 1, 1).data; return `#${[r, g, b].map(v => v!.toString(16).padStart(2, "0")).join("")}`; };
+          const color = (token: string) => P.Display.Color.HexStringToColor(hex(token)).color;
           const at = (p: Position) => [(p.x + .5) * 64, (p.y + .5) * 64] as const;
           const text = (p: Position, t: string, size = 36) => { const o = this.add.text(...at(p), t, { fontSize: `${size}px` }).setOrigin(.5).setDepth(3); this.scenery.push(o); return o; };
           if (!s.scrolls.includes(s.zone) && Math.abs(SCROLLS[s.zone].x - s.x) + Math.abs(SCROLLS[s.zone].y - s.y) <= SCROLL_REVEAL) {
@@ -90,7 +91,7 @@ export function WorldCanvas(props: Props) {
               g.fillStyle(0xffffff, .14).fillRoundedRect(cx - 24, cy - 25, 48, 20, { tl: 9, tr: 9, bl: 4, br: 4 }); // top shine
               g.lineStyle(3, gold, 1).strokeRoundedRect(cx - 28, cy - 28, 56, 56, 12);
               g.lineStyle(1.5, gold, .55).strokeRoundedRect(cx - 21, cy - 21, 42, 42, 8);
-              const label = this.add.text(cx, cy, "ABC"[i]!, { fontSize: "30px", fontFamily: "Fredoka, sans-serif", fontStyle: "700", color: getComputedStyle(document.documentElement).getPropertyValue("--points").trim() || "#FFB800", stroke: "#3a2200", strokeThickness: 5 }).setOrigin(.5).setDepth(3);
+              const label = this.add.text(cx, cy, "ABC"[i]!, { fontSize: "30px", fontFamily: "Fredoka, sans-serif", fontStyle: "700", color: hex("--points"), stroke: "#3a2200", strokeThickness: 5 }).setOrigin(.5).setDepth(3);
               label.setShadow(0, 2, "#000", 4, true, true); this.scenery.push(label);
               if (!this.reduced && !s.rescued) { this.tweens.add({ targets: [g, label], alpha: .78, duration: 900 + i * 150, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); }
             });
