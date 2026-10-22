@@ -1,3 +1,8 @@
+# Treasure Hunt RPG
+- [ ] Make the three-zone treasure adventure the main experience, retaining mentor and existing activities.
+- [ ] Add exploration controls, tool gates, riddles, relic logbook, saved account/guest progression and atomic wardrobe unlocks.
+- [ ] Verify full adventure, locks, reload persistence and wardrobe rewards on isolated QA; check phone/desktop layout and tests.
+
 # Three additional glasses
 - [x] Add Heart Specs, Aviator Shades and Rainbow Specs at 300 points each, with eight-angle wearable layers and server catalogue entries.
 - [x] Verify all three QA purchases (1780→880), free re-equips, reload persistence and worn home/shop appearance; original hat and puppy preserved, Carl untouched. 43 focused tests pass; build OK. Preview-only.
