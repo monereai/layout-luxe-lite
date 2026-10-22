@@ -22,6 +22,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StoryRouteImport } from './routes/story'
+import { Route as TreasureRouteImport } from './routes/treasure'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as ApiStoryImageRouteImport } from './routes/api/story-image'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -93,6 +94,11 @@ const StoryRoute = StoryRouteImport.update({
   path: '/story',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TreasureRoute = TreasureRouteImport.update({
+  id: '/treasure',
+  path: '/treasure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
+  '/treasure': typeof TreasureRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
+  '/treasure': typeof TreasureRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/story': typeof StoryRoute
+  '/treasure': typeof TreasureRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/story-image': typeof ApiStoryImageRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/story'
+    | '/treasure'
     | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
     | '/.lovable/oauth/consent'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/story'
+    | '/treasure'
     | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
     | '/.lovable/oauth/consent'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/sitemap.xml'
     | '/story'
+    | '/treasure'
     | '/.well-known/oauth-protected-resource'
     | '/api/story-image'
     | '/.lovable/oauth/consent'
@@ -260,6 +272,7 @@ export interface RootRouteChildren {
   ShopRoute: typeof ShopRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StoryRoute: typeof StoryRoute
+  TreasureRoute: typeof TreasureRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiStoryImageRoute: typeof ApiStoryImageRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -360,6 +373,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/treasure': {
+      id: '/treasure'
+      path: '/treasure'
+      fullPath: '/treasure'
+      preLoaderRoute: typeof TreasureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -412,6 +432,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShopRoute: ShopRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StoryRoute: StoryRoute,
+  TreasureRoute: TreasureRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiStoryImageRoute: ApiStoryImageRoute,
