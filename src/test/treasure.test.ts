@@ -39,3 +39,13 @@ describe("Griffin rescue rules", () => {
     expect(petButtonState({ owned: [], active: null }, 99999, g)).toBe("reward");
   });
 });
+
+import { scrollWarmth as _w, SCROLLS as _S } from "@/lib/treasure";
+import { describe as _d, it as _i, expect as _e } from "vitest";
+_d("hidden scroll hints", () => {
+  _i("is hot beside the scroll and cold far away", () => {
+    const base = { version: 3, zone: "meadow", scrolls: [], gates: [], duel: 0, rescued: false } as never as Parameters<typeof _w>[0];
+    _e(_w({ ...base, x: _S.meadow.x + 1, y: _S.meadow.y })).toContain("hot");
+    _e(_w({ ...base, x: _S.meadow.x + 15, y: _S.meadow.y })).toContain("Cold");
+  });
+});
