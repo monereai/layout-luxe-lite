@@ -9,7 +9,7 @@ import { loadPets } from "@/lib/pets";
 
 const GUEST_KEY = "monere-griffin-guest-v1";
 export function useAdventure() {
-  const { user, ready } = usePlan();
+  const { user, ready, refresh } = usePlan();
   const run = useServerFn(adventureAction);
   const client = useQueryClient();
   const key = ["treasure", user?.id ?? "guest"];
@@ -65,6 +65,7 @@ export function useAdventure() {
       try {
         const result = await run({ data: action });
         update(result.state);
+        if (result.points > 0) { toast.success(`+${result.points} points added to your balance!`); void refresh().catch(() => false); }
         if (result.griffin) { void loadPets().catch(() => {}); toast.success("The Golden Griffin joined your pets!"); }
         client.setQueryData(key, result);
         return result.state;
