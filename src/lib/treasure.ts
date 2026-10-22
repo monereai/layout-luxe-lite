@@ -1,9 +1,9 @@
-// The Rescue of the Golden Griffin — pure rules shared by the browser and mirrored in SQL (treasure_v3_action).
+// The Rescue of the Golden Griffin — pure rules shared by the browser and mirrored in SQL (treasure_v5_action).
 export type ZoneId = "meadow" | "wood" | "ravine" | "lair";
 export type Position = { x: number; y: number };
 export type Gear = "lantern" | "boots" | "goggles";
 export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean;
-  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>> };
+  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[] };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
 export const ZONES: { id: ZoneId; name: string; subtitle: string; icon: string }[] = [
@@ -83,7 +83,7 @@ export const PORTALS: Record<ZoneId, Portal[]> = {
   lair: [{ x: 12, y: 21, target: "ravine", arrive: { x: 20, y: 17 }, forward: false }],
 };
 export const near = (a: Position, b: Position) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 1;
-export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {} }); }
+export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {}, riddles: defaultRiddles() }); }
 export function walkable(zone: ZoneId, x: number, y: number): boolean {
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 2 || x > 21 || y < 2 || y > 21) return false;
   if (zone === "meadow") return y < 21 || (x >= 11 && x <= 13);
@@ -130,12 +130,12 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "switch") { if (s.zone !== "ravine" || s.x !== PLATE_HERO.x || s.y !== PLATE_HERO.y || s.pet?.x !== PLATE_PET.x) return s; return { ...s, pet: null, quests: s.quests.includes("vault") ? s.quests : [...s.quests, "vault"], items: s.items.includes(VAULT_RELIC) ? s.items : [...s.items, VAULT_RELIC] }; }
   if (a.action === "call") return { ...s, pet: null };
   if (a.action === "collect") return !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
-  if (a.action === "answer") return gateHere(s) === a.id && a.x === GATES[s.zone].answer ? { ...s, gates: [...s.gates, s.zone] } : s;
+  if (a.action === "answer") return gateHere(s) === a.id && a.x === gateRiddle(s, s.zone).answer ? { ...s, gates: [...s.gates, s.zone] } : s;
   if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && (!p.forward || s.gates.includes(s.zone)) ? { ...s, zone: p.target, ...p.arrive, pet: null } : s; }
   if (a.action === "duel") {
     const tile = duelTileAt(s); if (tile < 0 || tile !== a.x) return s;
-    if (tile !== DUEL[s.duel]!.answer) return { ...s, ...DUEL_START };
-    const duel = s.duel + 1; return { ...s, duel, rescued: duel === DUEL.length };
+    if (tile !== duelRiddle(s).answer) return { ...s, ...DUEL_START };
+    const duel = s.duel + 1; return { ...s, duel, rescued: duel === DUEL_ROUNDS };
   }
   return s;
 }
@@ -143,7 +143,7 @@ export function questClue(s: AdventureState): string {
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
   if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
   if (!s.gates.includes(s.zone)) return s.zone === "lair" ? "Scroll found! Go to the carved inner door in the middle of the lair and answer its riddle." : "Scroll found! Walk to the eastern gate and answer the gatekeeper's riddle.";
-  if (s.zone === "lair") return `Riddle Duel ${s.duel + 1}/3: ${DUEL[s.duel]!.riddle} Hop onto the right tile.`;
+  if (s.zone === "lair") return `Riddle Duel ${s.duel + 1}/3: ${duelRiddle(s).riddle} Hop onto the right tile.`;
   return "The gate is open. Travel onward through the portal!";
 }
 export function parseAdventure(value: unknown): AdventureState {
@@ -157,7 +157,7 @@ export function parseAdventure(value: unknown): AdventureState {
   const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
   for (const id of ids) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 36); }
   let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
-    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog };
+    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles() };
   const zone = ids.find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
   if (st.zone !== "ravine") st = { ...st, pet: null };
@@ -223,7 +223,8 @@ export const inCave = (x: number, y: number) => x >= 18 && y <= 6;
 export const onCliff = (x: number, y: number) => x >= 15 && y <= 7;
 export const inChasm = (x: number, y: number) => x >= 2 && x <= 9 && y >= 12 && y <= 18;
 export const onPlatform = (x: number, y: number) => x >= 4 && x <= 6 && y >= 14 && y <= 16;
-export const isHiddenPath = (x: number, y: number) => y === 15 && x >= 7 && x <= 9;
+/** Goggle-revealed bridge: three tiles wide so Monere and his pet cross the chasm cleanly. */
+export const isHiddenPath = (x: number, y: number) => y >= 14 && y <= 16 && x >= 7 && x <= 9;
 export const isTrap = (x: number, y: number) => TRAPS.some(t => t.x === x && t.y === y);
 /** Fog of war: 6×6 chunks of 4×4 tiles; Monere uncovers his chunk and its neighbours. */
 export function reveal(s: AdventureState): AdventureState {
