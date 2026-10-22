@@ -7,7 +7,7 @@ import chest from "@/assets/treasure/chest.png";
 import { PORTALS, RELICS, TILE_SIZE, walkable, type AdventureState, type Position } from "@/lib/treasure";
 
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
-type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; onInteract: () => void };
+type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; onInteract: () => void };
 export function WorldCanvas(props: Props) {
   const host = useRef<HTMLDivElement>(null);
   const live = useRef(props); live.current = props;
@@ -31,7 +31,7 @@ export function WorldCanvas(props: Props) {
         create() {
           sceneRef.current = this;
           this.background = this.add.image(768, 768, live.current.state.zone).setDisplaySize(1536, 1536);
-          this.player = this.add.image(0, 0, "lion").setDisplaySize(140, 140).setOrigin(.5, .8).setDepth(10);
+          this.player = this.add.image(0, 0, "lion").setDisplaySize(140, 140).setOrigin(.5, .8).setDepth(10).setAlpha(0);
           this.base = this.player.scaleX; this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           this.shadow = this.add.ellipse(0, 0, 70, 18, 0x000000, .28).setDepth(9);
           const fitCamera = () => this.cameras.main.setZoom(Math.max(.85, this.scale.width / 1536, this.scale.height / 1536));
@@ -91,26 +91,24 @@ export function WorldCanvas(props: Props) {
           live.current.onMove(next);
           this.moving = true;
           if (next.x !== s.x) this.facing = next.x < s.x ? -1 : 1;
-          this.depthScale = next.y < s.y ? .94 : next.y > s.y ? 1.03 : 1;
-          this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 90 : 150, onComplete: () => { this.moving = false; } });
+          
+          this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 160 : 210, onComplete: () => { this.moving = false; } });
         }
         animate() {
-          const p = this.player; if (!p) return;
-          const dt = this.game.loop.delta / 1000;
-          const walking = this.moving && !this.reduced;
-          this.stride += ((walking ? 1 : 0) - this.stride) * Math.min(1, dt * 10);
-          if (walking) this.phase += dt * 13; else this.phase += dt * 2.2;
-          const step = Math.abs(Math.sin(this.phase));
-          const bounce = walking || this.stride > .05 ? step * 10 * this.stride : 0;
-          const breathe = this.reduced ? 0 : Math.sin(this.phase) * .015 * (1 - this.stride);
-          const squash = this.stride * (step - .5) * .1;
-          const sx = this.base * this.depthScale * (1 - squash - breathe * .5);
-          const sy = this.base * this.depthScale * (1 + squash + breathe);
-          p.setFlipX(this.facing < 0).setScale(sx, sy);
-          p.setOrigin(.5, .8 + bounce / (p.height * sy));
-          p.setRotation(this.stride * Math.sin(this.phase) * .05);
-          this.shadow?.setPosition(p.x, p.y + 4).setScale(1 - bounce / 40, 1 - bounce / 40).setAlpha(.28 - bounce / 80);
-          if (walking && step < .25 && this.time.now - this.lastStep > 160) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
+          const p = this.player; const el = live.current.figure.current; if (!p) return;
+          const keys = this.keys;
+          const held = !!(this.direction.x || this.direction.y || ["LEFT", "RIGHT", "UP", "DOWN", "W", "A", "S", "D"].some(k => keys?.[k]?.isDown));
+          const walking = !this.paused && (this.moving || this.path.length > 0 || held);
+          const cam = this.cameras.main;
+          this.shadow?.setPosition(p.x, p.y + 4);
+          if (el) {
+            el.style.transform = `translate(${(p.x - cam.worldView.x) * cam.zoom}px, ${(p.y - cam.worldView.y) * cam.zoom}px)`;
+            el.style.setProperty("--monere-size", `${140 * cam.zoom}px`);
+            el.dataset["facing"] = this.facing < 0 ? "left" : "right";
+            el.dataset["moving"] = walking ? "true" : "false";
+            const body = el.firstElementChild; body?.classList.toggle("walk-bounce", walking); body?.classList.toggle("idle-breath", !walking);
+          }
+          if (walking && this.time.now - this.lastStep > 260) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
         }
         dust(x: number, y: number) {
           for (let i = 0; i < 3; i++) {
