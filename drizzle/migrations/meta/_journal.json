@@ -309,6 +309,13 @@
       "when": 1792665290559,
       "tag": "0043_treasure_progressive_puzzles",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1792675143959,
+      "tag": "0044_griffin_rescue",
+      "breakpoints": true
     }
   ]
 }

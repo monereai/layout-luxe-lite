@@ -623,6 +623,15 @@ export type Database = {
       }
       treasure_v2_normalize: { Args: { s: Json }; Returns: Json }
       treasure_v2_travel: { Args: { p_steps: Json }; Returns: Json }
+      treasure_v3_action: {
+        Args: { p_action: string; p_id?: string; p_x?: number; p_y?: number }
+        Returns: Json
+      }
+      treasure_v3_travel: { Args: { p_steps: Json }; Returns: Json }
+      treasure_v3_walkable: {
+        Args: { x: number; y: number; z: string }
+        Returns: boolean
+      }
       treasure_walkable: {
         Args: { x: number; y: number; z: string }
         Returns: boolean

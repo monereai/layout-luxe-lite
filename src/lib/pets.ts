@@ -14,8 +14,9 @@ import owl from "@/assets/pets/owl.png";
 import unicorn from "@/assets/pets/unicorn.png";
 import thunderbird from "@/assets/pets/thunderbird.png";
 import phoenix from "@/assets/pets/phoenix.png";
+import goldenGriffin from "@/assets/pets/golden-griffin.png";
 
-export type Pet = { id: string; name: string; description: string; cost: number; src: string };
+export type Pet = { id: string; name: string; description: string; cost: number; src: string; reward?: boolean };
 
 /** Prices must match the pet_action database function, which is the real charge. */
 export const PETS: Pet[] = [
@@ -32,13 +33,14 @@ export const PETS: Pet[] = [
   { id: "unicorn", name: "Unicorn", description: "A magical friend with a rainbow mane.", cost: 2000, src: unicorn },
   { id: "thunderbird", name: "Thunderbird", description: "A brave little storm with a heart of gold.", cost: 3000, src: thunderbird },
   { id: "phoenix", name: "Phoenix", description: "Warm wings that rise again with you.", cost: 3000, src: phoenix },
+  { id: "golden-griffin", name: "Golden Griffin", description: "Rescued from Razor's Lair — earned, never bought.", cost: 0, src: goldenGriffin, reward: true },
 ];
 
 export type PetRarity = "Common" | "Rare" | "Legendary";
 export const PET_RARITIES: Record<string, PetRarity> = {
   goldfish: "Common", puppy: "Common", kitten: "Common", hedgehog: "Common", turtle: "Common",
   bunny: "Rare", parrot: "Rare", fox: "Rare", owl: "Rare",
-  "baby-dragon": "Legendary", unicorn: "Legendary", thunderbird: "Legendary", phoenix: "Legendary",
+  "baby-dragon": "Legendary", unicorn: "Legendary", thunderbird: "Legendary", phoenix: "Legendary", "golden-griffin": "Legendary",
 };
 
 export type PetState = { owned: string[]; active: string | null };
@@ -50,9 +52,10 @@ const subs = new Set<(s: PetState) => void>();
 function set(next: PetState) { state = next; subs.forEach((f) => f(next)); }
 
 /** Pure rule used by the UI before calling the server. */
-export function petButtonState(s: PetState, wallet: number, pet: Pet): "equipped" | "owned" | "buy" | "unaffordable" {
+export function petButtonState(s: PetState, wallet: number, pet: Pet): "equipped" | "owned" | "buy" | "unaffordable" | "reward" {
   if (s.active === pet.id) return "equipped";
   if (s.owned.includes(pet.id)) return "owned";
+  if (pet.reward) return "reward";
   return wallet >= pet.cost ? "buy" : "unaffordable";
 }
 
