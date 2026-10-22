@@ -6,7 +6,7 @@ import ravine from "@/assets/treasure/ravine.jpg";
 import lair from "@/assets/treasure/lair.jpg";
 import razor from "@/assets/treasure/razor.png";
 import griffin from "@/assets/pets/golden-griffin.png";
-import { PORTALS, SCROLLS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, canStep, type AdventureState, type Position } from "@/lib/treasure";
+import { PORTALS, SCROLLS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, canStep, isRevealed, type AdventureState, type Position } from "@/lib/treasure";
 
 export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
@@ -30,7 +30,7 @@ export function WorldCanvas(props: Props) {
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
-        effectN = 0;
+        effectN = 0; lastLily = -1;
         preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
@@ -60,7 +60,7 @@ export function WorldCanvas(props: Props) {
           }
         }
         sync(force = false) {
-          const s = live.current.state; const key = `${s.zone}:${live.current.revision}:${s.x},${s.y}:${s.scrolls.join()}:${s.gates.join()}:${s.duel}:${s.rescued}`;
+          const s = live.current.state; const key = `${s.zone}:${live.current.revision}:${s.x},${s.y}:${s.scrolls.join()}:${s.gates.join()}:${s.duel}:${s.rescued}:${s.gear.join()}:${s.items.length}:${s.dug.length}:${s.lily}:${s.pet ? 1 : 0}:${s.quests.length}:${(s.fog[s.zone] ?? []).length}`;
           const fx = live.current.effect;
           if (fx.n !== this.effectN) { this.effectN = fx.n; if (fx.kind === "gust") this.gust(); if (fx.kind === "victory") this.victory(); }
           if (key === this.lastState && !force) return;
@@ -80,6 +80,37 @@ export function WorldCanvas(props: Props) {
             scroll.on("pointerdown", (_: unknown, __: unknown, ___: unknown, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (!this.paused) this.seek(SCROLLS[s.zone]); });
             if (!this.reduced) this.tweens.add({ targets: scroll, y: scroll.y - 6, alpha: .75, duration: 1200, yoyo: true, repeat: -1 });
           }
+          const rect = (x: number, y: number, w: number, h: number, c: number, a: number, depth = 1) => { const r = this.add.rectangle(x * 64 + w * 32, y * 64 + h * 32, w * 64, h * 64, c, a).setDepth(depth); this.scenery.push(r); return r; };
+          const label = (p: Position, t: string) => { const o = this.add.text((p.x + .5) * 64, (p.y + 1) * 64 + 4, t, { fontFamily: "Nunito", fontSize: "12px", color: hex("--foreground"), backgroundColor: hex("--background"), padding: { x: 6, y: 2 } }).setOrigin(.5, 0).setDepth(4).setAlpha(.9); this.scenery.push(o); };
+          const bob = (o: Phaser.GameObjects.Text) => { if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); return o; };
+          if (s.zone === "wood") {
+            // Dark cave (north-east): pitch black without the Lantern, softly lit with it.
+            const lit = s.gear.includes("lantern"); rect(18, 2, 4, 5, 0x05040a, lit ? .35 : .82, 2);
+            if (lit) { const glow = this.add.circle(20 * 64, 4 * 64, 150, color("--points"), .12).setDepth(2); this.scenery.push(glow); } else text({ x: 19, y: 4 }, "🌑", 40);
+            label({ x: 19, y: 6 }, lit ? "Lit cave" : "Dark cave · needs Lantern");
+            // River with moving lily pads.
+            const water = rect(2, 17, 20, 2, color("--energy"), .38, 1); if (!this.reduced) this.tweens.add({ targets: water, alpha: .26, duration: 1400, yoyo: true, repeat: -1 });
+            [17, 18].forEach((row, r) => { const pad = text({ x: LILY_ROWS[r]![s.lily]!, y: row }, "🪷", 46); const prev = LILY_ROWS[r]![(s.lily + 2) % 3]!; if (!this.reduced && this.lastLily !== s.lily) { pad.x = (prev + .5) * 64; this.tweens.add({ targets: pad, x: (LILY_ROWS[r]![s.lily]! + .5) * 64, duration: 700, ease: "Sine.easeInOut" }); } });
+            this.lastLily = s.lily; text(BELL, "🛎️", 36); label(BELL, "Frog bell");
+          }
+          if (s.zone === "ravine") {
+            const boots = s.gear.includes("boots"); rect(15, 2, 7, 6, 0x3a2414, boots ? .18 : .45, 1); text({ x: 17, y: 6 }, boots ? "🧗" : "⛰️", 36); label({ x: 17, y: 6 }, boots ? "Cliffs" : "Cliffs · needs Climbing Boots");
+            const vault = s.quests.includes("vault");
+            [PLATE_HERO, PLATE_PET].forEach((pl, i) => { const c = this.add.circle(...at(pl), 24, i ? color("--energy") : color("--points"), vault ? .2 : .45).setStrokeStyle(3, i ? color("--energy") : color("--points")).setDepth(2); this.scenery.push(c); text(pl, i ? "🐾" : "🦁", 22).setAlpha(.8); });
+            text({ x: 6, y: 21 }, vault ? "🏛️✨" : "🏛️", 34); label({ x: 6, y: 19 }, vault ? "Vault open" : "Stone Vault");
+          }
+          if (s.zone === "lair") {
+            const goggles = s.gear.includes("goggles");
+            rect(2, 12, 8, 7, 0x000000, .72, 1); rect(4, 14, 3, 3, 0x6b4a2a, .85, 1);
+            if (goggles) for (let x = 7; x <= 9; x++) { const t = rect(x, 15, 1, 1, color("--energy"), .45, 2); if (!this.reduced) this.tweens.add({ targets: t, alpha: .2, duration: 900, yoyo: true, repeat: -1 }); }
+            label({ x: 5, y: 16 }, goggles ? "Ledge · path revealed" : "Ledge across the chasm");
+            if (goggles) TRAPS.forEach(t => { rect(t.x, t.y, 1, 1, 0xff3030, .3, 2); text(t, "⚠️", 28); });
+          }
+          NPCS.filter(n => n.zone === s.zone).forEach(n => { bob(text(n, n.icon, 50)); label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26); });
+          ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => { const o = bob(text(i, i.icon, 34)); if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 }); });
+          DIGS.filter(d => d.zone === s.zone).forEach(d => { const done = s.dug.includes(d.id); const m = this.add.ellipse(...at(d), 46, 20, 0x5a3a1c, done ? .35 : .8).setDepth(2); this.scenery.push(m); if (!done) { const x = text(d, "✖", 22); x.setY(x.y - 2); if (!this.reduced) this.tweens.add({ targets: x, alpha: .4, duration: 800, yoyo: true, repeat: -1 }); } });
+          // Fog of war: unexplored 4×4 chunks stay hidden.
+          for (let cx = 0; cx < 6; cx++) for (let cy = 0; cy < 6; cy++) if (!isRevealed(s, s.zone, cx * 4, cy * 4)) rect(cx * 4, cy * 4, 4, 4, 0x0b0d1a, .9, 7);
           if (s.zone === "lair") {
             if (!s.gates.includes("lair")) { const door = this.add.rectangle((LAIR_DOOR.x + .5) * 64, 10 * 64, 64, 128, color("--primary"), .55).setDepth(4); this.scenery.push(door); text(LAIR_DOOR, s.scrolls.includes("lair") ? "❓" : "🔒", 32).setY(10 * 64); }
             DUEL_TILES.forEach((t, i) => {
@@ -170,7 +201,8 @@ export function WorldCanvas(props: Props) {
           while (this.trail.length > 2 && (this.trail[1]?.t ?? now) <= now - 500) this.trail.shift();
           const past = this.trail[0]; const pet = live.current.pet.current;
           if (pet && past) {
-            const lag = this.trail.find(e => e.t >= now - 500) ?? past;
+            const stay = live.current.state.pet; const found = this.trail.find(e => e.t >= now - 500) ?? past;
+            const lag = stay ? { x: (stay.x + .5) * 64, y: (stay.y + .5) * 64, walking: false, t: now } : found;
             const px = lag.x; const py = lag.y;
             pet.style.transform = `translate(${(px - cam.worldView.x) * cam.zoom}px, ${(py - cam.worldView.y) * cam.zoom}px)`;
             pet.style.setProperty("--pet-size", `${70 * cam.zoom}px`);
