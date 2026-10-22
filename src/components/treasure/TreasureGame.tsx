@@ -22,7 +22,8 @@ export function TreasureGame() {
   const controls = useRef<WorldControls | null>(null);
   const figure = useRef<HTMLDivElement | null>(null);
   const petRef = useRef<HTMLDivElement | null>(null);
-  const companion = PETS.find(p => p.id === usePets().active);
+  const pets = usePets();
+  const companion = PETS.find(p => p.id === pets.active);
   const [panel, setPanel] = useState<"logbook" | "map" | "quests" | null>(null);
   const [tab, setTab] = useState<"relics" | "gear" | "wardrobe">("relics");
   const [reward, setReward] = useState<Relic | null>(null);
