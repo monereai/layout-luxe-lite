@@ -104,8 +104,8 @@ export function WorldCanvas(props: Props) {
           if (el) {
             el.style.transform = `translate(${(p.x - cam.worldView.x) * cam.zoom}px, ${(p.y - cam.worldView.y) * cam.zoom}px)`;
             el.style.setProperty("--monere-size", `${140 * cam.zoom}px`);
-            el.dataset.facing = this.facing < 0 ? "left" : "right";
-            el.dataset.moving = walking ? "true" : "false";
+            el.dataset["facing"] = this.facing < 0 ? "left" : "right";
+            el.dataset["moving"] = walking ? "true" : "false";
             const body = el.firstElementChild; body?.classList.toggle("walk-bounce", walking); body?.classList.toggle("idle-breath", !walking);
           }
           if (walking && this.time.now - this.lastStep > 260) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
