@@ -1,6 +1,6 @@
 # Pet Shop and app navigation restoration
-- [ ] Restore Pet Shop and Points Shop/Wardrobe in the shared menu on every page, including the full-screen adventure.
-- [ ] Verify dashboard, adventure and shop navigation plus pet inventory, buying, equipping and reload on isolated QA.
+- [x] Restore Pet Shop and Points Shop/Wardrobe in the shared menu on every page, including the full-screen adventure, with a direct Pet Shop header link.
+- [x] Verify guest/signed-in navigation, all activity pages, 13 pets, saved puppy equip/unequip/reload, free owned-pet buy and rejected unaffordable purchase on isolated QA; 55 focused tests pass and build OK. No new paid purchase tested (QA has 100 points); Carl untouched. Preview-only.
 
 # Treasure Hunt RPG
 - [x] Monere map walk: CSS walk-bounce while moving, left/right flip, idle-breath when stopped.
