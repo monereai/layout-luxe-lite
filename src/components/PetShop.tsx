@@ -66,11 +66,13 @@ export function PetShop() {
               <span className={`mb-2 w-fit rounded-md border px-2 py-0.5 font-body text-xs font-bold ${RARITY_STYLE[rarity]}`}>{rarity}</span>
               <p className="font-heading text-sm font-semibold">{pet.name}</p>
               <p className="font-body text-xs text-muted-foreground">{pet.description}</p>
-              <p className="mb-3 mt-1 flex items-center gap-1 font-heading text-xs font-semibold text-points"><Award className="h-3.5 w-3.5" />{pet.cost} pts</p>
+              <p className="mb-3 mt-1 flex items-center gap-1 font-heading text-xs font-semibold text-points"><Award className="h-3.5 w-3.5" />{pet.reward ? "Adventure reward" : `${pet.cost} pts`}</p>
               {st === "equipped" ? (
                 <Button size="sm" variant="secondary" className={BUTTON} disabled={busy === pet.id} onClick={() => run("unequip", pet)} aria-label={`${pet.name} equipped — tap to unequip`}><Check /> Equipped · Unequip</Button>
               ) : st === "owned" ? (
                 <Button size="sm" variant="outline" className={BUTTON} disabled={busy === pet.id} onClick={() => run("equip", pet)}>Equip</Button>
+              ) : st === "reward" ? (
+                <Button size="sm" variant="outline" className={BUTTON} disabled><Lock /> Rescue it in the adventure</Button>
               ) : (
                 <Button size="sm" className={`${BUTTON} ${st === "unaffordable" ? "opacity-60" : ""}`} disabled={st === "unaffordable" || busy === pet.id} onClick={() => run("buy", pet)}>
                   {st === "unaffordable" && <Lock />} Buy for {pet.cost} pts
