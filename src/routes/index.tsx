@@ -7,7 +7,7 @@ import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
-  validateSearch: (s: Record<string, unknown>): { dilemma?: number } => ({ dilemma: s.dilemma === "1" || s.dilemma === 1 ? 1 : undefined }),
+  validateSearch: (s: Record<string, unknown>): { dilemma?: number | undefined } => ({ dilemma: s["dilemma"] === "1" || s["dilemma"] === 1 ? 1 : undefined }),
   head: () => ({ meta: [
     { title: "Monere Treasure Hunt — MonereAI" },
     { name: "description", content: "Explore Monere's Meadow, Whispering Forest and Sky Isles. Solve riddles, discover treasures and grow in courage, kindness and Christian wisdom." },

@@ -24,7 +24,7 @@ export function WorldCanvas(props: Props) {
         background?: Phaser.GameObjects.Image;
         markers: Phaser.GameObjects.Image[] = [];
         portals: Phaser.GameObjects.Container[] = [];
-        keys?: Record<string, Phaser.Input.Keyboard.Key>;
+        keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         preload() { this.load.image("meadow", meadow); this.load.image("forest", forest); this.load.image("sky", sky); this.load.image("chest", chest); this.load.image("lion", live.current.avatar); }
         create() {
@@ -53,7 +53,7 @@ export function WorldCanvas(props: Props) {
         sync(force = false) {
           const s = live.current.state; const key = `${s.zone}:${s.relics.join()}:${s.gear.join()}:${live.current.revision}`;
           if (key === this.lastState && !force) return;
-          const changedZone = this.lastState.split(":")[0] !== s.zone;
+          const changedZone = this.lastState.split(":")[0] !== s.zone || this.lastState.split(":")[3] !== String(live.current.revision);
           this.lastState = key;
           this.background?.setTexture(s.zone);
           if (changedZone || force) { this.path = []; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
@@ -71,14 +71,14 @@ export function WorldCanvas(props: Props) {
             const node = this.add.container((p.x + .5) * 64, (p.y + .5) * 64, [ring, label]); this.portals.push(node);
           });
         }
-        update() {
+        override update() {
           if (!this.player) return;
           this.sync();
           if (this.paused || this.moving) return;
           const keys = this.keys;
           let dx = this.direction.x; let dy = this.direction.y;
-          if (keys?.LEFT?.isDown || keys?.A?.isDown) dx = -1; else if (keys?.RIGHT?.isDown || keys?.D?.isDown) dx = 1;
-          if (keys?.UP?.isDown || keys?.W?.isDown) dy = -1; else if (keys?.DOWN?.isDown || keys?.S?.isDown) dy = 1;
+          if (keys?.['LEFT']?.isDown || keys?.['A']?.isDown) dx = -1; else if (keys?.['RIGHT']?.isDown || keys?.['D']?.isDown) dx = 1;
+          if (keys?.['UP']?.isDown || keys?.['W']?.isDown) dy = -1; else if (keys?.['DOWN']?.isDown || keys?.['S']?.isDown) dy = 1;
           const s = live.current.state;
           const next = dx || dy ? { x: s.x + dx, y: s.y + (dx ? 0 : dy) } : this.path.shift();
           if (!next || !walkable(s.zone, next.x, next.y)) return;

@@ -73,11 +73,11 @@ export function parseAdventure(value: unknown): AdventureState {
   const fallback = initialAdventure();
   if (!value || typeof value !== "object") return fallback;
   const s = value as Record<string, unknown>;
-  const relics = Array.isArray(s.relics) ? RELICS.filter(r => (s.relics as unknown[]).includes(r.id)).map(r => r.id) : [];
+  const relics = Array.isArray(s['relics']) ? RELICS.filter(r => (s['relics'] as unknown[]).includes(r.id)).map(r => r.id) : [];
   const tools = TOOLS.filter(t => RELICS.some(r => r.tool === t.id && relics.includes(r.id))).map(t => t.id);
-  const zone = ZONES.find(z => z.id === s.zone)?.id ?? "meadow";
+  const zone = ZONES.find(z => z.id === s['zone'])?.id ?? "meadow";
   const partial = { ...fallback, relics, tools };
   const validZone = canEnter(partial, zone) ? zone : "meadow";
-  const x = typeof s.x === "number" ? s.x : fallback.x; const y = typeof s.y === "number" ? s.y : fallback.y;
-  return { ...partial, zone: validZone, ...(walkable(validZone, x, y) ? { x, y } : {}), gear: Array.isArray(s.gear) ? tools.filter(t => (s.gear as unknown[]).includes(t)) : tools, unlocked: ZONES.filter(z => canEnter(partial, z.id)).map(z => z.id) };
+  const x = typeof s['x'] === "number" ? s['x'] : fallback.x; const y = typeof s['y'] === "number" ? s['y'] : fallback.y;
+  return { ...partial, zone: validZone, ...(walkable(validZone, x, y) ? { x, y } : {}), gear: Array.isArray(s['gear']) ? tools.filter(t => (s['gear'] as unknown[]).includes(t)) : tools, unlocked: ZONES.filter(z => canEnter(partial, z.id)).map(z => z.id) };
 }
