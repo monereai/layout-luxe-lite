@@ -20,7 +20,7 @@ import { runWebMCPTool } from "@/lib/webmcp-telemetry";
 import { QaPanel } from "@/components/QaPanel";
 import { GuestRewardHost, GuestPointsTransfer } from "@/components/GuestSignupModal";
 
-const tabs = [
+const allTabs = [
   { to: "/", label: "talk", icon: BookOpen },
   { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
@@ -29,7 +29,7 @@ const tabs = [
   { to: "/jigsaw", label: "jigsaw", icon: Puzzle },
 ] as const;
 
-const menuItems = [
+const allMenuItems = [
   { to: "/", label: "talk", icon: BookOpen },
   { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
@@ -38,6 +38,13 @@ const menuItems = [
   { to: "/jigsaw", label: "jigsaw", icon: Puzzle },
   { to: "/shop", label: "shop", icon: Coins },
 ] as const;
+
+// While the treasure hunt is under maintenance its menu entries (desktop side
+// menu, phone bottom bar, phone drawer and webMCP navigation) disappear.
+const visible = <T extends { to: string }>(items: readonly T[]) =>
+  items.filter(item => !(TREASURE_MAINTENANCE && item.to === "/treasure"));
+const tabs = visible(allTabs);
+const menuItems = visible(allMenuItems);
 
 export function AppShell({ children, hideCrisisBar = false, adventure = false }: { children: ReactNode; hideCrisisBar?: boolean; adventure?: boolean }) {
   const [open, setOpen] = useState(false);
