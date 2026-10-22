@@ -8,6 +8,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { useCare } from "@/hooks/useCare";
 import { energyGain } from "@/lib/care";
 import { useT, useLang, setLang, LANGS, type Lang } from "@/lib/i18n";
+import { TREASURE_MAINTENANCE } from "@/lib/treasureGate";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
