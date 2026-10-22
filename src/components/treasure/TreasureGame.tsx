@@ -4,6 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Backpack, BookOpen, Check, C
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { MonereFigure } from "@/components/MonereFigure";
+import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
 import { RELICS, REWARD_SETS, TOOLS, ZONES, PORTALS, canCollect, type Relic } from "@/lib/treasure";
 import { equippedItems, SHOP_ITEMS, useShop } from "@/lib/shop";
@@ -20,6 +21,8 @@ export function TreasureGame() {
   const game = useAdventure(); const { state } = game;
   const controls = useRef<WorldControls | null>(null);
   const figure = useRef<HTMLDivElement | null>(null);
+  const petRef = useRef<HTMLDivElement | null>(null);
+  const companion = PETS.find(p => p.id === usePets().active);
   const [panel, setPanel] = useState<"logbook" | "map" | "quests" | null>(null);
   const [tab, setTab] = useState<"relics" | "gear" | "wardrobe">("relics");
   const [reward, setReward] = useState<Relic | null>(null);
@@ -79,7 +82,8 @@ export function TreasureGame() {
     </header>
     <div className="treasure-viewport">
       <img src={maps[state.zone]} alt="" width={1536} height={1536} className="absolute inset-0 h-full w-full object-cover" />
-      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} onMove={game.move} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
+      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} onMove={game.move} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
+      {companion && <div ref={petRef} className="treasure-pet" data-facing="east" aria-hidden="true"><div className="idle-breath"><div className={reward ? "pet-celebrate" : undefined}><img src={companion.src} alt="" draggable={false} /></div></div></div>}
       <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" aria-hidden="true"><div className="idle-breath">{(["east", "south", "west", "north"] as const).map(dir => <img key={dir} data-dir={dir} src={turn[dir] ?? avatar} alt="" draggable={false} />)}</div></div>
       <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{quest ? "Your next discovery" : "Zone complete"}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Open quest scroll" onClick={() => setPanel("quests")}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{quest?.clue ?? (state.relics.length === 18 ? "All 18 relics found. The greatest treasure is the wisdom you share." : "Every relic found! A new wardrobe reward is waiting in your logbook.")}</p><div className="mt-2 flex gap-1" aria-label={`${zoneRelics.filter(r => state.relics.includes(r.id)).length} of 6 zone relics found`}>{zoneRelics.map(r => <span key={r.id} className={`h-1.5 flex-1 rounded-full ${state.relics.includes(r.id) ? "bg-primary" : "bg-muted"}`} />)}</div></div>
       <div className="treasure-map-chip"><span>{zone?.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>

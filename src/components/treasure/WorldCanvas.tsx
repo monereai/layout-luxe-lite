@@ -7,7 +7,7 @@ import chest from "@/assets/treasure/chest.png";
 import { PORTALS, RELICS, TILE_SIZE, walkable, type AdventureState, type Position } from "@/lib/treasure";
 
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
-type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; onInteract: () => void };
+type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void };
 export function WorldCanvas(props: Props) {
   const host = useRef<HTMLDivElement>(null);
   const live = useRef(props); live.current = props;
@@ -26,7 +26,7 @@ export function WorldCanvas(props: Props) {
         portals: Phaser.GameObjects.Container[] = [];
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
-        shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false;
+        shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
         preload() { this.load.image("meadow", meadow); this.load.image("forest", forest); this.load.image("sky", sky); this.load.image("chest", chest); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
@@ -107,6 +107,17 @@ export function WorldCanvas(props: Props) {
             el.dataset["facing"] = this.facing;
             el.dataset["moving"] = walking ? "true" : "false";
             const body = el.firstElementChild; body?.classList.toggle("walk-bounce", walking); body?.classList.toggle("idle-breath", !walking);
+          }
+          // Companion follows the path Monere walked half a second ago.
+          const now = this.time.now; this.trail.push({ t: now, x: p.x, y: p.y, walking });
+          while (this.trail.length > 2 && (this.trail[1]?.t ?? now) <= now - 500) this.trail.shift();
+          const past = this.trail[0]; const pet = live.current.pet.current;
+          if (pet && past) {
+            const lag = this.trail.find(e => e.t >= now - 500) ?? past;
+            pet.style.transform = `translate(${(lag.x - cam.worldView.x) * cam.zoom}px, ${(lag.y - cam.worldView.y) * cam.zoom}px)`;
+            pet.style.setProperty("--pet-size", `${70 * cam.zoom}px`);
+            pet.dataset["facing"] = lag.x > p.x + 2 ? "west" : lag.x < p.x - 2 ? "east" : pet.dataset["facing"] ?? "east";
+            const body = pet.firstElementChild; body?.classList.toggle("walk-bounce", lag.walking); body?.classList.toggle("idle-breath", !lag.walking);
           }
           if (walking && this.time.now - this.lastStep > 260) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
         }
