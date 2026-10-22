@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type RefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -6,13 +6,14 @@ import * as THREE from "three";
 const YAW: Record<string, number> = { south: 0, east: Math.PI / 2, north: Math.PI, west: -Math.PI / 2 };
 const FUR = "#d9a24a", MANE = "#8a4a1c", HOODIE = "#22305a", SHIRT = "#f0931e", DARK = "#2a1a10";
 
-function Lion({ host }: { host: HTMLElement | null }) {
+function Lion({ hostRef }: { hostRef: RefObject<HTMLElement | null> }) {
   const root = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
   const legL = useRef<THREE.Mesh>(null), legR = useRef<THREE.Mesh>(null), armL = useRef<THREE.Group>(null), armR = useRef<THREE.Group>(null), tail = useRef<THREE.Group>(null);
   const t = useRef(0), stride = useRef(0);
   useFrame((_, raw) => {
     const dt = Math.min(raw, 0.05);
+    const host = hostRef.current;
     const facing = host?.dataset["facing"] ?? "south";
     const moving = host?.dataset["moving"] === "true";
     const g = root.current; if (!g) return;
@@ -70,12 +71,12 @@ function Lion({ host }: { host: HTMLElement | null }) {
 }
 
 /** True 3D Monere for the treasure map; reads facing/moving from the host's data attributes each frame. */
-export default function Monere3D({ host }: { host: HTMLElement | null }) {
+export default function Monere3D({ hostRef }: { hostRef: RefObject<HTMLElement | null> }) {
   return (
     <Canvas dpr={[1, 2]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 2.6, 6.2], fov: 30 }} onCreated={({ camera }) => camera.lookAt(0, 1.25, 0)} style={{ pointerEvents: "none" }}>
       <hemisphereLight args={["#fff6e0", "#5a7a3a", 1.4]} />
       <directionalLight position={[3, 6, 5]} intensity={1.8} />
-      <Lion host={host} />
+      <Lion hostRef={hostRef} />
     </Canvas>
   );
 }
