@@ -323,6 +323,20 @@
       "when": 1792676292471,
       "tag": "0045_griffin_world_expansion",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1792678106196,
+      "tag": "0046_griffin_random_riddles",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1792678164097,
+      "tag": "0047_griffin_riddle_pool",
+      "breakpoints": true
     }
   ]
 }

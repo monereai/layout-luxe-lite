@@ -1,9 +1,9 @@
-// The Rescue of the Golden Griffin — pure rules shared by the browser and mirrored in SQL (treasure_v3_action).
+// The Rescue of the Golden Griffin — pure rules shared by the browser and mirrored in SQL (treasure_v5_action).
 export type ZoneId = "meadow" | "wood" | "ravine" | "lair";
 export type Position = { x: number; y: number };
 export type Gear = "lantern" | "boots" | "goggles";
 export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean;
-  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>> };
+  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[] };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
 export const ZONES: { id: ZoneId; name: string; subtitle: string; icon: string }[] = [
@@ -24,17 +24,52 @@ export const SCROLL_CLUES: Record<ZoneId, string> = {
   ravine: "The canyon keeps its scroll well hidden. Search carefully on both sides of the bridge.",
   lair: "The last scroll rests on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
 };
-export const GATES: Record<ZoneId, { riddle: string; options: string[]; answer: number }> = {
-  meadow: { riddle: "I have hands, but I cannot clap. I have a face, but I cannot smile. What am I?", options: ["A Clock", "A Mirror", "A Book"], answer: 0 },
-  wood: { riddle: "What gets wetter and wetter the more it dries?", options: ["A Sponge", "A Towel", "A Cloud"], answer: 1 },
-  ravine: { riddle: "I have keys, but no locks. I have space, but no room. You can enter, but you can't go outside. What am I?", options: ["A Door", "A Keyboard", "A Treasure Chest"], answer: 1 },
-  lair: { riddle: "What belongs to you, but other people use it far more than you do?", options: ["Your Shoes", "Your Toys", "Your Name"], answer: 2 },
-};
-export const DUEL = [
-  { riddle: "I fly without wings and cry without eyes. Wherever I go, darkness flies. What am I?", tiles: ["A Bird", "A Cloud", "An Airplane"], answer: 1 },
-  { riddle: "I am tall when I am young, and I am short when I am old. What am I?", tiles: ["A Tree", "A Pencil", "A Candle"], answer: 2 },
-  { riddle: "What comes down, but never goes up?", tiles: ["Rain", "An Elevator", "A Ball"], answer: 0 },
+/** Master riddle pool (mirrored in SQL treasure_v5_riddle_answers). `answer` indexes the unshuffled options. */
+export type PoolRiddle = { riddle: string; options: [string, string, string]; answer: number; hint: string };
+export const RIDDLE_POOL: PoolRiddle[] = [
+  { riddle: "I have hands, but I cannot clap. I have a face, but I cannot smile. What am I?", options: ["A Clock", "A Mirror", "A Book"], answer: 0, hint: "The answer keeps time, tick-tock!" },
+  { riddle: "What gets wetter and wetter the more it dries?", options: ["A Sponge", "A Towel", "A Cloud"], answer: 1, hint: "You use it after a bath." },
+  { riddle: "I have keys, but no locks. I have space, but no room. You can enter, but you can't go outside. What am I?", options: ["A Door", "A Keyboard", "A Treasure Chest"], answer: 1, hint: "You type on it." },
+  { riddle: "What belongs to you, but other people use it far more than you do?", options: ["Your Shoes", "Your Toys", "Your Name"], answer: 2, hint: "Friends call you by it." },
+  { riddle: "I fly without wings and cry without eyes. Wherever I go, darkness flies. What am I?", options: ["A Bird", "A Cloud", "An Airplane"], answer: 1, hint: "Look up on a rainy day." },
+  { riddle: "I am tall when I am young, and I am short when I am old. What am I?", options: ["A Tree", "A Pencil", "A Candle"], answer: 2, hint: "It melts as it glows." },
+  { riddle: "What comes down, but never goes up?", options: ["Rain", "An Elevator", "A Ball"], answer: 0, hint: "Bring an umbrella!" },
+  { riddle: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter"], answer: 1, hint: "It's the fourth planet from the Sun." },
+  { riddle: "How many legs does a spider have?", options: ["Six", "Eight", "Ten"], answer: 1, hint: "Two more than an insect." },
+  { riddle: "What has a neck but no head?", options: ["A Bottle", "A Snake", "A Chair"], answer: 0, hint: "You can pour from it." },
+  { riddle: "What do bees make?", options: ["Milk", "Honey", "Silk"], answer: 1, hint: "It's sweet and sticky." },
+  { riddle: "What is full of holes but still holds water?", options: ["A Bucket", "A Sponge", "A Net"], answer: 1, hint: "You squeeze it when washing up." },
+  { riddle: "Which is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Pacific"], answer: 2, hint: "Its name means peaceful." },
+  { riddle: "What has to be broken before you can use it?", options: ["An Egg", "A Window", "A Pencil"], answer: 0, hint: "Think breakfast!" },
+  { riddle: "Which gas do plants take in that we breathe out?", options: ["Oxygen", "Carbon Dioxide", "Helium"], answer: 1, hint: "Its short name is CO₂." },
+  { riddle: "What can travel around the world while staying in a corner?", options: ["A Stamp", "A Spider", "A Shadow"], answer: 0, hint: "You find it on a letter." },
 ];
+/** Slots 0–3 are the zone gates (meadow, wood, ravine, lair); 4–6 are Razor's duel. `o` maps shown position → pool option. */
+export type RiddleSlot = { i: number; o: number[] };
+export const RIDDLE_SLOTS = 7;
+export const defaultRiddles = (): RiddleSlot[] => Array.from({ length: RIDDLE_SLOTS }, (_, i) => ({ i, o: [0, 1, 2] }));
+export function randomRiddles(rand: () => number = Math.random): RiddleSlot[] {
+  const shuffle = <T,>(a: T[]) => { const b = [...a]; for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(rand() * (k + 1)); [b[k], b[j]] = [b[j]!, b[k]!]; } return b; };
+  return shuffle(RIDDLE_POOL.map((_, i) => i)).slice(0, RIDDLE_SLOTS).map(i => ({ i, o: shuffle([0, 1, 2]) }));
+}
+export function validRiddles(v: unknown): RiddleSlot[] | null {
+  if (!Array.isArray(v) || v.length !== RIDDLE_SLOTS) return null;
+  const out: RiddleSlot[] = []; const used = new Set<number>();
+  for (const r of v) {
+    const i = (r as RiddleSlot)?.i; const o = (r as RiddleSlot)?.o;
+    if (!Number.isInteger(i) || i < 0 || i >= RIDDLE_POOL.length || used.has(i) || !Array.isArray(o) || o.length !== 3 || [...o].sort().join() !== "0,1,2") return null;
+    used.add(i); out.push({ i, o: [...o] });
+  }
+  return out;
+}
+export type ShownRiddle = { riddle: string; options: string[]; answer: number; hint: string };
+export function riddleAt(s: AdventureState, slot: number): ShownRiddle {
+  const r = s.riddles[slot] ?? { i: slot, o: [0, 1, 2] }; const p = RIDDLE_POOL[r.i]!;
+  return { riddle: p.riddle, options: r.o.map(k => p.options[k]!), answer: r.o.indexOf(p.answer), hint: p.hint };
+}
+export const gateRiddle = (s: AdventureState, zone: ZoneId) => riddleAt(s, ZONES.findIndex(z => z.id === zone));
+export const duelRiddle = (s: AdventureState, round = s.duel) => riddleAt(s, 4 + Math.min(round, 2));
+export const DUEL_ROUNDS = 3;
 export const DUEL_TILES: Position[] = [{ x: 10, y: 6 }, { x: 12, y: 6 }, { x: 14, y: 6 }];
 export const DUEL_START: Position = { x: 12, y: 8 };
 export const LAIR_DOOR: Position = { x: 12, y: 10 };
@@ -48,7 +83,7 @@ export const PORTALS: Record<ZoneId, Portal[]> = {
   lair: [{ x: 12, y: 21, target: "ravine", arrive: { x: 20, y: 17 }, forward: false }],
 };
 export const near = (a: Position, b: Position) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 1;
-export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {} }); }
+export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {}, riddles: defaultRiddles() }); }
 export function walkable(zone: ZoneId, x: number, y: number): boolean {
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 2 || x > 21 || y < 2 || y > 21) return false;
   if (zone === "meadow") return y < 21 || (x >= 11 && x <= 13);
@@ -95,12 +130,12 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "switch") { if (s.zone !== "ravine" || s.x !== PLATE_HERO.x || s.y !== PLATE_HERO.y || s.pet?.x !== PLATE_PET.x) return s; return { ...s, pet: null, quests: s.quests.includes("vault") ? s.quests : [...s.quests, "vault"], items: s.items.includes(VAULT_RELIC) ? s.items : [...s.items, VAULT_RELIC] }; }
   if (a.action === "call") return { ...s, pet: null };
   if (a.action === "collect") return !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
-  if (a.action === "answer") return gateHere(s) === a.id && a.x === GATES[s.zone].answer ? { ...s, gates: [...s.gates, s.zone] } : s;
+  if (a.action === "answer") return gateHere(s) === a.id && a.x === gateRiddle(s, s.zone).answer ? { ...s, gates: [...s.gates, s.zone] } : s;
   if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && (!p.forward || s.gates.includes(s.zone)) ? { ...s, zone: p.target, ...p.arrive, pet: null } : s; }
   if (a.action === "duel") {
     const tile = duelTileAt(s); if (tile < 0 || tile !== a.x) return s;
-    if (tile !== DUEL[s.duel]!.answer) return { ...s, ...DUEL_START };
-    const duel = s.duel + 1; return { ...s, duel, rescued: duel === DUEL.length };
+    if (tile !== duelRiddle(s).answer) return { ...s, ...DUEL_START };
+    const duel = s.duel + 1; return { ...s, duel, rescued: duel === DUEL_ROUNDS };
   }
   return s;
 }
@@ -108,7 +143,7 @@ export function questClue(s: AdventureState): string {
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
   if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
   if (!s.gates.includes(s.zone)) return s.zone === "lair" ? "Scroll found! Go to the carved inner door in the middle of the lair and answer its riddle." : "Scroll found! Walk to the eastern gate and answer the gatekeeper's riddle.";
-  if (s.zone === "lair") return `Riddle Duel ${s.duel + 1}/3: ${DUEL[s.duel]!.riddle} Hop onto the right tile.`;
+  if (s.zone === "lair") return `Riddle Duel ${s.duel + 1}/3: ${duelRiddle(s).riddle} Hop onto the right tile.`;
   return "The gate is open. Travel onward through the portal!";
 }
 export function parseAdventure(value: unknown): AdventureState {
@@ -122,7 +157,7 @@ export function parseAdventure(value: unknown): AdventureState {
   const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
   for (const id of ids) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 36); }
   let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
-    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog };
+    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles() };
   const zone = ids.find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
   if (st.zone !== "ravine") st = { ...st, pet: null };
@@ -188,7 +223,8 @@ export const inCave = (x: number, y: number) => x >= 18 && y <= 6;
 export const onCliff = (x: number, y: number) => x >= 15 && y <= 7;
 export const inChasm = (x: number, y: number) => x >= 2 && x <= 9 && y >= 12 && y <= 18;
 export const onPlatform = (x: number, y: number) => x >= 4 && x <= 6 && y >= 14 && y <= 16;
-export const isHiddenPath = (x: number, y: number) => y === 15 && x >= 7 && x <= 9;
+/** Goggle-revealed bridge: three tiles wide so Monere and his pet cross the chasm cleanly. */
+export const isHiddenPath = (x: number, y: number) => y >= 14 && y <= 16 && x >= 7 && x <= 9;
 export const isTrap = (x: number, y: number) => TRAPS.some(t => t.x === x && t.y === y);
 /** Fog of war: 6×6 chunks of 4×4 tiles; Monere uncovers his chunk and its neighbours. */
 export function reveal(s: AdventureState): AdventureState {
