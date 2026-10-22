@@ -184,7 +184,7 @@ function MiniMap({ state, className }: { state: AdventureState; className?: stri
   const chunks = Array.from({ length: 36 }, (_, i) => i);
   return <div className={`overflow-hidden rounded-lg border-2 border-primary/50 bg-background/80 shadow-lg ${className ?? ""}`} aria-label="Mini-map">
     <svg viewBox="0 0 24 24" className="block aspect-square w-full"><image href={maps[state.zone]} x="0" y="0" width="24" height="24" preserveAspectRatio="none" />
-      {chunks.map(c => !isRevealed(state, state.zone, (c % 6) * 4, Math.floor(c / 6) * 4) && <rect key={c} x={(c % 6) * 4} y={Math.floor(c / 6) * 4} width="4.05" height="4.05" className="fill-background" />)}
+      {chunks.map(c => !isRevealed(state, state.zone, (c % 6) * 4, Math.floor(c / 6) * 4) && <rect key={c} x={(c % 6) * 4} y={Math.floor(c / 6) * 4} width="4.05" height="4.05" className="fill-muted" opacity=".92" />)}
       {PORTALS[state.zone].filter(p => isRevealed(state, state.zone, p.x, p.y)).map(p => <circle key={p.target} cx={p.x + .5} cy={p.y + .5} r=".9" className="fill-energy" />)}
       {NPCS.filter(n => n.zone === state.zone && isRevealed(state, state.zone, n.x, n.y)).map(n => <circle key={n.id} cx={n.x + .5} cy={n.y + .5} r=".8" className="fill-points" />)}
       <circle cx={state.x + .5} cy={state.y + .5} r="1.1" className="fill-primary stroke-foreground" strokeWidth=".3" />
