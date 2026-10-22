@@ -33,7 +33,7 @@ import { openGuestReward } from "@/components/GuestSignupModal";
 import { guestCompleted } from "@/lib/guest-preview";
 import { DailyDilemmaModal } from "@/components/DailyDilemmaModal";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/mentor")({
   staticData: { sitemap: true },
   validateSearch: (s: Record<string, unknown>): { dilemma?: number | undefined; [key: string]: unknown } => ({
     ...s,
@@ -61,7 +61,7 @@ function Home() {
   useEffect(() => { if (dilemma === 1) setDilemmaOpen(true); }, [dilemma]);
   const closeDilemma = () => {
     setDilemmaOpen(false);
-    if (dilemma === 1) void navigate({ to: "/", search: (prev) => ({ ...prev, dilemma: undefined }) });
+    if (dilemma === 1) void navigate({ to: "/mentor", search: (prev) => ({ ...prev, dilemma: undefined }) });
   };
   const ask = useServerFn(seekWisdom);
   const askGuest = useServerFn(seekWisdomGuest);
