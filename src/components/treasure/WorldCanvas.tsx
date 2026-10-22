@@ -81,8 +81,22 @@ export function WorldCanvas(props: Props) {
           }
           if (s.zone === "lair") {
             if (!s.gates.includes("lair")) { const door = this.add.rectangle((LAIR_DOOR.x + .5) * 64, 10 * 64, 64, 128, color("--primary"), .55).setDepth(4); this.scenery.push(door); text(LAIR_DOOR, s.scrolls.includes("lair") ? "❓" : "🔒", 32).setY(10 * 64); }
-            DUEL_TILES.forEach((t, i) => { const r = this.add.rectangle(...at(t), 60, 60, color("--points"), s.rescued ? .2 : .45).setStrokeStyle(3, color("--primary")).setDepth(2); this.scenery.push(r); text(t, "ABC"[i]!, 28); });
-            const start = this.add.circle(...at(DUEL_START), 20, color("--energy"), .4).setDepth(2); this.scenery.push(start);
+            DUEL_TILES.forEach((t, i) => {
+              const [cx, cy] = at(t); const g = this.add.graphics().setDepth(2); this.scenery.push(g);
+              const gold = color("--points"), deep = color("--primary");
+              g.fillStyle(gold, s.rescued ? .12 : .28).fillRoundedRect(cx - 34, cy - 34, 68, 68, 16); // outer glow
+              g.fillStyle(0x000000, .35).fillRoundedRect(cx - 27, cy - 23, 56, 56, 12); // drop shadow
+              g.fillStyle(deep, .92).fillRoundedRect(cx - 28, cy - 28, 56, 56, 12); // stone body
+              g.fillStyle(0xffffff, .14).fillRoundedRect(cx - 24, cy - 25, 48, 20, { tl: 9, tr: 9, bl: 4, br: 4 }); // top shine
+              g.lineStyle(3, gold, 1).strokeRoundedRect(cx - 28, cy - 28, 56, 56, 12);
+              g.lineStyle(1.5, gold, .55).strokeRoundedRect(cx - 21, cy - 21, 42, 42, 8);
+              const label = this.add.text(cx, cy, "ABC"[i]!, { fontSize: "30px", fontFamily: "Fredoka, sans-serif", fontStyle: "700", color: getComputedStyle(document.documentElement).getPropertyValue("--points").trim() || "#FFB800", stroke: "#3a2200", strokeThickness: 5 }).setOrigin(.5).setDepth(3);
+              label.setShadow(0, 2, "#000", 4, true, true); this.scenery.push(label);
+              if (!this.reduced && !s.rescued) { this.tweens.add({ targets: [g, label], alpha: .78, duration: 900 + i * 150, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); }
+            });
+            const ring = this.add.circle(...at(DUEL_START), 22, color("--energy"), .25).setStrokeStyle(3, color("--energy"), .9).setDepth(2); this.scenery.push(ring);
+            const mark = text(DUEL_START, "✦", 26); mark.setAlpha(.9);
+            if (!this.reduced) this.tweens.add({ targets: ring, scale: 1.15, alpha: .5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
             if (!s.rescued) { const hy = this.add.image(...at(RAZOR), "razor").setDisplaySize(130, 130).setDepth(5); this.scenery.push(hy); }
             const g = this.add.image(...at(CAGE), "griffin").setDisplaySize(110, 110).setDepth(5); this.scenery.push(g);
             if (!s.rescued) for (let i = -2; i <= 2; i++) { const bar = this.add.rectangle(at(CAGE)[0] + i * 22, at(CAGE)[1], 5, 120, color("--foreground"), .8).setDepth(6); this.scenery.push(bar); }
