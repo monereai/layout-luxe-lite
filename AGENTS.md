@@ -48,4 +48,4 @@
 - Never alias entities root: parse5 needs its own version.
 
 - Treasure uses lazy browser-only Phaser and account-scoped SQL step/collection validation; wardrobe_action grants fixed relic-set gifts. Guest saves never import into rewards.
-- Griffin world (treasure_v4_action/travel) keeps older treasure RPCs for the published client; v4 validates movement gates (gear, lily phase, traps), scrolls, riddles, NPC deliveries, digs and plates per saved step, pays points only via one-time point_credits references, and alone grants the reward-only golden-griffin pet. Why: staged deployment and optimistic movement must not bypass puzzles or replay rewards.
+- Griffin world (treasure_v5_action/travel) keeps older treasure RPCs for the published client; v5 draws each save's riddle slots and option order from the pool server-side and validates movement gates (gear, lily phase, traps), scrolls, riddles, NPC deliveries, digs and plates per saved step, pays points only via one-time point_credits references, and alone grants the reward-only golden-griffin pet. Why: staged deployment and optimistic movement must not bypass puzzles or replay rewards.
