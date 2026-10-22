@@ -74,8 +74,9 @@ export function TreasureGame() {
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
   const settled = useRef("");
   useEffect(() => {
-    const tile = duelTileAt(state); const key = `${state.x},${state.y},${state.duel}`;
-    if (tile < 0 || busy || settled.current === key) return;
+    const tile = duelTileAt(state); const key = `${state.x},${state.y}`;
+    if (tile < 0) { settled.current = ""; return; }
+    if (blocked || settled.current === key) return;
     const timer = setTimeout(async () => {
       settled.current = key; setBusy(true);
       try {
@@ -85,7 +86,7 @@ export function TreasureGame() {
       } catch { /* hook reports */ } finally { setBusy(false); }
     }, 400);
     return () => clearTimeout(timer);
-  }, [state.x, state.y, state.duel, state.zone, busy]);
+  }, [state.x, state.y, state.duel, state.zone, blocked]);
 
   async function run(action: Parameters<typeof game.act>[0]) { setBusy(true); try { return await game.act(action); } catch { return null; } finally { setBusy(false); } }
   async function interact() {
