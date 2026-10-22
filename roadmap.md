@@ -1,3 +1,7 @@
+# Razor’s Lair review
+- [ ] Remove stray colour overlays and align visible routes with stone access.
+- [ ] Verify chasm, locked door and answer-stone access in a browser without changing Carl’s account.
+
 # Progressive Treasure Hunt
 - [x] Implement 3/2/1 chests, fragments, landmark riddles, matching puzzle and stage victory portals.
 - [x] Add mud, wind and simultaneous companion pressure-plate gates with secure saved progression.
