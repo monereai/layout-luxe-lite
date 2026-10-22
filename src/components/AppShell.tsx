@@ -22,6 +22,7 @@ import { GuestRewardHost, GuestPointsTransfer } from "@/components/GuestSignupMo
 
 const tabs = [
   { to: "/", label: "seek", icon: Compass },
+  { to: "/mentor", label: "talk", icon: BookOpen },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -30,6 +31,7 @@ const tabs = [
 
 const menuItems = [
   { to: "/", label: "seek", icon: Compass },
+  { to: "/mentor", label: "talk", icon: BookOpen },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -37,7 +39,7 @@ const menuItems = [
   { to: "/shop", label: "shop", icon: Coins },
 ] as const;
 
-export function AppShell({ children, hideCrisisBar = false }: { children: ReactNode; hideCrisisBar?: boolean }) {
+export function AppShell({ children, hideCrisisBar = false, adventure = false }: { children: ReactNode; hideCrisisBar?: boolean; adventure?: boolean }) {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -69,7 +71,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
   });
   useWebMCP({
     name: "navigate_monere",
-    description: "Open a page from MonereAI's visible menu: Seek, Daily Verse, Journal, Find Monere, Jigsaw, Points Shop, or Monere’s Daily Dilemma.",
+    description: "Open a page from MonereAI's visible menu: Treasure Hunt, Talk to Monere, Daily Verse, Journal, Find Monere, Jigsaw, Points Shop, or Monere’s Daily Dilemma.",
     inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
       if (page === "dilemma") {
@@ -85,7 +87,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
     }),
   });
   return (
-    <div className="bg-glow relative isolate min-h-screen">
+    <div className={`bg-glow relative isolate min-h-screen ${adventure ? "adventure-shell" : ""}`}>
       <svg className="wisdom-pattern" aria-hidden="true"><defs><pattern id="wisdom-stars" width="120" height="140" patternUnits="userSpaceOnUse"><path d="M20 15v10m-5-5h10M80 90l5 8-5 8-5-8ZM105 30v6m-3-3h6" fill="none" stroke="currentColor" strokeWidth="1" /></pattern></defs><rect width="100%" height="100%" fill="url(#wisdom-stars)" /></svg>
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col px-4 pt-5 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:max-w-2xl sm:px-5 sm:pt-8 md:max-w-7xl md:px-6 md:pt-6 md:pb-6">
         <header className="mb-5 sm:mb-7 md:mb-6 md:border-b md:border-border md:pb-5">
@@ -113,7 +115,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           </div>
           <p className="mt-3 text-lg font-medium leading-relaxed text-muted-foreground sm:text-xl md:text-2xl">{t("tagline")}</p>
         </header>
-        <div className={`flex flex-1 flex-col md:grid md:items-start md:gap-5 ${collapsed ? "md:grid-cols-[3.5rem_minmax(0,1fr)] xl:grid-cols-[3.5rem_minmax(0,1fr)_15rem]" : "md:grid-cols-[11rem_minmax(0,1fr)] xl:grid-cols-[12rem_minmax(0,1fr)_15rem]"}`}>
+        <div className={adventure ? "adventure-content" : `flex flex-1 flex-col md:grid md:items-start md:gap-5 ${collapsed ? "md:grid-cols-[3.5rem_minmax(0,1fr)] xl:grid-cols-[3.5rem_minmax(0,1fr)_15rem]" : "md:grid-cols-[11rem_minmax(0,1fr)] xl:grid-cols-[12rem_minmax(0,1fr)_15rem]"}`}>
           <aside className="sticky top-6 hidden min-w-0 md:flex md:flex-col">
             <Button variant="ghost" size="icon" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand navigation" : "Collapse navigation"} title={collapsed ? "Expand navigation" : "Collapse navigation"} className="mb-5 text-muted-foreground">
               {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
@@ -122,7 +124,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
               {tabs.map(({ to, label, icon: Icon }) => (
                 <Button key={to} asChild variant="ghost" className={`font-nav h-auto min-h-11 whitespace-normal text-base font-semibold text-muted-foreground ${collapsed ? "justify-center px-2" : "justify-start px-3"}`}>
                   <Link to={to} title={t(label)} aria-label={t(label)} activeProps={{ className: "bg-primary/10 text-primary" }} activeOptions={{ exact: true }}>
-                    <Icon className="shrink-0" />{!collapsed && <span className="min-w-0">{t(label)}</span>}
+                    <Icon className="shrink-0" />{!collapsed && <span className="min-w-0">{to === "/" ? "Treasure Hunt" : t(label)}</span>}
                   </Link>
                 </Button>
               ))}
@@ -139,7 +141,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             )}
           </aside>
           <main className="relative z-0 flex min-w-0 flex-1 flex-col md:workspace-panel md:min-h-[calc(100dvh-14rem)] md:p-6 lg:p-8">{children}</main>
-          <QaPanel />
+          {!adventure && <QaPanel />}
           {user ? <GuestPointsTransfer userId={user.id} /> : <GuestRewardHost />}
           <aside aria-label="Points Shop" className="sticky top-6 hidden min-w-0 xl:block">
             <div className="flex items-center gap-2 border-b border-border pb-4 text-primary">
@@ -192,7 +194,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
           {tabs.map(({ to, label, icon: Icon }) => (
             <Link key={to} to={to} className="font-nav flex min-h-12 min-w-0 flex-1 flex-col items-center gap-0.5 px-0.5 py-2 text-xs font-semibold leading-tight text-muted-foreground" activeProps={{ className: "text-primary" }} activeOptions={{ exact: true }}>
               <Icon className="h-5 w-5 shrink-0" />
-              <span className="min-h-[2.5em] text-center leading-tight">{t(label)}</span>
+              <span className="min-h-[2.5em] text-center leading-tight">{to === "/" ? "Treasure Hunt" : t(label)}</span>
             </Link>
           ))}
         </nav>
@@ -206,7 +208,7 @@ export function AppShell({ children, hideCrisisBar = false }: { children: ReactN
             {menuItems.map(({ to, label, icon: Icon }) => (
               <Link key={to} to={to} onClick={() => setMenuOpen(false)} title={t(label)} aria-label={t(label)} className="font-nav flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary" activeProps={{ className: "bg-primary/10 text-primary" }} activeOptions={{ exact: true }}>
                 <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                <span className="min-w-0">{t(label)}</span>
+                <span className="min-w-0">{to === "/" ? "Treasure Hunt" : t(label)}</span>
               </Link>
             ))}
             <Link to="/" search={{ dilemma: 1 }} onClick={() => setMenuOpen(false)} title={t("dailyDilemma")} aria-label={t("dailyDilemma")} className="font-nav flex min-h-11 items-center gap-3 rounded-xl px-3 text-base font-semibold text-muted-foreground hover:bg-primary/10 hover:text-primary">

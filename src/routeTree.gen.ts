@@ -16,6 +16,7 @@ import { Route as FindRouteImport } from './routes/find'
 import { Route as JigsawRouteImport } from './routes/jigsaw'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MentorRouteImport } from './routes/mentor'
 import { Route as PetShopRouteImport } from './routes/pet-shop'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ShopRouteImport } from './routes/shop'
@@ -60,6 +61,11 @@ const JournalRoute = JournalRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorRoute = MentorRouteImport.update({
+  id: '/mentor',
+  path: '/mentor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PetShopRoute = PetShopRouteImport.update({
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/jigsaw': typeof JigsawRoute
   '/journal': typeof JournalRoute
   '/mcp': typeof McpRoute
+  '/mentor': typeof MentorRoute
   '/pet-shop': typeof PetShopRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/jigsaw': typeof JigsawRoute
   '/journal': typeof JournalRoute
   '/mcp': typeof McpRoute
+  '/mentor': typeof MentorRoute
   '/pet-shop': typeof PetShopRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/jigsaw': typeof JigsawRoute
   '/journal': typeof JournalRoute
   '/mcp': typeof McpRoute
+  '/mentor': typeof MentorRoute
   '/pet-shop': typeof PetShopRoute
   '/reset-password': typeof ResetPasswordRoute
   '/shop': typeof ShopRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/jigsaw'
     | '/journal'
     | '/mcp'
+    | '/mentor'
     | '/pet-shop'
     | '/reset-password'
     | '/shop'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/jigsaw'
     | '/journal'
     | '/mcp'
+    | '/mentor'
     | '/pet-shop'
     | '/reset-password'
     | '/shop'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/jigsaw'
     | '/journal'
     | '/mcp'
+    | '/mentor'
     | '/pet-shop'
     | '/reset-password'
     | '/shop'
@@ -242,6 +254,7 @@ export interface RootRouteChildren {
   JigsawRoute: typeof JigsawRoute
   JournalRoute: typeof JournalRoute
   McpRoute: typeof McpRoute
+  MentorRoute: typeof MentorRoute
   PetShopRoute: typeof PetShopRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ShopRoute: typeof ShopRoute
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor': {
+      id: '/mentor'
+      path: '/mentor'
+      fullPath: '/mentor'
+      preLoaderRoute: typeof MentorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pet-shop': {
@@ -386,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   JigsawRoute: JigsawRoute,
   JournalRoute: JournalRoute,
   McpRoute: McpRoute,
+  MentorRoute: MentorRoute,
   PetShopRoute: PetShopRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ShopRoute: ShopRoute,
