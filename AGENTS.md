@@ -16,6 +16,7 @@
 
 - Share identity/navigation in AppShell. Mobile QA stays in flow; habitat dialogs clear tabs.
 - Use the shared AppShell menu list for desktop and drawer navigation; fullscreen adventure keeps the menu and Pet Shop header link available. Why: game layout must not orphan existing stores or dashboard views.
+- The site root serves the main page; the fullscreen adventure lives at /treasure and /mentor only redirects there. Why: players must land on Monere's main page, not inside the game.
 - Pet Shop separates scene from rarity controls; rarity never sets prices.
 - Preserve the journal storage key through rebrands.
 - Reuse MonereMentor portraits and welcome/loading/results states with reduced-motion support; never duplicate character layouts.
