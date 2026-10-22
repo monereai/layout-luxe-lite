@@ -27,7 +27,10 @@ export function useAdventure() {
     generation.current++; steps.current = []; queue.current = Promise.resolve(); setLoaded(false);
     if (!ready) return;
     if (!user) {
-      try { update(parseAdventure(JSON.parse(localStorage.getItem(GUEST_KEY) ?? "null"))); } catch { update(initialAdventure()); }
+      // New guest playthroughs draw their own riddles and answer order.
+      let raw: unknown = null; try { raw = JSON.parse(localStorage.getItem(GUEST_KEY) ?? "null"); } catch { raw = null; }
+      const parsed = parseAdventure(raw);
+      update(validRiddles((raw as { riddles?: unknown } | null)?.riddles) && parsed !== initialAdventure() ? parsed : { ...parsed, riddles: randomRiddles() });
       setRevision(v => v + 1); setLoaded(true);
     }
   }, [user?.id, ready]);
