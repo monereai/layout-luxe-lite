@@ -20,7 +20,7 @@ import razor from "@/assets/treasure/razor.png";
 
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
 const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair };
-const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin.";
+const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin. Along the way, lift the fog, help friendly villagers, earn explorer gear and let your pet dig for buried treasure!";
 
 export function TreasureGame() {
   const game = useAdventure(); const { state } = game;
