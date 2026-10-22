@@ -87,8 +87,17 @@ export function WorldCanvas(props: Props) {
               const gold = color("--points"), deep = color("--primary");
               g.fillStyle(gold, s.rescued ? .12 : .28).fillRoundedRect(cx - 34, cy - 34, 68, 68, 16); // outer glow
               g.fillStyle(0x000000, .35).fillRoundedRect(cx - 27, cy - 23, 56, 56, 12); // drop shadow
-              g.fillStyle(deep, .92).fillRoundedRect(cx - 28, cy - 28, 56, 56, 12); // stone body
-              g.fillStyle(0xffffff, .14).fillRoundedRect(cx - 24, cy - 25, 48, 20, { tl: 9, tr: 9, bl: 4, br: 4 }); // top shine
+              g.fillStyle(deep, .95).fillRoundedRect(cx - 28, cy - 28, 56, 56, 12); // stone body
+              // bevel: lit top-left rim, shaded bottom-right rim, recessed face
+              g.fillStyle(0xffffff, .22).fillRoundedRect(cx - 28, cy - 28, 56, 10, { tl: 12, tr: 12, bl: 0, br: 0 });
+              g.fillStyle(0xffffff, .14).fillRect(cx - 28, cy - 20, 6, 36);
+              g.fillStyle(0x000000, .28).fillRoundedRect(cx - 28, cy + 20, 56, 8, { tl: 0, tr: 0, bl: 12, br: 12 });
+              g.fillStyle(0x000000, .18).fillRect(cx + 22, cy - 20, 6, 40);
+              g.fillStyle(0x000000, .12).fillRoundedRect(cx - 21, cy - 19, 43, 40, 7);
+              // carved-stone texture: deterministic speckles and two hairline cracks
+              for (let k = 0; k < 14; k++) { const h = Math.sin((i + 1) * 97.3 + k * 12.9898) * 43758.5453; const fx = h - Math.floor(h); const fy = (h * 7.13) - Math.floor(h * 7.13); g.fillStyle(k % 2 ? 0xffffff : 0x000000, k % 2 ? .1 : .16).fillCircle(cx - 18 + fx * 36, cy - 18 + fy * 36, 1 + (k % 3) * .5); }
+              g.lineStyle(1, 0x000000, .22).beginPath().moveTo(cx - 20, cy - 8 + i * 3).lineTo(cx - 12, cy - 4 + i * 2).lineTo(cx - 8, cy + 2).strokePath();
+              g.lineStyle(1, 0x000000, .18).beginPath().moveTo(cx + 18, cy + 12 - i * 2).lineTo(cx + 11, cy + 8).lineTo(cx + 9, cy + 16).strokePath();
               g.lineStyle(3, gold, 1).strokeRoundedRect(cx - 28, cy - 28, 56, 56, 12);
               g.lineStyle(1.5, gold, .55).strokeRoundedRect(cx - 21, cy - 21, 42, 42, 8);
               const label = this.add.text(cx, cy, "ABC"[i]!, { fontSize: "30px", fontFamily: "Fredoka, sans-serif", fontStyle: "700", color: hex("--points"), stroke: "#3a2200", strokeThickness: 5 }).setOrigin(.5).setDepth(3);
