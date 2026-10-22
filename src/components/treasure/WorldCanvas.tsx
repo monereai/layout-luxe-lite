@@ -26,11 +26,14 @@ export function WorldCanvas(props: Props) {
         portals: Phaser.GameObjects.Container[] = [];
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
+        shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = 1; depthScale = 1; lastStep = 0; reduced = false;
         preload() { this.load.image("meadow", meadow); this.load.image("forest", forest); this.load.image("sky", sky); this.load.image("chest", chest); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
           this.background = this.add.image(768, 768, live.current.state.zone).setDisplaySize(1536, 1536);
           this.player = this.add.image(0, 0, "lion").setDisplaySize(140, 140).setOrigin(.5, .8).setDepth(10);
+          this.base = this.player.scaleX; this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          this.shadow = this.add.ellipse(0, 0, 70, 18, 0x000000, .28).setDepth(9);
           const fitCamera = () => this.cameras.main.setZoom(Math.max(.85, this.scale.width / 1536, this.scale.height / 1536));
           this.cameras.main.setBounds(0, 0, 1536, 1536);
           fitCamera(); this.scale.on("resize", fitCamera);
@@ -76,6 +79,7 @@ export function WorldCanvas(props: Props) {
         override update() {
           if (!this.player) return;
           this.sync();
+          this.animate();
           if (this.paused || this.moving) return;
           const keys = this.keys;
           let dx = this.direction.x; let dy = this.direction.y;
@@ -86,13 +90,38 @@ export function WorldCanvas(props: Props) {
           if (!next || !walkable(s.zone, next.x, next.y)) return;
           live.current.onMove(next);
           this.moving = true;
-          this.player.setFlipX(next.x < s.x);
+          if (next.x !== s.x) this.facing = next.x < s.x ? -1 : 1;
+          this.depthScale = next.y < s.y ? .94 : next.y > s.y ? 1.03 : 1;
           this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 90 : 150, onComplete: () => { this.moving = false; } });
+        }
+        animate() {
+          const p = this.player; if (!p) return;
+          const dt = this.game.loop.delta / 1000;
+          const walking = this.moving && !this.reduced;
+          this.stride += ((walking ? 1 : 0) - this.stride) * Math.min(1, dt * 10);
+          if (walking) this.phase += dt * 13; else this.phase += dt * 2.2;
+          const step = Math.abs(Math.sin(this.phase));
+          const bounce = walking || this.stride > .05 ? step * 10 * this.stride : 0;
+          const breathe = this.reduced ? 0 : Math.sin(this.phase) * .015 * (1 - this.stride);
+          const squash = this.stride * (step - .5) * .1;
+          const sx = this.base * this.depthScale * (1 - squash - breathe * .5);
+          const sy = this.base * this.depthScale * (1 + squash + breathe);
+          p.setFlipX(this.facing < 0).setScale(sx, sy);
+          p.setOrigin(.5, .8 + bounce / p.height / sy * this.base * this.base / this.base);
+          p.setRotation(this.stride * Math.sin(this.phase) * .05);
+          this.shadow?.setPosition(p.x, p.y + 4).setScale(1 - bounce / 40, 1 - bounce / 40).setAlpha(.28 - bounce / 80);
+          if (walking && step < .25 && this.time.now - this.lastStep > 160) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
+        }
+        dust(x: number, y: number) {
+          for (let i = 0; i < 3; i++) {
+            const puff = this.add.circle(x + (Math.random() - .5) * 30, y, 4 + Math.random() * 4, 0xf3e3c3, .55).setDepth(8);
+            this.tweens.add({ targets: puff, x: puff.x - this.facing * (8 + Math.random() * 10), y: y - 6 - Math.random() * 8, scale: 1.8, alpha: 0, duration: 420, onComplete: () => puff.destroy() });
+          }
         }
         setAvatar(src: string) {
           const key = `outfit-${++this.serial}`;
           this.load.image(key, src);
-          this.load.once(`filecomplete-image-${key}`, () => { this.player?.setTexture(key); const old = this.avatarKey; this.avatarKey = key; if (old !== "lion") this.textures.remove(old); });
+          this.load.once(`filecomplete-image-${key}`, () => { if (this.player) { this.player.setTexture(key).setDisplaySize(140, 140); this.base = this.player.scaleX; } const old = this.avatarKey; this.avatarKey = key; if (old !== "lion") this.textures.remove(old); });
           this.load.start();
         }
       }
