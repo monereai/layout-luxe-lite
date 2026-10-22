@@ -54,7 +54,7 @@ export function useAdventure() {
     if (!loaded) return;
     const next = applyAdventure(current.current, { action: "move", ...position });
     if (next === current.current) return;
-    update(next); if (user) { steps.current.push(position); if (steps.current.length >= 24) void flush().catch(() => {}); }
+    update(next); if (user) { setSaving(true); steps.current.push(position); if (steps.current.length >= 24) void flush().catch(() => {}); }
   }
   async function act(action: AdventureAction) {
     if (!loaded) return current.current;
