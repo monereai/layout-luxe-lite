@@ -73,7 +73,7 @@ function Lion({ hostRef }: { hostRef: RefObject<HTMLElement | null> }) {
 /** True 3D Monere for the treasure map; reads facing/moving from the host's data attributes each frame. */
 export default function Monere3D({ hostRef }: { hostRef: RefObject<HTMLElement | null> }) {
   return (
-    <Canvas dpr={[1, 2]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 2.6, 6.2], fov: 30 }} onCreated={({ camera }) => camera.lookAt(0, 1.25, 0)} style={{ pointerEvents: "none" }}>
+    <Canvas dpr={[1, 2]} gl={{ alpha: true, antialias: true }} camera={{ position: [0, 2.8, 8], fov: 28 }} onCreated={({ camera }) => camera.lookAt(0, 1.45, 0)} style={{ pointerEvents: "none" }}>
       <hemisphereLight args={["#fff6e0", "#5a7a3a", 1.4]} />
       <directionalLight position={[3, 6, 5]} intensity={1.8} />
       <Lion hostRef={hostRef} />
