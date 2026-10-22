@@ -105,11 +105,11 @@ export function WorldCanvas(props: Props) {
             const goggles = s.gear.includes("goggles");
             // Chasm drawn as a soft, see-through pit (no solid dark block) so the ledge stays clearly visible.
             const pit = this.add.graphics().setDepth(1); this.scenery.push(pit);
-            for (let k = 0; k < 6; k++) pit.fillStyle(0x120c08, .1).fillRoundedRect(2 * 64 + k * 10, 12 * 64 + k * 10, 8 * 64 - k * 20, 7 * 64 - k * 20, 40);
+            for (let k = 0; k < 12; k++) pit.fillStyle(0x120c08, .045).fillRoundedRect(2 * 64 + k * 6, 12 * 64 + k * 6, 8 * 64 - k * 12, 7 * 64 - k * 12, 60 - k * 3);
             // Ledge: a lit stone platform with a rim, drawn above the pit.
             const ledge = this.add.graphics().setDepth(2); this.scenery.push(ledge);
             ledge.fillStyle(0x000000, .3).fillRoundedRect(4 * 64 + 4, 14 * 64 + 10, 3 * 64, 3 * 64, 18);
-            ledge.fillStyle(0x8a6238, 1).fillRoundedRect(4 * 64, 14 * 64, 3 * 64, 3 * 64, 18);
+            ledge.fillStyle(0x8a6238, .55).fillRoundedRect(4 * 64, 14 * 64, 3 * 64, 3 * 64, 18);
             ledge.lineStyle(4, color("--points"), .8).strokeRoundedRect(4 * 64, 14 * 64, 3 * 64, 3 * 64, 18);
             // Bridge: solid gold with goggles; a faint shimmer hint without them.
             for (let x = 7; x <= 9; x++) { const t = rect(x, 14, 1, 3, color("--points"), goggles ? .55 : .12, 2); if (!this.reduced) this.tweens.add({ targets: t, alpha: goggles ? .3 : .04, duration: 900, yoyo: true, repeat: -1 }); }
