@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { usePlan } from "./usePlan";
 import { adventureAction } from "@/lib/treasure.functions";
 import { applyAdventure, initialAdventure, parseAdventure, type AdventureAction, type AdventureState, type Position } from "@/lib/treasure";
-import { saveShop } from "@/lib/shop";
+import { loadPets } from "@/lib/pets";
 
-const GUEST_KEY = "monere-treasure-guest-v1";
+const GUEST_KEY = "monere-griffin-guest-v1";
 export function useAdventure() {
   const { user, ready } = usePlan();
   const run = useServerFn(adventureAction);
@@ -65,10 +65,10 @@ export function useAdventure() {
       try {
         const result = await run({ data: action });
         update(result.state);
-        if (result.wardrobe) { saveShop(result.wardrobe); toast.success("Relic set complete — a new wardrobe item is yours!"); }
+        if (result.griffin) { void loadPets().catch(() => {}); toast.success("The Golden Griffin joined your pets!"); }
         client.setQueryData(key, result);
         return result.state;
-      } catch (e) { await recover(e); throw e; } finally { setSaving(false); }
+      } catch (e) { if (action.action === "answer") throw e; await recover(e); throw e; } finally { setSaving(false); }
     });
   }
   return { state, move, act, loaded, saving, revision, user, error: query.error, retry: () => query.refetch() };
