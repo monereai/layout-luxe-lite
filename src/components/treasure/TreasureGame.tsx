@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { ZONES, PORTALS, SCROLLS, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, interactionHere, sideQuests, isRevealed, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
+import { ZONES, PORTALS, SCROLLS, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
@@ -74,8 +74,9 @@ export function TreasureGame() {
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
   const settled = useRef("");
   useEffect(() => {
-    const tile = duelTileAt(state); const key = `${state.x},${state.y},${state.duel}`;
-    if (tile < 0 || busy || settled.current === key) return;
+    const tile = duelTileAt(state); const key = duelLanding(state, settled.current, blocked);
+    if (tile < 0) { settled.current = ""; return; }
+    if (!key) return;
     const timer = setTimeout(async () => {
       settled.current = key; setBusy(true);
       try {
@@ -85,7 +86,7 @@ export function TreasureGame() {
       } catch { /* hook reports */ } finally { setBusy(false); }
     }, 400);
     return () => clearTimeout(timer);
-  }, [state.x, state.y, state.duel, state.zone, busy]);
+  }, [state.x, state.y, state.duel, state.zone, blocked]);
 
   async function run(action: Parameters<typeof game.act>[0]) { setBusy(true); try { return await game.act(action); } catch { return null; } finally { setBusy(false); } }
   async function interact() {
@@ -136,7 +137,7 @@ export function TreasureGame() {
     </header>
     <div className="treasure-viewport">
       <img src={maps[state.zone]} alt="" width={1536} height={1536} className="absolute inset-0 h-full w-full object-cover" />
-      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} effect={effect} onMove={game.move} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
+      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} effect={effect} onMove={game.move} onNotice={setNotice} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
       {companion && <div ref={petRef} className="treasure-pet" data-facing="east" aria-hidden="true"><div className="idle-breath"><div className={celebrate ? "spin-360" : undefined}><img src={companion.src} alt="" draggable={false} /></div></div></div>}
       <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" aria-hidden="true"><div className="idle-breath"><div className={celebrate ? "spin-360" : undefined}>{[0, 1, 2, 3, 4, 5, 6, 7].map(frame => <img key={frame} data-frame={frame} src={turn[frame] ?? avatar} alt="" draggable={false} />)}</div></div></div>
       <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{state.rescued ? "Griffin rescued" : `Land ${ZONES.findIndex(z => z.id === state.zone) + 1} of 4 · Quest`}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Read the story again" onClick={() => setIntro(true)}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{questClue(state)}</p>

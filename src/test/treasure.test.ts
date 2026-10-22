@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, DUEL_START, type AdventureState } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, type AdventureState } from "@/lib/treasure";
 import { PETS, petButtonState } from "@/lib/pets";
 
 const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
@@ -32,6 +32,30 @@ describe("Griffin rescue rules", () => {
     expect(canStep({ ...s, gear: [] }, 8, 15)).toBe(false);
   });
   it("invalid saved riddles are rejected", () => { expect(validRiddles([{ i: 0, o: [0, 0, 1] }])).toBeNull(); });
+  it("lair entrance reaches the scroll with goggles, then the gate and all answer stones", () => {
+    let s = at({ zone: "lair", x: 12, y: 19, gear: ["goggles"], gates: ["meadow", "wood", "ravine"] });
+    const scrollPath = worldPath(s, SCROLLS.lair); expect(scrollPath).not.toBeNull();
+    for (const step of scrollPath ?? []) s = applyAdventure(s, { action: "move", ...step });
+    expect([s.x, s.y]).toEqual([5, 15]);
+    s = applyAdventure(s, { action: "collect" });
+    const approach = { x: LAIR_DOOR.x, y: LAIR_DOOR.y + 1 };
+    const doorPath = worldPath(s, approach); expect(doorPath).not.toBeNull();
+    for (const step of doorPath ?? []) s = applyAdventure(s, { action: "move", ...step });
+    expect(gateHere(s)).toBe("lair");
+    expect(worldPath(s, DUEL_TILES[0] ?? { x: 10, y: 6 })).toBeNull();
+    s = applyAdventure(s, { action: "answer", id: "lair", x: gateRiddle(s, "lair").answer });
+    for (const stone of DUEL_TILES) expect(worldPath(s, stone)).not.toBeNull();
+  });
+  it("lair scroll cannot be reached from the entrance without goggles", () => {
+    expect(worldPath(at({ zone: "lair", x: 12, y: 19 }), SCROLLS.lair)).toBeNull();
+  });
+  it("one stone landing answers once, not again when the next riddle appears", () => {
+    const s = at({ zone: "lair", gates: ["lair"], x: 12, y: 6 });
+    expect(duelLanding(s, "", false)).toBe("12,6");
+    expect(duelLanding({ ...s, duel: 1 }, "12,6", false)).toBeNull();
+    expect(duelLanding({ ...s, x: 14, duel: 1 }, "12,6", false)).toBe("14,6");
+    expect(duelLanding(s, "", true)).toBeNull();
+  });
   it("gate needs the scroll first", () => {
     const s = at({ x: 20, y: 10 });
     expect(applyAdventure(s, { action: "answer", id: "meadow", x: 0 }).gates).toEqual([]);

@@ -6,11 +6,11 @@ import ravine from "@/assets/treasure/ravine.jpg";
 import lair from "@/assets/treasure/lair.jpg";
 import razor from "@/assets/treasure/razor.png";
 import griffin from "@/assets/pets/golden-griffin.png";
-import { PORTALS, SCROLLS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, canStep, isRevealed, type AdventureState, type Position } from "@/lib/treasure";
+import { PORTALS, SCROLLS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, canStep, worldPath, inChasm, onPlatform, isRevealed, type AdventureState, type Position } from "@/lib/treasure";
 
 export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
-type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void; effect: WorldEffect };
+type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void; onNotice: (message: string) => void; effect: WorldEffect };
 export function WorldCanvas(props: Props) {
   const host = useRef<HTMLDivElement>(null);
   const live = useRef(props); live.current = props;
@@ -53,13 +53,19 @@ export function WorldCanvas(props: Props) {
           this.game.events.on(P.Core.Events.BLUR, () => { this.direction = { x: 0, y: 0 }; this.path = []; });
         }
         seek(target: Position) {
-          if (!canStep(live.current.state, target.x, target.y)) return;
-          const s = live.current.state; const open: Position[][] = [[{ x: s.x, y: s.y }]]; const seen = new Set([`${s.x},${s.y}`]);
-          for (let i = 0; i < open.length; i++) {
-            const path = open[i]; const end = path?.at(-1); if (!path || !end) continue;
-            if (end.x === target.x && end.y === target.y) { this.path = path.slice(1); return; }
-            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const next = { x: end.x + (dx ?? 0), y: end.y + (dy ?? 0) }; const key = `${next.x},${next.y}`; if (!seen.has(key) && canStep(s, next.x, next.y)) { seen.add(key); open.push([...path, next]); } }
+          const s = live.current.state;
+          const notify = live.current.onNotice;
+          if (s.zone === "lair" && target.y <= 10 && !s.gates.includes("lair")) {
+            this.path = worldPath(s, { x: LAIR_DOOR.x, y: LAIR_DOOR.y + 1 }) ?? [];
+            notify(s.scrolls.includes("lair") ? "Answer the inner door's riddle to reach Razor's answer stones." : "Find the Scroll of Wisdom on the ledge first, then unlock the inner door.");
+            return;
           }
+          if (s.zone === "lair" && inChasm(target.x, target.y) && !s.gear.includes("goggles")) {
+            notify("Get the Goggles of Truth from Rocco in Shadow Ravine to cross to the ledge."); return;
+          }
+          const path = worldPath(s, target);
+          if (path) this.path = path;
+          else if (s.zone === "lair") notify("That is the chasm edge. Follow the stone crossing to the ledge.");
         }
         sync(force = false) {
           const s = live.current.state; const key = `${s.zone}:${live.current.revision}:${s.x},${s.y}:${s.scrolls.join()}:${s.gates.join()}:${s.duel}:${s.rescued}:${s.gear.join()}:${s.items.length}:${s.dug.length}:${s.lily}:${s.pet ? 1 : 0}:${s.quests.length}:${(s.fog[s.zone] ?? []).length}`;
@@ -70,10 +76,10 @@ export function WorldCanvas(props: Props) {
           this.lastState = key;
           this.background?.setTexture(s.zone);
           const far = this.player && Math.abs(this.player.x - (s.x + .5) * TILE_SIZE) + Math.abs(this.player.y - (s.y + .5) * TILE_SIZE) > TILE_SIZE * 1.5;
-          if (changedZone || force || (far && !this.moving)) { this.path = []; this.tweens.killTweensOf(this.player!); this.moving = false; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
+          if (changedZone || force || (far && !this.moving)) { this.path = []; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.portals.forEach(p => p.destroy()); this.portals = [];
           this.scenery.forEach(item => item.destroy()); this.scenery = [];
-          const hex = (token: string) => { const c = document.createElement("canvas").getContext("2d")!; c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#888"; c.fillRect(0, 0, 1, 1); const [r, g, b] = c.getImageData(0, 0, 1, 1).data; return `#${[r, g, b].map(v => v!.toString(16).padStart(2, "0")).join("")}`; };
+          const hex = (token: string) => { const c = document.createElement("canvas").getContext("2d"); if (!c) return "#888888"; c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#888"; c.fillRect(0, 0, 1, 1); const [r, g, b] = c.getImageData(0, 0, 1, 1).data; return `#${[r, g, b].map(v => (v ?? 0).toString(16).padStart(2, "0")).join("")}`; };
           const color = (token: string) => P.Display.Color.HexStringToColor(hex(token)).color;
           const at = (p: Position) => [(p.x + .5) * 64, (p.y + .5) * 64] as const;
           const text = (p: Position, t: string, size = 36) => { const o = this.add.text(...at(p), t, { fontSize: `${size}px` }).setOrigin(.5).setDepth(3); this.scenery.push(o); return o; };
@@ -103,18 +109,29 @@ export function WorldCanvas(props: Props) {
           }
           if (s.zone === "lair") {
             const goggles = s.gear.includes("goggles");
-            // Chasm drawn as a soft, see-through pit (no solid dark block) so the ledge stays clearly visible.
-            const pit = this.add.graphics().setDepth(1); this.scenery.push(pit);
-            for (let k = 0; k < 12; k++) pit.fillStyle(0x120c08, .045).fillRoundedRect(2 * 64 + k * 6, 12 * 64 + k * 6, 8 * 64 - k * 12, 7 * 64 - k * 12, 60 - k * 3);
-            // Ledge: a lit stone platform with a rim, drawn above the pit.
-            const ledge = this.add.graphics().setDepth(2); this.scenery.push(ledge);
-            ledge.fillStyle(0x000000, .3).fillRoundedRect(4 * 64 + 4, 14 * 64 + 10, 3 * 64, 3 * 64, 18);
-            ledge.fillStyle(0x8a6238, .55).fillRoundedRect(4 * 64, 14 * 64, 3 * 64, 3 * 64, 18);
-            ledge.lineStyle(4, color("--points"), .8).strokeRoundedRect(4 * 64, 14 * 64, 3 * 64, 3 * 64, 18);
-            // Bridge: solid gold with goggles; a faint shimmer hint without them.
-            for (let x = 7; x <= 9; x++) { const t = rect(x, 14, 1, 3, color("--points"), goggles ? .55 : .12, 2); if (!this.reduced) this.tweens.add({ targets: t, alpha: goggles ? .3 : .04, duration: 900, yoyo: true, repeat: -1 }); }
+            // Keep the floor art unobstructed: a feathered pit and separate stone slabs,
+            // never large coloured rectangles over the terrain.
+            const pitKey = "lair-pit";
+            if (!this.textures.exists(pitKey)) {
+              const texture = this.textures.createCanvas(pitKey, 512, 448);
+              if (texture) {
+                const ctx = texture.getContext(); const shade = ctx.createRadialGradient(256, 224, 50, 256, 224, 270);
+                shade.addColorStop(0, hex("--adventure-pit")); shade.addColorStop(1, "transparent");
+                ctx.fillStyle = shade; ctx.fillRect(0, 0, 512, 448); texture.refresh();
+              }
+            }
+            const pit = this.add.image(6 * 64, 15.5 * 64, pitKey).setAlpha(.26).setDepth(1); this.scenery.push(pit);
+            const slabs = this.add.graphics().setDepth(2); this.scenery.push(slabs);
+            for (let x = 4; x <= 9; x++) for (let y = 14; y <= 16; y++) {
+              const platform = onPlatform(x, y);
+              slabs.fillStyle(color("--adventure-stone"), platform ? .65 : goggles ? .75 : .08)
+                .fillRoundedRect(x * 64 + 5, y * 64 + 5, 54, 54, 7);
+              slabs.lineStyle(2, color("--adventure-stone-light"), platform || goggles ? .65 : .12)
+                .strokeRoundedRect(x * 64 + 5, y * 64 + 5, 54, 54, 7);
+              if (!platform && goggles) slabs.lineStyle(2, color("--points"), .4).lineBetween(x * 64 + 17, y * 64 + 28, x * 64 + 44, y * 64 + 28);
+            }
             label({ x: 5, y: 16 }, goggles ? "Ledge · path revealed" : "Ledge · needs Goggles of Truth");
-            if (goggles) TRAPS.forEach(t => { rect(t.x, t.y, 1, 1, 0xff3030, .3, 2); text(t, "⚠️", 28); });
+            if (goggles) TRAPS.forEach(t => { const warning = this.add.circle(...at(t), 20, color("--destructive"), .12).setStrokeStyle(2, color("--destructive"), .65).setDepth(2); this.scenery.push(warning); text(t, "⚠️", 28); });
           }
           NPCS.filter(n => n.zone === s.zone).forEach(n => { bob(text(n, n.icon, 50)); label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26); });
           ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => { const o = bob(text(i, i.icon, 34)); if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 }); });
@@ -131,10 +148,10 @@ export function WorldCanvas(props: Props) {
           ctx.globalCompositeOperation = "source-over"; fogTex.refresh();
           if (!this.fog) this.fog = this.add.image(768, 768, "fog").setDisplaySize(1536, 1536).setDepth(7);
           if (s.zone === "lair") {
-            if (!s.gates.includes("lair")) { const door = this.add.rectangle((LAIR_DOOR.x + .5) * 64, 10 * 64, 64, 128, color("--primary"), .55).setDepth(4); this.scenery.push(door); text(LAIR_DOOR, s.scrolls.includes("lair") ? "❓" : "🔒", 32).setY(10 * 64); }
+            if (!s.gates.includes("lair")) { const door = this.add.text((LAIR_DOOR.x + .5) * 64, 10 * 64, s.scrolls.includes("lair") ? "❓" : "🔒", { fontSize: "32px" }).setOrigin(.5).setDepth(4); this.scenery.push(door); }
             DUEL_TILES.forEach((t, i) => {
               const [cx, cy] = at(t); const g = this.add.graphics().setDepth(2); this.scenery.push(g);
-              const gold = color("--points"), deep = color("--primary");
+              const gold = color("--points"), deep = color("--adventure-stone");
               g.fillStyle(gold, s.rescued ? .12 : .28).fillRoundedRect(cx - 34, cy - 34, 68, 68, 16); // outer glow
               g.fillStyle(0x000000, .35).fillRoundedRect(cx - 27, cy - 23, 56, 56, 12); // drop shadow
               g.fillStyle(deep, .95).fillRoundedRect(cx - 28, cy - 28, 56, 56, 12); // stone body

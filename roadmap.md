@@ -1,3 +1,7 @@
+# Razor’s Lair review
+- [x] Replace floor colour blocks with stone slabs and circular trap markers; blocked stone taps guide players to the inner door without bypassing goggles or gate rules.
+- [x] Guest browser verified no-goggles guidance, crossing with companion, scroll pickup, door answer, stone tap, single-answer landing and reload persistence; 23 focused tests pass and build OK. Signed-in saves unchanged and not retested; Carl untouched. Preview-only.
+
 # Progressive Treasure Hunt
 - [x] Implement 3/2/1 chests, fragments, landmark riddles, matching puzzle and stage victory portals.
 - [x] Add mud, wind and simultaneous companion pressure-plate gates with secure saved progression.

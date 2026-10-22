@@ -106,6 +106,21 @@ export function canStep(s: AdventureState, x: number, y: number) {
   return true;
 }
 export function canEnter(s: AdventureState, zone: ZoneId) { const i = ZONES.findIndex(z => z.id === zone); return i === 0 || (i > 0 && s.gates.includes(ZONES[i - 1]!.id)); }
+/** Tap navigation follows the same collision rules as keyboard movement. */
+export function worldPath(s: AdventureState, target: Position): Position[] | null {
+  if (!canStep(s, target.x, target.y)) return null;
+  const paths: Position[][] = [[{ x: s.x, y: s.y }]];
+  const seen = new Set([`${s.x},${s.y}`]);
+  for (const path of paths) {
+    const end = path.at(-1); if (!end) continue;
+    if (end.x === target.x && end.y === target.y) return path.slice(1);
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const next = { x: end.x + (dx ?? 0), y: end.y + (dy ?? 0) }; const key = `${next.x},${next.y}`;
+      if (!seen.has(key) && canStep(s, next.x, next.y)) { seen.add(key); paths.push([...path, next]); }
+    }
+  }
+  return null;
+}
 export type AdventureAction = { action: "status" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
 /** Gate riddle for this zone's exit is answerable once the zone's scroll is found and Monere stands at the gate. */
 export function gateHere(s: AdventureState): ZoneId | null {
@@ -114,6 +129,10 @@ export function gateHere(s: AdventureState): ZoneId | null {
   return at && near(s, at) ? s.zone : null;
 }
 export function duelTileAt(s: AdventureState): number { return s.zone === "lair" && s.gates.includes("lair") && !s.rescued ? DUEL_TILES.findIndex(t => t.x === s.x && t.y === s.y) : -1; }
+export function duelLanding(s: AdventureState, lastLanding: string, blocked: boolean): string | null {
+  const key = `${s.x},${s.y}`;
+  return !blocked && duelTileAt(s) >= 0 && key !== lastLanding ? key : null;
+}
 export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
 function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
