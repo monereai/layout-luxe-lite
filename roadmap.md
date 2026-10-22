@@ -1,7 +1,7 @@
 # Progressive Treasure Hunt
-- [ ] Implement 3/2/1 chests, fragments, landmark riddles, matching puzzle and stage victory portals.
-- [ ] Add mud, wind and simultaneous companion pressure-plate gates with secure saved progression.
-- [ ] Verify rules and full guest/signed-in progression on isolated QA; retain earned wardrobe gifts and all app navigation.
+- [x] Implement 3/2/1 chests, fragments, landmark riddles, matching puzzle and stage victory portals.
+- [x] Add mud, wind and simultaneous companion pressure-plate gates with secure saved progression.
+- [x] Verify all six chests, Forest fragments/plates, both stage victories, Sky matching and final victory as guest and isolated signed-in QA; reload and database read confirm saved completion. All 274 tests pass; build OK. Existing wardrobe gifts and navigation retained. Preview-only.
 
 # Pet Shop and app navigation restoration
 - [x] Restore Pet Shop and Points Shop/Wardrobe in the shared menu on every page, including the full-screen adventure, with a direct Pet Shop header link.
