@@ -65,7 +65,7 @@ export function useAdventure() {
       try {
         const result = await run({ data: action });
         update(result.state);
-        if (result.points > 0) { toast.success(`+${result.points} points added to your balance!`); void client.invalidateQueries(); }
+        if (result.points > 0) { toast.success(`+${result.points} points added to your balance!`); void client.invalidateQueries({ predicate: q => q.queryKey[0] !== "treasure" }); }
         if (result.griffin) { void loadPets().catch(() => {}); toast.success("The Golden Griffin joined your pets!"); }
         client.setQueryData(key, result);
         return result.state;
