@@ -330,6 +330,13 @@
       "when": 1792678106196,
       "tag": "0046_griffin_random_riddles",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1792678164097,
+      "tag": "0047_griffin_riddle_pool",
+      "breakpoints": true
     }
   ]
 }
