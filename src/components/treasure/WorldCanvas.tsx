@@ -2,12 +2,15 @@ import { useEffect, useRef, type MutableRefObject } from "react";
 import type Phaser from "phaser";
 import meadow from "@/assets/treasure/meadow.jpg";
 import forest from "@/assets/treasure/forest.jpg";
-import sky from "@/assets/treasure/sky.jpg";
-import chest from "@/assets/treasure/chest.png";
-import { PORTALS, RELICS, LANDMARKS, PLATES, TILE_SIZE, canStep, chestVisible, applyAdventure, terrain, type AdventureState, type Position } from "@/lib/treasure";
+import ravine from "@/assets/treasure/ravine.jpg";
+import lair from "@/assets/treasure/lair.jpg";
+import razor from "@/assets/treasure/razor.png";
+import griffin from "@/assets/pets/golden-griffin.png";
+import { PORTALS, SCROLLS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, canStep, type AdventureState, type Position } from "@/lib/treasure";
 
+export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
-type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void };
+type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void; effect: WorldEffect };
 export function WorldCanvas(props: Props) {
   const host = useRef<HTMLDivElement>(null);
   const live = useRef(props); live.current = props;
@@ -27,7 +30,8 @@ export function WorldCanvas(props: Props) {
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
-        preload() { this.load.image("meadow", meadow); this.load.image("forest", forest); this.load.image("sky", sky); this.load.image("chest", chest); this.load.image("lion", live.current.avatar); }
+        effectN = 0;
+        preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
           this.background = this.add.image(768, 768, live.current.state.zone).setDisplaySize(1536, 1536);
@@ -56,50 +60,49 @@ export function WorldCanvas(props: Props) {
           }
         }
         sync(force = false) {
-          const s = live.current.state; const key = `${s.zone}:${s.relics.join()}:${s.gear.join()}:${live.current.revision}:${s.x},${s.y}:${s.gates.join()}:${s.landmarks.join()}`;
+          const s = live.current.state; const key = `${s.zone}:${live.current.revision}:${s.x},${s.y}:${s.scrolls.join()}:${s.gates.join()}:${s.duel}:${s.rescued}`;
+          const fx = live.current.effect;
+          if (fx.n !== this.effectN) { this.effectN = fx.n; if (fx.kind === "gust") this.gust(); if (fx.kind === "victory") this.victory(); }
           if (key === this.lastState && !force) return;
-          const changedZone = this.lastState.split(":")[0] !== s.zone || this.lastState.split(":")[3] !== String(live.current.revision);
+          const changedZone = this.lastState.split(":")[0] !== s.zone || this.lastState.split(":")[1] !== String(live.current.revision);
           this.lastState = key;
           this.background?.setTexture(s.zone);
-          if (changedZone || force) { this.path = []; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
-          this.markers.forEach(m => m.destroy()); this.markers = [];
+          const far = this.player && Math.abs(this.player.x - (s.x + .5) * TILE_SIZE) + Math.abs(this.player.y - (s.y + .5) * TILE_SIZE) > TILE_SIZE * 1.5;
+          if (changedZone || force || (far && !this.moving)) { this.path = []; this.tweens.killTweensOf(this.player!); this.moving = false; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.portals.forEach(p => p.destroy()); this.portals = [];
-          RELICS.filter(r => r.zone === s.zone && chestVisible(s, r)).forEach(r => {
-            const marker = this.add.image((r.x + .5) * 64, (r.y + .5) * 64, "chest").setDisplaySize(57, 57).setDepth(3).setInteractive({ useHandCursor: true });
-            marker.on("pointerdown", (_: unknown, __: unknown, ___: unknown, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (!this.paused) this.seek(r); });
-            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) this.tweens.add({ targets: marker, y: marker.y - 5, alpha: .8, duration: 1300, yoyo: true, repeat: -1 });
-            this.markers.push(marker);
-          });
           this.scenery.forEach(item => item.destroy()); this.scenery = [];
           const color = (token: string) => P.Display.Color.HexStringToColor(getComputedStyle(document.documentElement).getPropertyValue(token).trim()).color;
-          for (let x = 2; x <= 21; x++) for (let y = 2; y <= 21; y++) {
-            const hazard = terrain(s.zone, x, y);
-            if (hazard) {
-              const tile = this.add.rectangle((x + .5) * 64, (y + .5) * 64, 62, 62, color(hazard === "mud" ? "--muted" : "--energy"), .35).setDepth(2);
-              const label = this.add.text((x + .5) * 64, (y + .5) * 64, hazard === "mud" ? "≋" : "⇠", { fontSize: "32px" }).setOrigin(.5).setDepth(3);
-              this.scenery.push(tile, label);
-            }
+          const at = (p: Position) => [(p.x + .5) * 64, (p.y + .5) * 64] as const;
+          const text = (p: Position, t: string, size = 36) => { const o = this.add.text(...at(p), t, { fontSize: `${size}px` }).setOrigin(.5).setDepth(3); this.scenery.push(o); return o; };
+          if (!s.scrolls.includes(s.zone)) {
+            const scroll = text(SCROLLS[s.zone], "📜", 44).setInteractive({ useHandCursor: true });
+            scroll.on("pointerdown", (_: unknown, __: unknown, ___: unknown, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (!this.paused) this.seek(SCROLLS[s.zone]); });
+            if (!this.reduced) this.tweens.add({ targets: scroll, y: scroll.y - 6, alpha: .75, duration: 1200, yoyo: true, repeat: -1 });
           }
-          LANDMARKS.filter(l => l.zone === s.zone).forEach(l => {
-            const label = this.add.text((l.x + .5) * 64, (l.y + .5) * 64, s.landmarks.includes(l.id) ? "✓" : l.icon, { fontSize: "32px" }).setOrigin(.5).setDepth(3);
-            this.scenery.push(label);
-          });
-          if (s.zone === "forest") {
-            for (const [role, plate] of Object.entries(PLATES)) {
-              const circle = this.add.circle((plate.x + .5) * 64, (plate.y + .5) * 64, 25, color("--primary"), .5).setDepth(2);
-              const label = this.add.text((plate.x + .5) * 64, (plate.y + .5) * 64, role === "pet" ? "🐾" : "☀", { fontSize: "24px" }).setOrigin(.5).setDepth(3);
-              this.scenery.push(circle, label);
-            }
-            if (!s.gates.includes("forest-gate")) {
-              const gate = this.add.rectangle(10.5 * 64, 12 * 64, 32, 20 * 64, color("--primary"), .4).setDepth(4);
-              this.scenery.push(gate);
-            }
+          if (s.zone === "lair") {
+            if (!s.gates.includes("lair")) { const door = this.add.rectangle((LAIR_DOOR.x + .5) * 64, 10 * 64, 64, 128, color("--primary"), .55).setDepth(4); this.scenery.push(door); text(LAIR_DOOR, s.scrolls.includes("lair") ? "❓" : "🔒", 32).setY(10 * 64); }
+            DUEL_TILES.forEach((t, i) => { const r = this.add.rectangle(...at(t), 60, 60, color("--points"), s.rescued ? .2 : .45).setStrokeStyle(3, color("--primary")).setDepth(2); this.scenery.push(r); text(t, "ABC"[i]!, 28); });
+            const start = this.add.circle(...at(DUEL_START), 20, color("--energy"), .4).setDepth(2); this.scenery.push(start);
+            if (!s.rescued) { const hy = this.add.image(...at(RAZOR), "razor").setDisplaySize(130, 130).setDepth(5); this.scenery.push(hy); }
+            const g = this.add.image(...at(CAGE), "griffin").setDisplaySize(110, 110).setDepth(5); this.scenery.push(g);
+            if (!s.rescued) for (let i = -2; i <= 2; i++) { const bar = this.add.rectangle(at(CAGE)[0] + i * 22, at(CAGE)[1], 5, 120, color("--foreground"), .8).setDepth(6); this.scenery.push(bar); }
           }
           PORTALS[s.zone].forEach(p => {
-            const ring = this.add.text(0, 0, s.unlocked.includes(p.target) ? "🌀" : "🔒", { fontSize: "44px" }).setOrigin(.5);
-            const label = this.add.text(0, 34, p.target === "forest" ? "FOREST" : p.target === "sky" ? "SKY ISLES" : "MEADOW", { fontFamily: "Nunito", fontSize: "12px", backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--background").trim(), padding: { x: 8, y: 4 } }).setOrigin(.5);
-            const node = this.add.container((p.x + .5) * 64, (p.y + .5) * 64, [ring, label]); this.portals.push(node);
+            const open = !p.forward || s.gates.includes(s.zone);
+            const ring = this.add.text(0, 0, open ? "🌀" : s.scrolls.includes(s.zone) ? "❓" : "🔒", { fontSize: "44px" }).setOrigin(.5);
+            const label = this.add.text(0, 34, p.target === "wood" ? "LONELY WOOD" : p.target === "ravine" ? "SHADOW RAVINE" : p.target === "lair" ? "RAZOR'S LAIR" : "MEADOW", { fontFamily: "Nunito", fontSize: "12px", color: getComputedStyle(document.documentElement).getPropertyValue("--foreground").trim(), backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--background").trim(), padding: { x: 8, y: 4 } }).setOrigin(.5);
+            const node = this.add.container((p.x + .5) * 64, (p.y + .5) * 64, [ring, label]).setDepth(4); this.portals.push(node);
           });
+        }
+        gust() {
+          const p = this.player; if (!p) return;
+          for (let i = 0; i < 10; i++) { const w = this.add.text(p.x + (Math.random() - .5) * 80, p.y - 40 + Math.random() * 60, "〰", { fontSize: "28px" }).setDepth(12).setAlpha(.9); this.tweens.add({ targets: w, y: w.y + 90, alpha: 0, duration: 600 + Math.random() * 300, onComplete: () => w.destroy() }); }
+          this.cameras.main.shake(250, .004);
+        }
+        victory() {
+          const hy = this.scenery.find(o => (o as Phaser.GameObjects.Image).texture?.key === "razor") as Phaser.GameObjects.Image | undefined;
+          if (hy) this.tweens.add({ targets: hy, x: -200, alpha: 0, duration: 1400 });
+          for (let i = 0; i < 24; i++) { const c = this.add.text((CAGE.x + .5) * 64, (CAGE.y + .5) * 64, ["✨", "⭐", "🎉"][i % 3]!, { fontSize: "26px" }).setDepth(12); this.tweens.add({ targets: c, x: c.x + (Math.random() - .5) * 400, y: c.y + (Math.random() - .5) * 400, alpha: 0, duration: 1400, onComplete: () => c.destroy() }); }
         }
         override update() {
           if (!this.player) return;
@@ -113,12 +116,11 @@ export function WorldCanvas(props: Props) {
           const s = live.current.state;
           const next = dx || dy ? { x: s.x + dx, y: s.y + (dx ? 0 : dy) } : this.path.shift();
           if (!next || !canStep(s, next.x, next.y)) return;
-          const result = applyAdventure(s, { action: "move", ...next });
           live.current.onMove(next);
           this.moving = true;
           this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
           
-          this.tweens.add({ targets: this.player, x: (result.x + .5) * 64, y: (result.y + .5) * 64, duration: terrain(s.zone, next.x, next.y) === "mud" ? 520 : 210, onComplete: () => { this.moving = false; } });
+          this.tweens.add({ targets: this.player, x: (next.x + .5) * 64, y: (next.y + .5) * 64, duration: 210, onComplete: () => { this.moving = false; } });
         }
         animate() {
           const p = this.player; const el = live.current.figure.current; if (!p) return;
@@ -145,7 +147,7 @@ export function WorldCanvas(props: Props) {
           const past = this.trail[0]; const pet = live.current.pet.current;
           if (pet && past) {
             const lag = this.trail.find(e => e.t >= now - 500) ?? past;
-            const s = live.current.state; const px = s.pinned || s.zone === "forest" ? (s.pet.x + .5) * 64 : lag.x; const py = s.pinned || s.zone === "forest" ? (s.pet.y + .5) * 64 : lag.y;
+            const px = lag.x; const py = lag.y;
             pet.style.transform = `translate(${(px - cam.worldView.x) * cam.zoom}px, ${(py - cam.worldView.y) * cam.zoom}px)`;
             pet.style.setProperty("--pet-size", `${70 * cam.zoom}px`);
             pet.dataset["facing"] = lag.x > p.x + 2 ? "west" : lag.x < p.x - 2 ? "east" : pet.dataset["facing"] ?? "east";
