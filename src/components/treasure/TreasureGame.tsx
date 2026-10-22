@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { ZONES, PORTALS, SCROLLS, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, interactionHere, sideQuests, isRevealed, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
+import { ZONES, PORTALS, SCROLLS, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
@@ -74,9 +74,9 @@ export function TreasureGame() {
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
   const settled = useRef("");
   useEffect(() => {
-    const tile = duelTileAt(state); const key = `${state.x},${state.y}`;
+    const tile = duelTileAt(state); const key = duelLanding(state, settled.current, blocked);
     if (tile < 0) { settled.current = ""; return; }
-    if (blocked || settled.current === key) return;
+    if (!key) return;
     const timer = setTimeout(async () => {
       settled.current = key; setBusy(true);
       try {

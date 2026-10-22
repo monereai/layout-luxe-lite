@@ -129,6 +129,10 @@ export function gateHere(s: AdventureState): ZoneId | null {
   return at && near(s, at) ? s.zone : null;
 }
 export function duelTileAt(s: AdventureState): number { return s.zone === "lair" && s.gates.includes("lair") && !s.rescued ? DUEL_TILES.findIndex(t => t.x === s.x && t.y === s.y) : -1; }
+export function duelLanding(s: AdventureState, lastLanding: string, blocked: boolean): string | null {
+  const key = `${s.x},${s.y}`;
+  return !blocked && duelTileAt(s) >= 0 && key !== lastLanding ? key : null;
+}
 export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
 function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }

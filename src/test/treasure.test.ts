@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, DUEL_START, type AdventureState } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, type AdventureState } from "@/lib/treasure";
 import { PETS, petButtonState } from "@/lib/pets";
 
 const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
@@ -48,6 +48,13 @@ describe("Griffin rescue rules", () => {
   });
   it("lair scroll cannot be reached from the entrance without goggles", () => {
     expect(worldPath(at({ zone: "lair", x: 12, y: 19 }), SCROLLS.lair)).toBeNull();
+  });
+  it("one stone landing answers once, not again when the next riddle appears", () => {
+    const s = at({ zone: "lair", gates: ["lair"], x: 12, y: 6 });
+    expect(duelLanding(s, "", false)).toBe("12,6");
+    expect(duelLanding({ ...s, duel: 1 }, "12,6", false)).toBeNull();
+    expect(duelLanding({ ...s, x: 14, duel: 1 }, "12,6", false)).toBe("14,6");
+    expect(duelLanding(s, "", true)).toBeNull();
   });
   it("gate needs the scroll first", () => {
     const s = at({ x: 20, y: 10 });
