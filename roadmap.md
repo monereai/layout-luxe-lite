@@ -1,4 +1,5 @@
 # Orchard harvesting maze
+- [ ] Replace legacy direct harvesting with maze-only interactions and an explicit collected-Energy completion callback; verify modal closure and HUD update without changing Carl's account.
 - [x] Remove minimum Energy for Crystal Gate/maze entry in walking, World Map and authenticated maze start; retain Leaf Gate and daily harvest rules. Fourteen tests pass; signed-in play remains blocked by the separate-QA rule.
 - [x] Add tree-triggered maze, dots, Sun power, chasers and safe Energy settlement/entrance return with a shared UTC tree ledger.
 - [x] Verify reward/power rules and isolated desktop/phone maze controls and expulsion; 39 focused tests pass and preview builds clean.

@@ -7,17 +7,19 @@ import { MAZE, MAZE_TICK_MS, cellId, mazeCells, mazeStep, newMaze, powerActive, 
 import { playSound } from "@/lib/audio";
 
 /** Browser-only Phaser maze; the server replays the input trace before depositing rewards. */
-export function PacmanHarvestMiniGame({ avatar, onFinish }: { avatar: string; onFinish: (trace: MazeDirection[], expelled: boolean) => Promise<void> }) {
+export function PacmanHarvestMiniGame({ avatar, onComplete }: { avatar: string; onComplete: (collectedEnergy: number, trace: MazeDirection[], expelled: boolean) => Promise<void> }) {
   const [mount, setMount] = useState<HTMLDivElement | null>(null);
   const direction = useRef<MazeDirection>("idle");
-  const trace = useRef<MazeDirection[]>([]), finish = useRef(onFinish), stopped = useRef(false);
+  const trace = useRef<MazeDirection[]>([]), finish = useRef(onComplete), stopped = useRef(false);
+  const total = useRef(0), depositing = useRef(false);
   const [snapshot, setSnapshot] = useState(newMaze), [saving, setSaving] = useState(false), [error, setError] = useState<string | null>(null);
-  finish.current = onFinish;
+  finish.current = onComplete;
   async function deposit(expelled: boolean) {
-    if (saving) return;
-    stopped.current = true; setSaving(true); setError(null);
-    try { await finish.current(trace.current, expelled); }
+    if (depositing.current) return;
+    depositing.current = true; stopped.current = true; setSaving(true); setError(null);
+    try { await finish.current(total.current, [...trace.current], expelled); }
     catch { setError("Your harvest is safe here. Try saving it again."); setSaving(false); }
+    finally { depositing.current = false; }
   }
   const depositRef = useRef(deposit); depositRef.current = deposit;
   useEffect(() => {
@@ -46,7 +48,7 @@ export function PacmanHarvestMiniGame({ avatar, onFinish }: { avatar: string; on
         if (direction.current !== "idle") started = true;
         if (!started) return;
         elapsed += Math.min(dt, MAZE_TICK_MS); if (elapsed < MAZE_TICK_MS) return; elapsed -= MAZE_TICK_MS;
-        const old = state; state = mazeStep(state, direction.current); trace.current.push(direction.current); setSnapshot(state);
+        const old = state; state = mazeStep(state, direction.current); trace.current.push(direction.current); total.current = state.energy; setSnapshot(state);
         for (const id of state.collected) { this.dots.get(id)?.destroy(); this.dots.delete(id); }
         if (state.energy > old.energy) playSound(state.powerUntil > old.powerUntil ? "success.mp3" : "energy_pickup.mp3", .2);
         if (this.player) { this.tweens.add({ targets: this.player, x: state.player.x * 40 + 20, y: state.player.y * 40 + 20, duration: 180 }); if (direction.current === "left" || direction.current === "right") this.player.setFlipX(direction.current === "left"); }

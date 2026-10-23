@@ -25,7 +25,7 @@ import { Zap } from "lucide-react";
 import groveImg from "@/assets/treasure/grove.jpg";
 import cavernsImg from "@/assets/treasure/caverns.jpg";
 import petShopMark from "@/assets/shop/pet-shop.png";
-import { MAP_ENTRANCES, type MazeDirection } from "@/lib/harvest-maze";
+import { MAP_ENTRANCES, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 
 const PacmanHarvestMiniGame = lazy(() => import("../PacmanHarvestMiniGame").then(m => ({ default: m.PacmanHarvestMiniGame })));
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
@@ -55,6 +55,7 @@ export function TreasureGame() {
   const [travelling, setTravelling] = useState(false);
   const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
   const [sideReset, setSideReset] = useState(0);
+  const startingHarvest = useRef(false);
   const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
@@ -91,14 +92,16 @@ export function TreasureGame() {
   const gate = gateNear(state.zone, state); const tree = mapTreeNear(state.zone, state);
   const here = gate ? { kind: "orchard-gate" as const, label: `Open ${gate.name}`, icon: gate.icon } : tree ? { kind: "orchard-tree" as const, label: "Harvest Energy Tree", icon: "🌳" } : interactionHere(state);
   async function pick(id: TreeId) {
-    if (harvestMaze || busy) return;
+    if (harvestMaze || busy || startingHarvest.current) return;
+    startingHarvest.current = true;
     setBusy(true);
     try { await game.prepareHarvest(); const round = await orchard.beginMaze(id); setHarvestMaze({ tree: id, round }); }
     catch (e) { setNotice(e instanceof Error ? e.message : "The harvest couldn't be saved."); }
-    finally { setBusy(false); }
+    finally { startingHarvest.current = false; setBusy(false); }
   }
-  async function finishHarvest(trace: MazeDirection[], expelled: boolean) {
+  async function finishHarvest(collectedEnergy: number, trace: MazeDirection[], expelled: boolean) {
     if (!harvestMaze) return;
+    if (replayMaze(trace).energy !== collectedEnergy) throw new Error("The collected Energy could not be verified.");
     const result = await orchard.finishMaze(harvestMaze.tree, harvestMaze.round, trace);
     if (result.state) game.harvestReturn(result.state);
     else if (expelled && !side) game.harvestReturn({ ...state, ...MAP_ENTRANCES[state.zone], pet: null });
@@ -237,7 +240,7 @@ export function TreasureGame() {
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
-    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the orchard…</div>}><PacmanHarvestMiniGame avatar={avatar} onFinish={finishHarvest} /></Suspense></ClientOnly>}
+    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the orchard…</div>}><PacmanHarvestMiniGame avatar={avatar} onComplete={finishHarvest} /></Suspense></ClientOnly>}
 
     <Dialog open={intro} onOpenChange={setIntro}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Rescue of the Golden Griffin</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">{INTRO}</DialogDescription><div className="flex items-end justify-center gap-4"><img src={razor} alt="Razor the Hyena" width={768} height={768} className="h-28 w-28 object-contain" /><img src={griffin} alt="The Golden Griffin" width={816} height={816} className="h-24 w-24 object-contain" /></div><Button onClick={() => setIntro(false)}>{state.scrolls.length ? "Continue the rescue" : "Begin the rescue"}<ArrowRight /></Button></DialogContent></Dialog>
 
