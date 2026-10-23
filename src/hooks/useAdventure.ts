@@ -22,6 +22,7 @@ export function useAdventure() {
   const steps = useRef<Position[]>([]);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const generation = useRef(0);
+  const resetting = useRef(false);
   function update(next: AdventureState) { current.current = next; setState(next); }
   useEffect(() => {
     generation.current++; steps.current = []; queue.current = Promise.resolve(); setLoaded(false);
@@ -54,13 +55,13 @@ export function useAdventure() {
   }
   useEffect(() => { const timer = window.setInterval(() => { void flush().catch(() => {}); }, 900); const onHide = () => { void flush().catch(() => {}); }; window.addEventListener("pagehide", onHide); return () => { clearInterval(timer); window.removeEventListener("pagehide", onHide); }; }, [user?.id, run]);
   function move(position: Position) {
-    if (!loaded) return;
+    if (!loaded || resetting.current || current.current.rescued) return;
     const next = applyAdventure(current.current, { action: "move", ...position });
     if (next === current.current) return;
     update(next); if (user) { setSaving(true); steps.current.push(position); if (steps.current.length >= 24) void flush().catch(() => {}); }
   }
   async function act(action: AdventureAction) {
-    if (!loaded) return current.current;
+    if (!loaded || resetting.current || (current.current.rescued && action.action !== "restart")) return current.current;
     if (!user) { const next = applyAdventure(current.current, action); update(next); return next; }
     await flush();
     return enqueue(async () => {
@@ -75,5 +76,21 @@ export function useAdventure() {
       } catch (e) { if (action.action === "answer") throw e; await recover(e); throw e; } finally { setSaving(false); }
     });
   }
-  return { state, move, act, loaded, saving, revision, user, error: query.error, retry: () => query.refetch() };
+  async function restart() {
+    if (resetting.current || !current.current.rescued) return false;
+    resetting.current = true; steps.current = []; setSaving(true);
+    const identity = generation.current;
+    try {
+      await queue.current.catch(() => {});
+      if (identity !== generation.current) return false;
+      const result = user ? await run({ data: { action: "restart" } }) : { state: applyAdventure(current.current, { action: "restart" }), griffin: false, points: 0 };
+      if (identity !== generation.current) return false;
+      update(result.state); client.setQueryData(key, result);
+      try { localStorage.setItem(user ? `monere-treasure-cache-${user.id}` : GUEST_KEY, JSON.stringify(result.state)); } catch { /* storage unavailable */ }
+      setRevision(v => v + 1);
+      return true;
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Could not restart your adventure."); return false; }
+    finally { resetting.current = false; setSaving(false); }
+  }
+  return { state, move, act, restart, loaded, saving, revision, user, error: query.error, retry: () => query.refetch() };
 }
