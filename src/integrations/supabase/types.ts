@@ -207,6 +207,30 @@ export type Database = {
         }
         Relationships: []
       }
+      orchard_harvests: {
+        Row: {
+          created_at: string
+          day: string
+          energy: number
+          tree: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          energy: number
+          tree: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          energy?: number
+          tree?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       organization_codes: {
         Row: {
           code: string
@@ -587,6 +611,7 @@ export type Database = {
       }
       is_premium: { Args: { check_env: string }; Returns: boolean }
       is_sandbox_admin: { Args: never; Returns: boolean }
+      orchard_harvest: { Args: { p_tree: string }; Returns: Json }
       pet_action: { Args: { p_action: string; p_id: string }; Returns: Json }
       property_action: {
         Args: { p_action: string; p_id: string }

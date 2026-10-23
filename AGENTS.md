@@ -34,14 +34,13 @@
 - AI endpoints need sign-in except seekWisdomGuest (first questions, server-capped per hashed visitor/day); guest rewards are display-only.
 - Share mentor facts and MessageResponse.
 
-- Read nested AGENTS.md before edits (src/components: art, wardrobe, shop).
+- Read nested AGENTS.md before edits (src/components: art, wardrobe, shop, treasure).
 
 - Keep MCP reads OAuth caller-scoped in src/lib/mcp; browser tools use owning controls and static fail-open telemetry.
 - Validate same-origin OAuth return paths for every sign-in method.
 
 - Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps.
-- Extend jigsaw sizes end-to-end; preserve gifts.
-- Find Monere spots come from care_start_round; taps are checked against them.
+- Jigsaw sizes extend end-to-end and keep gifts; Find Monere taps are checked against care_start_round spots.
 - Daily Dilemma uses SQL-owned choices, protected dev resets and daily ledger keys with shared care cache.
 - Story images use scene hashes, private signed cache URLs and immediate ready-made art on failure; refusals never replay.
 - Guest points (local monere_guest_*) reach accounts only via claim_guest_points, once and capped.
@@ -50,7 +49,6 @@
 
 - Treasure uses lazy browser-only Phaser and account-scoped SQL step/collection validation; wardrobe_action grants fixed relic-set gifts. Guest saves never import into rewards.
 - Cloud startup consumers resolve through the non-generated cloud-client guard; invalid public configuration uses a signed-out, non-persistent, network-disabled client. Why: local UI must mount without fake authentication or editing managed integration files.
-- Quest completion derives from saved rescued state and pauses gameplay; explicit restart serializes pending actions, resets adventure/cache/canvas state via authenticated treasure_restart, and never clears reward ledgers or account inventory. Why: completion and replay must not loop or duplicate rewards.
 - Use the shared treasure maintenance gate for navigation, route rendering and sitemap visibility; its account-keyed server-verified tester exception requires verified identity plus protected admin/tester roles and is enforced on adventure server actions. Do not mount gameplay or unrelated dialogs for blocked visitors. Why: private testing must not reopen public access or trust client identity flags.
-- Treasure tap routes use the shared collision pathfinder; locked answer stones route to the inner-door approach and explain prerequisites. Why: visible scenery must not silently swallow navigation or bypass gate rules.
 - Griffin world (treasure_v5_action/travel) keeps older treasure RPCs for the published client; v5 draws each save's riddle slots and option order from the pool server-side and validates movement gates (gear, lily phase, traps), scrolls, riddles, NPC deliveries, digs and plates per saved step, pays points only via one-time point_credits references, and alone grants the reward-only golden-griffin pet. Why: staged deployment and optimistic movement must not bypass puzzles or replay rewards.
+- Orchard side lands are client-only dead ends; only orchard_harvest (per tree per UTC day) changes care energy. Why: no quest bypass or farming.

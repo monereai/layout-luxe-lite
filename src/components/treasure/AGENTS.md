@@ -1,0 +1,3 @@
+# Treasure adventure rules
+- Quest completion derives from saved rescued state and pauses gameplay; explicit restart serializes pending actions, resets adventure/cache/canvas state via authenticated treasure_restart, and never clears reward ledgers or account inventory. Why: completion and replay must not loop or duplicate rewards.
+- Treasure tap routes use the shared collision pathfinder; locked answer stones route to the inner-door approach and explain prerequisites. Why: visible scenery must not silently swallow navigation or bypass gate rules.

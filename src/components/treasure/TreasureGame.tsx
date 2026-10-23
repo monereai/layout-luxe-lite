@@ -18,6 +18,10 @@ import ravine from "@/assets/treasure/ravine.jpg";
 import lair from "@/assets/treasure/lair.jpg";
 import griffin from "@/assets/pets/golden-griffin.png";
 import razor from "@/assets/treasure/razor.png";
+import { SideZone } from "./SideZone";
+import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
+import { ENERGY_GATE_COST, SIDE_ZONES, canOpenGate, gateNear, mapTreeNear, type SideZoneId, type TreeId } from "@/lib/orchard";
+import { Zap } from "lucide-react";
 import petShopMark from "@/assets/shop/pet-shop.png";
 
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
@@ -43,6 +47,8 @@ export function TreasureGame() {
   const [busy, setBusy] = useState(false);
   const [sound, setSound] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
+  const [side, setSide] = useState<SideZoneId | null>(null);
+  const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
   const [turn, setTurn] = useState<Record<number, string>>({});
@@ -60,14 +66,14 @@ export function TreasureGame() {
     return () => { cancelled = true; };
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
-  const blocked = !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
+  const blocked = !!side || !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
   useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
   useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
   useEffect(() => { const enabled = (() => { try { return localStorage.getItem("monere-treasure-sound") !== "off"; } catch { return true; } })(); setSound(enabled); setSoundsMuted(!enabled); return () => { void audio.current?.close(); }; }, []);
   const [music, setMusic] = useState(true);
   useEffect(() => { const on = (() => { try { return localStorage.getItem("monere-treasure-music") !== "off"; } catch { return true; } })(); setMusic(on); setMusicMuted(!on); const start = () => resumeBackgroundMusic(); window.addEventListener("pointerdown", start); window.addEventListener("keydown", start); return () => { window.removeEventListener("pointerdown", start); window.removeEventListener("keydown", start); stopBackgroundMusic(); }; }, []);
-  useEffect(() => { playBackgroundMusic(state.zone === "lair" ? "lair_theme.mp3" : state.zone === "ravine" ? "desert_theme.mp3" : "forest_theme.mp3"); }, [state.zone]);
+  useEffect(() => { playBackgroundMusic(side ? SIDE_ZONES[side].music : state.zone === "lair" ? "lair_theme.mp3" : state.zone === "ravine" ? "desert_theme.mp3" : "forest_theme.mp3"); }, [state.zone, side]);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
   function tone(notes: number[]) {
     if (!sound) return;
@@ -75,7 +81,12 @@ export function TreasureGame() {
   }
   const chime = () => tone([523, 659, 784]);
   const zone = ZONES.find(z => z.id === state.zone);
-  const here = interactionHere(state);
+  const gate = gateNear(state.zone, state); const tree = mapTreeNear(state.zone, state);
+  const here = gate ? { kind: "orchard-gate" as const, label: `Open ${gate.name}`, icon: gate.icon } : tree ? { kind: "orchard-tree" as const, label: "Harvest Energy Tree", icon: "🌳" } : interactionHere(state);
+  async function pick(id: TreeId) {
+    try { const r = await orchard.pick(id); if (r.gained > 0) { playSound("energy_pickup.mp3", 0.6); setNotice(`Crunch! +${r.gained} Energy${orchard.guest ? " (sign in to keep it)" : ""}.`); } else setNotice(r.reason ?? "Monere's Energy is already full!"); }
+    catch (e) { setNotice(e instanceof Error ? e.message : "The harvest couldn't be saved."); }
+  }
   const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
@@ -98,6 +109,8 @@ export function TreasureGame() {
   async function run(action: Parameters<typeof game.act>[0]) { setBusy(true); try { return await game.act(action); } catch { return null; } finally { setBusy(false); } }
   async function interact() {
     if (blocked) return;
+    if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
+    if (tree) { await pick(tree.id); return; }
     const h = interactionHere(state);
     if (!h) {
       if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
@@ -144,8 +157,9 @@ export function TreasureGame() {
   if (!zone) return null;
   return <section className="treasure-game" aria-label="The Rescue of the Golden Griffin">
     <header className="treasure-hud">
-      <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">The Rescue of the Golden Griffin</p><h1 className="truncate font-display text-lg sm:text-2xl">{zone.name}</h1></div></div>
+      <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">The Rescue of the Golden Griffin</p><h1 className="truncate font-display text-lg sm:text-2xl">{side ? SIDE_ZONES[side].name : zone.name}</h1></div></div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+        <span className="treasure-energy" aria-label={`Energy ${orchard.energy} of 100`} title="Energy"><Zap className="h-4 w-4" /><span><span style={{ width: `${orchard.energy}%` }} /></span><span className="hidden text-sm sm:inline">{orchard.energy}</span></span>
         <span className="flex items-center gap-1.5 font-display text-lg text-points" aria-label={`${state.scrolls.length} of 4 scrolls collected`}><ScrollText className="h-4 w-4" />{state.scrolls.length}<span className="text-xs text-muted-foreground">/4</span></span>
         <Button size="icon" variant="ghost" title={music ? "Turn music off" : "Turn music on"} aria-label={music ? "Turn music off" : "Turn music on"} aria-pressed={music} onClick={() => { const next = !music; setMusic(next); setMusicMuted(!next); try { localStorage.setItem("monere-treasure-music", next ? "on" : "off"); } catch { /* storage optional */ } }}>{music ? <Music /> : <Music2 className="opacity-40" />}</Button>
         <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); setSoundsMuted(sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
@@ -164,6 +178,7 @@ export function TreasureGame() {
       <div className="treasure-map-chip"><span>{zone.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
       <MiniMap state={state} className="absolute right-3 top-14 z-20 hidden w-32 sm:block" />
       <Link to="/pet-shop" title="Pet Shop" aria-label="Pet Shop" className="treasure-petshop"><img src={petShopMark} alt="" width={816} height={816} loading="lazy" draggable={false} /><span>Pet Shop</span></Link>
+      {side && <SideZone zone={side} avatar={turn[2] ?? avatar} cooling={orchard.cool} onPick={pick} onExit={() => { setSide(null); setNotice("Back on the main path."); }} />}
       {notice && <div role="status" className="treasure-notice">{notice}</div>}
       <div className="treasure-controls">
         <div className="treasure-dpad" aria-label="Movement controls">{[{ x: 0, y: -1, Icon: ArrowUp, name: "Move up", css: "col-start-2" }, { x: -1, y: 0, Icon: ArrowLeft, name: "Move left", css: "row-start-2" }, { x: 0, y: 1, Icon: ArrowDown, name: "Move down", css: "col-start-2 row-start-2" }, { x: 1, y: 0, Icon: ArrowRight, name: "Move right", css: "col-start-3 row-start-2" }].map(({ x, y, Icon, name, css }) => <Button key={name} variant="secondary" size="icon" aria-label={name} title={name} className={`treasure-direction ${css}`} disabled={!game.loaded || blocked} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); controls.current?.direction(x, y); }} onPointerUp={() => controls.current?.release()} onPointerCancel={() => controls.current?.release()} onLostPointerCapture={() => controls.current?.release()}><Icon /></Button>)}</div>

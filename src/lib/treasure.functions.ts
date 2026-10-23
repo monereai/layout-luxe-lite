@@ -32,3 +32,15 @@ export const adventureAction = createServerFn({ method: "POST" })
     const value = result.data as { state?: unknown; griffin?: boolean; points?: number } | null;
     return { state: parseAdventure(value?.state), griffin: value?.griffin === true, points: typeof value?.points === "number" ? value.points : 0 };
   });
+
+export const orchardHarvest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ tree: z.enum(["meadow-1", "grove-1", "grove-2", "grove-3", "caverns-1"]) }))
+  .handler(async ({ data, context }) => {
+    if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) {
+      throw new Error("Monere's adventure is temporarily under construction.");
+    }
+    const result = await context.supabase.rpc("orchard_harvest", { p_tree: data.tree });
+    if (result.error) throw new Error(result.error.message);
+    return z.object({ energy: z.number().int(), gained: z.number().int(), harvested: z.boolean() }).parse(result.data);
+  });
