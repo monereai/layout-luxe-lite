@@ -40,8 +40,7 @@
 - Validate same-origin OAuth return paths for every sign-in method.
 
 - Derive the sitemap from required staticData.sitemap decisions; exclude personal/protocol routes and omit dates without page-specific timestamps.
-- Extend jigsaw sizes end-to-end; preserve gifts.
-- Find Monere spots come from care_start_round; taps are checked against them.
+- Jigsaw sizes extend end-to-end and keep gifts; Find Monere taps are checked against care_start_round spots.
 - Daily Dilemma uses SQL-owned choices, protected dev resets and daily ledger keys with shared care cache.
 - Story images use scene hashes, private signed cache URLs and immediate ready-made art on failure; refusals never replay.
 - Guest points (local monere_guest_*) reach accounts only via claim_guest_points, once and capped.
@@ -54,4 +53,4 @@
 - Use the shared treasure maintenance gate for navigation, route rendering and sitemap visibility; its account-keyed server-verified tester exception requires verified identity plus protected admin/tester roles and is enforced on adventure server actions. Do not mount gameplay or unrelated dialogs for blocked visitors. Why: private testing must not reopen public access or trust client identity flags.
 - Treasure tap routes use the shared collision pathfinder; locked answer stones route to the inner-door approach and explain prerequisites. Why: visible scenery must not silently swallow navigation or bypass gate rules.
 - Griffin world (treasure_v5_action/travel) keeps older treasure RPCs for the published client; v5 draws each save's riddle slots and option order from the pool server-side and validates movement gates (gear, lily phase, traps), scrolls, riddles, NPC deliveries, digs and plates per saved step, pays points only via one-time point_credits references, and alone grants the reward-only golden-griffin pet. Why: staged deployment and optimistic movement must not bypass puzzles or replay rewards.
-- Energy Orchard side lands (grove/caverns) are client-only dead-end scenes outside the v5 server state; only orchard_harvest (one per tree per UTC day) touches care energy. Why: optional lands must not alter server-validated quest movement or allow energy farming.
+- Orchard side lands are client-only dead ends; only orchard_harvest (per tree per UTC day) changes care energy. Why: no quest bypass or farming.
