@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseAdventure } from "./treasure";
+import { isTreasureTester, TREASURE_MAINTENANCE } from "./treasureGate";
+
+async function verifiedTester(client: Parameters<typeof requireSupabaseAuth.server>[0]) {
+  return client;
+}
 
 export const adventureAction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
