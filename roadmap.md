@@ -1,3 +1,7 @@
+# Orchard harvesting maze
+- [ ] Add tree-triggered maze, dots, Sun power, chasers and safe Energy settlement/entrance return.
+- [ ] Verify concrete reward/power rules, replay protection and browser controls without altering Carl's account.
+
 # Startup, quest completion and Lair cleanup
 - [x] Safeguard invalid local Cloud configuration without editing generated files; browser verifies signed-out home mounts with missing/placeholder settings.
 - [x] Stop completed-game activity and add explicit Play Again / Main Menu resets, preserving earned rewards; isolated guest browser verifies final answer, stable modal, both resets and refresh persistence. Signed-in reset not exercised because private access is Carl-only and his progress must not change.
