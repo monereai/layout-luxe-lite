@@ -18,7 +18,7 @@ it("allows Crystal practice only after the authenticated daily reward refusal", 
   expect(supabase.rpc).toHaveBeenCalledExactlyOnceWith("orchard_maze_start", { p_tree: "caverns-1" });
 });
 it("does not turn denied location, identity or other tree requests into practice", async () => {
-  for (const [tree, message] of [["caverns-1", "Reach the Energy Tree first"], ["grove-1", "This tree has been harvested today. Come back tomorrow!"], ["caverns-1", "Access denied"]]) {
+  for (const [tree, message] of [["caverns-1", "Reach the Energy Tree first"], ["grove-1", "This tree has been harvested today. Come back tomorrow!"], ["caverns-1", "Access denied"]] as const) {
     await expect(handler({ data: { tree }, context: { userId: "isolated", supabase: client(message) } })).rejects.toThrow(message);
   }
   mocks.tester.mockReturnValue(false); const supabase = client("This tree has been harvested today. Come back tomorrow!");
