@@ -246,7 +246,7 @@ export function TreasureGame() {
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
-    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the Energy maze…</div>}><PacmanHarvestMiniGame avatar={avatar} onComplete={finishHarvest} /></Suspense></ClientOnly>}
+    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the Energy maze…</div>}><PacmanHarvestMiniGame avatar={avatar} practice={harvestMaze.round === "practice"} onComplete={finishHarvest} /></Suspense></ClientOnly>}
 
     <Dialog open={intro} onOpenChange={setIntro}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Rescue of the Golden Griffin</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">{INTRO}</DialogDescription><div className="flex items-end justify-center gap-4"><img src={razor} alt="Razor the Hyena" width={768} height={768} className="h-28 w-28 object-contain" /><img src={griffin} alt="The Golden Griffin" width={816} height={816} className="h-24 w-24 object-contain" /></div><Button onClick={() => setIntro(false)}>{state.scrolls.length ? "Continue the rescue" : "Begin the rescue"}<ArrowRight /></Button></DialogContent></Dialog>
 

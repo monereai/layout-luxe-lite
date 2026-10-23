@@ -53,6 +53,9 @@ export const startOrchardMaze = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) throw new Error("Monere's adventure is temporarily under construction.");
     const result = await context.supabase.rpc("orchard_maze_start", { p_tree: data.tree });
+    // SQL checks ownership, location and eligibility before the daily ledger.
+    // A completed Crystal harvest still permits play, but never another payout.
+    if (data.tree === "caverns-1" && result.error?.message === "This tree has been harvested today. Come back tomorrow!") return { id: "practice" };
     if (result.error) throw new Error(result.error.message);
     return z.object({ id: z.string().uuid() }).parse(result.data);
   });

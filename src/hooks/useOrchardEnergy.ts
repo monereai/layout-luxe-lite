@@ -18,11 +18,12 @@ export function useOrchardEnergy() {
   const energy = care.user ? care.data?.energy ?? 0 : guest;
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
   async function beginMaze(id: TreeId) {
-    if (cool(id)) throw new Error("This tree is regrowing its fruit.");
+    if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
     return care.user ? (await start({ data: { tree: id } })).id : "guest";
   }
   async function finishMaze(id: TreeId, round: string, trace: MazeDirection[]) {
     const maze = replayMaze(trace);
+    if (round === "practice") return { gained: 0, state: null };
     if (!care.user) {
       const gained = depositEnergy(guest, maze.energy), next = guest + gained;
       setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ }
