@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { ZONES, PORTALS, SCROLLS, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
+import { ZONES, PORTALS, SCROLLS, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, worldPath, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
 import { playBackgroundMusic, playSound, resumeBackgroundMusic, setMusicMuted, setSoundsMuted, stopBackgroundMusic } from "@/lib/audio";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
@@ -20,8 +20,10 @@ import griffin from "@/assets/pets/golden-griffin.png";
 import razor from "@/assets/treasure/razor.png";
 import { SideZone } from "./SideZone";
 import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
-import { ENERGY_GATE_COST, SIDE_ZONES, canOpenGate, gateNear, mapTreeNear, type SideZoneId, type TreeId } from "@/lib/orchard";
+import { ELEMENTAL_GATES, ENERGY_GATE_COST, SIDE_ZONES, canOpenGate, gateNear, mapTreeNear, type SideZoneId, type TreeId } from "@/lib/orchard";
 import { Zap } from "lucide-react";
+import groveImg from "@/assets/treasure/grove.jpg";
+import cavernsImg from "@/assets/treasure/caverns.jpg";
 import petShopMark from "@/assets/shop/pet-shop.png";
 
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
@@ -48,6 +50,7 @@ export function TreasureGame() {
   const [sound, setSound] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [side, setSide] = useState<SideZoneId | null>(null);
+  const [travelling, setTravelling] = useState(false);
   const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
@@ -107,6 +110,36 @@ export function TreasureGame() {
   }, [state.x, state.y, state.duel, state.zone, blocked]);
 
   async function run(action: Parameters<typeof game.act>[0]) { setBusy(true); try { return await game.act(action); } catch { return null; } finally { setBusy(false); } }
+  const landOpen = (id: ZoneId) => { const i = ZONES.findIndex(z => z.id === id); return i === 0 || state.gates.includes(ZONES[i - 1]!.id); };
+  function walkNear(cur: AdventureState, at: { x: number; y: number }): AdventureState | null {
+    if (near(cur, at)) return cur;
+    const options = [[0, 1], [0, -1], [1, 0], [-1, 0]].map(([dx, dy]) => worldPath(cur, { x: at.x + dx!, y: at.y + dy! })).filter((p): p is NonNullable<typeof p> => !!p).sort((a, b) => a.length - b.length);
+    const path = options[0]; if (!path) return null;
+    for (const p of path) { game.move(p); cur = { ...cur, ...p }; }
+    return cur;
+  }
+  /** Travels to an unlocked land through the real portals, so every step is validated like normal walking. */
+  async function journey(target: ZoneId, gateTo?: SideZoneId) {
+    if (!landOpen(target) || travelling) return;
+    setTravelling(true); setPanel(null); setSide(null);
+    try {
+      let cur: AdventureState = state;
+      for (let hop = 0; hop < 6 && cur.zone !== target; hop++) {
+        const ci = ZONES.findIndex(z => z.id === cur.zone), ti = ZONES.findIndex(z => z.id === target);
+        const nextZone = ZONES[ci + (ti > ci ? 1 : -1)]!.id;
+        const portal = PORTALS[cur.zone].find(p => p.target === nextZone);
+        const at = portal && walkNear(cur, portal); if (!portal || !at) { setNotice("Monere can't find a clear path there yet."); return; }
+        const next = await game.act({ action: "portal", id: nextZone }); if (!next || next.zone === cur.zone) { setNotice("That path is still blocked."); return; }
+        cur = next;
+      }
+      if (gateTo) {
+        const g = ELEMENTAL_GATES.find(g => g.target === gateTo)!;
+        if (!walkNear(cur, g.at)) { setNotice(`Monere can't reach the ${g.name} from here.`); return; }
+        if (!canOpenGate(orchard.energy)) { setNotice(`The ${g.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it.`); return; }
+        playSound("success.mp3", 0.5); setSide(gateTo);
+      } else setNotice(`Welcome to ${ZONES.find(z => z.id === target)?.name}!`);
+    } finally { setTravelling(false); }
+  }
   async function interact() {
     if (blocked) return;
     if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
@@ -203,7 +236,7 @@ export function TreasureGame() {
     <Dialog open={victory}><DialogContent showCloseButton={false} onEscapeKeyDown={e => e.preventDefault()} onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()} className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">Quest Complete!</DialogTitle><DialogDescription>Razor dropped the key and ran off. Your wisdom won the Riddle Duel.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-28 w-28"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="Golden Griffin" width={816} height={816} className="treasure-reward h-28 w-28 object-contain" /></div><p className="flex items-center justify-center gap-2 rounded-lg border border-points/40 bg-points/10 p-3 font-display text-points"><Award className="h-5 w-5" />Badge earned: Griffin Savior</p><p className="text-sm">{game.user ? "The Golden Griffin is now in your Pet Shop — equip it as your companion!" : "Sign in and rescue the Griffin on your account to keep it as a pet."}</p><div className="grid grid-cols-2 gap-2"><Button disabled={busy || game.saving} onClick={() => void finish("play")}>Play Again<ArrowRight /></Button><Button variant="secondary" disabled={busy || game.saving} onClick={() => void finish("menu")}>Main Menu</Button></div><Button variant="ghost" asChild><Link to={game.user ? "/pet-shop" : "/auth"}>{game.user ? "Meet your Griffin" : "Sign in"}<ArrowRight /></Link></Button></DialogContent></Dialog>
 
     <Dialog open={!!panel} onOpenChange={o => { if (!o) setPanel(null); }}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto rounded-lg"><DialogTitle className="flex items-center gap-2 text-2xl"><Compass className="text-primary" />{panel === "map" ? "The road to Razor's Lair" : "Rescue Logbook"}</DialogTitle><DialogDescription>{panel === "map" ? "Four lands. Four scrolls. One Golden Griffin. Explore to lift the fog." : `${state.scrolls.length} of 4 scrolls · ${state.gates.length} of 4 riddles · ${state.quests.length} of ${NPCS.length + 1} side quests`}</DialogDescription>
-      {panel === "map" ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ZONES.map((z, i) => <div key={z.id} className="overflow-hidden rounded-lg border border-border"><img src={maps[z.id]} alt={z.name} width={1536} height={1536} loading="lazy" className="aspect-square w-full object-cover" /><div className="p-3"><h2 className="text-lg">{z.name}</h2><p className="mt-1 text-sm text-muted-foreground">{z.subtitle}</p><p className="mt-3 flex items-center gap-2 text-xs text-primary">{i === 0 || state.gates.includes(ZONES[i - 1]!.id) ? <><Check className="h-4 w-4" />{state.zone === z.id ? "Exploring now" : "Unlocked"}</> : <><LockKeyhole className="h-4 w-4" />Solve the previous gate riddle</>}</p></div></div>)}</div>
+      {panel === "map" ? <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">{[...ZONES.map(z => ({ id: z.id, name: z.name, subtitle: z.subtitle, img: maps[z.id], open: landOpen(z.id), here: !side && state.zone === z.id, go: () => void journey(z.id), lock: "Solve the previous gate riddle" })), ...ELEMENTAL_GATES.map(g => ({ id: g.target, name: SIDE_ZONES[g.target].name, subtitle: `Through the ${g.name} · needs ${ENERGY_GATE_COST} Energy`, img: g.target === "grove" ? groveImg : cavernsImg, open: landOpen(g.zone), here: side === g.target, go: () => void journey(g.zone, g.target), lock: `Reach ${ZONES.find(z => z.id === g.zone)?.name} first` }))].map(n => <button key={n.id} type="button" disabled={!n.open || n.here || travelling} onClick={n.go} className="overflow-hidden rounded-lg border border-border text-left transition hover:border-primary disabled:cursor-default disabled:hover:border-border"><img src={n.img} alt="" width={1536} height={1536} loading="lazy" className={`aspect-square w-full object-cover ${n.open ? "" : "opacity-40 grayscale"}`} /><div className="p-3"><h2 className="text-base">{n.name}</h2><p className="mt-1 text-xs text-muted-foreground">{n.subtitle}</p><p className="mt-2 flex items-center gap-2 text-xs text-primary">{n.open ? <><Check className="h-4 w-4" />{n.here ? "Exploring now" : "Tap to travel"}</> : <><LockKeyhole className="h-4 w-4" />{n.lock}</>}</p></div></button>)}</div>
       : <div className="grid gap-3 sm:grid-cols-2">{ZONES.map(z => { const has = state.scrolls.includes(z.id); return <div key={z.id} className={`rounded-lg border p-3 ${has ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30"}`}><span className="mb-2 block text-3xl">{has ? "📜" : "🔒"}</span><h2 className="text-base">{has ? SCROLLS[z.id].name : "Undiscovered scroll"}</h2><p className="mt-1 text-xs text-muted-foreground">{has ? SCROLLS[z.id].lore : z.name}</p>{state.gates.includes(z.id) && <p className="mt-2 text-xs text-primary">Riddle solved ✓</p>}</div>; })}
         <div className={`rounded-lg border p-3 sm:col-span-2 ${state.rescued ? "border-points/40 bg-points/10" : "border-border"}`}><p className="flex items-center gap-2 font-display text-lg"><Award className="h-5 w-5 text-points" />Griffin Savior badge</p><p className="text-sm text-muted-foreground">{state.rescued ? "Earned! You rescued the Golden Griffin." : "Win Razor's Riddle Duel to earn it."}</p></div>
         <div className="rounded-lg border border-primary/30 p-3 sm:col-span-2"><h2 className="font-display text-lg text-primary">Main quest</h2><p className="mt-1 font-body text-sm">{questClue(state)}</p></div>
