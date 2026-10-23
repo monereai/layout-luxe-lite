@@ -48,9 +48,13 @@ export const RIDDLE_POOL: PoolRiddle[] = [
 export type RiddleSlot = { i: number; o: number[] };
 export const RIDDLE_SLOTS = 7;
 export const defaultRiddles = (): RiddleSlot[] => Array.from({ length: RIDDLE_SLOTS }, (_, i) => ({ i, o: [0, 1, 2] }));
-export function randomRiddles(rand: () => number = Math.random): RiddleSlot[] {
+/** Picks fresh riddles; riddles from `previous` (the last playthrough) are skipped so a replay never repeats them. */
+export function randomRiddles(rand: () => number = Math.random, previous: RiddleSlot[] = []): RiddleSlot[] {
   const shuffle = <T,>(a: T[]) => { const b = [...a]; for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(rand() * (k + 1)); [b[k], b[j]] = [b[j]!, b[k]!]; } return b; };
-  return shuffle(RIDDLE_POOL.map((_, i) => i)).slice(0, RIDDLE_SLOTS).map(i => ({ i, o: shuffle([0, 1, 2]) }));
+  const old = new Set(previous.map(r => r.i));
+  const fresh = RIDDLE_POOL.map((_, i) => i).filter(i => !old.has(i));
+  const ids = fresh.length >= RIDDLE_SLOTS ? shuffle(fresh) : [...shuffle(fresh), ...shuffle([...old])];
+  return ids.slice(0, RIDDLE_SLOTS).map(i => ({ i, o: shuffle([0, 1, 2]) }));
 }
 export function validRiddles(v: unknown): RiddleSlot[] | null {
   if (!Array.isArray(v) || v.length !== RIDDLE_SLOTS) return null;
@@ -135,7 +139,7 @@ export function duelLanding(s: AdventureState, lastLanding: string, blocked: boo
 }
 export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
 function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
-  if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles() } : s;
+  if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles(Math.random, s.riddles) } : s;
   if (s.rescued) return s;
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
   if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
