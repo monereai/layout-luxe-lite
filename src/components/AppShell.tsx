@@ -8,7 +8,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { useCare } from "@/hooks/useCare";
 import { energyGain } from "@/lib/care";
 import { useT, useLang, setLang, LANGS, type Lang } from "@/lib/i18n";
-import { TREASURE_MAINTENANCE } from "@/lib/treasureGate";
+import { visibleAdventureNavigation } from "@/lib/treasureGate";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
@@ -42,10 +42,8 @@ const allMenuItems = [
 
 // While the treasure hunt is under maintenance its menu entries (desktop side
 // menu, phone bottom bar, phone drawer and webMCP navigation) disappear.
-const visible = <T extends { to: string }>(items: readonly T[]) =>
-  items.filter(item => !(TREASURE_MAINTENANCE && item.to === "/treasure"));
-const tabs = visible(allTabs);
-const menuItems = visible(allMenuItems);
+const tabs = visibleAdventureNavigation(allTabs);
+const menuItems = visibleAdventureNavigation(allMenuItems);
 
 export function AppShell({ children, hideCrisisBar = false, adventure = false }: { children: ReactNode; hideCrisisBar?: boolean; adventure?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -80,7 +78,7 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
   });
   useWebMCP({
     name: "navigate_monere",
-    description: "Open a page from MonereAI's visible menu: Treasure Hunt, Dashboard / Talk to Monere, Daily Verse, Journal, Find Monere, Jigsaw, Points Shop / Wardrobe, Pet Shop, or Monere’s Daily Dilemma.",
+    description: "Open a page allowed by MonereAI's visible menu, or Monere’s Daily Dilemma.",
     inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
       if (page === "dilemma") {

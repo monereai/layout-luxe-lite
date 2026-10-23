@@ -3,8 +3,10 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { sitemapXML, isSitemapRouteIncluded } from "@/lib/sitemap";
 import type { AnyRoute } from "@tanstack/react-router";
+import { Route as TreasureRoute } from "@/routes/treasure";
 
 function routeDecision(file: string) {
+  if (file === "treasure.tsx") return String(TreasureRoute.options.staticData?.sitemap);
   const source = readFileSync(resolve("src/routes", file), "utf8");
   const decision = source.match(/staticData:\s*\{\s*sitemap:\s*(true|false|"exclude-subtree")/);
   if (!decision) throw new Error(`Missing sitemap decision: ${file}`);
@@ -12,6 +14,10 @@ function routeDecision(file: string) {
 }
 
 describe("MonereAI public sitemap", () => {
+  it("excludes the adventure while it is under construction", () => {
+    expect(TreasureRoute.options.staticData?.sitemap).toBe(false);
+    expect(isSitemapRouteIncluded(TreasureRoute as AnyRoute)).toBe(false);
+  });
   it.each(["index.tsx", "daily.tsx", "shop.tsx"])("includes public page %s", file => {
     expect(routeDecision(file)).toBe("true");
   });
