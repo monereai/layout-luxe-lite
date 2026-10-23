@@ -437,8 +437,8 @@
 .treasure-side-prop { position: absolute; transform: translate(-50%, -50%); font-size: clamp(28px, 5vw, 48px); pointer-events: none; filter: drop-shadow(0 0 10px var(--adventure-glow, var(--primary))); animation: treasure-side-glow 3s ease-in-out infinite; }
 .treasure-side-hazard { position: absolute; transform: translate(-50%, -50%); width: 8%; aspect-ratio: 1; border-radius: 30%; pointer-events: none; background: radial-gradient(circle, color-mix(in oklab, var(--destructive) 55%, transparent), transparent 70%); }
 .treasure-side-tree, .treasure-side-exit, .treasure-side-monere { position: absolute; transform: translate(-50%, -50%); }
-.treasure-side-tree { font-size: clamp(36px, 7vw, 64px); line-height: 1; filter: drop-shadow(0 6px 6px rgb(0 0 0 / .4)); transition: transform .3s, filter .3s; }
-.treasure-side-fruit { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); font-size: .3em; letter-spacing: .4em; }
+.treasure-side-tree { font-size: clamp(45px, 8.75vw, 80px); line-height: 1; filter: drop-shadow(0 6px 6px rgb(0 0 0 / .4)); transition: transform .3s, filter .3s; }
+.treasure-side-fruit { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); font-size: .18em; letter-spacing: .4em; }
 .treasure-side-tree[data-cooling="true"] .treasure-side-fruit { display: none; }
 .treasure-side-tree i { position: absolute; right: -6px; top: -6px; font-size: 22px; font-style: normal; animation: treasure-side-glow 1.4s ease-in-out infinite; }
 .treasure-side-tree[data-cooling="true"] { filter: grayscale(.8) brightness(.7); animation: treasure-side-shake .5s ease-out; }
@@ -452,3 +452,4 @@
 .treasure-energy > span:nth-child(2) { width: 64px; height: 8px; border-radius: 999px; background: var(--muted); overflow: hidden; }
 .treasure-energy > span:nth-child(2) > span { display: block; height: 100%; background: var(--energy); transition: width .5s; }
 @media (prefers-reduced-motion: reduce) { .treasure-side, .treasure-side-tree, .treasure-side-tree i, .treasure-side-monere { animation: none; transition: none; } }
+.treasure-side-objective { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 5; max-width: 90%; padding: 6px 14px; border-radius: 999px; border: 2px solid var(--primary); background: var(--adventure-panel); color: var(--primary); font-family: var(--font-display, inherit); font-size: 14px; text-align: center; }

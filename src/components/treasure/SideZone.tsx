@@ -32,6 +32,7 @@ export function SideZone({ zone, avatar, onExit, onPick, cooling }: { zone: Side
   });
   return <div className="treasure-side" role="region" aria-label={land.name}>
     <img src={art[zone]} alt="" width={1280} height={896} className="absolute inset-0 h-full w-full object-cover" />
+    <div className="treasure-side-objective" role="status">{land.objective}</div>
     <div className="treasure-side-title"><p className="font-display text-lg text-primary">{land.name}</p><p className="font-body text-xs">{land.subtitle}</p></div>
     <button type="button" className="treasure-side-exit" style={pct(land.exit)} onClick={onExit} aria-label="Leave this land"><DoorOpen /></button>
     {land.hazards.map(h => <span key={`h${h.x}-${h.y}`} className="treasure-side-hazard" style={pct(h)} aria-hidden="true" />)}
