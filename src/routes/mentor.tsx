@@ -6,7 +6,12 @@ export const Route = createFileRoute("/mentor")({
   staticData: { sitemap: false },
   head: () => ({
     meta: [
-      { title: "Talk to Monere — MonereAI" },
+      { title: "Monere Mentor — MonereAI" },
+      { name: "description", content: "Return to the main page to talk with Monere, your warm Christian wisdom companion." },
+      { property: "og:title", content: "Monere Mentor — MonereAI" },
+      { property: "og:description", content: "Talk with Monere on the main MonereAI page." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
