@@ -8,7 +8,8 @@ import { playSound } from "@/lib/audio";
 
 /** Browser-only Phaser maze; the server replays the input trace before depositing rewards. */
 export function PacmanHarvestMiniGame({ avatar, onFinish }: { avatar: string; onFinish: (trace: MazeDirection[], expelled: boolean) => Promise<void> }) {
-  const mount = useRef<HTMLDivElement>(null), direction = useRef<MazeDirection>("idle");
+  const [mount, setMount] = useState<HTMLDivElement | null>(null);
+  const direction = useRef<MazeDirection>("idle");
   const trace = useRef<MazeDirection[]>([]), finish = useRef(onFinish), stopped = useRef(false);
   const [snapshot, setSnapshot] = useState(newMaze), [saving, setSaving] = useState(false), [error, setError] = useState<string | null>(null);
   finish.current = onFinish;
@@ -20,7 +21,7 @@ export function PacmanHarvestMiniGame({ avatar, onFinish }: { avatar: string; on
   }
   const depositRef = useRef(deposit); depositRef.current = deposit;
   useEffect(() => {
-    const parent = mount.current; if (!parent) return;
+    const parent = mount; if (!parent) return;
     let state = newMaze(), started = false, elapsed = 0;
     const css = getComputedStyle(document.documentElement);
     const color = (token: string) => css.getPropertyValue(token).trim();
@@ -60,12 +61,12 @@ export function PacmanHarvestMiniGame({ avatar, onFinish }: { avatar: string; on
     const blur = () => { direction.current = "idle"; };
     window.addEventListener("keydown", down, true); window.addEventListener("keyup", up, true); window.addEventListener("blur", blur);
     return () => { window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true); window.removeEventListener("blur", blur); game.destroy(true); };
-  }, [avatar]);
+  }, [avatar, mount]);
   const power = Math.max(0, Math.ceil((snapshot.powerUntil - snapshot.tick) * MAZE_TICK_MS / 1000));
   return <Dialog open onOpenChange={() => { if (!saving) void deposit(snapshot.ended === "expelled"); }}><DialogContent showCloseButton={false} className="harvest-modal" onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()}>
     <div className="flex flex-wrap items-center justify-between gap-3"><div><DialogTitle className="text-xl text-primary">Monere’s Energy Orchard</DialogTitle><DialogDescription>Sunlit harvest</DialogDescription></div><span role="status" aria-label={`Collected ${snapshot.energy} Energy`} className="flex items-center gap-1 font-display text-xl text-energy"><Zap />+{snapshot.energy}</span></div>
     <div className="flex items-center justify-between gap-2 text-sm"><span className="text-muted-foreground">{snapshot.collected.length - 1} / {mazeCells.length - 1}</span><span role="status" className={power ? "text-points" : "text-muted-foreground"}><Sun className="mr-1 inline h-4 w-4" />{power ? `Sun Power · ${power}s` : "Golden Suns"}</span></div>
-    <div ref={mount} className="harvest-board" role="img" aria-label="Orchard maze with Monere, glowing Energy dots, four Golden Suns and three Shadow Chasers" />
+    <div ref={setMount} className="harvest-board" role="img" aria-label="Orchard maze with Monere, glowing Energy dots, four Golden Suns and three Shadow Chasers" />
     <div className="flex items-end justify-between gap-3"><div className="harvest-pad" aria-label="Maze movement">{[{ d: "up", Icon: ArrowUp, c: "col-start-2" }, { d: "left", Icon: ArrowLeft, c: "row-start-2" }, { d: "down", Icon: ArrowDown, c: "row-start-2 col-start-2" }, { d: "right", Icon: ArrowRight, c: "row-start-2 col-start-3" }].map(({ d, Icon, c }) => <Button key={d} variant="secondary" size="icon" aria-label={`Maze move ${d}`} className={c} disabled={saving || stopped.current} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); direction.current = d as MazeDirection; }} onPointerUp={() => { direction.current = "idle"; }} onPointerCancel={() => { direction.current = "idle"; }} onLostPointerCapture={() => { direction.current = "idle"; }}><Icon /></Button>)}</div><Button disabled={saving} variant="outline" onClick={() => void deposit(snapshot.ended === "expelled")}><DoorOpen />{saving ? "Saving Energy…" : error ? "Retry save" : "Keep harvest"}</Button></div>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
   </DialogContent></Dialog>;
