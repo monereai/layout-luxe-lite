@@ -95,7 +95,7 @@ export function WorldCanvas(props: Props) {
           const bob = (o: Phaser.GameObjects.Text) => { if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); return o; };
           // Energy Orchards: sealed elemental gates and Energy Trees (actionable via the interact button).
           ELEMENTAL_GATES.filter(g => g.zone === s.zone).forEach(g => bob(text(g.at, g.icon, 44)));
-          MAP_TREES.filter(t => t.zone === s.zone).forEach(t => text(t.at, "🌳", 52));
+          MAP_TREES.filter(t => t.zone === s.zone).forEach(t => { text(t.at, "🌳", 52); text(t.at, "🍎", 18).setPosition(...at(t.at)).setX(at(t.at)[0] - 12).setY(at(t.at)[1] - 8).setDepth(4); text(t.at, "🍐", 16).setX(at(t.at)[0] + 13).setY(at(t.at)[1] - 2).setDepth(4); });
           if (s.zone === "wood") {
             // Dark cave (north-east): a soft radial shadow, never a rectangular tint box.
             const lit = s.gear.includes("lantern");
