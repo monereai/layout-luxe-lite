@@ -3,7 +3,8 @@ import { MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable } from "./o
 import { walkable, ZONES } from "./treasure";
 
 describe("energy orchards", () => {
-  it("gates need 50 energy", () => { expect(canOpenGate(49)).toBe(false); expect(canOpenGate(50)).toBe(true); });
+  it("Crystal maze entry needs no Energy", () => { expect(canOpenGate(0, "caverns")).toBe(true); expect(canOpenGate(49, "caverns")).toBe(true); });
+  it("the Leaf Gate still needs 50 energy", () => { expect(canOpenGate(49, "grove")).toBe(false); expect(canOpenGate(50, "grove")).toBe(true); });
   it("trees give 25 energy capped at 100", () => { expect(harvestGain(10)).toBe(25); expect(harvestGain(90)).toBe(10); expect(harvestGain(100)).toBe(0); });
   it("trees block walking", () => { expect(sideWalkable("grove", { x: 3, y: 1 })).toBe(false); expect(sideWalkable("grove", { x: 2, y: 1 })).toBe(true); });
   it("every main land has a harvestable tree on a walkable tile", () => {
