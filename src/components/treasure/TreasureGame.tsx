@@ -25,7 +25,9 @@ import { Zap } from "lucide-react";
 import groveImg from "@/assets/treasure/grove.jpg";
 import cavernsImg from "@/assets/treasure/caverns.jpg";
 import petShopMark from "@/assets/shop/pet-shop.png";
+import { MAP_ENTRANCES, type MazeDirection } from "@/lib/harvest-maze";
 
+const PacmanHarvestMiniGame = lazy(() => import("../PacmanHarvestMiniGame").then(m => ({ default: m.PacmanHarvestMiniGame })));
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
 const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair };
 const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin. Along the way, lift the fog, help friendly villagers, earn explorer gear and let your pet dig for buried treasure!";
@@ -51,6 +53,8 @@ export function TreasureGame() {
   const [notice, setNotice] = useState<string | null>(null);
   const [side, setSide] = useState<SideZoneId | null>(null);
   const [travelling, setTravelling] = useState(false);
+  const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
+  const [sideReset, setSideReset] = useState(0);
   const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
@@ -69,7 +73,7 @@ export function TreasureGame() {
     return () => { cancelled = true; };
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
-  const blocked = !!side || !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
+  const blocked = !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
   useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
   useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
@@ -87,8 +91,20 @@ export function TreasureGame() {
   const gate = gateNear(state.zone, state); const tree = mapTreeNear(state.zone, state);
   const here = gate ? { kind: "orchard-gate" as const, label: `Open ${gate.name}`, icon: gate.icon } : tree ? { kind: "orchard-tree" as const, label: "Harvest Energy Tree", icon: "🌳" } : interactionHere(state);
   async function pick(id: TreeId) {
-    try { const r = await orchard.pick(id); if (r.gained > 0) { playSound("energy_pickup.mp3", 0.6); setNotice(`Crunch! +${r.gained} Energy${orchard.guest ? " (sign in to keep it)" : ""}.`); } else setNotice(r.reason ?? "Monere's Energy is already full!"); }
+    if (harvestMaze || busy) return;
+    setBusy(true);
+    try { await game.prepareHarvest(); const round = await orchard.beginMaze(id); setHarvestMaze({ tree: id, round }); }
     catch (e) { setNotice(e instanceof Error ? e.message : "The harvest couldn't be saved."); }
+    finally { setBusy(false); }
+  }
+  async function finishHarvest(trace: MazeDirection[], expelled: boolean) {
+    if (!harvestMaze) return;
+    const result = await orchard.finishMaze(harvestMaze.tree, harvestMaze.round, trace);
+    if (result.state) game.harvestReturn(result.state);
+    else if (expelled && !side) game.harvestReturn({ ...state, ...MAP_ENTRANCES[state.zone], pet: null });
+    if (expelled && side) setSideReset(v => v + 1);
+    setHarvestMaze(null);
+    setNotice(`${expelled ? "Whoosh! Safely back at the entrance." : "Harvest gathered!"} +${result.gained} Energy${orchard.guest ? " (guest preview)" : ""}.`);
   }
   const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
@@ -211,7 +227,7 @@ export function TreasureGame() {
       <div className="treasure-map-chip"><span>{zone.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
       <MiniMap state={state} className="absolute right-3 top-14 z-20 hidden w-32 sm:block" />
       <Link to="/pet-shop" title="Pet Shop" aria-label="Pet Shop" className="treasure-petshop"><img src={petShopMark} alt="" width={816} height={816} loading="lazy" draggable={false} /><span>Pet Shop</span></Link>
-      {side && <SideZone key={side} zone={side} avatar={turn[2] ?? avatar} cooling={orchard.cool} onPick={pick} onExit={() => { setSide(null); setNotice("Back on the main path."); }} />}
+      {side && <SideZone key={`${side}-${sideReset}`} zone={side} avatar={turn[2] ?? avatar} paused={!!harvestMaze || busy} cooling={orchard.cool} onPick={pick} onExit={() => { setSide(null); setNotice("Back on the main path."); }} />}
       {notice && <div role="status" className="treasure-notice">{notice}</div>}
       <div className="treasure-controls">
         <div className="treasure-dpad" aria-label="Movement controls">{[{ x: 0, y: -1, Icon: ArrowUp, name: "Move up", css: "col-start-2" }, { x: -1, y: 0, Icon: ArrowLeft, name: "Move left", css: "row-start-2" }, { x: 0, y: 1, Icon: ArrowDown, name: "Move down", css: "col-start-2 row-start-2" }, { x: 1, y: 0, Icon: ArrowRight, name: "Move right", css: "col-start-3 row-start-2" }].map(({ x, y, Icon, name, css }) => <Button key={name} variant="secondary" size="icon" aria-label={name} title={name} className={`treasure-direction ${css}`} disabled={!game.loaded || blocked} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); controls.current?.direction(x, y); }} onPointerUp={() => controls.current?.release()} onPointerCancel={() => controls.current?.release()} onLostPointerCapture={() => controls.current?.release()}><Icon /></Button>)}</div>
@@ -219,6 +235,7 @@ export function TreasureGame() {
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
+    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the orchard…</div>}><PacmanHarvestMiniGame avatar={avatar} onFinish={finishHarvest} /></Suspense></ClientOnly>}
 
     <Dialog open={intro} onOpenChange={setIntro}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Rescue of the Golden Griffin</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">{INTRO}</DialogDescription><div className="flex items-end justify-center gap-4"><img src={razor} alt="Razor the Hyena" width={768} height={768} className="h-28 w-28 object-contain" /><img src={griffin} alt="The Golden Griffin" width={816} height={816} className="h-24 w-24 object-contain" /></div><Button onClick={() => setIntro(false)}>{state.scrolls.length ? "Continue the rescue" : "Begin the rescue"}<ArrowRight /></Button></DialogContent></Dialog>
 
