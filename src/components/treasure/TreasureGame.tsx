@@ -56,7 +56,6 @@ export function TreasureGame() {
   const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
   const [sideReset, setSideReset] = useState(0);
   const startingHarvest = useRef(false);
-  const crystalEntryStarted = useRef(false);
   const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
@@ -93,12 +92,18 @@ export function TreasureGame() {
   const gate = gateNear(state.zone, state); const tree = mapTreeNear(state.zone, state);
   const here = gate ? { kind: "orchard-gate" as const, label: `Open ${gate.name}`, icon: gate.icon } : tree ? { kind: "orchard-tree" as const, label: "Harvest Energy Tree", icon: "🌳" } : interactionHere(state);
   async function pick(id: TreeId) {
-    if (harvestMaze || busy || startingHarvest.current) return;
+    if (harvestMaze || busy || startingHarvest.current) return false;
     startingHarvest.current = true;
     setBusy(true);
-    try { await game.prepareHarvest(); const round = await orchard.beginMaze(id); setHarvestMaze({ tree: id, round }); }
-    catch (e) { setNotice(e instanceof Error ? e.message : "The harvest couldn't be saved."); }
+    try { await game.prepareHarvest(); const round = await orchard.beginMaze(id); setHarvestMaze({ tree: id, round }); return true; }
+    catch (e) { setNotice(e instanceof Error ? e.message : "The harvest couldn't be saved."); return false; }
     finally { startingHarvest.current = false; setBusy(false); }
+  }
+  async function enterSide(target: SideZoneId) {
+    playSound("success.mp3", 0.5);
+    setSide(target);
+    // Crystal Gate IS the maze entrance: never mount the old cave/tree walk.
+    if (target === "caverns" && !await pick("caverns-1")) setSide(null);
   }
   async function finishHarvest(collectedEnergy: number, trace: MazeDirection[], expelled: boolean) {
     if (!harvestMaze) return;
@@ -108,16 +113,9 @@ export function TreasureGame() {
     else if (expelled && !side) game.harvestReturn({ ...state, ...MAP_ENTRANCES[state.zone], pet: null });
     if (expelled && side) setSideReset(v => v + 1);
     setHarvestMaze(null);
+    if (side === "caverns") setSide(null);
     setNotice(`${expelled ? "Whoosh! Safely back at the entrance." : "Harvest gathered!"} +${result.gained} Energy${orchard.guest ? " (guest preview)" : ""}.`);
   }
-  // Entering the Crystal Caverns starts the Crystal Maze straight away, before Monere can walk anywhere.
-  useEffect(() => {
-    if (side !== "caverns") { crystalEntryStarted.current = false; return; }
-    if (crystalEntryStarted.current || harvestMaze || busy || intro) return;
-    crystalEntryStarted.current = true;
-    void pick("caverns-1");
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [side, harvestMaze, busy, intro]);
   const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
@@ -164,13 +162,13 @@ export function TreasureGame() {
         const g = ELEMENTAL_GATES.find(g => g.target === gateTo)!;
         if (!walkNear(cur, g.at)) { setNotice(`Monere can't reach the ${g.name} from here.`); return; }
         if (!canOpenGate(orchard.energy, g.target)) { setNotice(`The ${g.name} is sealed. Monere needs ${gateEnergyCost(g.target)} Energy to open it.`); return; }
-        playSound("success.mp3", 0.5); setSide(gateTo);
+        await enterSide(gateTo);
       } else setNotice(`Welcome to ${ZONES.find(z => z.id === target)?.name}!`);
     } finally { setTravelling(false); }
   }
   async function interact() {
     if (blocked) return;
-    if (gate) { if (!canOpenGate(orchard.energy, gate.target)) { setNotice(`The ${gate.name} is sealed. Monere needs ${gateEnergyCost(gate.target)} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
+    if (gate) { if (!canOpenGate(orchard.energy, gate.target)) { setNotice(`The ${gate.name} is sealed. Monere needs ${gateEnergyCost(gate.target)} Energy to open it — harvest an Energy Tree!`); return; } await enterSide(gate.target); return; }
     if (tree) { await pick(tree.id); return; }
     const h = interactionHere(state);
     if (!h) {
@@ -239,7 +237,8 @@ export function TreasureGame() {
       <div className="treasure-map-chip"><span>{zone.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
       <MiniMap state={state} className="absolute right-3 top-14 z-20 hidden w-32 sm:block" />
       <Link to="/pet-shop" title="Pet Shop" aria-label="Pet Shop" className="treasure-petshop"><img src={petShopMark} alt="" width={816} height={816} loading="lazy" draggable={false} /><span>Pet Shop</span></Link>
-      {side && <SideZone key={`${side}-${sideReset}`} zone={side} avatar={turn[2] ?? avatar} paused={!!harvestMaze || busy} cooling={orchard.cool} onPick={pick} onExit={() => { setSide(null); setNotice("Back on the main path."); }} />}
+      {side === "grove" && <SideZone key={`${side}-${sideReset}`} zone={side} avatar={turn[2] ?? avatar} paused={!!harvestMaze || busy} cooling={orchard.cool} onPick={async id => { await pick(id); }} onExit={() => { setSide(null); setNotice("Back on the main path."); }} />}
+      {side === "caverns" && !harvestMaze && <div className="treasure-loading" role="status">Opening the Crystal Maze…</div>}
       {notice && <div role="status" className="treasure-notice">{notice}</div>}
       <div className="treasure-controls">
         <div className="treasure-dpad" aria-label="Movement controls">{[{ x: 0, y: -1, Icon: ArrowUp, name: "Move up", css: "col-start-2" }, { x: -1, y: 0, Icon: ArrowLeft, name: "Move left", css: "row-start-2" }, { x: 0, y: 1, Icon: ArrowDown, name: "Move down", css: "col-start-2 row-start-2" }, { x: 1, y: 0, Icon: ArrowRight, name: "Move right", css: "col-start-3 row-start-2" }].map(({ x, y, Icon, name, css }) => <Button key={name} variant="secondary" size="icon" aria-label={name} title={name} className={`treasure-direction ${css}`} disabled={!game.loaded || blocked} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); controls.current?.direction(x, y); }} onPointerUp={() => controls.current?.release()} onPointerCancel={() => controls.current?.release()} onLostPointerCapture={() => controls.current?.release()}><Icon /></Button>)}</div>
@@ -247,7 +246,7 @@ export function TreasureGame() {
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
-    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the orchard…</div>}><PacmanHarvestMiniGame avatar={avatar} onComplete={finishHarvest} /></Suspense></ClientOnly>}
+    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the Energy maze…</div>}><PacmanHarvestMiniGame avatar={avatar} onComplete={finishHarvest} /></Suspense></ClientOnly>}
 
     <Dialog open={intro} onOpenChange={setIntro}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Rescue of the Golden Griffin</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">{INTRO}</DialogDescription><div className="flex items-end justify-center gap-4"><img src={razor} alt="Razor the Hyena" width={768} height={768} className="h-28 w-28 object-contain" /><img src={griffin} alt="The Golden Griffin" width={816} height={816} className="h-24 w-24 object-contain" /></div><Button onClick={() => setIntro(false)}>{state.scrolls.length ? "Continue the rescue" : "Begin the rescue"}<ArrowRight /></Button></DialogContent></Dialog>
 
