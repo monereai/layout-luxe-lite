@@ -38,7 +38,7 @@ export function SideZone({ zone, avatar, onExit, onPick, cooling }: { zone: Side
     {land.props.map(p => <span key={`p${p.at.x}-${p.at.y}`} className="treasure-side-prop" style={pct(p.at)} aria-hidden="true">{p.icon}</span>)}
     {land.trees.map(t => <button key={t.id} type="button" className="treasure-side-tree" data-cooling={cooling(t.id)} style={pct(t.at)} aria-label={cooling(t.id) ? "Energy Tree regrowing" : "Harvest Energy Tree"}
       onClick={() => { if (sideAdjacent(t.at, pos)) void onPick(t.id); else { const target = [{ x: t.at.x - 1, y: t.at.y }, { x: t.at.x + 1, y: t.at.y }, { x: t.at.x, y: t.at.y - 1 }, { x: t.at.x, y: t.at.y + 1 }].find(p => sideWalkable(zone, p)); if (target) { setPos(target); void onPick(t.id); } } }}>
-      <span>{t.icon}</span>{!cooling(t.id) && <i aria-hidden="true">⚡</i>}</button>)}
+      <span>{t.icon}</span>{zone === "grove" && <b className="treasure-side-fruit" aria-hidden="true">🍎🍐</b>}{!cooling(t.id) && <i aria-hidden="true">⚡</i>}</button>)}
     <div className="treasure-side-monere" style={pct(pos)} aria-hidden="true"><img src={avatar} alt="" style={{ transform: `scaleX(${face})` }} draggable={false} /></div>
     <div className="treasure-side-pad" aria-label="Movement controls">{[{ x: 0, y: -1, Icon: ArrowUp, n: "Move up", c: "col-start-2" }, { x: -1, y: 0, Icon: ArrowLeft, n: "Move left", c: "row-start-2" }, { x: 0, y: 1, Icon: ArrowDown, n: "Move down", c: "col-start-2 row-start-2" }, { x: 1, y: 0, Icon: ArrowRight, n: "Move right", c: "col-start-3 row-start-2" }].map(({ x, y, Icon, n, c }) => <Button key={n} size="icon" variant="secondary" aria-label={n} className={c} onClick={() => step(x, y)}><Icon /></Button>)}</div>
   </div>;
