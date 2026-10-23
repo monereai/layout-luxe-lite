@@ -15,3 +15,11 @@ describe("energy orchards", () => {
     expect(MAP_TREES.map(t => t.id).every(id => TREE_IDS.includes(id))).toBe(true);
   });
 });
+
+import { SIDE_ZONES as SZ, sideWalkable as sw, sideHazard as sh } from "./orchard";
+test("side land entrances are safe and every tree is reachable", () => {
+  for (const z of ["grove", "caverns"] as const) {
+    expect(sw(z, SZ[z].start) && !sh(z, SZ[z].start)).toBe(true);
+    for (const t of SZ[z].trees) expect(([[1,0],[-1,0],[0,1],[0,-1]] as const).some(([dx,dy]) => sw(z, { x: t.at.x+dx, y: t.at.y+dy }) && !sh(z, { x: t.at.x+dx, y: t.at.y+dy }))).toBe(true);
+  }
+});

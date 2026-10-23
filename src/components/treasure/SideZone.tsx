@@ -3,7 +3,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import grove from "@/assets/treasure/grove.jpg";
 import caverns from "@/assets/treasure/caverns.jpg";
-import { SIDE_COLS, SIDE_ROWS, SIDE_ZONES, sideAdjacent, sideWalkable, type SideZoneId, type TreeId } from "@/lib/orchard";
+import { SIDE_COLS, SIDE_ROWS, SIDE_ZONES, sideAdjacent, sideHazard, sideWalkable, type SideZoneId, type TreeId } from "@/lib/orchard";
 import type { Position } from "@/lib/treasure";
 import { playSound } from "@/lib/audio";
 
@@ -20,6 +20,7 @@ export function SideZone({ zone, avatar, onExit, onPick, cooling }: { zone: Side
     if (dx) setFace(dx);
     if (next.x < 0) { onExit(); return; } // west edge leads back
     if (!sideWalkable(zone, next)) return;
+    if (sideHazard(zone, next)) { setPos(land.start); playSound("step.mp3", 0.3); return; }
     setPos(next); playSound("step.mp3", 0.3);
     const tree = land.trees.find(t => sideAdjacent(t.at, next) && !cooling(t.id));
     if (tree) void onPick(tree.id);
@@ -33,6 +34,8 @@ export function SideZone({ zone, avatar, onExit, onPick, cooling }: { zone: Side
     <img src={art[zone]} alt="" width={1280} height={896} className="absolute inset-0 h-full w-full object-cover" />
     <div className="treasure-side-title"><p className="font-display text-lg text-primary">{land.name}</p><p className="font-body text-xs">{land.subtitle}</p></div>
     <button type="button" className="treasure-side-exit" style={pct(land.exit)} onClick={onExit} aria-label="Leave this land"><DoorOpen /></button>
+    {land.hazards.map(h => <span key={`h${h.x}-${h.y}`} className="treasure-side-hazard" style={pct(h)} aria-hidden="true" />)}
+    {land.props.map(p => <span key={`p${p.at.x}-${p.at.y}`} className="treasure-side-prop" style={pct(p.at)} aria-hidden="true">{p.icon}</span>)}
     {land.trees.map(t => <button key={t.id} type="button" className="treasure-side-tree" data-cooling={cooling(t.id)} style={pct(t.at)} aria-label={cooling(t.id) ? "Energy Tree regrowing" : "Harvest Energy Tree"}
       onClick={() => { if (sideAdjacent(t.at, pos)) void onPick(t.id); else { const target = [{ x: t.at.x - 1, y: t.at.y }, { x: t.at.x + 1, y: t.at.y }, { x: t.at.x, y: t.at.y - 1 }, { x: t.at.x, y: t.at.y + 1 }].find(p => sideWalkable(zone, p)); if (target) { setPos(target); void onPick(t.id); } } }}>
       <span>{t.icon}</span>{!cooling(t.id) && <i aria-hidden="true">⚡</i>}</button>)}
