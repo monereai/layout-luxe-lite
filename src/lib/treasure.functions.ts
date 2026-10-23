@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseAdventure } from "./treasure";
+import { TREE_IDS } from "./orchard";
 import { isTreasureTester, TREASURE_MAINTENANCE } from "./treasureGate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
@@ -35,7 +36,7 @@ export const adventureAction = createServerFn({ method: "POST" })
 
 export const orchardHarvest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ tree: z.enum(["meadow-1", "grove-1", "grove-2", "grove-3", "caverns-1"]) }))
+  .inputValidator(z.object({ tree: z.enum(TREE_IDS) }))
   .handler(async ({ data, context }) => {
     if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) {
       throw new Error("Monere's adventure is temporarily under construction.");
