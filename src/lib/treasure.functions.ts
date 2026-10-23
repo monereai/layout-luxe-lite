@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseAdventure } from "./treasure";
+import { TREE_IDS } from "./orchard";
 import { isTreasureTester, TREASURE_MAINTENANCE } from "./treasureGate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
