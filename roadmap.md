@@ -1,3 +1,8 @@
+# Orchard harvesting maze
+- [x] Add tree-triggered maze, dots, Sun power, chasers and safe Energy settlement/entrance return with a shared UTC tree ledger.
+- [x] Verify reward/power rules and isolated desktop/phone maze controls and expulsion; 39 focused tests pass and preview builds clean.
+- [ ] Verify signed-in tree entry, account Energy read-back and saved entrance return; blocked by Carl-only testing access and the rule against changing his account. Isolated maze browser checks do not verify account settlement.
+
 # Startup, quest completion and Lair cleanup
 - [x] Safeguard invalid local Cloud configuration without editing generated files; browser verifies signed-out home mounts with missing/placeholder settings.
 - [x] Stop completed-game activity and add explicit Play Again / Main Menu resets, preserving earned rewards; isolated guest browser verifies final answer, stable modal, both resets and refresh persistence. Signed-in reset not exercised because private access is Carl-only and his progress must not change.

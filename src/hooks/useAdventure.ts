@@ -93,5 +93,9 @@ export function useAdventure() {
     } catch (e) { toast.error(e instanceof Error ? e.message : "Could not restart your adventure."); return false; }
     finally { resetting.current = false; setSaving(false); }
   }
-  return { state, move, act, restart, loaded, saving, revision, user, error: query.error, retry: () => query.refetch() };
+  async function prepareHarvest() { await flush(); await queue.current; }
+  function harvestReturn(next?: AdventureState | null) {
+    if (next) { update(next); client.setQueryData(key, { state: next, griffin: false, points: 0 }); setRevision(v => v + 1); }
+  }
+  return { state, move, act, restart, prepareHarvest, harvestReturn, loaded, saving, revision, user, error: query.error, retry: () => query.refetch() };
 }

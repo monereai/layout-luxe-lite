@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseAdventure } from "./treasure";
 import { TREE_IDS } from "./orchard";
+import { replayMaze, MAZE_TICK_MS } from "./harvest-maze";
 import { isTreasureTester, TREASURE_MAINTENANCE } from "./treasureGate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
@@ -44,4 +45,35 @@ export const orchardHarvest = createServerFn({ method: "POST" })
     const result = await context.supabase.rpc("orchard_harvest", { p_tree: data.tree });
     if (result.error) throw new Error(result.error.message);
     return z.object({ energy: z.number().int(), gained: z.number().int(), harvested: z.boolean() }).parse(result.data);
+  });
+
+export const startOrchardMaze = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ tree: z.enum(TREE_IDS) }))
+  .handler(async ({ data, context }) => {
+    if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) throw new Error("Monere's adventure is temporarily under construction.");
+    const result = await context.supabase.rpc("orchard_maze_start", { p_tree: data.tree });
+    if (result.error) throw new Error(result.error.message);
+    return z.object({ id: z.string().uuid() }).parse(result.data);
+  });
+
+export const settleOrchardMaze = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ round: z.string().uuid(), trace: z.array(z.enum(["up", "down", "left", "right", "idle"])).max(3000) }))
+  .handler(async ({ data, context }) => {
+    if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) throw new Error("Monere's adventure is temporarily under construction.");
+    const maze = replayMaze(data.trace);
+    const { data: round, error } = await context.supabase.from("orchard_maze_rounds").select("started_at,settled_at").eq("id", data.round).eq("user_id", context.userId).single();
+    if (error || !round) throw new Error("Harvest not found.");
+    if (!round.settled_at && Date.now() - Date.parse(round.started_at) + 1000 < maze.tick * MAZE_TICK_MS) throw new Error("The harvest is moving too quickly.");
+    const sync = await context.supabase.rpc("care_apply", { p_action: "sync" });
+    if (sync.error) throw new Error(sync.error.message);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: ownedRound, error: ownedError } = await context.supabase.from("orchard_maze_rounds").select("tree").eq("id", data.round).eq("user_id", context.userId).single();
+    if (ownedError || !ownedRound) throw new Error("Harvest not found.");
+    const mainTree = ["meadow-1", "wood-1", "ravine-1", "lair-1"].includes(ownedRound.tree);
+    const result = await supabaseAdmin.rpc("orchard_maze_settle", { p_user: context.userId, p_round: data.round, p_energy: maze.energy, p_ticks: maze.tick, p_expelled: maze.ended === "expelled" && mainTree });
+    if (result.error) throw new Error(result.error.message);
+    const value = z.object({ energy: z.number(), gained: z.number(), state: z.unknown() }).parse(result.data);
+    return { ...value, state: parseAdventure(value.state) };
   });

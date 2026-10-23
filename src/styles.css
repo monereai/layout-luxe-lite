@@ -453,3 +453,10 @@
 .treasure-energy > span:nth-child(2) > span { display: block; height: 100%; background: var(--energy); transition: width .5s; }
 @media (prefers-reduced-motion: reduce) { .treasure-side, .treasure-side-tree, .treasure-side-tree i, .treasure-side-monere { animation: none; transition: none; } }
 .treasure-side-objective { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 5; max-width: 90%; padding: 6px 14px; border-radius: 999px; border: 2px solid var(--primary); background: var(--adventure-panel); color: var(--primary); font-family: var(--font-display, inherit); font-size: 14px; text-align: center; }
+
+:root { --maze-wall: oklch(0.34 0.06 156); --maze-edge: oklch(0.63 0.10 158); --maze-floor: oklch(0.16 0.018 155); --maze-shadow: oklch(0.38 0.035 285); }
+.harvest-modal { width: min(650px, calc(100vw - 24px)); max-width: 650px; max-height: calc(100dvh - 24px); overflow-y: auto; padding: 18px; border-radius: 8px; gap: 12px; }
+.harvest-board { width: 100%; aspect-ratio: 15 / 13; max-height: calc(100dvh - 260px); background: var(--maze-floor); border: 1px solid var(--maze-edge); border-radius: 8px; overflow: hidden; touch-action: none; }
+.harvest-board canvas { display: block; }
+.harvest-pad { display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(2, 40px); gap: 4px; }
+.harvest-pad button { width: 40px; height: 40px; border-radius: 8px; touch-action: none; }
