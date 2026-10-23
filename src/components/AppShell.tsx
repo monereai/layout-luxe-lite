@@ -9,6 +9,7 @@ import { useCare } from "@/hooks/useCare";
 import { energyGain } from "@/lib/care";
 import { useT, useLang, setLang, LANGS, type Lang } from "@/lib/i18n";
 import { visibleAdventureNavigation } from "@/lib/treasureGate";
+import { useTreasureAccess } from "@/hooks/useTreasureAccess";
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
@@ -40,12 +41,10 @@ const allMenuItems = [
   { to: "/shop", label: "shop", icon: Coins },
 ] as const;
 
-// While the treasure hunt is under maintenance its menu entries (desktop side
-// menu, phone bottom bar, phone drawer and webMCP navigation) disappear.
-const tabs = visibleAdventureNavigation(allTabs);
-const menuItems = visibleAdventureNavigation(allMenuItems);
-
 export function AppShell({ children, hideCrisisBar = false, adventure = false }: { children: ReactNode; hideCrisisBar?: boolean; adventure?: boolean }) {
+  const { tester } = useTreasureAccess();
+  const tabs = visibleAdventureNavigation(allTabs, undefined, tester);
+  const menuItems = visibleAdventureNavigation(allMenuItems, undefined, tester);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
