@@ -130,7 +130,7 @@ d4("expanded griffin world", () => {
     const s = at4({ zone: "ravine", x: 20, y: 7, gear: ["boots"] });
     e4(A4(s, { action: "pick", id: "bell" }).items).toEqual([]);
     const met = A4(at4({ zone: "ravine", x: 12, y: 5 }), { action: "talk", id: "rocco" });
-    const nearBell = { ...met, x: 20, y: 7, gear: ["boots"] as const };
+    const nearBell = { ...at4({ zone: "ravine", x: 20, y: 7, gear: ["boots"] }), met: met.met };
     e4(A4(nearBell, { action: "pick", id: "bell" }).items).toEqual(["bell"]);
   });
   i4("vault needs pet on its plate and Monere on his", () => {
