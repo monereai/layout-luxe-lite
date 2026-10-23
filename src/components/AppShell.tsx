@@ -65,7 +65,7 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
     return () => clearTimeout(timer);
   }, [energy]);
   const t = useT();
-  const navigationLabel = (to: string, label: Parameters<typeof t>[0]) => to === "/treasure" ? t("treasure") : to === "/shop" ? `${t(label)} / Wardrobe` : to === "/" ? `Dashboard / ${t(label)}` : t(label);
+  const navigationLabel = (to: string, label: Parameters<typeof t>[0]) => to === "/treasure" ? (tester ? `${t("treasure")} · Dev` : t("treasure")) : to === "/shop" ? `${t(label)} / Wardrobe` : to === "/" ? `Dashboard / ${t(label)}` : t(label);
   const lang = useLang();
   const navigate = useNavigate();
   const location = useLocation();
