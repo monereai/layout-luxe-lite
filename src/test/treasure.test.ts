@@ -127,10 +127,10 @@ d4("expanded griffin world", () => {
     e4(rung.lily).toBe(1); e4(C4(rung, 10, 17) && C4(rung, 10, 18)).toBe(true);
   });
   i4("Rocco's silver bell appears only after talking to him", () => {
-    const s = at4({ zone: "ravine", x: 20, y: 7, gear: ["boots"] });
+    const s = at4({ zone: "meadow", x: 17, y: 18 });
     e4(A4(s, { action: "pick", id: "bell" }).items).toEqual([]);
     const met = A4(at4({ zone: "ravine", x: 12, y: 5 }), { action: "talk", id: "rocco" });
-    const nearBell = { ...at4({ zone: "ravine", x: 20, y: 7, gear: ["boots"] }), met: met.met };
+    const nearBell = { ...at4({ zone: "meadow", x: 17, y: 18 }), met: met.met };
     e4(A4(nearBell, { action: "pick", id: "bell" }).items).toEqual(["bell"]);
   });
   i4("vault needs pet on its plate and Monere on his", () => {
