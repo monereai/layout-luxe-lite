@@ -121,7 +121,7 @@ export function worldPath(s: AdventureState, target: Position): Position[] | nul
   }
   return null;
 }
-export type AdventureAction = { action: "status" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
+export type AdventureAction = { action: "status" | "restart" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
 /** Gate riddle for this zone's exit is answerable once the zone's scroll is found and Monere stands at the gate. */
 export function gateHere(s: AdventureState): ZoneId | null {
   if (!s.scrolls.includes(s.zone) || s.gates.includes(s.zone)) return null;
@@ -135,6 +135,8 @@ export function duelLanding(s: AdventureState, lastLanding: string, blocked: boo
 }
 export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
 function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
+  if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles() } : s;
+  if (s.rescued) return s;
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
   if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
   if (a.action === "talk" || a.action === "deliver") {

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { ClientOnly, Link } from "@tanstack/react-router";
+import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Award, Backpack, BookOpen, Check, Compass, Flag, LockKeyhole, Map, ScrollText, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -24,6 +24,7 @@ const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair };
 const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin. Along the way, lift the fog, help friendly villagers, earn explorer gear and let your pet dig for buried treasure!";
 
 export function TreasureGame() {
+  const navigate = useNavigate();
   const game = useAdventure(); const { state } = game;
   const controls = useRef<WorldControls | null>(null);
   const figure = useRef<HTMLDivElement | null>(null);
@@ -36,7 +37,6 @@ export function TreasureGame() {
   const [found, setFound] = useState<ZoneId | null>(null);
   const [riddle, setRiddle] = useState<ZoneId | null>(null);
   const [wrong, setWrong] = useState<number | null>(null);
-  const [victory, setVictory] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
   const [effect, setEffect] = useState<WorldEffect>({ kind: null, n: 0 });
   const [busy, setBusy] = useState(false);
@@ -58,7 +58,10 @@ export function TreasureGame() {
     })).then(entries => { if (!cancelled) setTurn(Object.fromEntries(entries)); });
     return () => { cancelled = true; };
   }, [shop.equipped]);
+  const victory = game.loaded && state.rescued;
   const blocked = !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
+  useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); } }, [victory]);
+  useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
   useEffect(() => { try { setSound(localStorage.getItem("monere-treasure-sound") !== "off"); } catch { /* default on */ } return () => { void audio.current?.close(); }; }, []);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
@@ -67,7 +70,7 @@ export function TreasureGame() {
     try { const c = audio.current ?? new AudioContext(); audio.current = c; void c.resume(); notes.forEach((f, i) => { const o = c.createOscillator(); const g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = f; g.gain.setValueAtTime(.07, c.currentTime + i * .1); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + i * .1 + .35); o.start(c.currentTime + i * .1); o.stop(c.currentTime + i * .1 + .36); }); } catch { /* sound optional */ }
   }
   const chime = () => tone([523, 659, 784]);
-  const zone = ZONES.find(z => z.id === state.zone) ?? ZONES[0]!;
+  const zone = ZONES.find(z => z.id === state.zone);
   const here = interactionHere(state);
   const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
@@ -81,7 +84,7 @@ export function TreasureGame() {
       settled.current = key; setBusy(true);
       try {
         const step = state.duel; const next = await game.act({ action: "duel", x: tile });
-        if (next.duel > step) { chime(); if (next.rescued) { tone([523, 659, 784, 1046]); setEffect(e => ({ kind: "victory", n: e.n + 1 })); setCelebrate(true); setTimeout(() => { setCelebrate(false); setVictory(true); }, 2300); } else setNotice(`Correct! Riddle ${next.duel + 1} of 3…`); }
+        if (next.duel > step) { chime(); if (next.rescued) { tone([523, 659, 784, 1046]); setEffect(e => ({ kind: "victory", n: e.n + 1 })); setCelebrate(true); } else setNotice(`Correct! Riddle ${next.duel + 1} of 3…`); }
         else { tone([330, 247]); setEffect(e => ({ kind: "gust", n: e.n + 1 })); setNotice("Whoosh! Razor's gust blows you back to the start mark. Try again!"); }
       } catch { /* hook reports */ } finally { setBusy(false); }
     }, 400);
@@ -125,6 +128,16 @@ export function TreasureGame() {
     catch { setNotice("That answer couldn't be saved. Please try again."); } finally { setBusy(false); }
   }
   const action = here?.label ?? "Search";
+  async function finish(destination: "play" | "menu") {
+    if (busy) return;
+    setBusy(true); controls.current?.pause(true);
+    try {
+      if (!await game.restart()) return;
+      settled.current = ""; setPanel(null); setNpc(null); setFound(null); setRiddle(null); setWrong(null); setCelebrate(false); setNotice(null); setEffect({ kind: null, n: 0 }); setIntro(false);
+      if (destination === "menu") await navigate({ to: "/" });
+    } finally { setBusy(false); }
+  }
+  if (!zone) return null;
   return <section className="treasure-game" aria-label="The Rescue of the Golden Griffin">
     <header className="treasure-hud">
       <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">The Rescue of the Golden Griffin</p><h1 className="truncate font-display text-lg sm:text-2xl">{zone.name}</h1></div></div>
@@ -167,7 +180,7 @@ export function TreasureGame() {
       {!done && <Button disabled={!ready || busy} onClick={() => void deliver(npc)}>{ready ? "Hand them over" : "Keep searching"}</Button>}
       <Button variant="ghost" onClick={() => setNpc(null)}>Goodbye</Button></>; })()}</DialogContent></Dialog>
 
-    <Dialog open={victory} onOpenChange={setVictory}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Griffin is free!</DialogTitle><DialogDescription>Razor dropped the key and ran off. Your wisdom won the Riddle Duel.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-28 w-28"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="Golden Griffin" width={816} height={816} className="treasure-reward h-28 w-28 object-contain" /></div><p className="flex items-center justify-center gap-2 rounded-lg border border-points/40 bg-points/10 p-3 font-display text-points"><Award className="h-5 w-5" />Badge earned: Griffin Savior</p><p className="text-sm">{game.user ? "The Golden Griffin is now in your Pet Shop — equip it as your companion!" : "Sign in and rescue the Griffin on your account to keep it as a pet."}</p><Button asChild><Link to={game.user ? "/pet-shop" : "/auth"}>{game.user ? "Meet your Griffin" : "Sign in"}<ArrowRight /></Link></Button></DialogContent></Dialog>
+    <Dialog open={victory}><DialogContent showCloseButton={false} onEscapeKeyDown={e => e.preventDefault()} onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()} className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">Quest Complete!</DialogTitle><DialogDescription>Razor dropped the key and ran off. Your wisdom won the Riddle Duel.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-28 w-28"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="Golden Griffin" width={816} height={816} className="treasure-reward h-28 w-28 object-contain" /></div><p className="flex items-center justify-center gap-2 rounded-lg border border-points/40 bg-points/10 p-3 font-display text-points"><Award className="h-5 w-5" />Badge earned: Griffin Savior</p><p className="text-sm">{game.user ? "The Golden Griffin is now in your Pet Shop — equip it as your companion!" : "Sign in and rescue the Griffin on your account to keep it as a pet."}</p><div className="grid grid-cols-2 gap-2"><Button disabled={busy || game.saving} onClick={() => void finish("play")}>Play Again<ArrowRight /></Button><Button variant="secondary" disabled={busy || game.saving} onClick={() => void finish("menu")}>Main Menu</Button></div><Button variant="ghost" asChild><Link to={game.user ? "/pet-shop" : "/auth"}>{game.user ? "Meet your Griffin" : "Sign in"}<ArrowRight /></Link></Button></DialogContent></Dialog>
 
     <Dialog open={!!panel} onOpenChange={o => { if (!o) setPanel(null); }}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto rounded-lg"><DialogTitle className="flex items-center gap-2 text-2xl"><Compass className="text-primary" />{panel === "map" ? "The road to Razor's Lair" : "Rescue Logbook"}</DialogTitle><DialogDescription>{panel === "map" ? "Four lands. Four scrolls. One Golden Griffin. Explore to lift the fog." : `${state.scrolls.length} of 4 scrolls · ${state.gates.length} of 4 riddles · ${state.quests.length} of ${NPCS.length + 1} side quests`}</DialogDescription>
       {panel === "map" ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{ZONES.map((z, i) => <div key={z.id} className="overflow-hidden rounded-lg border border-border"><img src={maps[z.id]} alt={z.name} width={1536} height={1536} loading="lazy" className="aspect-square w-full object-cover" /><div className="p-3"><h2 className="text-lg">{z.name}</h2><p className="mt-1 text-sm text-muted-foreground">{z.subtitle}</p><p className="mt-3 flex items-center gap-2 text-xs text-primary">{i === 0 || state.gates.includes(ZONES[i - 1]!.id) ? <><Check className="h-4 w-4" />{state.zone === z.id ? "Exploring now" : "Unlocked"}</> : <><LockKeyhole className="h-4 w-4" />Solve the previous gate riddle</>}</p></div></div>)}</div>

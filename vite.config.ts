@@ -24,6 +24,17 @@ export default defineConfig({
       "entities/lib/encode.js": path.resolve("node_modules/entities/lib/encode.js"),
     } },
     plugins: [
+      {
+        name: "monere-cloud-boot-guard", enforce: "pre",
+        resolveId(source, importer) {
+          // Keep the generated integration untouched; intercept its consumers only.
+          const parent = importer?.split("?")[0];
+          if (parent === path.resolve("src/lib/cloud-client.ts")) return null;
+          const target = source.startsWith(".") && parent ? path.resolve(path.dirname(parent), source) : source;
+          if (source === "@/integrations/supabase/client" || target === path.resolve("src/integrations/supabase/client") || target === path.resolve("src/integrations/supabase/client.ts")) return path.resolve("src/lib/cloud-client.ts");
+          return null;
+        },
+      },
       { name: "email-server-env", config: (_, { mode }) => { Object.assign(process.env, loadEnv(mode, process.cwd(), "")); } },
       mcpPlugin(),
       VitePWA({

@@ -1,3 +1,8 @@
+# Startup, quest completion and Lair cleanup
+- [x] Safeguard invalid local Cloud configuration without editing generated files; browser verifies signed-out home mounts with missing/placeholder settings.
+- [x] Stop completed-game activity and add explicit Play Again / Main Menu resets, preserving earned rewards; isolated guest browser verifies final answer, stable modal, both resets and refresh persistence. Signed-in reset not exercised because private access is Carl-only and his progress must not change.
+- [x] Remove Lair warning symbols, path dashes and revealed-ledge label; screenshots and guest crossing checks pass with/without goggles. Public closure remains intact.
+
 # Private Griffin testing access
 - [ ] Allow only Carl's server-verified signed-in account through the closure, restore its game navigation, and verify allowed/denied access without changing his game progress.
 

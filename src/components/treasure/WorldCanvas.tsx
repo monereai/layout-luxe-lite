@@ -76,7 +76,7 @@ export function WorldCanvas(props: Props) {
           this.lastState = key;
           this.background?.setTexture(s.zone);
           const far = this.player && Math.abs(this.player.x - (s.x + .5) * TILE_SIZE) + Math.abs(this.player.y - (s.y + .5) * TILE_SIZE) > TILE_SIZE * 1.5;
-          if (changedZone || force || (far && !this.moving)) { this.path = []; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
+          if (changedZone || force || (far && !this.moving)) { this.path = []; this.trail = []; this.direction = { x: 0, y: 0 }; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.portals.forEach(p => p.destroy()); this.portals = [];
           this.scenery.forEach(item => item.destroy()); this.scenery = [];
           const hex = (token: string) => { const c = document.createElement("canvas").getContext("2d"); if (!c) return "#888888"; c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#888"; c.fillRect(0, 0, 1, 1); const [r, g, b] = c.getImageData(0, 0, 1, 1).data; return `#${[r, g, b].map(v => (v ?? 0).toString(16).padStart(2, "0")).join("")}`; };
@@ -128,10 +128,9 @@ export function WorldCanvas(props: Props) {
                 .fillRoundedRect(x * 64 + 5, y * 64 + 5, 54, 54, 7);
               slabs.lineStyle(2, color("--adventure-stone-light"), platform || goggles ? .65 : .12)
                 .strokeRoundedRect(x * 64 + 5, y * 64 + 5, 54, 54, 7);
-              if (!platform && goggles) slabs.lineStyle(2, color("--points"), .4).lineBetween(x * 64 + 17, y * 64 + 28, x * 64 + 44, y * 64 + 28);
             }
-            label({ x: 5, y: 16 }, goggles ? "Ledge · path revealed" : "Ledge · needs Goggles of Truth");
-            if (goggles) TRAPS.forEach(t => { const warning = this.add.circle(...at(t), 20, color("--destructive"), .12).setStrokeStyle(2, color("--destructive"), .65).setDepth(2); this.scenery.push(warning); text(t, "⚠️", 28); });
+            if (!goggles) label({ x: 5, y: 16 }, "Ledge · needs Goggles of Truth");
+            if (goggles) TRAPS.forEach(t => { const warning = this.add.circle(...at(t), 20, color("--destructive"), .12).setStrokeStyle(2, color("--destructive"), .65).setDepth(2); this.scenery.push(warning); });
           }
           NPCS.filter(n => n.zone === s.zone).forEach(n => { bob(text(n, n.icon, 50)); label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26); });
           ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => { const o = bob(text(i, i.icon, 34)); if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 }); });
