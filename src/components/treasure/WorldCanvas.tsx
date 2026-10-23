@@ -106,8 +106,8 @@ export function WorldCanvas(props: Props) {
           if (s.zone === "ravine") {
             const boots = s.gear.includes("boots"); text({ x: 17, y: 6 }, boots ? "🧗" : "⛰️", 36); label({ x: 17, y: 6 }, boots ? "Cliffs" : "Cliffs · needs Climbing Boots");
             const vault = s.quests.includes("vault");
-            [PLATE_HERO, PLATE_PET].forEach((pl, i) => { const c = this.add.circle(...at(pl), 24, i ? color("--energy") : color("--points"), vault ? .2 : .45).setStrokeStyle(3, i ? color("--energy") : color("--points")).setDepth(2); this.scenery.push(c); text(pl, i ? "🐾" : "🦁", 22).setAlpha(.8); });
-            text({ x: 6, y: 21 }, vault ? "🏛️✨" : "🏛️", 34); label({ x: 6, y: 19 }, vault ? "Vault open" : "Stone Vault");
+            // Plates keep their coloured circles only; decorative emblems (lion head, temple pillar) are hidden.
+            [PLATE_HERO, PLATE_PET].forEach((pl, i) => { const c = this.add.circle(...at(pl), 24, i ? color("--energy") : color("--points"), vault ? .2 : .45).setStrokeStyle(3, i ? color("--energy") : color("--points")).setDepth(2); this.scenery.push(c); });
           }
           if (s.zone === "lair") {
             const goggles = s.gear.includes("goggles");
@@ -123,13 +123,8 @@ export function WorldCanvas(props: Props) {
               }
             }
             const pit = this.add.image(6 * 64, 15.5 * 64, pitKey).setAlpha(.26).setDepth(1); this.scenery.push(pit);
-            const slabs = this.add.graphics().setDepth(2); this.scenery.push(slabs);
-            for (let x = 4; x <= 9; x++) for (let y = 14; y <= 16; y++) {
-              const platform = onPlatform(x, y);
-              // Seamless slabs: no outlines or grid lines, just a soft fill.
-              slabs.fillStyle(color("--adventure-stone"), platform ? .65 : goggles ? .75 : .08)
-                .fillRoundedRect(x * 64 + 2, y * 64 + 2, 60, 60, 10);
-            }
+            // No slab tile grid: Monere walks directly on the floor artwork.
+            void goggles; void onPlatform;
           }
           NPCS.filter(n => n.zone === s.zone).forEach(n => { bob(text(n, n.icon, 50)); label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26); });
           ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => { const o = bob(text(i, i.icon, 34)); if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 }); });
@@ -170,8 +165,20 @@ export function WorldCanvas(props: Props) {
               if (!this.reduced && !s.rescued) { this.tweens.add({ targets: [g, label], alpha: .78, duration: 900 + i * 150, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); }
             });
             if (!s.rescued) { const hy = this.add.image(...at(RAZOR), "razor").setDisplaySize(130, 130).setDepth(5); this.scenery.push(hy); }
-            const g = this.add.image(...at(CAGE), "griffin").setDisplaySize(110, 110).setDepth(5); this.scenery.push(g);
-            if (!s.rescued) for (let i = -2; i <= 2; i++) { const bar = this.add.rectangle(at(CAGE)[0] + i * 22, at(CAGE)[1], 5, 120, color("--foreground"), .8).setDepth(6); this.scenery.push(bar); }
+            const [gx, gy] = at(CAGE);
+            const g = this.add.image(gx, gy, "griffin").setDisplaySize(72, 72).setDepth(5); this.scenery.push(g);
+            if (!s.rescued) {
+              // Styled cage: dark metallic bars with top/bottom frame and a gold lock.
+              const cage = this.add.graphics().setDepth(6); this.scenery.push(cage);
+              const w = 84, h = 92, l = gx - w / 2, t = gy - h / 2;
+              cage.fillStyle(0x000000, .25).fillRoundedRect(l + 3, t + 4, w, h, 8);
+              for (let i = 0; i < 6; i++) { const bx = l + 8 + i * ((w - 16) / 5); cage.fillStyle(0x2b2d33, 1).fillRect(bx - 2.5, t + 8, 5, h - 16); cage.fillStyle(0x9aa0aa, .55).fillRect(bx - 2.5, t + 8, 1.5, h - 16); }
+              [t, t + h - 10].forEach(y => { cage.fillStyle(0x3a3d45, 1).fillRoundedRect(l, y, w, 10, 4); cage.fillStyle(0xb8bec8, .4).fillRect(l + 3, y + 1, w - 6, 2); });
+              cage.fillStyle(0x3a3d45, 1).fillRoundedRect(l - 4, t - 8, w + 8, 8, 4);
+              cage.fillStyle(color("--points"), 1).fillRoundedRect(gx - 9, gy + 4, 18, 15, 3);
+              cage.lineStyle(3, color("--points"), 1).beginPath().arc(gx, gy + 4, 6, Math.PI, 0).strokePath();
+              cage.fillStyle(0x3a2200, 1).fillCircle(gx, gy + 10, 2.2).fillRect(gx - 1, gy + 10, 2, 5);
+            }
           }
           PORTALS[s.zone].forEach(p => {
             const open = !p.forward || s.gates.includes(s.zone);
