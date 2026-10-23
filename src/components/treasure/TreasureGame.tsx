@@ -158,7 +158,7 @@ export function TreasureGame() {
   }
   async function interact() {
     if (blocked) return;
-    if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
+    if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); if (gate.target === "caverns" && !orchard.cool("caverns-1")) void pick("caverns-1"); return; }
     if (tree) { await pick(tree.id); return; }
     const h = interactionHere(state);
     if (!h) {
