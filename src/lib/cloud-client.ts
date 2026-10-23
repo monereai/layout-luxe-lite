@@ -7,7 +7,8 @@ import { validCloudConfig } from "./cloud-config";
 export function createOfflineClient() {
   return createClient<Database>("https://offline.invalid", "sb_publishable_local_offline_unavailable", {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-    global: { fetch: async () => new Response(JSON.stringify({ message: "Account services are unavailable until Cloud is configured.", code: "CLOUD_UNAVAILABLE" }), { status: 503, headers: { "Content-Type": "application/json" } }) },
+    // A terminal response prevents the auth SDK retrying an unavailable service forever.
+    global: { fetch: async () => new Response(JSON.stringify({ message: "Account services are unavailable until Cloud is configured.", code: "CLOUD_UNAVAILABLE" }), { status: 400, headers: { "Content-Type": "application/json" } }) },
   });
 }
 
