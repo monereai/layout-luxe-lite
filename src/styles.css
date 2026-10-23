@@ -433,7 +433,7 @@
 /* Energy Orchards side lands */
 .treasure-side { position: absolute; inset: 0; z-index: 30; overflow: hidden; background: var(--background); animation: treasure-side-in .5s ease-out; }
 @keyframes treasure-side-in { from { opacity: 0; } to { opacity: 1; } }
-.treasure-side-title { position: absolute; left: 16px; top: 16px; max-width: 70%; padding: 8px 12px; border-radius: 8px; background: var(--adventure-panel); box-shadow: var(--adventure-shadow); }
+.treasure-side-title { position: absolute; left: 16px; top: 56px; max-width: 70%; padding: 8px 12px; border-radius: 8px; background: var(--adventure-panel); box-shadow: var(--adventure-shadow); }
 .treasure-side-prop { position: absolute; transform: translate(-50%, -50%); font-size: clamp(28px, 5vw, 48px); pointer-events: none; filter: drop-shadow(0 0 10px var(--adventure-glow, var(--primary))); animation: treasure-side-glow 3s ease-in-out infinite; }
 .treasure-side-hazard { position: absolute; transform: translate(-50%, -50%); width: 8%; aspect-ratio: 1; border-radius: 30%; pointer-events: none; background: radial-gradient(circle, color-mix(in oklab, var(--destructive) 55%, transparent), transparent 70%); }
 .treasure-side-tree, .treasure-side-exit, .treasure-side-monere { position: absolute; transform: translate(-50%, -50%); }
