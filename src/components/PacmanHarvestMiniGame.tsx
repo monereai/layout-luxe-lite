@@ -40,7 +40,7 @@ export function PacmanHarvestMiniGame({ avatar, onFinish }: { avatar: string; on
         this.player = this.add.image(state.player.x * 40 + 20, state.player.y * 40 + 20, "monere").setDisplaySize(38, 38).setDepth(3);
         this.shadows = state.chasers.map(c => this.add.image(c.x * 40 + 20, c.y * 40 + 20, "shadow").setDepth(2));
       }
-      update(_time: number, dt: number) {
+      override update(_time: number, dt: number) {
         if (stopped.current || document.hidden) return;
         if (direction.current !== "idle") started = true;
         if (!started) return;
