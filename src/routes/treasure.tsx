@@ -11,10 +11,11 @@ export const Route = createFileRoute("/treasure")({
   staticData: { sitemap: !TREASURE_MAINTENANCE },
   validateSearch: (s: Record<string, unknown>): { dilemma?: number | undefined } => ({ dilemma: s["dilemma"] === "1" || s["dilemma"] === 1 ? 1 : undefined }),
   head: () => ({ meta: [
-    { title: "Monere Treasure Hunt — MonereAI" },
-    { name: "description", content: "Explore Monere's Meadow, Whispering Forest and Sky Isles. Solve riddles, discover treasures and grow in courage, kindness and Christian wisdom." },
-    { property: "og:title", content: "Monere Treasure Hunt — MonereAI" },
-    { property: "og:description", content: "A playful three-zone treasure adventure with Monere the lion, hidden relics, exploration tools and wardrobe rewards." },
+    { title: TREASURE_MAINTENANCE ? "Adventure Under Construction — MonereAI" : "The Rescue of the Golden Griffin — MonereAI" },
+    { name: "description", content: TREASURE_MAINTENANCE ? "Monere is getting ready for his adventure. The Rescue of the Golden Griffin is temporarily closed for improvements." : "Explore four lands with Monere, find hidden scrolls, solve riddles and rescue the Golden Griffin from Razor." },
+    { property: "og:title", content: TREASURE_MAINTENANCE ? "Adventure Under Construction — MonereAI" : "The Rescue of the Golden Griffin — MonereAI" },
+    { property: "og:description", content: TREASURE_MAINTENANCE ? "Monere's adventure will be back soon. Return to the main dashboard while improvements are underway." : "Join Monere on a four-land adventure to rescue the Golden Griffin." },
+    ...(TREASURE_MAINTENANCE ? [{ name: "robots", content: "noindex, nofollow" }] : []),
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -24,11 +25,11 @@ function AdventureHome() {
   usePaymentReturn();
   const { dilemma } = Route.useSearch();
   const [open, setOpen] = useState(false);
-  useEffect(() => { if (dilemma === 1) setOpen(true); }, [dilemma]);
+  useEffect(() => { if (!TREASURE_MAINTENANCE && dilemma === 1) setOpen(true); }, [dilemma]);
   return (
     <AppShell adventure>
       {TREASURE_MAINTENANCE ? <TreasureConstructionGate /> : <TreasureGame />}
-      <DailyDilemmaModal open={open} onOpenChange={setOpen} />
+      {!TREASURE_MAINTENANCE && <DailyDilemmaModal open={open} onOpenChange={setOpen} />}
     </AppShell>
   );
 }

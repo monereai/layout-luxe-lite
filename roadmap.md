@@ -1,3 +1,7 @@
+# Temporary adventure closure
+- [x] Hide Treasure Hunt navigation and show a localized construction modal on direct visits without mounting gameplay or changing saves.
+- [ ] Verify closure, return navigation, saved guest data and focused tests; retain all game code.
+
 # Razor’s Lair review
 - [x] Replace floor colour blocks with stone slabs and circular trap markers; blocked stone taps guide players to the inner door without bypassing goggles or gate rules.
 - [x] Guest browser verified no-goggles guidance, crossing with companion, scroll pickup, door answer, stone tap, single-answer landing and reload persistence; 23 focused tests pass and build OK. Signed-in saves unchanged and not retested; Carl untouched. Preview-only.
