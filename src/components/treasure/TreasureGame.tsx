@@ -20,7 +20,7 @@ import griffin from "@/assets/pets/golden-griffin.png";
 import razor from "@/assets/treasure/razor.png";
 import { SideZone } from "./SideZone";
 import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
-import { ELEMENTAL_GATES, ENERGY_GATE_COST, SIDE_ZONES, canOpenGate, gateNear, mapTreeNear, type SideZoneId, type TreeId } from "@/lib/orchard";
+import { ELEMENTAL_GATES, SIDE_ZONES, canOpenGate, gateEnergyCost, gateNear, mapTreeNear, type SideZoneId, type TreeId } from "@/lib/orchard";
 import { Zap } from "lucide-react";
 import groveImg from "@/assets/treasure/grove.jpg";
 import cavernsImg from "@/assets/treasure/caverns.jpg";
@@ -153,14 +153,14 @@ export function TreasureGame() {
       if (gateTo) {
         const g = ELEMENTAL_GATES.find(g => g.target === gateTo)!;
         if (!walkNear(cur, g.at)) { setNotice(`Monere can't reach the ${g.name} from here.`); return; }
-        if (!canOpenGate(orchard.energy)) { setNotice(`The ${g.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it.`); return; }
+        if (!canOpenGate(orchard.energy, g.target)) { setNotice(`The ${g.name} is sealed. Monere needs ${gateEnergyCost(g.target)} Energy to open it.`); return; }
         playSound("success.mp3", 0.5); setSide(gateTo);
       } else setNotice(`Welcome to ${ZONES.find(z => z.id === target)?.name}!`);
     } finally { setTravelling(false); }
   }
   async function interact() {
     if (blocked) return;
-    if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
+    if (gate) { if (!canOpenGate(orchard.energy, gate.target)) { setNotice(`The ${gate.name} is sealed. Monere needs ${gateEnergyCost(gate.target)} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
     if (tree) { await pick(tree.id); return; }
     const h = interactionHere(state);
     if (!h) {

@@ -4,6 +4,7 @@ import type { Position, ZoneId } from "./treasure";
 
 export type SideZoneId = "grove" | "caverns";
 export const ENERGY_GATE_COST = 50;
+export const gateEnergyCost = (zone: SideZoneId) => zone === "caverns" ? 0 : ENERGY_GATE_COST;
 export const TREE_ENERGY = 25;
 export const TREE_IDS = ["meadow-1", "wood-1", "ravine-1", "lair-1", "grove-1", "grove-2", "grove-3", "caverns-1"] as const;
 export type TreeId = (typeof TREE_IDS)[number];
@@ -35,7 +36,7 @@ export const SIDE_ZONES: Record<SideZoneId, { name: string; subtitle: string; ob
 const adjacent = (a: Position, b: Position) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 1;
 export const gateNear = (zone: ZoneId, p: Position) => ELEMENTAL_GATES.find(g => g.zone === zone && adjacent(p, g.at));
 export const mapTreeNear = (zone: ZoneId, p: Position) => MAP_TREES.find(t => t.zone === zone && adjacent(p, t.at));
-export const canOpenGate = (energy: number) => energy >= ENERGY_GATE_COST;
+export const canOpenGate = (energy: number, zone: SideZoneId = "grove") => energy >= gateEnergyCost(zone);
 export const harvestGain = (energy: number) => Math.max(0, Math.min(TREE_ENERGY, 100 - energy));
 /** Side-land walking: inside the grid and never onto a tree. */
 export const sideWalkable = (zone: SideZoneId, p: Position) => p.x >= 0 && p.y >= 0 && p.x < SIDE_COLS && p.y < SIDE_ROWS && ![...SIDE_ZONES[zone].trees, ...SIDE_ZONES[zone].props].some(t => t.at.x === p.x && t.at.y === p.y);
