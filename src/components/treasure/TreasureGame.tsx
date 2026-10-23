@@ -106,6 +106,8 @@ export function TreasureGame() {
     setHarvestMaze(null);
     setNotice(`${expelled ? "Whoosh! Safely back at the entrance." : "Harvest gathered!"} +${result.gained} Energy${orchard.guest ? " (guest preview)" : ""}.`);
   }
+  // Entering the Crystal Caverns starts the Crystal Maze straight away, before Monere can walk anywhere.
+  useEffect(() => { if (side === "caverns" && !harvestMaze && !busy) void pick("caverns-1"); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [side]);
   const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
@@ -158,7 +160,7 @@ export function TreasureGame() {
   }
   async function interact() {
     if (blocked) return;
-    if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); if (gate.target === "caverns" && !orchard.cool("caverns-1")) void pick("caverns-1"); return; }
+    if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
     if (tree) { await pick(tree.id); return; }
     const h = interactionHere(state);
     if (!h) {
