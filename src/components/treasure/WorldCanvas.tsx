@@ -69,7 +69,7 @@ export function WorldCanvas(props: Props) {
           else if (s.zone === "lair") notify("That is the chasm edge. Follow the stone crossing to the ledge.");
         }
         sync(force = false) {
-          const s = live.current.state; const key = `${s.zone}:${live.current.revision}:${s.x},${s.y}:${s.scrolls.join()}:${s.gates.join()}:${s.duel}:${s.rescued}:${s.gear.join()}:${s.items.length}:${s.dug.length}:${s.lily}:${s.pet ? 1 : 0}:${s.quests.length}:${(s.fog[s.zone] ?? []).length}`;
+          const s = live.current.state; const key = `${s.zone}:${live.current.revision}:${s.x},${s.y}:${s.scrolls.join()}:${s.gates.join()}:${s.duel}:${s.rescued}:${s.gear.join()}:${s.items.length}:${s.dug.length}:${s.lily}:${s.pet ? 1 : 0}:${s.quests.length}:${s.met.length}:${(s.fog[s.zone] ?? []).length}`;
           const fx = live.current.effect;
           if (fx.n !== this.effectN) { this.effectN = fx.n; if (fx.kind === "gust") this.gust(); if (fx.kind === "victory") this.victory(); }
           if (key === this.lastState && !force) return;
