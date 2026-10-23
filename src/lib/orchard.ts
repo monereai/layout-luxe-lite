@@ -5,7 +5,7 @@ import type { Position, ZoneId } from "./treasure";
 export type SideZoneId = "grove" | "caverns";
 export const ENERGY_GATE_COST = 50;
 export const TREE_ENERGY = 25;
-export const TREE_IDS = ["meadow-1", "grove-1", "grove-2", "grove-3", "caverns-1"] as const;
+export const TREE_IDS = ["meadow-1", "wood-1", "ravine-1", "lair-1", "grove-1", "grove-2", "grove-3", "caverns-1"] as const;
 export type TreeId = (typeof TREE_IDS)[number];
 
 /** Sealed elemental gates in the main lands; each opens one side land. */
@@ -14,7 +14,12 @@ export const ELEMENTAL_GATES: { zone: ZoneId; at: Position; target: SideZoneId; 
   { zone: "ravine", at: { x: 4, y: 6 }, target: "caverns", icon: "💎", name: "Crystal Gate" },
 ];
 /** Energy Trees standing in the main lands. */
-export const MAP_TREES: { zone: ZoneId; at: Position; id: TreeId }[] = [{ zone: "meadow", at: { x: 6, y: 12 }, id: "meadow-1" }];
+export const MAP_TREES: { zone: ZoneId; at: Position; id: TreeId }[] = [
+  { zone: "meadow", at: { x: 6, y: 12 }, id: "meadow-1" },
+  { zone: "wood", at: { x: 11, y: 6 }, id: "wood-1" },
+  { zone: "ravine", at: { x: 9, y: 16 }, id: "ravine-1" },
+  { zone: "lair", at: { x: 18, y: 8 }, id: "lair-1" },
+];
 
 export const SIDE_COLS = 10, SIDE_ROWS = 7;
 export const SIDE_ZONES: Record<SideZoneId, { name: string; subtitle: string; music: string; start: Position; exit: Position; trees: { id: TreeId; at: Position; icon: string }[] }> = {
