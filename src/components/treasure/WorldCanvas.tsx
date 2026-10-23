@@ -89,11 +89,13 @@ export function WorldCanvas(props: Props) {
             if (!this.reduced) this.tweens.add({ targets: scroll, y: scroll.y - 6, alpha: .75, duration: 1200, yoyo: true, repeat: -1 });
           }
           const rect = (x: number, y: number, w: number, h: number, c: number, a: number, depth = 1) => { const r = this.add.rectangle(x * 64 + w * 32, y * 64 + h * 32, w * 64, h * 64, c, a).setDepth(depth); this.scenery.push(r); return r; };
-          const label = (p: Position, t: string) => { const o = this.add.text((p.x + .5) * 64, (p.y + 1) * 64 + 4, t, { fontFamily: "Nunito", fontSize: "12px", color: hex("--foreground"), backgroundColor: hex("--background"), padding: { x: 6, y: 2 } }).setOrigin(.5, 0).setDepth(4).setAlpha(.9); this.scenery.push(o); };
+          // Map text labels are intentionally disabled: hints live in the quest log and on-tap messages.
+          const label = (_p: Position, _t: string) => {};
           const bob = (o: Phaser.GameObjects.Text) => { if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); return o; };
           if (s.zone === "wood") {
-            // Dark cave (north-east): pitch black without the Lantern, softly lit with it.
-            const lit = s.gear.includes("lantern"); rect(18, 2, 4, 5, 0x05040a, lit ? .35 : .82, 2);
+            // Dark cave (north-east): a soft radial shadow, never a rectangular tint box.
+            const lit = s.gear.includes("lantern");
+            const cave = this.add.circle(20 * 64, 4.5 * 64, 150, 0x05040a, lit ? .18 : .55).setDepth(2); this.scenery.push(cave);
             if (lit) { const glow = this.add.circle(20 * 64, 4 * 64, 150, color("--points"), .12).setDepth(2); this.scenery.push(glow); } else text({ x: 19, y: 4 }, "🌑", 40);
             label({ x: 19, y: 6 }, lit ? "Lit cave" : "Dark cave · needs Lantern");
             // River with moving lily pads.
@@ -102,7 +104,7 @@ export function WorldCanvas(props: Props) {
             this.lastLily = s.lily; text(BELL, "🛎️", 36); label(BELL, "Frog bell");
           }
           if (s.zone === "ravine") {
-            const boots = s.gear.includes("boots"); rect(15, 2, 7, 6, 0x3a2414, boots ? .18 : .45, 1); text({ x: 17, y: 6 }, boots ? "🧗" : "⛰️", 36); label({ x: 17, y: 6 }, boots ? "Cliffs" : "Cliffs · needs Climbing Boots");
+            const boots = s.gear.includes("boots"); text({ x: 17, y: 6 }, boots ? "🧗" : "⛰️", 36); label({ x: 17, y: 6 }, boots ? "Cliffs" : "Cliffs · needs Climbing Boots");
             const vault = s.quests.includes("vault");
             [PLATE_HERO, PLATE_PET].forEach((pl, i) => { const c = this.add.circle(...at(pl), 24, i ? color("--energy") : color("--points"), vault ? .2 : .45).setStrokeStyle(3, i ? color("--energy") : color("--points")).setDepth(2); this.scenery.push(c); text(pl, i ? "🐾" : "🦁", 22).setAlpha(.8); });
             text({ x: 6, y: 21 }, vault ? "🏛️✨" : "🏛️", 34); label({ x: 6, y: 19 }, vault ? "Vault open" : "Stone Vault");
@@ -124,13 +126,10 @@ export function WorldCanvas(props: Props) {
             const slabs = this.add.graphics().setDepth(2); this.scenery.push(slabs);
             for (let x = 4; x <= 9; x++) for (let y = 14; y <= 16; y++) {
               const platform = onPlatform(x, y);
+              // Seamless slabs: no outlines or grid lines, just a soft fill.
               slabs.fillStyle(color("--adventure-stone"), platform ? .65 : goggles ? .75 : .08)
-                .fillRoundedRect(x * 64 + 5, y * 64 + 5, 54, 54, 7);
-              slabs.lineStyle(2, color("--adventure-stone-light"), platform || goggles ? .65 : .12)
-                .strokeRoundedRect(x * 64 + 5, y * 64 + 5, 54, 54, 7);
+                .fillRoundedRect(x * 64 + 2, y * 64 + 2, 60, 60, 10);
             }
-            if (!goggles) label({ x: 5, y: 16 }, "Ledge · needs Goggles of Truth");
-            if (goggles) TRAPS.forEach(t => { const warning = this.add.circle(...at(t), 20, color("--destructive"), .12).setStrokeStyle(2, color("--destructive"), .65).setDepth(2); this.scenery.push(warning); });
           }
           NPCS.filter(n => n.zone === s.zone).forEach(n => { bob(text(n, n.icon, 50)); label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26); });
           ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => { const o = bob(text(i, i.icon, 34)); if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 }); });
@@ -170,9 +169,6 @@ export function WorldCanvas(props: Props) {
               label.setShadow(0, 2, "#000", 4, true, true); this.scenery.push(label);
               if (!this.reduced && !s.rescued) { this.tweens.add({ targets: [g, label], alpha: .78, duration: 900 + i * 150, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); }
             });
-            const ring = this.add.circle(...at(DUEL_START), 22, color("--energy"), .25).setStrokeStyle(3, color("--energy"), .9).setDepth(2); this.scenery.push(ring);
-            const mark = text(DUEL_START, "✦", 26); mark.setAlpha(.9);
-            if (!this.reduced) this.tweens.add({ targets: ring, scale: 1.15, alpha: .5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
             if (!s.rescued) { const hy = this.add.image(...at(RAZOR), "razor").setDisplaySize(130, 130).setDepth(5); this.scenery.push(hy); }
             const g = this.add.image(...at(CAGE), "griffin").setDisplaySize(110, 110).setDepth(5); this.scenery.push(g);
             if (!s.rescued) for (let i = -2; i <= 2; i++) { const bar = this.add.rectangle(at(CAGE)[0] + i * 22, at(CAGE)[1], 5, 120, color("--foreground"), .8).setDepth(6); this.scenery.push(bar); }
