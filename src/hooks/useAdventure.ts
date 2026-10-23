@@ -6,6 +6,7 @@ import { usePlan } from "./usePlan";
 import { adventureAction } from "@/lib/treasure.functions";
 import { applyAdventure, initialAdventure, parseAdventure, randomRiddles, validRiddles, type AdventureAction, type AdventureState, type Position } from "@/lib/treasure";
 import { loadPets } from "@/lib/pets";
+import { playSound } from "@/lib/audio";
 
 const GUEST_KEY = "monere-griffin-guest-v1";
 export function useAdventure() {
@@ -58,7 +59,7 @@ export function useAdventure() {
     if (!loaded || resetting.current || current.current.rescued) return;
     const next = applyAdventure(current.current, { action: "move", ...position });
     if (next === current.current) return;
-    update(next); if (user) { setSaving(true); steps.current.push(position); if (steps.current.length >= 24) void flush().catch(() => {}); }
+    update(next); playSound("step.mp3", 0.3); if (user) { setSaving(true); steps.current.push(position); if (steps.current.length >= 24) void flush().catch(() => {}); }
   }
   async function act(action: AdventureAction) {
     if (!loaded || resetting.current || (current.current.rescued && action.action !== "restart")) return current.current;

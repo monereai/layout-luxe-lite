@@ -8,6 +8,7 @@ import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
 import { ZONES, PORTALS, SCROLLS, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
+import { playSound, setSoundsMuted } from "@/lib/audio";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
 import type { WorldControls, WorldEffect } from "./WorldCanvas";
@@ -60,10 +61,10 @@ export function TreasureGame() {
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
   const blocked = !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
-  useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); } }, [victory]);
+  useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
   useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
-  useEffect(() => { try { setSound(localStorage.getItem("monere-treasure-sound") !== "off"); } catch { /* default on */ } return () => { void audio.current?.close(); }; }, []);
+  useEffect(() => { const enabled = (() => { try { return localStorage.getItem("monere-treasure-sound") !== "off"; } catch { return true; } })(); setSound(enabled); setSoundsMuted(!enabled); return () => { void audio.current?.close(); }; }, []);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
   function tone(notes: number[]) {
     if (!sound) return;
@@ -84,7 +85,7 @@ export function TreasureGame() {
       settled.current = key; setBusy(true);
       try {
         const step = state.duel; const next = await game.act({ action: "duel", x: tile });
-        if (next.duel > step) { chime(); if (next.rescued) { tone([523, 659, 784, 1046]); setEffect(e => ({ kind: "victory", n: e.n + 1 })); setCelebrate(true); } else setNotice(`Correct! Riddle ${next.duel + 1} of 3…`); }
+        if (next.duel > step) { playSound("success.mp3", 0.6); if (next.rescued) { tone([523, 659, 784, 1046]); setEffect(e => ({ kind: "victory", n: e.n + 1 })); setCelebrate(true); } else setNotice(`Correct! Riddle ${next.duel + 1} of 3…`); }
         else { tone([330, 247]); setEffect(e => ({ kind: "gust", n: e.n + 1 })); setNotice("Whoosh! Razor's gust blows you back to the start mark. Try again!"); }
       } catch { /* hook reports */ } finally { setBusy(false); }
     }, 400);
@@ -108,7 +109,7 @@ export function TreasureGame() {
       if (next?.dug.includes(d.id)) { tone([392, 523, 659]); const t = d.item ? TREASURES[d.item] : null; setNotice(t ? `Your pet dug up ${t.name}! ${t.icon}` : game.user ? `Your pet dug up ${d.points} coins! 🪙` : `Your pet dug up ${d.points} coins! 🪙 Sign in to keep them as points.`); }
       return;
     }
-    if (h.kind === "bell") { const next = await run({ action: "bell" }); if (next) { tone([784, 988]); setNotice(next.lily === 1 ? "Ribbit! The lily pads line up — hop across now!" : "Ding! The lily pads drift to new spots…"); } return; }
+    if (h.kind === "bell") { const next = await run({ action: "bell" }); if (next) { playSound("bell.mp3", 0.6); setNotice(next.lily === 1 ? "Ribbit! The lily pads line up — hop across now!" : "Ding! The lily pads drift to new spots…"); } return; }
     if (h.kind === "stay") { const next = await run({ action: "stay" }); if (next?.pet) setNotice("Your pet sits on the paw plate. Now step onto the lion plate!"); return; }
     if (h.kind === "switch") { const next = await run({ action: "switch" }); if (next?.quests.includes("vault")) { chime(); setNotice(game.user ? "Click-clunk! The Stone Vault opens: Sun Stone ☀️ + 40 points!" : "Click-clunk! The Stone Vault opens: Sun Stone ☀️! Sign in to earn the points."); } return; }
     if (h.kind === "portal" && portal) {
@@ -124,7 +125,7 @@ export function TreasureGame() {
     if (!riddle) return;
     if (i !== gateRiddle(state, riddle).answer) { setWrong(i); tone([330, 247]); return; }
     setBusy(true);
-    try { await game.act({ action: "answer", id: riddle, x: i }); chime(); setRiddle(null); setNotice(riddle === "lair" ? "The inner door rumbles open. Razor awaits!" : "Correct! The gate swings open."); }
+    try { await game.act({ action: "answer", id: riddle, x: i }); playSound("success.mp3", 0.6); setRiddle(null); setNotice(riddle === "lair" ? "The inner door rumbles open. Razor awaits!" : "Correct! The gate swings open."); }
     catch { setNotice("That answer couldn't be saved. Please try again."); } finally { setBusy(false); }
   }
   const action = here?.label ?? "Search";
@@ -143,7 +144,7 @@ export function TreasureGame() {
       <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">The Rescue of the Golden Griffin</p><h1 className="truncate font-display text-lg sm:text-2xl">{zone.name}</h1></div></div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         <span className="flex items-center gap-1.5 font-display text-lg text-points" aria-label={`${state.scrolls.length} of 4 scrolls collected`}><ScrollText className="h-4 w-4" />{state.scrolls.length}<span className="text-xs text-muted-foreground">/4</span></span>
-        <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
+        <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); setSoundsMuted(sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
         <Button size="icon" variant="outline" aria-label="Open world map" title="World map" onClick={() => setPanel("map")}><Map /></Button>
         <Button variant="default" className="gap-2" aria-label="Open logbook" onClick={() => setPanel("logbook")}><Backpack /><span className="hidden sm:inline">Logbook</span></Button>
       </div>
