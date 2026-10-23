@@ -18,10 +18,9 @@ export function SideZone({ zone, avatar, onExit, onPick, cooling }: { zone: Side
   function step(dx: number, dy: number) {
     const next = { x: pos.x + dx, y: pos.y + dy };
     if (dx) setFace(dx);
-    if (next.x === land.exit.x - 1 || (next.x < 0 && pos.x === land.exit.x && pos.y === land.exit.y)) { onExit(); return; }
+    if (next.x < 0) { onExit(); return; } // west edge leads back
     if (!sideWalkable(zone, next)) return;
     setPos(next); playSound("step.mp3", 0.3);
-    if (next.x === land.exit.x && next.y === land.exit.y && dx < 0) { onExit(); return; }
     const tree = land.trees.find(t => sideAdjacent(t.at, next) && !cooling(t.id));
     if (tree) void onPick(tree.id);
   }
