@@ -5,6 +5,7 @@ import forest from "@/assets/treasure/forest.jpg";
 import ravine from "@/assets/treasure/ravine.jpg";
 import lair from "@/assets/treasure/lair.jpg";
 import razor from "@/assets/treasure/razor.png";
+import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
 import { PORTALS, SCROLLS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, canStep, worldPath, inChasm, onPlatform, isRevealed, type AdventureState, type Position } from "@/lib/treasure";
 
@@ -92,6 +93,9 @@ export function WorldCanvas(props: Props) {
           // Map text labels are intentionally disabled: hints live in the quest log and on-tap messages.
           const label = (_p: Position, _t: string) => {};
           const bob = (o: Phaser.GameObjects.Text) => { if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); return o; };
+          // Energy Orchards: sealed elemental gates and Energy Trees (actionable via the interact button).
+          ELEMENTAL_GATES.filter(g => g.zone === s.zone).forEach(g => bob(text(g.at, g.icon, 44)));
+          MAP_TREES.filter(t => t.zone === s.zone).forEach(t => text(t.at, "🌳", 52));
           if (s.zone === "wood") {
             // Dark cave (north-east): a soft radial shadow, never a rectangular tint box.
             const lit = s.gear.includes("lantern");
