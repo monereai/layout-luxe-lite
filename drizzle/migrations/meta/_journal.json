@@ -351,6 +351,13 @@
       "when": 1792764316544,
       "tag": "0049_griffin_explicit_restart",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1792768313687,
+      "tag": "0050_energy_orchard_harvests",
+      "breakpoints": true
     }
   ]
 }
