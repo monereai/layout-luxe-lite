@@ -56,6 +56,7 @@ export function TreasureGame() {
   const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
   const [sideReset, setSideReset] = useState(0);
   const startingHarvest = useRef(false);
+  const crystalEntryStarted = useRef(false);
   const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
@@ -110,7 +111,13 @@ export function TreasureGame() {
     setNotice(`${expelled ? "Whoosh! Safely back at the entrance." : "Harvest gathered!"} +${result.gained} Energy${orchard.guest ? " (guest preview)" : ""}.`);
   }
   // Entering the Crystal Caverns starts the Crystal Maze straight away, before Monere can walk anywhere.
-  useEffect(() => { if (side === "caverns" && !harvestMaze && !busy) void pick("caverns-1"); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [side]);
+  useEffect(() => {
+    if (side !== "caverns") { crystalEntryStarted.current = false; return; }
+    if (crystalEntryStarted.current || harvestMaze || busy || intro) return;
+    crystalEntryStarted.current = true;
+    void pick("caverns-1");
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [side, harvestMaze, busy, intro]);
   const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
   // Riddle Duel: when Monere settles on a tile, ask the server whether it was the right answer.
