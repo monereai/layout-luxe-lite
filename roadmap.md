@@ -1,3 +1,8 @@
+# Startup, quest completion and Lair cleanup
+- [ ] Safeguard invalid local Cloud configuration without editing generated files.
+- [ ] Stop completed-game activity and add explicit Play Again / Main Menu resets, preserving earned rewards.
+- [ ] Remove Lair warning symbols, path dashes and revealed-ledge label; verify rendering and reset flows.
+
 # Private Griffin testing access
 - [ ] Allow only Carl's server-verified signed-in account through the closure, restore its game navigation, and verify allowed/denied access without changing his game progress.
 
