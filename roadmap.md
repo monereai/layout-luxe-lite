@@ -1,5 +1,5 @@
 # Orchard harvesting maze
-- [ ] Make Crystal Gate and World Map Crystal entry mount the maze directly, with no cavern/tree screen; verify using isolated game data.
+- [x] Crystal Gate and World Map Crystal entry mount the maze directly and never render the cavern/tree screen, including entry failure and completed harvest. Seventeen tests pass; isolated browser verifies both entrances at zero Energy, real maze canvas and closure back at the gate. Carl's account untouched; signed-in settlement remains unverified.
 - [x] Remove the legacy direct-harvest hook; all tree callers mount the shared maze with collected-Energy onComplete and verified settlement. Isolated desktop/phone browser checks confirm modal closure; phone harvest returns 2 Energy and test HUD rises 50→52. Fourteen rules pass. Signed-in settlement still awaits safe account access.
 - [x] Remove minimum Energy for Crystal Gate/maze entry in walking, World Map and authenticated maze start; retain Leaf Gate and daily harvest rules. Fourteen tests pass; signed-in play remains blocked by the separate-QA rule.
 - [x] Add tree-triggered maze, dots, Sun power, chasers and safe Energy settlement/entrance return with a shared UTC tree ledger.
