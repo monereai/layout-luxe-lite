@@ -344,6 +344,13 @@
       "when": 1792678277388,
       "tag": "0048_griffin_riddle_shuffle_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1792764316544,
+      "tag": "0049_griffin_explicit_restart",
+      "breakpoints": true
     }
   ]
 }

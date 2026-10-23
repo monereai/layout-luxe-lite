@@ -610,6 +610,7 @@ export type Database = {
         }
         Returns: Json
       }
+      treasure_restart: { Args: never; Returns: Json }
       treasure_travel: { Args: { p_steps: Json }; Returns: Json }
       treasure_v2_action: {
         Args: {
