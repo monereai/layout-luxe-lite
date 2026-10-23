@@ -69,7 +69,10 @@ export const settleOrchardMaze = createServerFn({ method: "POST" })
     const sync = await context.supabase.rpc("care_apply", { p_action: "sync" });
     if (sync.error) throw new Error(sync.error.message);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const result = await supabaseAdmin.rpc("orchard_maze_settle", { p_user: context.userId, p_round: data.round, p_energy: maze.energy, p_ticks: maze.tick, p_expelled: maze.ended === "expelled" });
+    const { data: ownedRound, error: ownedError } = await context.supabase.from("orchard_maze_rounds").select("tree").eq("id", data.round).eq("user_id", context.userId).single();
+    if (ownedError || !ownedRound) throw new Error("Harvest not found.");
+    const mainTree = ["meadow-1", "wood-1", "ravine-1", "lair-1"].includes(ownedRound.tree);
+    const result = await supabaseAdmin.rpc("orchard_maze_settle", { p_user: context.userId, p_round: data.round, p_energy: maze.energy, p_ticks: maze.tick, p_expelled: maze.ended === "expelled" && mainTree });
     if (result.error) throw new Error(result.error.message);
     const value = z.object({ energy: z.number(), gained: z.number(), state: z.unknown() }).parse(result.data);
     return { ...value, state: parseAdventure(value.state) };

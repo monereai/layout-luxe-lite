@@ -3,7 +3,7 @@ import Phaser from "phaser";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen, Sun, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { MAZE, MAZE_TICK_MS, cellId, mazeCells, mazeStep, mazeWalkable, newMaze, powerActive, type MazeDirection } from "@/lib/harvest-maze";
+import { MAZE, MAZE_TICK_MS, cellId, mazeCells, mazeStep, newMaze, powerActive, type MazeDirection } from "@/lib/harvest-maze";
 import { playSound } from "@/lib/audio";
 
 /** Browser-only Phaser maze; the server replays the input trace before depositing rewards. */
