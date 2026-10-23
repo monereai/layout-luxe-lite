@@ -26,7 +26,7 @@ export const SIDE_ZONES: Record<SideZoneId, { name: string; subtitle: string; ob
   grove: { name: "Ancient Orchard Grove", subtitle: "Harvest golden fruit to restore Monere's Energy.", objective: "Pick fruit from the three Energy Trees", music: "orchard_theme.mp3", start: { x: 1, y: 3 }, exit: { x: 0, y: 3 },
     props: [{ at: { x: 1, y: 0 }, icon: "🌲" }, { at: { x: 9, y: 0 }, icon: "🌲" }, { at: { x: 9, y: 6 }, icon: "🌳" }, { at: { x: 2, y: 6 }, icon: "🌲" }, { at: { x: 6, y: 0 }, icon: "🌸" }], hazards: [],
     trees: [{ id: "grove-1", at: { x: 3, y: 1 }, icon: "🌳" }, { id: "grove-2", at: { x: 7, y: 2 }, icon: "🌳" }, { id: "grove-3", at: { x: 5, y: 5 }, icon: "🌳" }] },
-  caverns: { name: "Crystal Caverns", subtitle: "A crystal tree glows deep in the cave.", objective: "Reach the glowing Crystal Tree for +25 Energy — avoid the shards!", music: "caverns_theme.mp3", start: { x: 1, y: 3 }, exit: { x: 0, y: 3 },
+  caverns: { name: "Crystal Caverns", subtitle: "A crystal tree glows deep in the cave.", objective: "Crystal Maze: gather Energy dots and Sun orbs, dodge the Shadow Chasers!", music: "caverns_theme.mp3", start: { x: 1, y: 3 }, exit: { x: 0, y: 3 },
     props: [{ at: { x: 2, y: 0 }, icon: "💎" }, { at: { x: 5, y: 0 }, icon: "🔷" }, { at: { x: 8, y: 0 }, icon: "💎" }, { at: { x: 3, y: 6 }, icon: "🔷" }, { at: { x: 8, y: 6 }, icon: "💎" }],
     hazards: [{ x: 3, y: 1 }, { x: 4, y: 2 }, { x: 5, y: 4 }, { x: 6, y: 2 }, { x: 4, y: 5 }],
     trees: [{ id: "caverns-1", at: { x: 7, y: 3 }, icon: "🔮" }] },
