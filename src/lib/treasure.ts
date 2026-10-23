@@ -142,7 +142,7 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles(Math.random, s.riddles) } : s;
   if (s.rescued) return s;
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
-  if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
+  if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && itemVisible(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
   if (a.action === "talk" || a.action === "deliver") {
     const n = NPCS.find(n => n.id === a.id); if (!n || n.zone !== s.zone || !near(s, n)) return s;
     let next = s.met.includes(n.id) ? s : { ...s, met: [...s.met, n.id] };
@@ -207,7 +207,7 @@ export type Npc = Position & { id: string; zone: ZoneId; name: string; icon: str
 export const NPCS: Npc[] = [
   { id: "barnaby", zone: "meadow", x: 14, y: 8, name: "Barnaby the Owl", icon: "🦉", ask: "Hoo! The wind blew 3 of my golden feathers across the Meadow and into Lonely Wood. Find them and I'll lend you my Lantern.", thanks: "My feathers! Take this Lantern — it lights the dark cave in Lonely Wood.", hint: "A gatekeeper's riddle tip: the answer keeps time, tick-tock!", need: ["feather-1", "feather-2", "feather-3"], gear: "lantern", points: 30 },
   { id: "pippa", zone: "wood", x: 9, y: 9, name: "Pippa the Squirrel", icon: "🐿️", ask: "I lost 3 golden acorns! One rolled back to the Meadow, one is in the dark cave, and one bounced into Shadow Ravine.", thanks: "All my acorns! These Climbing Boots will get you up any cliff.", hint: "Riddle tip: think of what you grab after a bath.", need: ["acorn-1", "acorn-2", "acorn-3"], gear: "boots", points: 30 },
-  { id: "rocco", zone: "ravine", x: 12, y: 4, name: "Rocco the Ram", icon: "🐏", ask: "My silver bell fell on the high cliffs to the north-east. Climb up and bring it back?", thanks: "Ding-ding! Here are my Goggles of Truth — they show what is hidden.", hint: "Riddle tip: you tap on the answer to type.", need: ["bell"], gear: "goggles", points: 30 },
+  { id: "rocco", zone: "ravine", x: 12, y: 4, name: "Rocco the Ram", icon: "🐏", ask: "My silver bell fell on the high cliffs to the north-east. Now that I've shown you where it landed, climb up and bring it back?", thanks: "Ding-ding! Here are my Goggles of Truth — they show what is hidden.", hint: "Riddle tip: you tap on the answer to type.", need: ["bell"], gear: "goggles", points: 30 },
   { id: "tilly", zone: "lair", x: 17, y: 19, name: "Tilly the Tortoise", icon: "🐢", ask: "Razor broke my Ancient Key into 3 fragments and buried them across the lands. Your pet could dig them up!", thanks: "The key is whole again! Please take the Griffin Feather Crown.", hint: "Riddle tip: everyone calls you by it.", need: ["fragment-1", "fragment-2", "fragment-3"], item: "griffin-crown", points: 50 },
 ];
 export type Item = Position & { id: string; zone: ZoneId; name: string; icon: string };
@@ -218,8 +218,10 @@ export const ITEMS: Item[] = [
   { id: "acorn-1", zone: "meadow", x: 8, y: 15, name: "Golden Acorn", icon: "🌰" },
   { id: "acorn-2", zone: "wood", x: 20, y: 3, name: "Golden Acorn", icon: "🌰" },
   { id: "acorn-3", zone: "ravine", x: 5, y: 8, name: "Golden Acorn", icon: "🌰" },
-  { id: "bell", zone: "ravine", x: 19, y: 3, name: "Rocco's Silver Bell", icon: "🔔" },
+  { id: "bell", zone: "ravine", x: 20, y: 6, name: "Rocco's Silver Bell", icon: "🔔" },
 ];
+/** Rocco's silver bell only appears once Monere has spoken to him. */
+export const itemVisible = (s: AdventureState, it: Item) => it.id !== "bell" || s.met.includes("rocco");
 export type Dig = Position & { id: string; zone: ZoneId; item?: string; points: number };
 export const DIGS: Dig[] = [
   { id: "m-coins", zone: "meadow", x: 5, y: 17, points: 10 }, { id: "m-frag", zone: "meadow", x: 19, y: 15, item: "fragment-1", points: 0 },
@@ -263,7 +265,7 @@ export type Interaction = { kind: "scroll" | "gate" | "portal" | "npc" | "item" 
 export function interactionHere(s: AdventureState): Interaction | null {
   if (!s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
   const g = gateHere(s); if (g) return { kind: "gate", label: "Answer riddle", icon: "❓" };
-  const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
+  const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && itemVisible(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
   const n = NPCS.find(n => n.zone === s.zone && near(s, n)); if (n) return { kind: "npc", id: n.id, label: `Talk to ${n.name.split(" ")[0]}`, icon: n.icon };
   const d = DIGS.find(d => d.zone === s.zone && near(s, d) && !s.dug.includes(d.id)); if (d) return { kind: "dig", id: d.id, label: "Pet, dig here!", icon: "🐾" };
   if (s.zone === "wood" && near(s, BELL)) return { kind: "bell", label: "Ring the frog bell", icon: "🛎️" };

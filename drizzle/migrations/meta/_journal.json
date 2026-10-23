@@ -393,6 +393,13 @@
       "when": 1792780351885,
       "tag": "0055_griffin_acorns_across_lands",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1792780682978,
+      "tag": "0056_griffin_bell_after_rocco",
+      "breakpoints": true
     }
   ]
 }
