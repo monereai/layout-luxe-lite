@@ -48,6 +48,7 @@ export function TreasureGame() {
   const [sound, setSound] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [side, setSide] = useState<SideZoneId | null>(null);
+  const [travelling, setTravelling] = useState(false);
   const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
@@ -107,6 +108,36 @@ export function TreasureGame() {
   }, [state.x, state.y, state.duel, state.zone, blocked]);
 
   async function run(action: Parameters<typeof game.act>[0]) { setBusy(true); try { return await game.act(action); } catch { return null; } finally { setBusy(false); } }
+  const landOpen = (id: ZoneId) => { const i = ZONES.findIndex(z => z.id === id); return i === 0 || state.gates.includes(ZONES[i - 1]!.id); };
+  function walkNear(cur: AdventureState, at: { x: number; y: number }): AdventureState | null {
+    if (near(cur, at)) return cur;
+    const options = [[0, 1], [0, -1], [1, 0], [-1, 0]].map(([dx, dy]) => worldPath(cur, { x: at.x + dx!, y: at.y + dy! })).filter((p): p is NonNullable<typeof p> => !!p).sort((a, b) => a.length - b.length);
+    const path = options[0]; if (!path) return null;
+    for (const p of path) { game.move(p); cur = { ...cur, ...p }; }
+    return cur;
+  }
+  /** Travels to an unlocked land through the real portals, so every step is validated like normal walking. */
+  async function journey(target: ZoneId, gateTo?: SideZoneId) {
+    if (!landOpen(target) || travelling) return;
+    setTravelling(true); setPanel(null); setSide(null);
+    try {
+      let cur: AdventureState = state;
+      for (let hop = 0; hop < 6 && cur.zone !== target; hop++) {
+        const ci = ZONES.findIndex(z => z.id === cur.zone), ti = ZONES.findIndex(z => z.id === target);
+        const nextZone = ZONES[ci + (ti > ci ? 1 : -1)]!.id;
+        const portal = PORTALS[cur.zone].find(p => p.target === nextZone);
+        const at = portal && walkNear(cur, portal); if (!portal || !at) { setNotice("Monere can't find a clear path there yet."); return; }
+        const next = await game.act({ action: "portal", id: nextZone }); if (!next || next.zone === cur.zone) { setNotice("That path is still blocked."); return; }
+        cur = next;
+      }
+      if (gateTo) {
+        const g = ELEMENTAL_GATES.find(g => g.target === gateTo)!;
+        if (!walkNear(cur, g.at)) { setNotice(`Monere can't reach the ${g.name} from here.`); return; }
+        if (!canOpenGate(orchard.energy)) { setNotice(`The ${g.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it.`); return; }
+        playSound("success.mp3", 0.5); setSide(gateTo);
+      } else setNotice(`Welcome to ${ZONES.find(z => z.id === target)?.name}!`);
+    } finally { setTravelling(false); }
+  }
   async function interact() {
     if (blocked) return;
     if (gate) { if (!canOpenGate(orchard.energy)) { setNotice(`The ${gate.name} is sealed. Monere needs ${ENERGY_GATE_COST} Energy to open it — harvest an Energy Tree!`); return; } playSound("success.mp3", 0.5); setSide(gate.target); return; }
