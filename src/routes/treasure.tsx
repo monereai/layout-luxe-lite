@@ -6,6 +6,7 @@ import { TreasureConstructionGate } from "@/components/treasure/TreasureConstruc
 import { DailyDilemmaModal } from "@/components/DailyDilemmaModal";
 import { usePaymentReturn } from "@/hooks/usePaymentReturn";
 import { TREASURE_MAINTENANCE } from "@/lib/treasureGate";
+import { useTreasureAccess } from "@/hooks/useTreasureAccess";
 
 export const Route = createFileRoute("/treasure")({
   staticData: { sitemap: !TREASURE_MAINTENANCE },
@@ -22,14 +23,15 @@ export const Route = createFileRoute("/treasure")({
   component: AdventureHome,
 });
 function AdventureHome() {
+  const { allowed, checking } = useTreasureAccess();
   usePaymentReturn();
   const { dilemma } = Route.useSearch();
   const [open, setOpen] = useState(false);
-  useEffect(() => { if (!TREASURE_MAINTENANCE && dilemma === 1) setOpen(true); }, [dilemma]);
+  useEffect(() => { if (allowed && dilemma === 1) setOpen(true); }, [dilemma, allowed]);
   return (
     <AppShell adventure>
-      {TREASURE_MAINTENANCE ? <TreasureConstructionGate /> : <TreasureGame />}
-      {!TREASURE_MAINTENANCE && <DailyDilemmaModal open={open} onOpenChange={setOpen} />}
+      {checking ? <p role="status" className="text-center text-muted-foreground">Checking adventure access…</p> : allowed ? <TreasureGame /> : <TreasureConstructionGate />}
+      {allowed && <DailyDilemmaModal open={open} onOpenChange={setOpen} />}
     </AppShell>
   );
 }

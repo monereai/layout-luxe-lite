@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TREASURE_MAINTENANCE, visibleAdventureNavigation } from "@/lib/treasureGate";
+import { isTreasureTester, TREASURE_MAINTENANCE, visibleAdventureNavigation } from "@/lib/treasureGate";
 
 describe("Temporary adventure closure", () => {
   const navigation = [{ to: "/" }, { to: "/treasure" }, { to: "/shop" }, { to: "/pet-shop" }];
@@ -15,5 +15,18 @@ describe("Temporary adventure closure", () => {
   it("preserves the original navigation for reopening", () => {
     expect(visibleAdventureNavigation(navigation, false)).toEqual(navigation);
     expect(navigation.map(item => item.to)).toContain("/treasure");
+  });
+  it("allows Carl's verified protected account during maintenance", () => {
+    expect(isTreasureTester("carlhillyard@icloud.com", ["admin"])).toBe(true);
+    expect(visibleAdventureNavigation(navigation, true, true)).toEqual(navigation);
+  });
+  it("does not allow another admin or tester account", () => {
+    expect(isTreasureTester("qa@example.com", ["admin", "tester"])).toBe(false);
+  });
+  it("does not trust Carl's email without a protected role", () => {
+    expect(isTreasureTester("carlhillyard@icloud.com", ["user"])).toBe(false);
+  });
+  it("keeps guests locked out", () => {
+    expect(isTreasureTester(undefined, [])).toBe(false);
   });
 });
