@@ -13,10 +13,6 @@ import { SHOP_ITEMS, COMBINATIONS_BY_VALUE, buy, buyCombination, combinationPric
 import { signSrc, useLang } from "@/lib/i18n";
 import { COMBINATION_FAMILIES, hasCombinationArt } from "@/lib/shop-combinations";
 import { MonereStore } from "@/components/MonereStore";
-import stormViking from "@/assets/combinations/storm-viking.png";
-import partyStar from "@/assets/combinations/party-star.png";
-import galaxyVoyager from "@/assets/combinations/galaxy-voyager.png";
-import dapperPirate from "@/assets/combinations/dapper-pirate.png";
 import { SpaceStationPreview } from "@/components/SpaceStationPreview";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -45,10 +41,10 @@ const CATS: { id: ShopCategory; label: string; icon: typeof Award }[] = [
 ];
 
 const COMBINATION_PICTURES: Record<string, string> = {
-  "viking-storm-boots": stormViking,
-  "party-flame-sliders": partyStar,
-  "halo-galaxy-rocket": galaxyVoyager,
-  "tophat-pirate-rain": dapperPirate,
+  "viking-storm-boots": "/monere/looks/combo-viking-storm-boots/0.webp",
+  "party-flame-sliders": "/monere/looks/combo-party-flame-sliders/0.webp",
+  "halo-galaxy-rocket": "/monere/looks/combo-halo-galaxy-rocket/0.webp",
+  "tophat-pirate-rain": "/monere/looks/combo-tophat-pirate-rain/0.webp",
 };
 
 const CLOTHING_BUTTON_CLASS = "mt-auto h-auto min-h-8 w-full whitespace-normal px-2 py-2 text-center leading-tight";
