@@ -231,6 +231,42 @@ export type Database = {
         }
         Relationships: []
       }
+      orchard_maze_rounds: {
+        Row: {
+          collected_energy: number
+          expelled: boolean
+          gained: number
+          id: string
+          settled_at: string | null
+          started_at: string
+          tree: string
+          user_id: string
+          world_zone: string
+        }
+        Insert: {
+          collected_energy?: number
+          expelled?: boolean
+          gained?: number
+          id?: string
+          settled_at?: string | null
+          started_at?: string
+          tree: string
+          user_id: string
+          world_zone: string
+        }
+        Update: {
+          collected_energy?: number
+          expelled?: boolean
+          gained?: number
+          id?: string
+          settled_at?: string | null
+          started_at?: string
+          tree?: string
+          user_id?: string
+          world_zone?: string
+        }
+        Relationships: []
+      }
       organization_codes: {
         Row: {
           code: string
@@ -612,6 +648,17 @@ export type Database = {
       is_premium: { Args: { check_env: string }; Returns: boolean }
       is_sandbox_admin: { Args: never; Returns: boolean }
       orchard_harvest: { Args: { p_tree: string }; Returns: Json }
+      orchard_maze_settle: {
+        Args: {
+          p_energy: number
+          p_expelled: boolean
+          p_round: string
+          p_ticks: number
+          p_user: string
+        }
+        Returns: Json
+      }
+      orchard_maze_start: { Args: { p_tree: string }; Returns: Json }
       pet_action: { Args: { p_action: string; p_id: string }; Returns: Json }
       property_action: {
         Args: { p_action: string; p_id: string }
