@@ -1,3 +1,6 @@
+# Private Griffin testing access
+- [ ] Allow only Carl's server-verified signed-in account through the closure, restore its game navigation, and verify allowed/denied access without changing his game progress.
+
 # Temporary adventure closure
 - [x] Hide Treasure Hunt navigation and show a localized construction modal on direct visits without mounting gameplay or changing saves.
 - [x] Verified desktop/phone closure, hidden drawer navigation, loaded Monere picture, dashboard return, no gameplay/extra dilemma and unchanged guest save; 49 focused tests pass and preview build OK. Game code retained; not published.
