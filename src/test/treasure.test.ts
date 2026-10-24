@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, type AdventureState } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, DIG_ENERGY, DIGS, type AdventureState } from "@/lib/treasure";
 import { PETS, petButtonState } from "@/lib/pets";
 
 const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
