@@ -34,7 +34,7 @@ export function useAdventure() {
       let raw: unknown = null; try { raw = JSON.parse(localStorage.getItem(GUEST_KEY) ?? "null"); } catch { raw = null; }
       const parsed = parseAdventure(raw);
       const next = validRiddles((raw as { riddles?: unknown } | null)?.riddles) ? parsed : { ...parsed, riddles: randomRiddles() };
-      update(raw ? next : { ...next, huntSpots: drawHuntSpots(() => Math.random() / 3) });
+      update(raw ? next : { ...next, huntSpots: drawHuntSpots(Math.random, [], ["meadow"]) });
       setRevision(v => v + 1); setLoaded(true);
     }
   }, [user?.id, ready]);
