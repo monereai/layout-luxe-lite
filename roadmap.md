@@ -1,4 +1,10 @@
+# Meadow gardener quest and Lair rumble
+- [x] Vernon the Gardener asks Monere to find three magic seed packets in the Meadow; seeds appear only after talking to him and the reward uses the shared WOW delivery message. Migration 0063 owns placement and the one-time reward.
+- [x] Solving Razor's final duel riddle rumbles the lair with a one-second camera shake and falling rock debris before the victory celebration; reduced-motion players skip the shake.
+- [x] All 352 tests pass; fresh security scan shows only the two expected shop-catalogue notes and no critical issues. Published to monereai.com.
+
 # Active player animation fix
+
 - [x] Active WorldCanvas cycles generated standing/walking poses every 120ms, applies moving-only three-pixel bounce, and uses 1.5x Energy-gated sprint; tile collision helpers unchanged.
 - [x] Guest preview verifies movement, sprint Energy drain/zero-Energy fallback, immediate position/inventory/door reload saves and direct HUD/Razor Stripe actions. All 351 tests pass; preview build OK. Authenticated Energy spending uses the unchanged atomic path; not retested this turn. Carl untouched.
 
