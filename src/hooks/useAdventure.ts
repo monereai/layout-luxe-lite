@@ -7,6 +7,7 @@ import { adventureAction } from "@/lib/treasure.functions";
 import { applyAdventure, initialAdventure, parseAdventure, randomRiddles, validRiddles, type AdventureAction, type AdventureState, type Position } from "@/lib/treasure";
 import { loadPets } from "@/lib/pets";
 import { playSound } from "@/lib/audio";
+import { drawHuntSpots } from "@/lib/chapter-hunts";
 
 const GUEST_KEY = "monere-griffin-guest-v1";
 export function useAdventure() {
@@ -32,7 +33,8 @@ export function useAdventure() {
       // New guest playthroughs draw their own riddles and answer order.
       let raw: unknown = null; try { raw = JSON.parse(localStorage.getItem(GUEST_KEY) ?? "null"); } catch { raw = null; }
       const parsed = parseAdventure(raw);
-      update(validRiddles((raw as { riddles?: unknown } | null)?.riddles) ? parsed : { ...parsed, riddles: randomRiddles() });
+      const next = validRiddles((raw as { riddles?: unknown } | null)?.riddles) ? parsed : { ...parsed, riddles: randomRiddles() };
+      update(raw ? next : { ...next, huntSpots: drawHuntSpots(() => Math.random() / 3) });
       setRevision(v => v + 1); setLoaded(true);
     }
   }, [user?.id, ready]);

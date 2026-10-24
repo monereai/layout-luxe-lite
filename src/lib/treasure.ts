@@ -1,9 +1,10 @@
+import { HUNT_POOL, drawHuntSpots, validHuntSpots } from "./chapter-hunts";
 // The Rescue of the Golden Griffin — pure rules shared by the browser and mirrored in SQL (treasure_v5_action).
 export type ZoneId = "meadow" | "wood" | "ravine" | "lair";
 export type Position = { x: number; y: number };
 export type Gear = "lantern" | "boots" | "goggles";
 export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean;
-  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[] };
+  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[]; huntSpots?: number[] | null };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
 export const ZONES: { id: ZoneId; name: string; subtitle: string; icon: string }[] = [
@@ -141,7 +142,7 @@ export function duelLanding(s: AdventureState, lastLanding: string, blocked: boo
 }
 export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
 function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
-  if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles(Math.random, s.riddles) } : s;
+  if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles(Math.random, s.riddles), huntSpots: drawHuntSpots(Math.random, (s.huntSpots ?? []).filter(i => i < 4)).map(i => i < 4 ? i : i % 4) } : s;
   if (s.rescued) return s;
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
   if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && itemVisible(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
@@ -151,7 +152,7 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
     if (a.action === "deliver" && !next.quests.includes(n.id) && n.need.every(i => next.items.includes(i))) next = { ...next, quests: [...next.quests, n.id], gear: n.gear && !next.gear.includes(n.gear) ? [...next.gear, n.gear] : next.gear, items: n.item && !next.items.includes(n.item) ? [...next.items, n.item] : next.items };
     return next;
   }
-  if (a.action === "dig") { const d = DIGS.find(d => d.id === a.id); if (!d || d.zone !== s.zone || !near(s, d) || s.dug.includes(d.id)) return s; return { ...s, dug: [...s.dug, d.id], items: d.item && !s.items.includes(d.item) ? [...s.items, d.item] : s.items }; }
+  if (a.action === "dig") { const d = sessionDigs(s).find(d => d.id === a.id); if (!d || d.zone !== s.zone || !near(s, d) || s.dug.includes(d.id)) return s; return { ...s, dug: [...s.dug, d.id], items: d.item && !s.items.includes(d.item) ? [...s.items, d.item] : s.items }; }
   if (a.action === "bell") return s.zone === "wood" && near(s, BELL) ? { ...s, lily: (s.lily + 1) % 3 } : s;
   if (a.action === "stay") return s.zone === "ravine" && s.x === PLATE_PET.x && s.y === PLATE_PET.y ? { ...s, pet: { ...PLATE_PET } } : s;
   if (a.action === "switch") { if (s.zone !== "ravine" || s.x !== PLATE_HERO.x || s.y !== PLATE_HERO.y || s.pet?.x !== PLATE_PET.x) return s; return { ...s, pet: null, quests: s.quests.includes("vault") ? s.quests : [...s.quests, "vault"], items: s.items.includes(VAULT_RELIC) ? s.items : [...s.items, VAULT_RELIC] }; }
@@ -184,7 +185,7 @@ export function parseAdventure(value: unknown): AdventureState {
   const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
   for (const id of ids) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 36); }
   let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
-    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles() };
+    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles(), huntSpots: validHuntSpots(s["huntSpots"]) };
   const zone = ids.find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
   if (st.zone !== "ravine") st = { ...st, pet: null };
@@ -232,6 +233,17 @@ export const DIGS: Dig[] = [
   { id: "l-frag", zone: "lair", x: 16, y: 16, item: "fragment-3", points: 0 }, { id: "l-coins", zone: "lair", x: 19, y: 13, points: 15 },
 ];
 export const VAULT_RELIC = "relic-sun-stone";
+export function sessionDigs(s: AdventureState): Dig[] {
+  const slots = validHuntSpots(s.huntSpots);
+  if (!slots) return DIGS;
+  const ids = ["m-frag", "r-frag", "l-frag"];
+  return DIGS.map(d => { const index = ids.indexOf(d.id), spot = index >= 0 ? HUNT_POOL[slots[index] ?? -1] : undefined; return spot ? { ...d, zone: spot.zone, x: spot.x, y: spot.y } : d; });
+}
+export function npcClue(s: AdventureState, npc: Npc): string {
+  if (npc.id !== "tilly" || !validHuntSpots(s.huntSpots)) return npc.ask;
+  const hints = (s.huntSpots ?? []).map(i => HUNT_POOL[i]?.clue).filter(Boolean);
+  return `Razor buried my three key fragments ${hints.join("; ")}. Ask your pet to dig them up!`;
+}
 export const TREASURES: Record<string, { name: string; icon: string; lore: string }> = {
   "fragment-1": { name: "Key Fragment I", icon: "🗝️", lore: "One third of Tilly's Ancient Key." },
   "fragment-2": { name: "Key Fragment II", icon: "🗝️", lore: "Still warm from the ravine sun." },
@@ -269,7 +281,7 @@ export function interactionHere(s: AdventureState): Interaction | null {
   const g = gateHere(s); if (g) return { kind: "gate", label: "Answer riddle", icon: "❓" };
   const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && itemVisible(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
   const n = NPCS.find(n => n.zone === s.zone && near(s, n)); if (n) return { kind: "npc", id: n.id, label: `Talk to ${n.name.split(" ")[0]}`, icon: n.icon };
-  const d = DIGS.find(d => d.zone === s.zone && near(s, d) && !s.dug.includes(d.id)); if (d) return { kind: "dig", id: d.id, label: "Pet, dig here!", icon: "🐾" };
+  const d = sessionDigs(s).find(d => d.zone === s.zone && near(s, d) && !s.dug.includes(d.id)); if (d) return { kind: "dig", id: d.id, label: "Pet, dig here!", icon: "🐾" };
   if (s.zone === "wood" && near(s, BELL)) return { kind: "bell", label: "Ring the frog bell", icon: "🛎️" };
   if (s.zone === "ravine" && !s.quests.includes("vault")) {
     if (s.x === PLATE_PET.x && s.y === PLATE_PET.y && !s.pet) return { kind: "stay", label: "Ask pet to wait here", icon: "🐾" };
