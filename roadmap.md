@@ -1,3 +1,6 @@
+# New-area graphics
+- [ ] Match garden and bridge-extension artwork to Meadow and remove the visible join; verify both in the preview.
+
 # Vernon's garden portal
 - [x] Extended Meadow beyond its bridge; returning three seeds unlocks Vernon's new garden land with saved, validated v6 travel.
 - [x] 358 tests pass; isolated guest delivery, garden entry/reload/return pass and database definitions confirm guarded access. Authenticated end-to-end travel remains unverified; Carl's account untouched.
