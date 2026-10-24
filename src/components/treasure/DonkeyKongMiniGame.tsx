@@ -58,7 +58,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
       }
       override update(_time: number, dt: number) {
         if (stopped.current || working || document.hidden) return;
-        if (command.current || direction.current !== "idle") start();
+        if (!started.current && (command.current || direction.current !== "idle")) start();
         if (!started.current) return;
         elapsed += Math.min(dt, GARDEN_TICK_MS);
         if (elapsed < GARDEN_TICK_MS) return;

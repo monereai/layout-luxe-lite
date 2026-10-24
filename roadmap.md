@@ -1,5 +1,5 @@
 # Barrel game startup repair
-- [ ] Reproduce and fix Vernon’s challenge startup; verify movement and jump controls without changing Carl’s account.
+- [x] Add a ready Start action and WASD input to the silently waiting barrel scene; disable competing Phaser keyboard capture. Seventeen focused tests pass; isolated real-preview canvas verifies Start, WASD/touch movement, jump and rolling barrels. Database start function exists; Carl’s data read only, never changed. Authenticated garden entrance was not exercised because access is Carl-only; not published.
 
 # Griffin developer-only access
 - [x] Close the shared maintenance gate; retain verified Carl developer exception and preserve game saves/code.
