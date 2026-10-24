@@ -14,8 +14,9 @@ export const HUNT_POOL: HuntSpot[] = [
   { zone: "ravine", x: 18, y: 18, clue: "among rocks south-east of the ravine bridge" },
   { zone: "ravine", x: 14, y: 16, clue: "east of the ravine bridge" },
 ];
-export function drawHuntSpots(random: () => number = Math.random, previous: number[] = []): number[] {
-  const pool = HUNT_POOL.map((_, i) => i).filter(i => !previous.includes(i));
+export function drawHuntSpots(random: () => number = Math.random, previous: number[] = [], unlocked: readonly string[] = ["meadow", "wood", "ravine"]): number[] {
+  const pool = HUNT_POOL.map((_, i) => i).filter(i => unlocked.includes(HUNT_POOL[i]?.zone ?? "") && !previous.includes(i));
+  if (pool.length < 3) pool.push(...HUNT_POOL.map((_, i) => i).filter(i => unlocked.includes(HUNT_POOL[i]?.zone ?? "") && !pool.includes(i)));
   const result: number[] = [];
   while (result.length < 3 && pool.length) { const index = Math.min(pool.length - 1, Math.max(0, Math.floor(random() * pool.length))); const picked = pool.splice(index, 1)[0]; if (picked !== undefined) result.push(picked); }
   return result;

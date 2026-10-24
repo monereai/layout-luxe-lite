@@ -3,7 +3,8 @@ import Phaser from "phaser";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen, Sun, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { MAZE, MAZE_TICK_MS, cellId, mazeCells, mazeStep, newMaze, powerActive, type MazeDirection } from "@/lib/harvest-maze";
+import { MAZE, MAZE_TICK_MS, mazeWalkable, cellId, mazeCells, mazeStep, newMaze, powerActive, type MazeDirection } from "@/lib/harvest-maze";
+import { advanceAlong, easeVelocity, CORNER_MARGIN } from "@/lib/movement";
 import { playSound } from "@/lib/audio";
 
 /** Browser-only Phaser maze; the server replays the input trace before depositing rewards. */
@@ -30,6 +31,7 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false }: 
     class HarvestScene extends Phaser.Scene {
       player?: Phaser.GameObjects.Image;
       shadows: Phaser.GameObjects.Image[] = [];
+      velocity = 0;
       dots = new Map<number, Phaser.GameObjects.Image>();
       preload() { this.load.image("monere", avatar); }
       create() {
@@ -47,11 +49,26 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false }: 
         if (stopped.current || document.hidden) return;
         if (direction.current !== "idle") started = true;
         if (!started) return;
+        // Render between deterministic checkpoints without changing the replay clock.
+        if (this.player) {
+          const target = { x: state.player.x * 40 + 20, y: state.player.y * 40 + 20 };
+          const distance = Math.hypot(target.x - this.player.x, target.y - this.player.y);
+          this.velocity = easeVelocity(this.velocity, distance > .1 ? 235 : 0, Math.min(dt, 50) / 1000);
+          const p = advanceAlong(this.player, target, this.velocity, Math.min(dt, 50) / 1000);
+          this.player.setPosition(p.x, p.y);
+          const wave = distance > .1 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? Math.sin(_time / 75) : 0;
+          this.player.setDisplaySize(38 * (1 + wave * .025), 38 * (1 - wave * .025)); this.player.setOrigin(.5, .5 + Math.abs(wave) * .045);
+        }
         elapsed += Math.min(dt, MAZE_TICK_MS); if (elapsed < MAZE_TICK_MS) return; elapsed -= MAZE_TICK_MS;
-        const old = state; state = mazeStep(state, direction.current); trace.current.push(direction.current); total.current = state.energy; setSnapshot(state);
+        let intent = direction.current;
+        // Buffer a tight turn until the visual body is close to the corridor centre.
+        const step = { up: [0,-1], down: [0,1], left: [-1,0], right: [1,0], idle: [0,0] }[intent];
+        if (step && !mazeWalkable({ x: state.player.x + (step[0] ?? 0), y: state.player.y + (step[1] ?? 0) })) intent = "idle";
+        if (this.player && Math.hypot(this.player.x - (state.player.x * 40 + 20), this.player.y - (state.player.y * 40 + 20)) > CORNER_MARGIN) intent = "idle";
+        const old = state; state = mazeStep(state, intent); trace.current.push(intent); total.current = state.energy; setSnapshot(state);
         for (const id of state.collected) { this.dots.get(id)?.destroy(); this.dots.delete(id); }
         if (state.energy > old.energy) playSound(state.powerUntil > old.powerUntil ? "success.mp3" : "energy_pickup.mp3", .2);
-        if (this.player) { this.tweens.add({ targets: this.player, x: state.player.x * 40 + 20, y: state.player.y * 40 + 20, duration: 180 }); if (direction.current === "left" || direction.current === "right") this.player.setFlipX(direction.current === "left"); }
+        if (this.player) { if (direction.current === "left" || direction.current === "right") this.player.setFlipX(direction.current === "left"); }
         this.shadows.forEach((c, i) => { const p = state.chasers[i]; if (p) this.tweens.add({ targets: c, x: p.x * 40 + 20, y: p.y * 40 + 20, alpha: powerActive(state) ? .45 : 1, duration: 180 }); });
         if (state.ended || trace.current.length >= 3000) { stopped.current = true; if (state.ended === "expelled") playSound("expulsion.mp3", .5); void depositRef.current(state.ended === "expelled"); }
       }

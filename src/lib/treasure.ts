@@ -142,7 +142,7 @@ export function duelLanding(s: AdventureState, lastLanding: string, blocked: boo
 }
 export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
 function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
-  if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles(Math.random, s.riddles), huntSpots: drawHuntSpots(Math.random, (s.huntSpots ?? []).filter(i => i < 4)).map(i => i < 4 ? i : i % 4) } : s;
+  if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles(Math.random, s.riddles), huntSpots: drawHuntSpots(Math.random, s.huntSpots ?? [], ["meadow"]) } : s;
   if (s.rescued) return s;
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
   if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && itemVisible(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
