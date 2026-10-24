@@ -63,7 +63,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
         if (next.jumps > state.jumps) {
           if (callbacks.current.energy < 5) { setError("Monere needs 5 Energy to jump."); return; }
           working = true; setBusy(true);
-          void callbacks.current.onJump([...trace.current, input]).then(() => { if (alive) { state = next; trace.current.push(input); playSound("success.mp3", .2); setError(null); } }).catch(() => { if (alive) setError("Jump unavailable. Your Energy was not spent."); }).finally(() => { working = false; if (alive) setBusy(false); });
+          void callbacks.current.onJump([...trace.current, input]).then(() => { if (alive) { state = next; trace.current.push(input); setSnapshot(state); this.player?.setPosition(state.x, gardenPlayerY(state)); playSound("success.mp3", .2); setError(null); } }).catch(() => { if (alive) setError("Jump unavailable. Your Energy was not spent."); }).finally(() => { working = false; if (alive) setBusy(false); });
           return;
         }
         if (next.hits > state.hits) playSound("expulsion.mp3", .25);
