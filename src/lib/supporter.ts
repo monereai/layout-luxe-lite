@@ -1,0 +1,1 @@
+export const SUPPORTER_PAYMENT_URL = "https://buy.stripe.com/eVq14p1xofTGge14kUaVa00";
