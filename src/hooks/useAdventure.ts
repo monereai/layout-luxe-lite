@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { usePlan } from "./usePlan";
 import { adventureAction } from "@/lib/treasure.functions";
-import { applyAdventure, initialAdventure, parseAdventure, randomRiddles, validRiddles, type AdventureAction, type AdventureState, type Position } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, randomRiddles, validRiddles, type AdventureAction, type AdventureState, type Position } from "@/lib/treasure";
 import { loadPets } from "@/lib/pets";
 import { playSound } from "@/lib/audio";
 import { drawHuntSpots } from "@/lib/chapter-hunts";

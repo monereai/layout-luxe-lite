@@ -1,7 +1,7 @@
 # Chapter 1 finalization checks
-- [ ] Refine vector acceleration, release friction, buffered corners and safe stamina boost scheduling.
-- [ ] Verify complete saved progression, dynamic hunt continuation and Razor Door completion.
-- [ ] Run all unit/feature tests and isolated browser checks.
+- [x] Refine vector acceleration, release friction, buffered ten-pixel corners and safe stamina boost scheduling with bounded retries.
+- [x] Save accepted progression immediately; verify guest reload, fresh daily targets, preserved equipment/gates and Razor Door completion.
+- [x] All 345 tests across 57 files pass; isolated guest and signed-in QA movement/reload pass, with authenticated Energy 23→21 from sprint then 21→16 from dash and retained after reload. Carl untouched; preview build OK.
 
 # Chapter 1 final upgrades
 - [x] Add fluid validated movement, corner assistance, walking animation, sprint and dash Energy costs; guest and signed-in QA movement/reload checked, 30→23 Energy after two sprint seconds and one dash.
