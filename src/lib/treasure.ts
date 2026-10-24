@@ -244,6 +244,9 @@ export function npcClue(s: AdventureState, npc: Npc): string {
   const hints = (s.huntSpots ?? []).map(i => HUNT_POOL[i]?.clue).filter(Boolean);
   return `Razor buried my three key fragments ${hints.join("; ")}. Ask your pet to dig them up!`;
 }
+export function refreshDailyHunt(s: AdventureState): AdventureState {
+  return { ...s, huntSpots: drawHuntSpots(Math.random, s.huntSpots ?? [], ["meadow", ...(s.gates.includes("meadow") ? ["wood"] : []), ...(s.gates.includes("wood") ? ["ravine"] : [])]), items: s.items.filter(i => !i.startsWith("fragment-")), dug: s.dug.filter(i => !["m-frag", "r-frag", "l-frag"].includes(i)) };
+}
 export const TREASURES: Record<string, { name: string; icon: string; lore: string }> = {
   "fragment-1": { name: "Key Fragment I", icon: "🗝️", lore: "One third of Tilly's Ancient Key." },
   "fragment-2": { name: "Key Fragment II", icon: "🗝️", lore: "Still warm from the ravine sun." },
