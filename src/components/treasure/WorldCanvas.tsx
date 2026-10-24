@@ -90,7 +90,8 @@ export function WorldCanvas(props: Props) {
           if (key === this.lastState && !force) return;
           const changedZone = this.lastState.split(":")[0] !== s.zone || this.lastState.split(":")[1] !== String(live.current.revision);
           this.lastState = key;
-          this.background?.setTexture(s.zone);
+          // Texture dimensions differ; reset the world size on every transition.
+          this.background?.setTexture(s.zone).setDisplaySize(1536, 1536);
           this.cameras.main.setBounds(0, 0, 1536, worldRows(s.zone) * 64);
           const far = this.player && Math.abs(this.player.x - (s.x + .5) * TILE_SIZE) + Math.abs(this.player.y - (s.y + .5) * TILE_SIZE) > TILE_SIZE * 1.5;
           if (changedZone || force || (far && !this.moving)) { this.boostGeneration++; this.turnUntil = 0; this.path = []; this.trail = []; this.direction = { x: 0, y: 0 }; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.target = null; this.velocity = { x: 0, y: 0 }; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
