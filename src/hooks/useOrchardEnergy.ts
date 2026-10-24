@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
+import { usePlan } from "./usePlan";
 import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame } from "@/lib/treasure.functions";
 import { JUMP_COST, GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
@@ -14,6 +15,7 @@ const COOLDOWN = 60_000;
 /** Signed in: Monere's real care Energy (server-capped per tree per day). Guests: a local, display-only bar. */
 export function useOrchardEnergy() {
   const care = useCare(); const client = useQueryClient();
+  const plan = usePlan();
   const start = useServerFn(startOrchardMaze); const settle = useServerFn(settleOrchardMaze); const spend = useServerFn(spendMovementEnergy);
   const gardenStart = useServerFn(startGardenGame), gardenCommit = useServerFn(commitGardenGame);
   const [guest, setGuest] = useState(50);
@@ -85,7 +87,7 @@ export function useOrchardEnergy() {
     const result = await gardenCommit({ data: { round, trace, finish } });
     if (identity.current !== account) throw new Error("Account changed.");
     client.setQueryData(["monere-care", account], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
-    if (finish) { void care.refetch(); void client.invalidateQueries({ queryKey: ["point-credits"] }); }
+    if (finish) { void care.refetch(); void plan.refresh(); }
     return result;
   }
   return { energy, cool, beginMaze, finishMaze, boost, spendDig, beginGarden, gardenAction, guest: !care.user };
