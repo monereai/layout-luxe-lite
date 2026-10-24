@@ -1,12 +1,16 @@
 import { HUNT_POOL, drawHuntSpots, validHuntSpots } from "./chapter-hunts";
 // The Rescue of the Golden Griffin — pure rules shared by the browser and mirrored in SQL (treasure_v5_action).
-export type ZoneId = "meadow" | "wood" | "ravine" | "lair";
+export type ZoneId = "meadow" | "wood" | "ravine" | "lair" | "garden";
 export type Position = { x: number; y: number };
 export type Gear = "lantern" | "boots" | "goggles";
 export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean;
   gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[]; huntSpots?: number[] | null; huntDate?: string };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
+export const GARDEN_PORTAL = { x: 12, y: 28 };
+export const worldRows = (zone: ZoneId) => zone === "meadow" ? 32 : 24;
+export const gardenOpen = (s: AdventureState) => s.quests.includes("vernon");
+export const portalOpen = (s: AdventureState, p: Portal) => p.target === "garden" ? gardenOpen(s) : !p.forward || s.gates.includes(s.zone);
 export const ZONES: { id: ZoneId; name: string; subtitle: string; icon: string }[] = [
   { id: "meadow", name: "Monere's Meadow", subtitle: "Scroll 1 · Where the journey begins.", icon: "🌼" },
   { id: "wood", name: "Lonely Wood", subtitle: "Scroll 2 · Razor fled through these trees.", icon: "🌲" },
@@ -17,16 +21,18 @@ export const SCROLLS: Record<ZoneId, Position & { name: string; lore: string }> 
   meadow: { x: 7, y: 6, name: "Scroll of Courage", lore: "Be strong and courageous — Joshua 1:9." },
   wood: { x: 12, y: 6, name: "Scroll of Friendship", lore: "A friend loves at all times — Proverbs 17:17." },
   ravine: { x: 6, y: 17, name: "Scroll of Trust", lore: "Trust in the Lord with all your heart — Proverbs 3:5." },
+  garden: { x: 12, y: 12, name: "Vernon’s Garden", lore: "From small seeds, kindness grows." },
   lair: { x: 5, y: 15, name: "Scroll of Wisdom", lore: "Wisdom is more precious than rubies — Proverbs 3:15." },
 };
 export const SCROLL_CLUES: Record<ZoneId, string> = {
+  garden: "Explore Vernon’s garden, then return through the southern arch.",
   meadow: "Razor tucked a scroll into the meadow's bushes. Search the greenery closely.",
   wood: "A scroll hides in a hollow log among the trees. Only a close look will reveal it.",
   ravine: "The canyon's scroll lies beneath a pile of rocks. Search carefully on both sides of the bridge.",
   lair: "The last scroll is buried under rubble on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
 };
 /** Landscape prop that conceals each zone's scroll until Monere is close. */
-export const SCROLL_COVERS: Record<ZoneId, string> = { meadow: "🌿", wood: "🪵", ravine: "🪨", lair: "🪨" };
+export const SCROLL_COVERS: Record<ZoneId, string> = { meadow: "🌿", wood: "🪵", ravine: "🪨", lair: "🪨", garden: "🌸" };
 /** Master riddle pool (mirrored in SQL treasure_v5_riddle_answers). `answer` indexes the unshuffled options. */
 export type PoolRiddle = { riddle: string; options: [string, string, string]; answer: number; hint: string };
 export const RIDDLE_POOL: PoolRiddle[] = [
@@ -84,7 +90,8 @@ export const RAZOR: Position = { x: 8, y: 4 };
 export const CAGE: Position = { x: 16, y: 4 };
 export type Portal = Position & { target: ZoneId; arrive: Position; forward: boolean };
 export const PORTALS: Record<ZoneId, Portal[]> = {
-  meadow: [{ x: 21, y: 10, target: "wood", arrive: { x: 3, y: 10 }, forward: true }],
+  meadow: [{ x: 21, y: 10, target: "wood", arrive: { x: 3, y: 10 }, forward: true }, { ...GARDEN_PORTAL, target: "garden", arrive: { x: 12, y: 20 }, forward: false }],
+  garden: [{ x: 12, y: 21, target: "meadow", arrive: { x: 12, y: 27 }, forward: false }],
   wood: [{ x: 2, y: 10, target: "meadow", arrive: { x: 20, y: 10 }, forward: false }, { x: 21, y: 10, target: "ravine", arrive: { x: 3, y: 6 }, forward: true }],
   ravine: [{ x: 2, y: 6, target: "wood", arrive: { x: 20, y: 10 }, forward: false }, { x: 21, y: 17, target: "lair", arrive: { x: 12, y: 19 }, forward: true }],
   lair: [{ x: 12, y: 21, target: "ravine", arrive: { x: 20, y: 17 }, forward: false }],
@@ -92,7 +99,9 @@ export const PORTALS: Record<ZoneId, Portal[]> = {
 export const near = (a: Position, b: Position) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 1;
 export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {}, riddles: defaultRiddles() }); }
 export function walkable(zone: ZoneId, x: number, y: number): boolean {
+  if (zone === "meadow" && Number.isInteger(x) && Number.isInteger(y) && y >= 21 && y <= 29) return y <= 23 ? x >= 11 && x <= 13 : x >= 4 && x <= 19;
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 2 || x > 21 || y < 2 || y > 21) return false;
+  if (zone === "garden") return !((x >= 9 && x <= 14 && y >= 9 && y <= 14) || (x <= 4 && y >= 5 && y <= 16) || (x >= 17 && y <= 5));
   if (zone === "meadow") return y < 21 || (x >= 11 && x <= 13);
   if (zone === "wood") return !((x >= 4 && x <= 8 && y >= 12 && y <= 15) || (x >= 14 && x <= 17 && y >= 12 && y <= 15));
   if (zone === "ravine") return !(y >= 10 && y <= 13 && (x < 10 || x > 13));
@@ -112,7 +121,7 @@ export function canStep(s: AdventureState, x: number, y: number) {
   }
   return true;
 }
-export function canEnter(s: AdventureState, zone: ZoneId) { const i = ZONES.findIndex(z => z.id === zone); return i === 0 || (i > 0 && s.gates.includes(ZONES[i - 1]!.id)); }
+export function canEnter(s: AdventureState, zone: ZoneId) { if (zone === "garden") return gardenOpen(s); const i = ZONES.findIndex(z => z.id === zone); return i === 0 || (i > 0 && s.gates.includes(ZONES[i - 1]!.id)); }
 /** Tap navigation follows the same collision rules as keyboard movement. */
 export function worldPath(s: AdventureState, target: Position): Position[] | null {
   if (!canStep(s, target.x, target.y)) return null;
@@ -131,7 +140,7 @@ export function worldPath(s: AdventureState, target: Position): Position[] | nul
 export type AdventureAction = { action: "status" | "refresh-hunt" | "restart" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
 /** Gate riddle for this zone's exit is answerable once the zone's scroll is found and Monere stands at the gate. */
 export function gateHere(s: AdventureState): ZoneId | null {
-  if (!s.scrolls.includes(s.zone) || s.gates.includes(s.zone)) return null;
+  if (s.zone === "garden" || !s.scrolls.includes(s.zone) || s.gates.includes(s.zone)) return null;
   const at = s.zone === "lair" ? LAIR_DOOR : PORTALS[s.zone].find(p => p.forward);
   return at && near(s, at) ? s.zone : null;
 }
@@ -158,9 +167,9 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "stay") return s.zone === "ravine" && s.x === PLATE_PET.x && s.y === PLATE_PET.y ? { ...s, pet: { ...PLATE_PET } } : s;
   if (a.action === "switch") { if (s.zone !== "ravine" || s.x !== PLATE_HERO.x || s.y !== PLATE_HERO.y || s.pet?.x !== PLATE_PET.x) return s; return { ...s, pet: null, quests: s.quests.includes("vault") ? s.quests : [...s.quests, "vault"], items: s.items.includes(VAULT_RELIC) ? s.items : [...s.items, VAULT_RELIC] }; }
   if (a.action === "call") return { ...s, pet: null };
-  if (a.action === "collect") return !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
+  if (a.action === "collect") return s.zone !== "garden" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
   if (a.action === "answer") return gateHere(s) === a.id && a.x === gateRiddle(s, s.zone).answer ? { ...s, gates: [...s.gates, s.zone] } : s;
-  if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && (!p.forward || s.gates.includes(s.zone)) ? { ...s, zone: p.target, ...p.arrive, pet: null } : s; }
+  if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && portalOpen(s, p) ? { ...s, zone: p.target, ...p.arrive, pet: null } : s; }
   if (a.action === "duel") {
     const tile = duelTileAt(s); if (tile < 0 || tile !== a.x) return s;
     if (tile !== duelRiddle(s).answer) return { ...s, ...DUEL_START };
@@ -169,6 +178,8 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   return s;
 }
 export function questClue(s: AdventureState): string {
+  if (s.zone === "garden") return "Welcome to Vernon’s Garden! Wander among the flowers and return through the southern arch.";
+  if (s.zone === "meadow" && gardenOpen(s)) return "Vernon’s garden is open! Cross the southern bridge and follow the path to the flower portal.";
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
   if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
   if (!s.gates.includes(s.zone)) return s.zone === "lair" ? "Chapter 1 gateway: visit the carved door, then continue exploring the daily hunts." : "Scroll found! Walk to the eastern gate and answer the gatekeeper's riddle.";
@@ -184,13 +195,13 @@ export function parseAdventure(value: unknown): AdventureState {
   const lily = typeof s["lily"] === "number" && [0, 1, 2].includes(s["lily"]) ? s["lily"] : 0;
   const rawPet = s["pet"] as Record<string, unknown> | null | undefined; const pet = rawPet && rawPet["x"] === PLATE_PET.x && rawPet["y"] === PLATE_PET.y ? { ...PLATE_PET } : null;
   const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
-  for (const id of ids) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 36); }
+  for (const id of [...ids, "garden" as const]) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < (worldRows(id) / 4) * 6); }
   let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
     gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles(), huntSpots: validHuntSpots(s["huntSpots"]), ...(typeof s["huntDate"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s["huntDate"]) ? { huntDate: s["huntDate"] } : {}) };
-  const zone = ids.find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
+  const zone = [...ids, "garden" as const].find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
   if (st.zone !== "ravine") st = { ...st, pet: null };
-  return reveal(canStep(st, x, y) ? { ...st, x, y } : { ...st, ...(st.zone === "meadow" ? { x: 10, y: 12 } : PORTALS[ZONES[ZONES.findIndex(z => z.id === st.zone) - 1]!.id].find(p => p.forward)!.arrive) });
+  return reveal(canStep(st, x, y) ? { ...st, x, y } : { ...st, ...(st.zone === "garden" ? { x: 12, y: 20 } : st.zone === "meadow" ? { x: 10, y: 12 } : PORTALS[ZONES[ZONES.findIndex(z => z.id === st.zone) - 1]!.id].find(p => p.forward)!.arrive) });
 }
 
 /** Hot/cold hint for the hidden scroll in the current zone. */
@@ -212,7 +223,7 @@ export const NPCS: Npc[] = [
   { id: "barnaby", zone: "meadow", x: 14, y: 8, name: "Barnaby the Owl", icon: "🦉", ask: "Hoo! The wind blew 3 of my golden feathers across the Meadow and into Lonely Wood. Find them and I'll lend you my Lantern.", thanks: "My feathers! Take this Lantern — it lights the dark cave in Lonely Wood.", hint: "A gatekeeper's riddle tip: the answer keeps time, tick-tock!", need: ["feather-1", "feather-2", "feather-3"], gear: "lantern", points: 30 },
   { id: "pippa", zone: "wood", x: 9, y: 9, name: "Pippa the Squirrel", icon: "🐿️", ask: "I lost 3 golden acorns! One rolled back to the Meadow, one is in the dark cave, and one bounced into Shadow Ravine.", thanks: "All my acorns! These Climbing Boots will get you up any cliff.", hint: "Riddle tip: think of what you grab after a bath.", need: ["acorn-1", "acorn-2", "acorn-3"], gear: "boots", points: 30 },
   { id: "rocco", zone: "ravine", x: 12, y: 4, name: "Rocco the Ram", icon: "🐏", ask: "The wind carried my silver bell all the way to Monere's Meadow. Now that I've told you where it landed, fetch it back for me?", thanks: "Ding-ding! Here are my Goggles of Truth — they show what is hidden.", hint: "Riddle tip: you tap on the answer to type.", need: ["bell"], gear: "goggles", points: 30 },
-  { id: "vernon", zone: "meadow", x: 11, y: 19, name: "Vernon the Gardener", icon: "👨‍🌾", ask: "Oh dear, Razor scattered my 3 packets of magic seeds beyond the Meadow! Look for one in Lonely Wood, one in Shadow Ravine, and one in Razor's Lair. Could you bring them back for my flower bed?", thanks: "Splendid! My flower bed will bloom beautifully. Take these points for your trouble, young lion.", hint: "Riddle tip: patience grows the best answers.", need: ["seed-1", "seed-2", "seed-3"], points: 40 },
+  { id: "vernon", zone: "meadow", x: 11, y: 19, name: "Vernon the Gardener", icon: "👨‍🌾", ask: "Oh dear, Razor scattered my 3 packets of magic seeds beyond the Meadow! Look for one in Lonely Wood, one in Shadow Ravine, and one in Razor's Lair. Could you bring them back for my flower bed?", thanks: "Splendid! My flower bed will bloom beautifully. Take these points for your trouble, young lion. Cross the bridge behind me and follow the southern path to the flower portal — it leads to my garden!", hint: "Riddle tip: patience grows the best answers.", need: ["seed-1", "seed-2", "seed-3"], points: 40 },
   { id: "tilly", zone: "lair", x: 17, y: 19, name: "Tilly the Tortoise", icon: "🐢", ask: "Razor broke my Ancient Key into 3 fragments and buried them across the lands. Your pet could dig them up!", thanks: "The key is whole again! Please take the Griffin Feather Crown.", hint: "Riddle tip: everyone calls you by it.", need: ["fragment-1", "fragment-2", "fragment-3"], item: "griffin-crown", points: 50 },
 ];
 export type Item = Position & { id: string; zone: ZoneId; name: string; icon: string };
@@ -280,14 +291,14 @@ export const isTrap = (x: number, y: number) => TRAPS.some(t => t.x === x && t.y
 /** Fog of war: 6×6 chunks of 4×4 tiles; Monere uncovers his chunk and its neighbours. */
 export function reveal(s: AdventureState): AdventureState {
   const cx = Math.floor(s.x / 4), cy = Math.floor(s.y / 4); const seen = new Set(s.fog[s.zone] ?? []); const before = seen.size;
-  for (let i = Math.max(0, cx - 1); i <= Math.min(5, cx + 1); i++) for (let j = Math.max(0, cy - 1); j <= Math.min(5, cy + 1); j++) seen.add(j * 6 + i);
+  for (let i = Math.max(0, cx - 1); i <= Math.min(5, cx + 1); i++) for (let j = Math.max(0, cy - 1); j <= Math.min(worldRows(s.zone) / 4 - 1, cy + 1); j++) seen.add(j * 6 + i);
   return seen.size === before && s.fog[s.zone] ? s : { ...s, fog: { ...s.fog, [s.zone]: [...seen] } };
 }
 export const isRevealed = (s: AdventureState, zone: ZoneId, x: number, y: number) => (s.fog[zone] ?? []).includes(Math.floor(y / 4) * 6 + Math.floor(x / 4));
 export type Interaction = { kind: "scroll" | "gate" | "portal" | "npc" | "item" | "dig" | "bell" | "stay" | "switch"; id?: string; label: string; icon: string };
 /** The single thing Monere can do where he stands, in priority order. */
 export function interactionHere(s: AdventureState): Interaction | null {
-  if (!s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
+  if (s.zone !== "garden" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
   const g = gateHere(s); if (g) return { kind: "gate", label: "Answer riddle", icon: "❓" };
   const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && itemVisible(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
   const n = NPCS.find(n => n.zone === s.zone && near(s, n)); if (n) return { kind: "npc", id: n.id, label: `Talk to ${n.name.split(" ")[0]}`, icon: n.icon };
@@ -297,7 +308,7 @@ export function interactionHere(s: AdventureState): Interaction | null {
     if (s.x === PLATE_PET.x && s.y === PLATE_PET.y && !s.pet) return { kind: "stay", label: "Ask pet to wait here", icon: "🐾" };
     if (s.x === PLATE_HERO.x && s.y === PLATE_HERO.y && s.pet) return { kind: "switch", label: "Press the plate", icon: "⚖️" };
   }
-  const p = PORTALS[s.zone].find(p => near(s, p)); if (p) return { kind: "portal", id: p.target, label: "Enter portal", icon: "🌀" };
+  const p = PORTALS[s.zone].find(p => near(s, p)); if (p) return { kind: "portal", id: p.target, label: p.target === "garden" ? "Enter Vernon’s Garden" : "Enter portal", icon: "🌀" };
   return null;
 }
 export type SideQuest = { id: string; title: string; giver: string; progress: number; total: number; done: boolean; reward: string };
