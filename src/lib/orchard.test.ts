@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable } from "./orchard";
+import { FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable, takeGuestMazeEntry } from "./orchard";
 import { walkable, ZONES } from "./treasure";
 
 describe("energy orchards", () => {
@@ -14,6 +14,22 @@ describe("energy orchards", () => {
       expect(walkable(z.id, tree!.at.x, tree!.at.y)).toBe(true);
     }
     expect(MAP_TREES.map(t => t.id).every(id => TREE_IDS.includes(id))).toBe(true);
+  });
+});
+
+describe("free maze entry limit", () => {
+  const fakeStorage = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) }; };
+  it("allows exactly 2 guest entries per UTC day, then refuses", () => {
+    const s = fakeStorage();
+    expect(takeGuestMazeEntry("2026-10-24", s)).toBe(true);
+    expect(takeGuestMazeEntry("2026-10-24", s)).toBe(true);
+    expect(takeGuestMazeEntry("2026-10-24", s)).toBe(false);
+    expect(FREE_MAZE_ENTRIES_PER_DAY).toBe(2);
+  });
+  it("resets on a new UTC day", () => {
+    const s = fakeStorage();
+    takeGuestMazeEntry("2026-10-24", s); takeGuestMazeEntry("2026-10-24", s);
+    expect(takeGuestMazeEntry("2026-10-25", s)).toBe(true);
   });
 });
 

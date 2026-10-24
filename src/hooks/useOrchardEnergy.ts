@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
 import { startOrchardMaze, settleOrchardMaze } from "@/lib/treasure.functions";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
-import { type TreeId } from "@/lib/orchard";
+import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
 
 const GUEST_KEY = "monere-orchard-guest-energy";
 const COOLDOWN = 60_000;
@@ -19,6 +19,7 @@ export function useOrchardEnergy() {
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
   async function beginMaze(id: TreeId) {
     if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
+    if (!care.user && !takeGuestMazeEntry(new Date().toISOString().slice(0, 10))) throw new Error("Free players can enter the Energy maze twice a day. Sign in with Monere Plus to harvest without limits!");
     return care.user ? (await start({ data: { tree: id } })).id : "guest";
   }
   async function finishMaze(id: TreeId, round: string, trace: MazeDirection[]) {
