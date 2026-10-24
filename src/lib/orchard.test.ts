@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable } from "./orchard";
+import { FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable, takeGuestMazeEntry } from "./orchard";
 import { walkable, ZONES } from "./treasure";
 
 describe("energy orchards", () => {
