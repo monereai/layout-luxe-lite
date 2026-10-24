@@ -23,7 +23,7 @@ describe("Protected replay operation", () => {
     const supabase = client();
     const result = await handler({ data: { action: "restart" }, context: { userId: "isolated", supabase } });
     expect(supabase.rpc).toHaveBeenCalledExactlyOnceWith("treasure_restart");
-    expect(result).toEqual({ state: initialAdventure(), points: 0, griffin: false });
+    expect(result).toEqual({ state: { ...initialAdventure(), huntSpots: null }, points: 0, griffin: false });
   });
   it("denies non-testers without resetting anything", async () => {
     mocks.isTester.mockReturnValue(false);

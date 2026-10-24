@@ -5,7 +5,8 @@ const complete = (): AdventureState => ({ ...initialAdventure(), zone: "lair", x
 describe("Explicit quest restart", () => {
   it("fully resets position, inventory and quest progress", () => {
     const next = applyAdventure(complete(), { action: "restart" });
-    expect({ ...next, riddles: [] }).toEqual({ ...initialAdventure(), riddles: [] });
+    expect({ ...next, riddles: [], huntSpots: null }).toEqual({ ...initialAdventure(), riddles: [], huntSpots: null });
+    expect(new Set(next.huntSpots).size).toBe(3);
     expect([next.zone, next.x, next.y]).toEqual(["meadow", 10, 12]);
     expect(validRiddles(next.riddles)).not.toBeNull();
   });

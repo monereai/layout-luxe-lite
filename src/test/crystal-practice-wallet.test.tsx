@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ start: vi.fn(), settle: vi.fn(), refetch: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
-vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: mocks.start, settleOrchardMaze: mocks.settle }));
+vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: mocks.start, settleOrchardMaze: mocks.settle, spendMovementEnergy: vi.fn() }));
 vi.mock("@/hooks/useCare", () => ({ useCare: () => ({ user: { id: "isolated" }, data: { energy: 42 }, refetch: mocks.refetch }) }));
 import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
 afterEach(cleanup);
