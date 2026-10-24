@@ -1,3 +1,7 @@
+# Vernon by the bridge
+- [x] Vernon the Gardener stands 10% larger beside the Meadow bridge on the north bank, clear of every item, seed, dig and hunt spot; migration 0064 moves his server-verified talk/deliver spot to the same tile.
+- [x] Guest and signed-in QA browsers walk to the bridge, open his seed quest with no server refusal, and the meadow build stays clean.
+
 # Meadow gardener quest and Lair rumble
 - [x] Vernon the Gardener asks Monere to find three magic seed packets in the Meadow; seeds appear only after talking to him and the reward uses the shared WOW delivery message. Migration 0063 owns placement and the one-time reward.
 - [x] Solving Razor's final duel riddle rumbles the lair with a one-second camera shake and falling rock debris before the victory celebration; reduced-motion players skip the shake.
