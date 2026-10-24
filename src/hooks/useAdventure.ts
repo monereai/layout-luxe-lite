@@ -25,7 +25,7 @@ export function useAdventure() {
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const generation = useRef(0);
   const resetting = useRef(false);
-  function update(next: AdventureState) { current.current = next; setState(next); saveAdventure(next, user?.id); }
+  function update(next: AdventureState) { current.current = next; saveAdventure(next, user?.id); setState(next); }
   useEffect(() => {
     generation.current++; steps.current = []; queue.current = Promise.resolve(); setLoaded(false);
     if (!ready) return;

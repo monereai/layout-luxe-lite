@@ -1,3 +1,7 @@
+# Active player animation fix
+- [ ] Cycle standing/walking poses every 120ms, moving-only three-pixel bounce, and 1.5x Energy-gated sprint without changing tile collisions.
+- [ ] Verify immediate position/inventory/door saves and direct HUD/Razor support links in the preview; run regression tests.
+
 # Chapter 1 finalization checks
 - [x] Refine vector acceleration, release friction, buffered ten-pixel corners and safe stamina boost scheduling with bounded retries.
 - [x] Save accepted progression immediately; verify guest reload, fresh daily targets, preserved equipment/gates and Razor Door completion.

@@ -1,11 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { HUNT_POOL, drawHuntSpots, validHuntSpots } from "./chapter-hunts";
-import { advanceAlong, easeVelocity, easeVector, slideDirection, cornerTurn, boostRetryDelay, SPRINT_MULTIPLIER, SPRINT_ENERGY_PER_SECOND, DASH_ENERGY } from "./movement";
+import { advanceAlong, easeVelocity, easeVector, slideDirection, cornerTurn, boostRetryDelay, walkPose, walkBounce, sprintActive, SPRINT_MULTIPLIER, SPRINT_ENERGY_PER_SECOND, DASH_ENERGY } from "./movement";
 import { saveAdventure, loadGuestAdventure, adventureStorageKey } from "./adventure-storage";
 import { initialAdventure, parseAdventure, sessionDigs, canStep, worldPath, applyAdventure } from "./treasure";
 import { saveHarvestRecord } from "./harvest-records";
 describe("Chapter 1 rules", () => {
-  it("sprint is exactly 1.7 times walking speed", () => expect(advanceAlong({x:0,y:0},{x:1000,y:0},100 * SPRINT_MULTIPLIER,1).x).toBeCloseTo(170));
+  it("sprint is exactly 1.5 times walking speed", () => expect(advanceAlong({x:0,y:0},{x:1000,y:0},100 * SPRINT_MULTIPLIER,1).x).toBeCloseTo(150));
+  it("advances walking poses every 120ms and returns to standing when idle", () => { expect([0,119,120,240,360,480].map(t=>walkPose(t,true))).toEqual([0,0,1,2,3,0]); expect(walkPose(360,false)).toBe(0); });
+  it("bounces exactly three pixels at 12 radians per second only while moving", () => { expect(walkBounce(Math.PI/24,true)).toBeCloseTo(3); expect(walkBounce(Math.PI/8,true)).toBeCloseTo(-3); expect(walkBounce(Math.PI/24,false)).toBe(0); });
+  it("requires Shift, positive Energy and stamina, and a paid sprint interval", () => { expect(sprintActive(true,true,2,100,1000,500)).toBe(true); expect(sprintActive(true,true,0,100,1000,500)).toBe(false); expect(sprintActive(false,true,2,100,1000,500)).toBe(false); expect(sprintActive(true,true,2,0,1000,500)).toBe(false); expect(sprintActive(true,true,2,100,1000,1000)).toBe(false); });
   it("sprint costs one Energy per second", () => expect(SPRINT_ENERGY_PER_SECOND).toBe(1));
   it("dash costs five Energy", () => expect(DASH_ENERGY).toBe(5));
   it("accelerates and slows without overshooting", () => { const speed=easeVelocity(0,100,.1); expect(speed).toBeGreaterThan(0); expect(speed).toBeLessThan(100); expect(easeVelocity(speed,0,.1)).toBeLessThan(speed); expect(advanceAlong({x:0,y:0},{x:5,y:0},100,1)).toEqual({x:5,y:0}); });
