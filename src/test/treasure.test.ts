@@ -178,9 +178,9 @@ d4("expanded griffin world", () => {
     e4(R4(I4(), "meadow", 10, 12)).toBe(true); e4(R4(I4(), "meadow", 21, 2)).toBe(false);
     e4(P4(JSON.parse(JSON.stringify(dug))).dug).toEqual(["m-coins"]);
   });
-  i4("every pet dig costs 25 Energy", () => {
+  i4("every pet dig rewards 25 Energy", () => {
     e4(DIG_ENERGY).toBe(25);
-    e4(DIGS.length).toBeGreaterThan(0); // all digs share the one cost — coin digs and fragment digs alike
+    e4(DIGS.length).toBeGreaterThan(0); // all digs share the one reward — coin digs and fragment digs alike
   });
 });
 
