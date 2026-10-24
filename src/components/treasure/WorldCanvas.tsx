@@ -11,7 +11,7 @@ import { PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZ
 
 import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, walkPose, walkBounce, walkHop, sprintActive, SPRINT_MULTIPLIER, stepStamina, STAMINA_MAX } from "@/lib/movement";
 
-export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
+export type WorldEffect = { kind: "gust" | "victory" | "rumble" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
 type Props = { state: AdventureState; revision: number; avatar: string; energy: number; controls: MutableRefObject<WorldControls | null>; onBoost: (mode: "sprint" | "dash") => Promise<boolean>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void; onNotice: (message: string) => void; effect: WorldEffect };
 export function WorldCanvas(props: Props) {
@@ -83,7 +83,7 @@ export function WorldCanvas(props: Props) {
         sync(force = false) {
           const s = live.current.state; const key = `${s.zone}:${live.current.revision}:${s.x},${s.y}:${s.scrolls.join()}:${s.gates.join()}:${s.duel}:${s.rescued}:${s.gear.join()}:${s.items.length}:${s.dug.length}:${s.lily}:${s.pet ? 1 : 0}:${s.quests.length}:${s.met.length}:${(s.fog[s.zone] ?? []).length}`;
           const fx = live.current.effect;
-          if (fx.n !== this.effectN) { this.effectN = fx.n; if (fx.kind === "gust") this.gust(); if (fx.kind === "victory") this.victory(); }
+          if (fx.n !== this.effectN) { this.effectN = fx.n; if (fx.kind === "gust") this.gust(); if (fx.kind === "victory") this.victory(); if (fx.kind === "rumble") this.rumble(); }
           if (key === this.lastState && !force) return;
           const changedZone = this.lastState.split(":")[0] !== s.zone || this.lastState.split(":")[1] !== String(live.current.revision);
           this.lastState = key;
@@ -210,6 +210,11 @@ export function WorldCanvas(props: Props) {
           const p = this.player; if (!p) return;
           for (let i = 0; i < 10; i++) { const w = this.add.text(p.x + (Math.random() - .5) * 80, p.y - 40 + Math.random() * 60, "〰", { fontSize: "28px" }).setDepth(12).setAlpha(.9); this.tweens.add({ targets: w, y: w.y + 90, alpha: 0, duration: 600 + Math.random() * 300, onComplete: () => w.destroy() }); }
           this.cameras.main.shake(250, .004);
+        }
+        rumble() {
+          if (this.reduced) return;
+          this.cameras.main.shake(700, .012);
+          for (let i = 0; i < 14; i++) { const d = this.add.text((CAGE.x + .5) * 64 + (Math.random() - .5) * 360, (CAGE.y + .5) * 64 - 40 + (Math.random() - .5) * 160, ["🪨", "✦", "•"][i % 3]!, { fontSize: "18px" }).setDepth(12); this.tweens.add({ targets: d, y: d.y + 110 + Math.random() * 90, angle: Math.random() * 180 - 90, alpha: 0, duration: 650 + Math.random() * 400, onComplete: () => d.destroy() }); }
         }
         victory() {
           const hy = this.scenery.find(o => (o as Phaser.GameObjects.Image).texture?.key === "razor") as Phaser.GameObjects.Image | undefined;
