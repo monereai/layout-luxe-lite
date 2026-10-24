@@ -1,0 +1,16 @@
+import { renderHook, act, cleanup } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+const mocks = vi.hoisted(() => ({ user: null as {id:string} | null, energy: 10, spend: vi.fn() }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
+vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: vi.fn(), settleOrchardMaze: vi.fn(), spendMovementEnergy: mocks.spend }));
+vi.mock("@/hooks/useCare", () => ({ useCare: () => ({ user: mocks.user, data: { energy: mocks.energy }, refetch: vi.fn() }) }));
+import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
+beforeEach(() => { localStorage.clear(); mocks.user = null; mocks.energy = 10; mocks.spend.mockReset(); });
+afterEach(cleanup);
+function setup() { const client=new QueryClient(); client.setQueryData(["monere-care","qa"],{energy:10}); const wrapper=({children}:{children:ReactNode})=><QueryClientProvider client={client}>{children}</QueryClientProvider>; return {hook:renderHook(useOrchardEnergy,{wrapper}),client}; }
+it("consecutive guest dash and sprint deduct exactly six Energy before reload", async () => { localStorage.setItem("monere-orchard-guest-energy","10"); const {hook}=setup(); await act(async()=>{ expect(await hook.result.current.boost("dash")).toBe(true); expect(await hook.result.current.boost("sprint")).toBe(true); }); expect(hook.result.current.energy).toBe(4); expect(localStorage.getItem("monere-orchard-guest-energy")).toBe("4"); hook.unmount(); const restored=setup(); expect(restored.hook.result.current.energy).toBe(4); });
+it("cannot dash below five Energy or overdraw consecutive guest spending", async()=>{localStorage.setItem("monere-orchard-guest-energy","5"); const {hook}=setup(); await act(async()=>{expect(await hook.result.current.boost("dash")).toBe(true); expect(await hook.result.current.boost("sprint")).toBe(false);}); expect(hook.result.current.energy).toBe(0);});
+it("serializes authenticated boosts and updates only the verified balance",async()=>{mocks.user={id:"qa"}; let resolve: (value:{allowed:boolean;energy:number})=>void=()=>{}; mocks.spend.mockImplementation(()=>new Promise(r=>{resolve=r;})); const {hook,client}=setup(); await act(async()=>{const first=hook.result.current.boost("dash"); expect(await hook.result.current.boost("sprint")).toBe(false); resolve({allowed:true,energy:5}); expect(await first).toBe(true);}); expect(mocks.spend).toHaveBeenCalledTimes(1); expect(client.getQueryData(["monere-care","qa"])).toEqual({energy:5});});
+it("zero account Energy never requests a paid boost",async()=>{mocks.user={id:"qa"}; mocks.energy=0; const {hook}=setup(); await act(async()=>expect(await hook.result.current.boost("sprint")).toBe(false)); expect(mocks.spend).not.toHaveBeenCalled();});

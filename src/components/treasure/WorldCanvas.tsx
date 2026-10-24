@@ -34,7 +34,7 @@ export function WorldCanvas(props: Props) {
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
         velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0;
-        effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
+        pathTarget = false; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
         preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
@@ -240,6 +240,7 @@ export function WorldCanvas(props: Props) {
             const slide = buffered ?? slideDirection(s, { x: dx, y: dy }, (x, y) => canStep(s, x, y));
             const next = slide ? { x: s.x + slide.x, y: s.y + slide.y } : dx || dy ? undefined : this.path.shift();
             if (next && canStep(s, next.x, next.y)) {
+              this.pathTarget = !dx && !dy && !buffered;
               this.target = { x: (next.x + .5) * 64, y: (next.y + .5) * 64 };
               this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
             }
@@ -247,7 +248,7 @@ export function WorldCanvas(props: Props) {
           const wantsSprint = !this.paused && !!this.target && !!keys?.['SHIFT']?.isDown;
           if (wantsSprint && this.time.now >= this.sprintUntil) void this.boost("sprint");
           const multiplier = this.time.now < this.dashUntil ? 3 : wantsSprint && this.time.now < this.sprintUntil ? SPRINT_MULTIPLIER : 1;
-          const intent = !this.paused && (dx || dy || this.path.length || this.time.now < this.turnUntil);
+          const intent = !this.paused && (dx || dy || this.pathTarget || this.path.length || this.time.now < this.turnUntil);
           const speed = this.target && intent ? 305 * multiplier : 0;
           const offset = this.target ? { x: this.target.x - p.x, y: this.target.y - p.y } : { x: 0, y: 0 };
           const distance = Math.hypot(offset.x, offset.y);
