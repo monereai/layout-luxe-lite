@@ -118,8 +118,7 @@ export function WorldCanvas(props: Props) {
             const cave = this.add.circle(20 * 64, 4.5 * 64, 150, 0x05040a, lit ? .18 : .55).setDepth(2); this.scenery.push(cave);
             if (lit) { const glow = this.add.circle(20 * 64, 4 * 64, 150, color("--points"), .12).setDepth(2); this.scenery.push(glow); } else text({ x: 19, y: 4 }, "🌑", 40);
             label({ x: 19, y: 6 }, lit ? "Lit cave" : "Dark cave · needs Lantern");
-            // River with moving lily pads.
-            const water = rect(2, 17, 20, 2, color("--energy"), .38, 1); if (!this.reduced) this.tweens.add({ targets: water, alpha: .26, duration: 1400, yoyo: true, repeat: -1 });
+            // Moving lily pads on the river (no flat colour overlay).
             [17, 18].forEach((row, r) => { const pad = text({ x: LILY_ROWS[r]![s.lily]!, y: row }, "🪷", 46); const prev = LILY_ROWS[r]![(s.lily + 2) % 3]!; if (!this.reduced && this.lastLily !== s.lily) { pad.x = (prev + .5) * 64; this.tweens.add({ targets: pad, x: (LILY_ROWS[r]![s.lily]! + .5) * 64, duration: 700, ease: "Sine.easeInOut" }); } });
             this.lastLily = s.lily; text(BELL, "🛎️", 36); label(BELL, "Frog bell");
           }
