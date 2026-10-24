@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { HUNT_POOL, drawHuntSpots, validHuntSpots } from "./chapter-hunts";
 import { advanceAlong, easeVelocity, slideDirection, SPRINT_MULTIPLIER, SPRINT_ENERGY_PER_SECOND, DASH_ENERGY } from "./movement";
-import { initialAdventure, parseAdventure, sessionDigs, canStep, worldPath } from "./treasure";
+import { initialAdventure, parseAdventure, sessionDigs, canStep, worldPath, applyAdventure } from "./treasure";
 import { saveHarvestRecord } from "./harvest-records";
 describe("Chapter 1 rules", () => {
   it("sprint is exactly 1.5 times walking speed", () => expect(advanceAlong({x:0,y:0},{x:1000,y:0},100 * SPRINT_MULTIPLIER,1).x).toBe(150));
@@ -13,4 +13,5 @@ describe("Chapter 1 rules", () => {
   it("draws exactly three unique spots in unlocked zones", () => { const result=drawHuntSpots(()=>.99,[],["meadow"]); expect(result).toHaveLength(3); expect(new Set(result).size).toBe(3); expect(result.every(i=>HUNT_POOL[i]?.zone==="meadow")).toBe(true); });
   it("keeps active fragment positions through a storage round trip", () => { const state={...initialAdventure(),huntSpots:[1,5,10]}; const restored=parseAdventure(JSON.parse(JSON.stringify(state))); expect(restored.huntSpots).toEqual([1,5,10]); expect(sessionDigs(restored).filter(d=>d.item?.startsWith("fragment")).map(d=>[d.zone,d.x,d.y])).toEqual([["meadow",8,16],["wood",12,8],["ravine",18,18]]); expect(validHuntSpots([1,1,2])).toBeNull(); });
   it("retains the highest harvest record without sharing accounts", () => { const store=new Map<string,string>(); const storage={getItem:(k:string)=>store.get(k)??null,setItem:(k:string,v:string)=>{store.set(k,v);}}; expect(saveHarvestRecord("qa",24,storage)).toBe(24); expect(saveHarvestRecord("qa",8,storage)).toBe(24); expect(saveHarvestRecord("guest",2,storage)).toBe(2); });
+  it("daily hunt refresh preserves unlocked gates and equipment", () => { const state={...initialAdventure(),zone:"lair" as const,x:12,y:11,gates:["meadow","wood","ravine"] as const,gear:["lantern","boots","goggles"] as const,items:["bell","fragment-1"],dug:["m-frag","m-coins"]}; const next=applyAdventure({...state,gates:[...state.gates],gear:[...state.gear]},{action:"refresh-hunt"}); expect(next.gates).toEqual(["meadow","wood","ravine"]); expect(next.gear).toEqual(["lantern","boots","goggles"]); expect(next.items).toEqual(["bell"]); expect(next.dug).toEqual(["m-coins"]); expect(new Set(next.huntSpots).size).toBe(3); expect(applyAdventure(next,{action:"refresh-hunt"})).toBe(next); });
 });

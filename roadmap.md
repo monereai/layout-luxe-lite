@@ -1,8 +1,9 @@
 # Chapter 1 final upgrades
-- [ ] Add fluid validated movement, corner assistance, walking animation, sprint and dash Energy costs.
-- [ ] Save secure session-randomized hunt locations and matching clues without breaking quest dependencies.
-- [ ] Show Chapter 1 completion at Razor's door, daily roaming CTA and external Stripe supporter link.
-- [ ] Persist hunt state and local high scores; verify rules and browser flows with isolated data.
+- [x] Add fluid validated movement, corner assistance, walking animation, sprint and dash Energy costs; guest and signed-in QA movement/reload checked, 30→23 Energy after two sprint seconds and one dash.
+- [x] Save secure session-randomized key-fragment hunt locations and matching NPC clues without breaking gear dependencies; old progressed saves retain placements, daily door continuation draws from unlocked lands.
+- [x] Show Chapter 1 completion at Razor's door and Continue Daily Hunts; guest browser verifies modal and maze continuation at 644×818.
+- [ ] External Stripe supporter link — price creation was declined; no payment link exists. Support controls honestly show unavailable status, with no shop substitution.
+- [x] Persist hunt state and account-keyed local harvest best scores; browser verifies guest placements/position and signed-in Energy/position after reload. Carl untouched.
 
 # Orchard harvesting maze
 - [x] Confirmed the user's requests were refused by the daily harvest ledger, not tester access. Exact authenticated Crystal daily-limit refusal now opens no-reward practice; other denials remain blocked. Twenty tests pass and isolated browser verifies real practice maze/closure at both entrances with unchanged Energy. Real signed-in replay remains unverified; Carl's account untouched.
