@@ -456,6 +456,13 @@
       "when": 1792860047547,
       "tag": "0064_vernon_by_the_bridge",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1792860387398,
+      "tag": "0065_pet_digs_cost_energy",
+      "breakpoints": true
     }
   ]
 }
