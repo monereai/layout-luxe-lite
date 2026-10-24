@@ -1,3 +1,7 @@
+# Vernon's garden portal
+- [x] Extended Meadow beyond its bridge; returning three seeds unlocks Vernon's new garden land with saved, validated v6 travel.
+- [x] 358 tests pass; isolated guest delivery, garden entry/reload/return pass and database definitions confirm guarded access. Authenticated end-to-end travel remains unverified; Carl's account untouched.
+
 # Vernon's scattered seeds
 - [x] Place exactly three visible seeds in Lonely Wood, Shadow Ravine and Razor's Lair, with no Vernon-talk prerequisite; migration 0066 mirrors pickups and keeps saved collections/rewards.
 - [x] All 28 focused adventure checks pass; isolated guest browser collected each seed and delivered all three to Vernon with saved completion. Signed-in collection was not retested; Carl's account untouched.

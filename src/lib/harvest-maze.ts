@@ -9,7 +9,7 @@ export const MAZE_TICK_MS = 200;
 export const POWER_MS = 5000;
 export const DOT_ENERGY = 2, SUN_ENERGY = 10;
 export const MAZE_START = { x: 7, y: 11 };
-export const MAP_ENTRANCES: Record<ZoneId, Position> = { meadow: { x: 10, y: 12 }, wood: { x: 3, y: 10 }, ravine: { x: 3, y: 6 }, lair: { x: 12, y: 19 } };
+export const MAP_ENTRANCES: Record<ZoneId, Position> = { garden: { x: 12, y: 20 }, meadow: { x: 10, y: 12 }, wood: { x: 3, y: 10 }, ravine: { x: 3, y: 6 }, lair: { x: 12, y: 19 } };
 export type MazeDirection = "up" | "down" | "left" | "right" | "idle";
 export type MazeState = { player: Position; chasers: Position[]; collected: number[]; energy: number; tick: number; powerUntil: number; ended: "expelled" | "complete" | null };
 export const cellId = (p: Position) => p.y * 15 + p.x;
