@@ -7,7 +7,7 @@ import lair from "@/assets/treasure/lair.jpg";
 import razor from "@/assets/treasure/razor.png";
 import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
-import { PORTALS, SCROLLS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
+import { PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
 
 export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
@@ -84,10 +84,14 @@ export function WorldCanvas(props: Props) {
           const color = (token: string) => P.Display.Color.HexStringToColor(hex(token)).color;
           const at = (p: Position) => [(p.x + .5) * 64, (p.y + .5) * 64] as const;
           const text = (p: Position, t: string, size = 36) => { const o = this.add.text(...at(p), t, { fontSize: `${size}px` }).setOrigin(.5).setDepth(3); this.scenery.push(o); return o; };
-          if (!s.scrolls.includes(s.zone) && Math.abs(SCROLLS[s.zone].x - s.x) + Math.abs(SCROLLS[s.zone].y - s.y) <= SCROLL_REVEAL) {
-            const scroll = text(SCROLLS[s.zone], "📜", 44).setInteractive({ useHandCursor: true });
-            scroll.on("pointerdown", (_: unknown, __: unknown, ___: unknown, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (!this.paused) this.seek(SCROLLS[s.zone]); });
-            if (!this.reduced) this.tweens.add({ targets: scroll, y: scroll.y - 6, alpha: .75, duration: 1200, yoyo: true, repeat: -1 });
+          if (!s.scrolls.includes(s.zone)) {
+            // The scroll hides inside a landscape prop; it only peeks out when Monere is right beside it.
+            text(SCROLLS[s.zone], SCROLL_COVERS[s.zone], 52);
+            if (Math.abs(SCROLLS[s.zone].x - s.x) + Math.abs(SCROLLS[s.zone].y - s.y) <= SCROLL_REVEAL) {
+              const scroll = text(SCROLLS[s.zone], "📜", 30).setDepth(4).setInteractive({ useHandCursor: true });
+              scroll.setPosition(at(SCROLLS[s.zone])[0] + 12, at(SCROLLS[s.zone])[1] - 14);
+              scroll.on("pointerdown", (_: unknown, __: unknown, ___: unknown, event: Phaser.Types.Input.EventData) => { event.stopPropagation(); if (!this.paused) this.seek(SCROLLS[s.zone]); });
+            }
           }
           const rect = (x: number, y: number, w: number, h: number, c: number, a: number, depth = 1) => { const r = this.add.rectangle(x * 64 + w * 32, y * 64 + h * 32, w * 64, h * 64, c, a).setDepth(depth); this.scenery.push(r); return r; };
           // Map text labels are intentionally disabled: hints live in the quest log and on-tap messages.

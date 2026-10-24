@@ -19,11 +19,13 @@ export const SCROLLS: Record<ZoneId, Position & { name: string; lore: string }> 
   lair: { x: 5, y: 15, name: "Scroll of Wisdom", lore: "Wisdom is more precious than rubies — Proverbs 3:15." },
 };
 export const SCROLL_CLUES: Record<ZoneId, string> = {
-  meadow: "Razor hid a scroll somewhere in the meadow — it's invisible until you're right beside it.",
-  wood: "A secret sleeps where the trees stand tall. Only a close look will reveal it.",
-  ravine: "The canyon keeps its scroll well hidden. Search carefully on both sides of the bridge.",
-  lair: "The last scroll rests on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
+  meadow: "Razor tucked a scroll into the meadow's bushes. Search the greenery closely.",
+  wood: "A scroll hides in a hollow log among the trees. Only a close look will reveal it.",
+  ravine: "The canyon's scroll lies beneath a pile of rocks. Search carefully on both sides of the bridge.",
+  lair: "The last scroll is buried under rubble on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
 };
+/** Landscape prop that conceals each zone's scroll until Monere is close. */
+export const SCROLL_COVERS: Record<ZoneId, string> = { meadow: "🌿", wood: "🪵", ravine: "🪨", lair: "🪨" };
 /** Master riddle pool (mirrored in SQL treasure_v5_riddle_answers). `answer` indexes the unshuffled options. */
 export type PoolRiddle = { riddle: string; options: [string, string, string]; answer: number; hint: string };
 export const RIDDLE_POOL: PoolRiddle[] = [
