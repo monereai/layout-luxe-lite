@@ -4,12 +4,12 @@ import { isTreasureTester, TREASURE_MAINTENANCE, visibleAdventureNavigation } fr
 describe("Adventure access gate", () => {
   const navigation = [{ to: "/" }, { to: "/treasure" }, { to: "/shop" }, { to: "/pet-shop" }];
 
-  it("opens public adventure access", () => {
-    expect(TREASURE_MAINTENANCE).toBe(false);
+  it("closes public adventure access for developer testing", () => {
+    expect(TREASURE_MAINTENANCE).toBe(true);
   });
 
-  it("keeps the adventure in dashboard navigation for everyone", () => {
-    expect(visibleAdventureNavigation(navigation)).toEqual(navigation);
+  it("removes the adventure from visitor navigation without hiding the shops", () => {
+    expect(visibleAdventureNavigation(navigation)).toEqual([{ to: "/" }, { to: "/shop" }, { to: "/pet-shop" }]);
   });
 
   it("preserves the original navigation for reopening", () => {

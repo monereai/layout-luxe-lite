@@ -1,3 +1,7 @@
+# Griffin developer-only access
+- [x] Close the shared maintenance gate; retain verified Carl developer exception and preserve game saves/code.
+- [x] Visitor browser sees Under Construction with no gameplay or public game link; nine access/server checks pass and build OK. Carl’s existing verified developer exception preserved; his account was not used for QA.
+
 # Vernon’s garden mini-game
 - [x] Build isolated lazy Phaser ladder/barrel overlay on garden entry; world input paused and touch controls included.
 - [x] Verify atomic 5-Energy jumps and one-time +50 Energy/+20 Coins via authenticated replay on separate QA; repeat settlement returns zero; completion reads back through UI after reload.
