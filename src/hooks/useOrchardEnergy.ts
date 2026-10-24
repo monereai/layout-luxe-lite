@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
 import { startOrchardMaze, settleOrchardMaze } from "@/lib/treasure.functions";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
-import { type TreeId } from "@/lib/orchard";
+import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
 
 const GUEST_KEY = "monere-orchard-guest-energy";
 const COOLDOWN = 60_000;
