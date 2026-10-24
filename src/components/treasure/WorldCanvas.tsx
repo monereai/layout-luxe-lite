@@ -9,7 +9,7 @@ import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
 import { PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, sessionDigs, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
 
-import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, walkPose, walkBounce, sprintActive, SPRINT_MULTIPLIER, stepStamina, STAMINA_MAX } from "@/lib/movement";
+import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, walkPose, walkBounce, walkHop, sprintActive, SPRINT_MULTIPLIER, stepStamina, STAMINA_MAX } from "@/lib/movement";
 
 export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
