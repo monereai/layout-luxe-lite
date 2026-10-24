@@ -135,7 +135,7 @@ export function TreasureGame() {
       settled.current = key; setBusy(true);
       try {
         const step = state.duel; const next = await game.act({ action: "duel", x: tile });
-        if (next.duel > step) { playSound("success.mp3", 0.6); if (next.rescued) { tone([523, 659, 784, 1046]); setEffect(e => ({ kind: "victory", n: e.n + 1 })); setCelebrate(true); } else setNotice(`Correct! Riddle ${next.duel + 1} of 3…`); }
+        if (next.duel > step) { playSound("success.mp3", 0.6); if (next.rescued) { tone([523, 659, 784, 1046]); setEffect(e => ({ kind: "rumble", n: e.n + 1 })); setCelebrate(true); window.setTimeout(() => setEffect(e => ({ kind: "victory", n: e.n + 1 })), 850); } else setNotice(`Correct! Riddle ${next.duel + 1} of 3…`); }
         else { tone([330, 247]); setEffect(e => ({ kind: "gust", n: e.n + 1 })); setNotice("Whoosh! Razor's gust blows you back to the start mark. Try again!"); }
       } catch { /* hook reports */ } finally { setBusy(false); }
     }, 400);
