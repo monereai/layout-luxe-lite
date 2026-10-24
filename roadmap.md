@@ -1,3 +1,6 @@
+# Seed pathway visibility
+- [ ] Move all three seeds to clear non-green ground outside Meadow, mirror validated pickup positions and verify collection.
+
 # New-area graphics
 - [x] Match garden and bridge-extension artwork to Meadow, feather the join and reset texture dimensions on zone changes; guest delivery/entry/reload/return screenshots pass, 31 adventure tests pass and preview build OK.
 
