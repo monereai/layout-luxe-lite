@@ -421,6 +421,13 @@
       "when": 1792851927507,
       "tag": "0059_chapter_one_hunts_and_movement",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1792852431063,
+      "tag": "0060_chapter_one_replayable_hunts",
+      "breakpoints": true
     }
   ]
 }
