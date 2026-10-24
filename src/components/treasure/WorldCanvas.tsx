@@ -9,7 +9,7 @@ import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
 import { PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, sessionDigs, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
 
-import { advanceAlong, easeVelocity, slideDirection, SPRINT_MULTIPLIER } from "@/lib/movement";
+import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, SPRINT_MULTIPLIER } from "@/lib/movement";
 
 export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
@@ -33,8 +33,8 @@ export function WorldCanvas(props: Props) {
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
-        velocity = 0; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; lastTap = { key: "", time: 0 };
-        effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
+        velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0;
+        pathTarget = false; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
         preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
@@ -50,15 +50,18 @@ export function WorldCanvas(props: Props) {
           this.cameras.main.startFollow(this.player, false, .12, .12);
           this.keys = this.input.keyboard?.addKeys("UP,DOWN,LEFT,RIGHT,W,A,S,D,E,SPACE,SHIFT") as Record<string, Phaser.Input.Keyboard.Key> | undefined;
           this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-            if (event.repeat || this.paused || !["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(event.key)) return;
+            const key = event.key.toLowerCase();
+            const input = ({ arrowup: { x: 0, y: -1 }, w: { x: 0, y: -1 }, arrowdown: { x: 0, y: 1 }, s: { x: 0, y: 1 }, arrowleft: { x: -1, y: 0 }, a: { x: -1, y: 0 }, arrowright: { x: 1, y: 0 }, d: { x: 1, y: 0 } } as Record<string, Position>)[key];
+            if (event.repeat || this.paused || !input) return;
             const now = this.time.now;
-            if (this.lastTap.key === event.key && now - this.lastTap.time < 280) void this.boost("dash");
-            this.lastTap = { key: event.key, time: now };
+            this.turnInput = input; this.turnUntil = now + 200;
+            if (this.lastTap.key === key && now - this.lastTap.time < 280) void this.boost("dash");
+            this.lastTap = { key, time: now };
           });
           this.input.keyboard?.on("keydown-E", () => { if (!this.paused) live.current.onInteract(); });
           this.input.keyboard?.on("keydown-SPACE", () => { if (!this.paused) live.current.onInteract(); });
           this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => { if (!this.paused) this.seek({ x: Math.floor(pointer.worldX / 64), y: Math.floor(pointer.worldY / 64) }); });
-          live.current.controls.current = { direction: (x, y) => { this.direction = { x, y }; this.path = []; }, release: () => { this.direction = { x: 0, y: 0 }; }, pause: paused => { this.paused = paused; this.direction = { x: 0, y: 0 }; this.path = []; }, seek: position => this.seek(position) };
+          live.current.controls.current = { direction: (x, y) => { if (this.paused) return; const key = `${x},${y}`, now = this.time.now; if (this.lastTap.key === key && now - this.lastTap.time < 280) void this.boost("dash"); this.lastTap = { key, time: now }; this.turnInput = { x, y }; this.turnUntil = now + 200; this.direction = { x, y }; this.path = []; }, release: () => { this.direction = { x: 0, y: 0 }; }, pause: paused => { this.paused = paused; if (paused) { this.boostGeneration++; this.turnUntil = 0; this.target = null; this.velocity = { x: 0, y: 0 }; const s = live.current.state; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); } this.direction = { x: 0, y: 0 }; this.path = []; }, seek: position => this.seek(position) };
           this.sync(true);
           this.game.events.on(P.Core.Events.BLUR, () => { this.direction = { x: 0, y: 0 }; this.path = []; });
         }
@@ -86,7 +89,7 @@ export function WorldCanvas(props: Props) {
           this.lastState = key;
           this.background?.setTexture(s.zone);
           const far = this.player && Math.abs(this.player.x - (s.x + .5) * TILE_SIZE) + Math.abs(this.player.y - (s.y + .5) * TILE_SIZE) > TILE_SIZE * 1.5;
-          if (changedZone || force || (far && !this.moving)) { this.path = []; this.trail = []; this.direction = { x: 0, y: 0 }; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.target = null; this.velocity = 0; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
+          if (changedZone || force || (far && !this.moving)) { this.boostGeneration++; this.turnUntil = 0; this.path = []; this.trail = []; this.direction = { x: 0, y: 0 }; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.target = null; this.velocity = { x: 0, y: 0 }; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.portals.forEach(p => p.destroy()); this.portals = [];
           this.scenery.forEach(item => item.destroy()); this.scenery = [];
           const hex = (token: string) => { const c = document.createElement("canvas").getContext("2d"); if (!c) return "#888888"; c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#888"; c.fillRect(0, 0, 1, 1); const [r, g, b] = c.getImageData(0, 0, 1, 1).data; return `#${[r, g, b].map(v => (v ?? 0).toString(16).padStart(2, "0")).join("")}`; };
@@ -215,9 +218,11 @@ export function WorldCanvas(props: Props) {
           for (let i = 0; i < 24; i++) { const c = this.add.text((CAGE.x + .5) * 64, (CAGE.y + .5) * 64, ["✨", "⭐", "🎉"][i % 3]!, { fontSize: "26px" }).setDepth(12); this.tweens.add({ targets: c, x: c.x + (Math.random() - .5) * 400, y: c.y + (Math.random() - .5) * 400, alpha: 0, duration: 1400, onComplete: () => c.destroy() }); }
         }
         async boost(mode: "sprint" | "dash") {
-          if (this.boosting || this.paused) return;
+          if (this.boosting || this.paused || this.time.now < this.retryAt[mode]) return;
+          this.retryAt[mode] = this.time.now + boostRetryDelay(mode);
+          const generation = this.boostGeneration;
           this.boosting = true;
-          try { if (await live.current.onBoost(mode)) { if (mode === "dash") this.dashUntil = this.time.now + 220; else this.sprintUntil = this.time.now + 1000; } }
+          try { if (await live.current.onBoost(mode) && generation === this.boostGeneration && !this.paused) { if (mode === "dash") this.dashUntil = this.time.now + 220; else this.sprintUntil = this.time.now + 1000; } }
           catch { /* ordinary movement remains available */ } finally { this.boosting = false; }
         }
         override update(_time: number, delta: number) {
@@ -231,9 +236,11 @@ export function WorldCanvas(props: Props) {
           if (this.paused) { dx = 0; dy = 0; this.path = []; }
           if (!this.target && !this.paused) {
             const s = live.current.state;
-            const slide = slideDirection(s, { x: dx, y: dy }, (x, y) => canStep(s, x, y));
+            const buffered = this.time.now < this.turnUntil ? slideDirection(s, this.turnInput, (x, y) => canStep(s, x, y)) : null;
+            const slide = buffered ?? slideDirection(s, { x: dx, y: dy }, (x, y) => canStep(s, x, y));
             const next = slide ? { x: s.x + slide.x, y: s.y + slide.y } : dx || dy ? undefined : this.path.shift();
             if (next && canStep(s, next.x, next.y)) {
+              this.pathTarget = !dx && !dy && !buffered;
               this.target = { x: (next.x + .5) * 64, y: (next.y + .5) * 64 };
               this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
             }
@@ -241,16 +248,25 @@ export function WorldCanvas(props: Props) {
           const wantsSprint = !this.paused && !!this.target && !!keys?.['SHIFT']?.isDown;
           if (wantsSprint && this.time.now >= this.sprintUntil) void this.boost("sprint");
           const multiplier = this.time.now < this.dashUntil ? 3 : wantsSprint && this.time.now < this.sprintUntil ? SPRINT_MULTIPLIER : 1;
-          this.velocity = easeVelocity(this.velocity, this.target ? (!this.paused && (dx || dy || this.path.length) ? 305 * multiplier : 180) : 0, dt);
+          const intent = !this.paused && (dx || dy || this.pathTarget || this.path.length || this.time.now < this.turnUntil);
+          const speed = this.target && intent ? 305 * multiplier : 0;
+          const offset = this.target ? { x: this.target.x - p.x, y: this.target.y - p.y } : { x: 0, y: 0 };
+          const distance = Math.hypot(offset.x, offset.y);
+          this.velocity = easeVector(this.velocity, distance ? { x: offset.x / distance * speed, y: offset.y / distance * speed } : { x: 0, y: 0 }, dt);
+          if (this.target && this.time.now < this.turnUntil) {
+            const s = live.current.state, at = { ...s, x: Math.floor(this.target.x / 64), y: Math.floor(this.target.y / 64) };
+            if (cornerTurn(p, this.target, this.turnInput, (x, y) => canStep(at, x, y), TILE_SIZE)) this.turnUntil = this.time.now + 200;
+          }
           if (this.target) {
-            const next = advanceAlong(p, this.target, this.velocity, dt); p.setPosition(next.x, next.y);
+            const along = distance ? Math.max(0, (this.velocity.x * offset.x + this.velocity.y * offset.y) / distance) : 0;
+            const next = advanceAlong(p, this.target, along, dt); p.setPosition(next.x, next.y);
             if (Math.hypot(p.x - this.target.x, p.y - this.target.y) < .5) {
               p.setPosition(this.target.x, this.target.y);
               live.current.onMove({ x: Math.floor(this.target.x / 64), y: Math.floor(this.target.y / 64) });
               this.target = null;
             }
           }
-          this.moving = !!this.target;
+          this.moving = !!this.target && Math.hypot(this.velocity.x, this.velocity.y) > 2;
           this.animate();
         }
         animate() {

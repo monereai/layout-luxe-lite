@@ -1,8 +1,13 @@
+# Chapter 1 finalization checks
+- [ ] Refine vector acceleration, release friction, buffered corners and safe stamina boost scheduling.
+- [ ] Verify complete saved progression, dynamic hunt continuation and Razor Door completion.
+- [ ] Run all unit/feature tests and isolated browser checks.
+
 # Chapter 1 final upgrades
 - [x] Add fluid validated movement, corner assistance, walking animation, sprint and dash Energy costs; guest and signed-in QA movement/reload checked, 30→23 Energy after two sprint seconds and one dash.
 - [x] Save secure session-randomized key-fragment hunt locations and matching NPC clues without breaking gear dependencies; old progressed saves retain placements, daily door continuation draws from unlocked lands.
 - [x] Show Chapter 1 completion at Razor's door and Continue Daily Hunts; guest browser verifies modal and maze continuation at 644×818.
-- [ ] External Stripe supporter link — price creation was declined; no payment link exists. Support controls honestly show unavailable status, with no shop substitution.
+- [x] External Stripe supporter link uses the supplied public payment link.
 - [x] Persist hunt state and account-keyed local harvest best scores; browser verifies guest placements/position and signed-in Energy/position after reload. Carl untouched.
 
 # Orchard harvesting maze

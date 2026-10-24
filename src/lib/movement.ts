@@ -5,8 +5,18 @@ export const CORNER_MARGIN = 10;
 export type Vector = { x: number; y: number };
 /** Exponential velocity easing is independent of rendering frame rate. */
 export function easeVelocity(current: number, target: number, seconds: number) {
-  return current + (target - current) * (1 - Math.exp(-Math.max(0, seconds) * (target ? 12 : 18)));
+  const rate = Math.abs(target) > Math.abs(current) ? 12 : 18;
+  return current + (target - current) * (1 - Math.exp(-Math.max(0, seconds) * rate));
 }
+export function easeVector(current: Vector, target: Vector, seconds: number): Vector {
+  return { x: easeVelocity(current.x, target.x, seconds), y: easeVelocity(current.y, target.y, seconds) };
+}
+/** A turn is buffered at a nearby tile edge, never by cutting through a wall. */
+export function cornerTurn(position: Vector, center: Vector, input: Vector, open: (x: number, y: number) => boolean, tileSize: number): Vector | null {
+  if (Math.hypot(position.x - center.x, position.y - center.y) > CORNER_MARGIN) return null;
+  return slideDirection({ x: Math.floor(center.x / tileSize), y: Math.floor(center.y / tileSize) }, input, open);
+}
+export function boostRetryDelay(mode: "sprint" | "dash") { return mode === "sprint" ? 1000 : 500; }
 export function slideDirection(at: Vector, input: Vector, open: (x: number, y: number) => boolean): Vector | null {
   const candidates = input.x ? [{ x: input.x, y: 0 }, ...(input.y ? [{ x: 0, y: input.y }] : [])] : [{ x: 0, y: input.y }];
   return candidates.find(d => (d.x || d.y) && open(at.x + d.x, at.y + d.y)) ?? null;

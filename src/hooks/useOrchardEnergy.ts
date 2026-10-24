@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
@@ -14,8 +14,12 @@ export function useOrchardEnergy() {
   const care = useCare(); const client = useQueryClient();
   const start = useServerFn(startOrchardMaze); const settle = useServerFn(settleOrchardMaze); const spend = useServerFn(spendMovementEnergy);
   const [guest, setGuest] = useState(50);
+  const guestBalance = useRef(50);
+  const spending = useRef(false);
+  const identity = useRef(care.user?.id); identity.current = care.user?.id;
   const [cooling, setCooling] = useState<Record<string, number>>({});
-  useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) setGuest(Math.min(100, Math.max(0, v))); } catch { /* optional */ } }, []);
+  function saveGuest(next: number) { guestBalance.current = next; setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ } }
+  useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) { guestBalance.current = Math.min(100, Math.max(0, v)); setGuest(guestBalance.current); } } catch { /* optional */ } }, []);
   const energy = care.user ? care.data?.energy ?? 0 : guest;
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
   async function beginMaze(id: TreeId) {
@@ -27,8 +31,8 @@ export function useOrchardEnergy() {
     const maze = replayMaze(trace);
     if (round === "practice") return { gained: 0, state: null };
     if (!care.user) {
-      const gained = depositEnergy(guest, maze.energy), next = guest + gained;
-      setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ }
+      const gained = depositEnergy(guestBalance.current, maze.energy), next = guestBalance.current + gained;
+      saveGuest(next);
       setCooling(c => ({ ...c, [id]: Date.now() + COOLDOWN }));
       return { gained, state: null };
     }
@@ -40,13 +44,19 @@ export function useOrchardEnergy() {
   async function boost(mode: "sprint" | "dash") {
     if (!care.user) {
       const cost = mode === "dash" ? DASH_ENERGY : SPRINT_ENERGY_PER_SECOND;
-      if (guest < cost) return false;
-      const next = guest - cost; setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ }
+      if (guestBalance.current < cost) return false;
+      saveGuest(guestBalance.current - cost);
       return true;
     }
-    const result = await spend({ data: { mode } });
-    client.setQueryData(["monere-care", care.user.id], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
-    return result.allowed;
+    if (spending.current || (care.data?.energy ?? 0) < (mode === "dash" ? DASH_ENERGY : SPRINT_ENERGY_PER_SECOND)) return false;
+    spending.current = true;
+    const account = care.user.id;
+    try {
+      const result = await spend({ data: { mode } });
+      if (identity.current !== account) return false;
+      client.setQueryData(["monere-care", account], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
+      return result.allowed;
+    } finally { spending.current = false; }
   }
   return { energy, cool, beginMaze, finishMaze, boost, guest: !care.user };
 }
