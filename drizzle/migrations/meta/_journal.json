@@ -477,6 +477,13 @@
       "when": 1792863320143,
       "tag": "0067_vernon_garden_portal",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1792863949067,
+      "tag": "0068_vernon_seed_pathways",
+      "breakpoints": true
     }
   ]
 }

@@ -235,9 +235,10 @@ export const ITEMS: Item[] = [
   { id: "acorn-2", zone: "wood", x: 20, y: 3, name: "Golden Acorn", icon: "🌰" },
   { id: "acorn-3", zone: "ravine", x: 5, y: 8, name: "Golden Acorn", icon: "🌰" },
   { id: "bell", zone: "meadow", x: 17, y: 17, name: "Rocco's Silver Bell", icon: "🔔" },
-  { id: "seed-1", zone: "wood", x: 7, y: 8, name: "Magic Seed Packet", icon: "🌱" },
-  { id: "seed-2", zone: "ravine", x: 16, y: 8, name: "Magic Seed Packet", icon: "🌱" },
-  { id: "seed-3", zone: "lair", x: 18, y: 18, name: "Magic Seed Packet", icon: "🌱" },
+  // Clear sandy pathways and bare stone, aligned with the bundled landscape art.
+  { id: "seed-1", zone: "wood", x: 11, y: 11, name: "Magic Seed Packet", icon: "🌱" },
+  { id: "seed-2", zone: "ravine", x: 12, y: 8, name: "Magic Seed Packet", icon: "🌱" },
+  { id: "seed-3", zone: "lair", x: 12, y: 18, name: "Magic Seed Packet", icon: "🌱" },
 ];
 /** Rocco's silver bell only appears once Monere has spoken to him. */
 export const itemVisible = (s: AdventureState, it: Item) => it.id === "bell" ? s.met.includes("rocco") : true;
