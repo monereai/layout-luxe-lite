@@ -428,6 +428,13 @@
       "when": 1792852431063,
       "tag": "0060_chapter_one_replayable_hunts",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1792855293560,
+      "tag": "0061_chapter_hunt_fresh_targets",
+      "breakpoints": true
     }
   ]
 }
