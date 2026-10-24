@@ -8,3 +8,5 @@
 - Smooth world movement follows only collision-approved corridor endpoints; authenticated sprint/dash spend Energy atomically before enabling visual speed boosts, and maze animation preserves its deterministic tick trace. Why: animation must not forge travel, Energy or rewards.
 - Save-specific huntSpots select three key-fragment digs from the shared twelve-coordinate pool; SQL generates and validates account placements while existing progressed saves retain their old positions. Why: replayability must not strand gear quests or invalidate saved collections.
 - Harvest best scores are account-keyed local display records, never a source for Energy or account rewards. Why: local persistence must not become a payment or reward authority.
+
+- Continue Daily Hunts refreshes only key-fragment targets once per UTC day at the chapter door and preserves equipment, gates and reward-ledger references. Why: renewed exploration must not replay account rewards.

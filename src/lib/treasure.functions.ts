@@ -22,12 +22,12 @@ export const getTreasureAccess = createServerFn({ method: "POST" })
 
 export const adventureAction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ action: z.enum(["status", "restart", "move", "collect", "answer", "portal", "duel", "pick", "talk", "deliver", "dig", "bell", "stay", "switch", "call", "travel"]), x: z.number().int().optional(), y: z.number().int().optional(), id: z.string().max(60).optional(), steps: z.array(z.object({ x: z.number().int(), y: z.number().int() })).max(32).optional() }))
+  .inputValidator(z.object({ action: z.enum(["status", "refresh-hunt", "restart", "move", "collect", "answer", "portal", "duel", "pick", "talk", "deliver", "dig", "bell", "stay", "switch", "call", "travel"]), x: z.number().int().optional(), y: z.number().int().optional(), id: z.string().max(60).optional(), steps: z.array(z.object({ x: z.number().int(), y: z.number().int() })).max(32).optional() }))
   .handler(async ({ data, context }) => {
     if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) {
       throw new Error("Monere's adventure is temporarily under construction.");
     }
-    const result = data.action === "restart" ? await context.supabase.rpc("treasure_restart") : data.action === "travel"
+    const result = data.action === "refresh-hunt" ? await context.supabase.rpc("treasure_refresh_hunt") : data.action === "restart" ? await context.supabase.rpc("treasure_restart") : data.action === "travel"
       ? await context.supabase.rpc("treasure_v5_travel", { p_steps: data.steps ?? [] })
       : await context.supabase.rpc("treasure_v5_action", { p_action: data.action, ...(data.x !== undefined ? { p_x: data.x } : {}), ...(data.y !== undefined ? { p_y: data.y } : {}), ...(data.id ? { p_id: data.id } : {}) });
     if (result.error) throw new Error(result.error.message);
