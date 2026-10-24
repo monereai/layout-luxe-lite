@@ -482,16 +482,22 @@ export type Database = {
       }
       treasure_saves: {
         Row: {
+          last_dash_at: string | null
+          last_sprint_at: string | null
           state: Json
           updated_at: string
           user_id: string
         }
         Insert: {
+          last_dash_at?: string | null
+          last_sprint_at?: string | null
           state?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
+          last_dash_at?: string | null
+          last_sprint_at?: string | null
           state?: Json
           updated_at?: string
           user_id?: string
@@ -682,6 +688,9 @@ export type Database = {
         }
         Returns: Json
       }
+      treasure_draw_hunt: { Args: { s: Json }; Returns: Json }
+      treasure_hunt_pool: { Args: never; Returns: Json }
+      treasure_movement_boost: { Args: { p_mode: string }; Returns: Json }
       treasure_restart: { Args: never; Returns: Json }
       treasure_travel: { Args: { p_steps: Json }; Returns: Json }
       treasure_v2_action: {
