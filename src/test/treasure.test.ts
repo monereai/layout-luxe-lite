@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, DIG_ENERGY, DIGS, type AdventureState } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, DIG_ENERGY, DIGS, ITEMS, itemVisible, NPCS, type AdventureState } from "@/lib/treasure";
 import { PETS, petButtonState } from "@/lib/pets";
 
 const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
@@ -105,11 +105,27 @@ d4("expanded griffin world", () => {
     s = { ...s, items: [...s.items, "feather-3"] };
     e4(A4(s, { action: "deliver", id: "barnaby" }).gear).toEqual(["lantern"]);
   });
-  i4("Vernon's seeds appear only after talking to him, and 3 seeds complete his quest", () => {
-    const seed = at4({ x: 3, y: 14 });
-    e4(A4(seed, { action: "pick", id: "seed-1" }).items).toEqual([]);
-    e4(A4({ ...seed, met: ["vernon"] }, { action: "pick", id: "seed-1" }).items).toEqual(["seed-1"]);
+  i4("Vernon has exactly 3 seeds in separate lands outside Meadow", () => {
+    const seeds = ITEMS.filter(i => i.id.startsWith("seed-"));
+    e4(seeds).toHaveLength(3);
+    e4(seeds.map(i => i.zone)).toEqual(["wood", "ravine", "lair"]);
+    for (const seed of seeds) {
+      const s = at4({ zone: seed.zone, x: seed.x, y: seed.y, gates: ["meadow", "wood", "ravine"] });
+      e4(C4(s, seed.x, seed.y)).toBe(true);
+      e4(NPCS.some(n => n.zone === seed.zone && n.x === seed.x && n.y === seed.y)).toBe(false);
+      e4(A4(at4({ x: seed.x, y: seed.y }), { action: "pick", id: seed.id }).items).toEqual([]);
+    }
+  });
+  i4("Vernon's seeds are visible and collectable before meeting him", () => {
+    for (const seed of ITEMS.filter(i => i.id.startsWith("seed-"))) {
+      const s = at4({ zone: seed.zone, x: seed.x, y: seed.y, met: [] });
+      e4(itemVisible(s, seed)).toBe(true);
+      e4(A4(s, { action: "pick", id: seed.id }).items).toEqual([seed.id]);
+    }
+  });
+  i4("Vernon's quest still requires all 3 seeds", () => {
     const s = at4({ x: 11, y: 18, items: ["seed-1", "seed-2", "seed-3"] });
+    e4(A4({ ...s, items: ["seed-1", "seed-2"] }, { action: "deliver", id: "vernon" }).quests).toEqual([]);
     e4(A4(s, { action: "deliver", id: "vernon" }).quests).toEqual(["vernon"]);
   });
   i4("dark cave needs the Lantern", () => {

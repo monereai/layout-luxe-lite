@@ -12,3 +12,4 @@
 - Active WorldCanvas drives independent timed walking poses generated from equipped turnaround art, and reads the shared Energy balance before sprinting. Why: directional frames must not masquerade as a walk cycle or allow boosts after Energy runs out.
 
 - Continue Daily Hunts refreshes only key-fragment targets once per UTC day at the chapter door and preserves equipment, gates and reward-ledger references. Why: renewed exploration must not replay account rewards.
+- Visible quest seeds render above the fog layer while collected-item filtering still removes them; pickup locations and prerequisites stay mirrored in authenticated SQL. Why: visible objectives must remain discoverable without bypassing collection validation.
