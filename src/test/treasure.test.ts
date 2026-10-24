@@ -174,3 +174,28 @@ d4("expanded griffin world", () => {
     e4(DIGS.length).toBeGreaterThan(0); // all digs share the one cost — coin digs and fragment digs alike
   });
 });
+
+
+describe("Vernon's garden portal", () => {
+  it("collecting three seeds or talking does not unlock the garden until delivery", () => {
+    const s = at({ x: 12, y: 27, items: ["seed-1", "seed-2", "seed-3"], met: ["vernon"] });
+    expect(applyAdventure(s, { action: "portal", id: "garden" }).zone).toBe("meadow");
+    expect(applyAdventure({ ...s, quests: ["vernon"] }, { action: "portal", id: "garden" }).zone).toBe("garden");
+  });
+  it("delivery unlocks a reachable portal beyond the bridge and preserves return progress", () => {
+    const delivered = applyAdventure(at({ x: 11, y: 18, items: ["seed-1", "seed-2", "seed-3"] }), { action: "deliver", id: "vernon" });
+    const path = worldPath(delivered, { x: 12, y: 27 });
+    expect(path).not.toBeNull();
+    let s = delivered;
+    for (const p of path ?? []) s = applyAdventure(s, { action: "move", ...p });
+    s = applyAdventure(s, { action: "portal", id: "garden" });
+    expect(s).toMatchObject({ zone: "garden", x: 12, y: 20, quests: ["vernon"] });
+    expect(parseAdventure(JSON.parse(JSON.stringify(s)))).toMatchObject({ zone: "garden", quests: ["vernon"] });
+    expect(applyAdventure(s, { action: "portal", id: "meadow" })).toMatchObject({ zone: "meadow", x: 12, y: 27, items: delivered.items });
+  });
+  it("garden scenery and bridge edges cannot be walked through", () => {
+    expect(canStep(at({ zone: "garden", quests: ["vernon"] }), 12, 12)).toBe(false);
+    expect(canStep(at({ x: 12, y: 20 }), 10, 22)).toBe(false);
+    expect(canStep(at({ x: 12, y: 20 }), 12, 22)).toBe(true);
+  });
+});
