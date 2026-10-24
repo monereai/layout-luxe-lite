@@ -7,6 +7,12 @@ export function walkPose(elapsedMs: number, active: boolean) {
 export function walkBounce(timeSeconds: number, moving: boolean) {
   return moving ? Math.sin(timeSeconds * 12) * 3 : 0;
 }
+/** Visible hop with squash on landing and stretch at the top; neutral when idle. */
+export function walkHop(timeSeconds: number, moving: boolean) {
+  if (!moving) return { y: 0, sx: 1, sy: 1 };
+  const h = Math.abs(Math.sin(timeSeconds * 9));
+  return { y: -h * 7, sx: 1 + (1 - h) * 0.06 - h * 0.03, sy: 1 - (1 - h) * 0.06 + h * 0.04 };
+}
 export function sprintActive(shift: boolean, moving: boolean, energy: number, stamina: number, paidUntil: number, now: number) {
   return shift && moving && energy > 0 && stamina > 0 && now < paidUntil;
 }
