@@ -1,5 +1,6 @@
 # Vernon's scattered seeds
-- [ ] Place exactly three visible seeds outside Meadow, mirror pickups in authenticated rules and verify collection and delivery.
+- [x] Place exactly three visible seeds in Lonely Wood, Shadow Ravine and Razor's Lair, with no Vernon-talk prerequisite; migration 0066 mirrors pickups and keeps saved collections/rewards.
+- [x] All 28 focused adventure checks pass; isolated guest browser collected each seed and delivered all three to Vernon with saved completion. Signed-in collection was not retested; Carl's account untouched.
 
 # Vernon by the bridge
 - [x] Vernon the Gardener stands 10% larger beside the Meadow bridge on the north bank, clear of every item, seed, dig and hunt spot; migration 0064 moves his server-verified talk/deliver spot to the same tile.
