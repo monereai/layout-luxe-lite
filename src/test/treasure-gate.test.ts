@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { isTreasureTester, TREASURE_MAINTENANCE, visibleAdventureNavigation } from "@/lib/treasureGate";
 
-describe("Temporary adventure closure", () => {
+describe("Adventure access gate", () => {
   const navigation = [{ to: "/" }, { to: "/treasure" }, { to: "/shop" }, { to: "/pet-shop" }];
 
-  it("keeps public adventure access closed during repairs", () => {
-    expect(TREASURE_MAINTENANCE).toBe(true);
+  it("opens public adventure access", () => {
+    expect(TREASURE_MAINTENANCE).toBe(false);
   });
 
-  it("removes only the adventure from dashboard navigation", () => {
-    expect(visibleAdventureNavigation(navigation).map(item => item.to)).toEqual(["/", "/shop", "/pet-shop"]);
+  it("keeps the adventure in dashboard navigation for everyone", () => {
+    expect(visibleAdventureNavigation(navigation)).toEqual(navigation);
   });
 
   it("preserves the original navigation for reopening", () => {
