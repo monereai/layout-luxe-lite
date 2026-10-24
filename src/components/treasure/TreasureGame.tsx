@@ -194,7 +194,7 @@ export function TreasureGame() {
   }
   async function deliver(n: Npc) {
     const next = await run({ action: "deliver", id: n.id });
-    if (next?.quests.includes(n.id)) { tone([523, 659, 784, 1046]); setNotice(`${n.name}: “${n.thanks}”${game.user ? "" : " Sign in to keep reward points."}`); setNpc(null); }
+    if (next?.quests.includes(n.id)) { tone([523, 659, 784, 1046]); setNotice(`WOW… YOU FOUND MY ITEMS! HERE IS YOUR REWARD 🎁 — ${n.name}: “${n.thanks}”${game.user ? "" : " Sign in to keep reward points."}`); setNpc(null); }
   }
   async function answer(i: number) {
     if (!riddle) return;
