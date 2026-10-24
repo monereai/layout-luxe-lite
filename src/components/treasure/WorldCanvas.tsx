@@ -241,6 +241,7 @@ export function WorldCanvas(props: Props) {
             const next = slide ? { x: s.x + slide.x, y: s.y + slide.y } : dx || dy ? undefined : this.path.shift();
             if (next && canStep(s, next.x, next.y)) {
               this.pathTarget = !dx && !dy && !buffered;
+              if (buffered) this.turnUntil = 0;
               this.target = { x: (next.x + .5) * 64, y: (next.y + .5) * 64 };
               this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
             }
@@ -255,7 +256,8 @@ export function WorldCanvas(props: Props) {
           this.velocity = easeVector(this.velocity, distance ? { x: offset.x / distance * speed, y: offset.y / distance * speed } : { x: 0, y: 0 }, dt);
           if (this.target && this.time.now < this.turnUntil) {
             const s = live.current.state, at = { ...s, x: Math.floor(this.target.x / 64), y: Math.floor(this.target.y / 64) };
-            if (cornerTurn(p, this.target, this.turnInput, (x, y) => canStep(at, x, y), TILE_SIZE)) this.turnUntil = this.time.now + 200;
+            const perpendicular = offset.x ? this.turnInput.y !== 0 : this.turnInput.x !== 0;
+            if (perpendicular && cornerTurn(p, this.target, this.turnInput, (x, y) => canStep(at, x, y), TILE_SIZE)) this.turnUntil = this.time.now + 200;
           }
           if (this.target) {
             const along = distance ? Math.max(0, (this.velocity.x * offset.x + this.velocity.y * offset.y) / distance) : 0;
