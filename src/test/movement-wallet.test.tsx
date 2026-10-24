@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ user: null as {id:string} | null, energy: 10, spend: vi.fn() }));
-vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn, createMiddleware: () => ({ server: (fn: unknown) => fn }) }));
+vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn, createMiddleware: () => ({ server: (fn: unknown) => fn }), createServerFn: () => { const chain = { middleware: () => chain, inputValidator: () => chain, handler: (fn: unknown) => fn, server: (fn: unknown) => fn }; return chain; } }));
 vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: vi.fn(), settleOrchardMaze: vi.fn(), spendMovementEnergy: mocks.spend }));
 vi.mock("@/hooks/useCare", () => ({ useCare: () => ({ user: mocks.user, data: { energy: mocks.energy }, refetch: vi.fn() }) }));
 import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
