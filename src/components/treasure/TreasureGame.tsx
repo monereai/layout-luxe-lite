@@ -187,8 +187,10 @@ export function TreasureGame() {
     if (h.kind === "item") { const it = ITEMS.find(i => i.id === h.id)!; const next = await run({ action: "pick", id: it.id }); if (next?.items.includes(it.id)) { chime(); setNotice(`You found a ${it.name}! ${it.icon}`); } return; }
     if (h.kind === "npc") { const n = NPCS.find(n => n.id === h.id)!; void run({ action: "talk", id: n.id }); setNpc(n); return; }
     if (h.kind === "dig") {
-      const d = sessionDigs(state).find(d => d.id === h.id); if (!d) return; const next = await run({ action: "dig", id: d.id });
-      if (next?.dug.includes(d.id)) { tone([392, 523, 659]); const t = d.item ? TREASURES[d.item] : null; setNotice(t ? `Your pet dug up ${t.name}! ${t.icon}` : game.user ? `Your pet dug up ${d.points} coins! 🪙` : `Your pet dug up ${d.points} coins! 🪙 Sign in to keep them as points.`); }
+      const d = sessionDigs(state).find(d => d.id === h.id); if (!d) return;
+      if (orchard.energy < DIG_ENERGY) { setNotice(`Monere needs ${DIG_ENERGY} Energy for a dig — harvest an Energy Tree first!`); return; }
+      const next = await run({ action: "dig", id: d.id });
+      if (next?.dug.includes(d.id)) { void orchard.spendDig(); tone([392, 523, 659]); const t = d.item ? TREASURES[d.item] : null; setNotice(t ? `Your pet dug up ${t.name}! ${t.icon}` : game.user ? `Your pet dug up ${d.points} coins! 🪙` : `Your pet dug up ${d.points} coins! 🪙 Sign in to keep them as points.`); }
       return;
     }
     if (h.kind === "bell") { const next = await run({ action: "bell" }); if (next) { playSound("bell.mp3", 0.6); setNotice(next.lily === 1 ? "Ribbit! The lily pads line up — hop across now!" : "Ding! The lily pads drift to new spots…"); } return; }

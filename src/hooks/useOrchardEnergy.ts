@@ -6,6 +6,7 @@ import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy } from "@/lib/
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { DIG_ENERGY } from "@/lib/treasure";
 
 const GUEST_KEY = "monere-orchard-guest-energy";
 const COOLDOWN = 60_000;
