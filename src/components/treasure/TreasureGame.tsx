@@ -86,6 +86,14 @@ export function TreasureGame() {
   useEffect(() => { const on = (() => { try { return localStorage.getItem("monere-treasure-music") !== "off"; } catch { return true; } })(); setMusic(on); setMusicMuted(!on); const start = () => resumeBackgroundMusic(); window.addEventListener("pointerdown", start); window.addEventListener("keydown", start); return () => { window.removeEventListener("pointerdown", start); window.removeEventListener("keydown", start); stopBackgroundMusic(); }; }, []);
   useEffect(() => { playBackgroundMusic(side ? SIDE_ZONES[side].music : state.zone === "lair" ? "lair_theme.mp3" : state.zone === "ravine" ? "desert_theme.mp3" : "forest_theme.mp3"); }, [state.zone, side]);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
+  // Chapter 1 ends at Razor's Lair: celebrate the first arrival, once per device.
+  useEffect(() => {
+    if (!game.loaded || state.zone !== "lair" || chapterShown.current) return;
+    chapterShown.current = true;
+    let seen = false;
+    try { seen = localStorage.getItem("monere-ch1-complete") === "seen"; } catch { /* storage optional */ }
+    if (!seen) { setChapter(true); try { localStorage.setItem("monere-ch1-complete", "seen"); } catch { /* storage optional */ } }
+  }, [state.zone, game.loaded]);
   function tone(notes: number[]) {
     if (!sound) return;
     try { const c = audio.current ?? new AudioContext(); audio.current = c; void c.resume(); notes.forEach((f, i) => { const o = c.createOscillator(); const g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = f; g.gain.setValueAtTime(.07, c.currentTime + i * .1); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + i * .1 + .35); o.start(c.currentTime + i * .1); o.stop(c.currentTime + i * .1 + .36); }); } catch { /* sound optional */ }
@@ -175,7 +183,7 @@ export function TreasureGame() {
     if (tree) { await pick(tree.id); return; }
     const h = interactionHere(state);
     if (!h) {
-      if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
+      if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { if (state.scrolls.includes("lair")) setChapter(true); else setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
       setNotice("Nothing here. Explore the fog, talk to friends and follow your quest scroll."); return;
     }
     if (h.kind === "scroll") { const next = await run({ action: "collect" }); if (next?.scrolls.includes(state.zone)) { chime(); setFound(state.zone); } return; }
@@ -223,6 +231,7 @@ export function TreasureGame() {
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         <span className="treasure-energy" aria-label={`Energy ${orchard.energy} of 100`} title="Energy"><Zap className="h-4 w-4" /><span><span style={{ width: `${orchard.energy}%` }} /></span><span className="hidden text-sm sm:inline">{orchard.energy}</span></span>
         <span className="flex items-center gap-1.5 font-display text-lg text-points" aria-label={`${state.scrolls.length} of 4 scrolls collected`}><ScrollText className="h-4 w-4" />{state.scrolls.length}<span className="text-xs text-muted-foreground">/4</span></span>
+        <Button size="sm" variant="outline" className="gap-1.5 border-points/50 text-points" title="Support the project" aria-label="Support the project" onClick={() => setSupport(true)}><span aria-hidden="true">⭐</span><span className="hidden sm:inline">Support</span></Button>
         <Button size="icon" variant="ghost" title={music ? "Turn music off" : "Turn music on"} aria-label={music ? "Turn music off" : "Turn music on"} aria-pressed={music} onClick={() => { const next = !music; setMusic(next); setMusicMuted(!next); try { localStorage.setItem("monere-treasure-music", next ? "on" : "off"); } catch { /* storage optional */ } }}>{music ? <Music /> : <Music2 className="opacity-40" />}</Button>
         <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); setSoundsMuted(sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
         <Button size="icon" variant="outline" aria-label="Open world map" title="World map" onClick={() => setPanel("map")}><Map /></Button>
