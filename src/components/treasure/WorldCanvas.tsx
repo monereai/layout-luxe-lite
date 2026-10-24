@@ -1,5 +1,6 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import type Phaser from "phaser";
+import meadowExtension from "@/assets/treasure/meadow-extension.jpg";
 import garden from "@/assets/treasure/garden.jpg";
 import meadow from "@/assets/treasure/meadow.jpg";
 import forest from "@/assets/treasure/forest.jpg";
@@ -37,7 +38,7 @@ export function WorldCanvas(props: Props) {
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
         velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0; stamina = STAMINA_MAX; staminaBar: Phaser.GameObjects.Graphics | null = null;
         pathTarget = false; walkElapsed = 0; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
-        preload() { this.load.image("garden", garden); this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("vernon", vernon); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
+        preload() { this.load.image("meadow-extension", meadowExtension); this.load.image("garden", garden); this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("vernon", vernon); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
           // Oversized base layer so no empty canvas shows past the map edges while the camera eases.
@@ -110,9 +111,7 @@ export function WorldCanvas(props: Props) {
           }
           const rect = (x: number, y: number, w: number, h: number, c: number, a: number, depth = 1) => { const r = this.add.rectangle(x * 64 + w * 32, y * 64 + h * 32, w * 64, h * 64, c, a).setDepth(depth); this.scenery.push(r); return r; };
           if (s.zone === "meadow") {
-            const extension = this.add.image(768, 1792, "meadow").setDisplaySize(1536, 512).setDepth(0); this.scenery.push(extension);
-            rect(11, 21, 3, 3, color("--adventure-stone"), .8);
-            rect(11, 24, 3, 5, color("--adventure-stone"), .35);
+            const extension = this.add.image(768, 1792, "meadow-extension").setDisplaySize(1536, 512).setDepth(0); this.scenery.push(extension);
             for (const p of [{ x: 5, y: 25 }, { x: 18, y: 25 }, { x: 6, y: 28 }, { x: 17, y: 28 }]) text(p, "🌸", 48);
           }
           // Map text labels are intentionally disabled: hints live in the quest log and on-tap messages.
