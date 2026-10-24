@@ -116,6 +116,15 @@ d4("expanded griffin world", () => {
       e4(A4(at4({ x: seed.x, y: seed.y }), { action: "pick", id: seed.id }).items).toEqual([]);
     }
   });
+  i4("all three seeds use clear non-green pathway or stone tiles", () => {
+    const seeds = ITEMS.filter(i => i.id.startsWith("seed-"));
+    e4(seeds.map(({ zone, x, y }) => [zone, x, y])).toEqual([
+      ["wood", 11, 11], ["ravine", 12, 8], ["lair", 12, 18],
+    ]);
+    for (const seed of seeds) {
+      e4(worldPath(at4({ zone: seed.zone, x: seed.zone === "lair" ? 12 : 3, y: seed.zone === "lair" ? 19 : seed.zone === "wood" ? 10 : 6 }), seed)).not.toBeNull();
+    }
+  });
   i4("Vernon's seeds are visible and collectable before meeting him", () => {
     for (const seed of ITEMS.filter(i => i.id.startsWith("seed-"))) {
       const s = at4({ zone: seed.zone, x: seed.x, y: seed.y, met: [] });
