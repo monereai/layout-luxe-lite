@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
-import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy } from "@/lib/treasure.functions";
+import { usePlan } from "./usePlan";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame } from "@/lib/treasure.functions";
+import { JUMP_COST, GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
@@ -13,7 +15,9 @@ const COOLDOWN = 60_000;
 /** Signed in: Monere's real care Energy (server-capped per tree per day). Guests: a local, display-only bar. */
 export function useOrchardEnergy() {
   const care = useCare(); const client = useQueryClient();
+  const plan = usePlan();
   const start = useServerFn(startOrchardMaze); const settle = useServerFn(settleOrchardMaze); const spend = useServerFn(spendMovementEnergy);
+  const gardenStart = useServerFn(startGardenGame), gardenCommit = useServerFn(commitGardenGame);
   const [guest, setGuest] = useState(50);
   const guestBalance = useRef(50);
   const spending = useRef(false);
@@ -69,5 +73,22 @@ export function useOrchardEnergy() {
     void care.refetch();
     return true;
   }
-  return { energy, cool, beginMaze, finishMaze, boost, spendDig, guest: !care.user };
+  async function beginGarden() { return care.user ? (await gardenStart()).id : "guest"; }
+  async function gardenAction(round: string, trace: GardenInput[], finish: boolean) {
+    if (!care.user) {
+      if (!finish && guestBalance.current < JUMP_COST) throw new Error("Monere needs 5 Energy to jump.");
+      const already = localStorage.getItem("monere-garden-guest-reward") === "claimed";
+      const gained = finish && !already ? depositEnergy(guestBalance.current, GARDEN_ENERGY_REWARD) : 0;
+      saveGuest(finish ? guestBalance.current + gained : guestBalance.current - JUMP_COST);
+      if (finish) localStorage.setItem("monere-garden-guest-reward", "claimed");
+      return { energy: guestBalance.current, gained, points: finish && !already ? 20 : 0, state: null };
+    }
+    const account = care.user.id;
+    const result = await gardenCommit({ data: { round, trace, finish } });
+    if (identity.current !== account) throw new Error("Account changed.");
+    client.setQueryData(["monere-care", account], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
+    if (finish) { void care.refetch(); void plan.refresh(); }
+    return result;
+  }
+  return { energy, cool, beginMaze, finishMaze, boost, spendDig, beginGarden, gardenAction, guest: !care.user };
 }

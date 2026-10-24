@@ -189,6 +189,39 @@ export type Database = {
           },
         ]
       }
+      garden_barrel_rounds: {
+        Row: {
+          gained: number
+          id: string
+          jumps: number
+          points: number
+          settled_at: string | null
+          started_at: string
+          ticks: number
+          user_id: string
+        }
+        Insert: {
+          gained?: number
+          id?: string
+          jumps?: number
+          points?: number
+          settled_at?: string | null
+          started_at?: string
+          ticks?: number
+          user_id: string
+        }
+        Update: {
+          gained?: number
+          id?: string
+          jumps?: number
+          points?: number
+          settled_at?: string | null
+          started_at?: string
+          ticks?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       guest_ai_usage: {
         Row: {
           count: number
@@ -644,6 +677,17 @@ export type Database = {
         Args: { p_action?: string; p_choice?: number; p_day?: string }
         Returns: Json
       }
+      garden_barrel_commit: {
+        Args: {
+          p_finish: boolean
+          p_jumps: number
+          p_round: string
+          p_ticks: number
+          p_user: string
+        }
+        Returns: Json
+      }
+      garden_barrel_start: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
