@@ -730,6 +730,15 @@ export type Database = {
         Returns: Json
       }
       treasure_v5_travel: { Args: { p_steps: Json }; Returns: Json }
+      treasure_v6_action: {
+        Args: { p_action: string; p_id?: string; p_x?: number; p_y?: number }
+        Returns: Json
+      }
+      treasure_v6_can_step: {
+        Args: { s: Json; x: number; y: number }
+        Returns: boolean
+      }
+      treasure_v6_travel: { Args: { p_steps: Json }; Returns: Json }
       treasure_walkable: {
         Args: { x: number; y: number; z: string }
         Returns: boolean

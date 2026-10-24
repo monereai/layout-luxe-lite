@@ -470,6 +470,13 @@
       "when": 1792862813653,
       "tag": "0066_scatter_vernon_seeds",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1792863320143,
+      "tag": "0067_vernon_garden_portal",
+      "breakpoints": true
     }
   ]
 }
