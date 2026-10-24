@@ -178,7 +178,8 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   return s;
 }
 export function questClue(s: AdventureState): string {
-  if (s.zone === "garden") return "Welcome to Vernon’s Garden! Wander among the flowers and return through the southern arch.";
+  if (s.quests.includes("vernon-garden") && s.zone === "meadow") return "Vernon’s seed hopper is filled! His garden challenge is complete.";
+  if (s.zone === "garden") return "Reach Vernon’s seed hopper at the top of the garden girders.";
   if (s.zone === "meadow" && gardenOpen(s)) return "Vernon’s garden is open! Cross the southern bridge and follow the path to the flower portal.";
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
   if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
@@ -197,7 +198,7 @@ export function parseAdventure(value: unknown): AdventureState {
   const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
   for (const id of [...ids, "garden" as const]) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < (worldRows(id) / 4) * 6); }
   let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
-    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles(), huntSpots: validHuntSpots(s["huntSpots"]), ...(typeof s["huntDate"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s["huntDate"]) ? { huntDate: s["huntDate"] } : {}) };
+    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault", "vernon-garden"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles(), huntSpots: validHuntSpots(s["huntSpots"]), ...(typeof s["huntDate"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s["huntDate"]) ? { huntDate: s["huntDate"] } : {}) };
   const zone = [...ids, "garden" as const].find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
   if (st.zone !== "ravine") st = { ...st, pet: null };
@@ -316,6 +317,7 @@ export type SideQuest = { id: string; title: string; giver: string; progress: nu
 export function sideQuests(s: AdventureState): SideQuest[] {
   const list: SideQuest[] = NPCS.map(n => ({ id: n.id, title: n.need.length === 1 ? `Find ${TREASURES[n.need[0]!]?.name ?? ITEMS.find(i => i.id === n.need[0])?.name}` : `Collect ${n.need.length} ${n.id === "tilly" ? "key fragments" : ITEMS.find(i => i.id === n.need[0])?.name.toLowerCase() + "s"}`, giver: n.name, progress: n.need.filter(i => s.items.includes(i)).length, total: n.need.length, done: s.quests.includes(n.id), reward: n.gear ? `${GEAR[n.gear].name} + ${n.points} points` : n.item ? `${TREASURES[n.item]!.name} + ${n.points} points` : `${n.points} points` }));
   list.push({ id: "vault", title: "Open the Stone Vault (paired plates)", giver: "Shadow Ravine", progress: s.quests.includes("vault") ? 1 : 0, total: 1, done: s.quests.includes("vault"), reward: "Sun Stone + 40 points" });
+  list.push({ id: "vernon-garden", title: "Fill the seed hopper", giver: "Vernon the Gardener", progress: s.quests.includes("vernon-garden") ? 1 : 0, total: 1, done: s.quests.includes("vernon-garden"), reward: "50 Energy + 20 Coins" });
   list.push({ id: "digs", title: "Dig up every buried treasure", giver: "Your pet", progress: s.dug.length, total: DIGS.length, done: s.dug.length === DIGS.length, reward: "Points, key fragments and relics" });
   return list;
 }

@@ -30,9 +30,11 @@ import { saveHarvestRecord } from "@/lib/harvest-records";
 import { SUPPORTER_PAYMENT_URL } from "@/lib/supporter";
 import { createWalkingFrames } from "@/lib/walking-frames";
 import { MAP_ENTRANCES, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
+import type { GardenInput } from "@/lib/garden-game";
 
 const PacmanHarvestMiniGame = lazy(() => import("../PacmanHarvestMiniGame").then(m => ({ default: m.PacmanHarvestMiniGame })));
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
+const DonkeyKongMiniGame = lazy(() => import("./DonkeyKongMiniGame"));
 const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair, garden };
 const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin. Along the way, lift the fog, help friendly villagers, earn explorer gear and let your pet dig for buried treasure!";
 
@@ -60,6 +62,8 @@ export function TreasureGame() {
   const [side, setSide] = useState<SideZoneId | null>(null);
   const [travelling, setTravelling] = useState(false);
   const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
+  const [gardenRound, setGardenRound] = useState<string | null>(null);
+  const openingGarden = useRef(false);
   const [sideReset, setSideReset] = useState(0);
   const startingHarvest = useRef(false);
   const orchard = useOrchardEnergy();
@@ -81,7 +85,27 @@ export function TreasureGame() {
     return () => { cancelled = true; };
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
-  const blocked = !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
+  const blocked = state.zone === "garden" || !!gardenRound || !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
+  useEffect(() => {
+    if (!game.loaded || state.zone !== "garden" || gardenRound || openingGarden.current) return;
+    openingGarden.current = true; setIntro(false); setPanel(null); setBusy(true);
+    void game.prepareHarvest().then(() => orchard.beginGarden()).then(setGardenRound).catch(async () => {
+      setNotice("The garden challenge couldn’t open. Please try entering again.");
+      await game.act({ action: "portal", id: "meadow" });
+    }).finally(() => { openingGarden.current = false; setBusy(false); });
+  }, [game.loaded, state.zone, gardenRound]);
+  async function finishGarden(trace: GardenInput[]) {
+    if (!gardenRound) return;
+    const result = await orchard.gardenAction(gardenRound, trace, true);
+    game.harvestReturn(result.state ?? { ...state, zone: "meadow", x: 12, y: 27, pet: null, quests: [...new Set([...state.quests, "vernon-garden"])] });
+    setGardenRound(null);
+    setNotice(`Vernon’s garden complete! +${result.gained} Energy · +${result.points} Coins${orchard.guest ? " (guest preview)" : ""}.`);
+  }
+  async function leaveGarden() {
+    setBusy(true);
+    try { await game.act({ action: "portal", id: "meadow" }); setGardenRound(null); }
+    finally { setBusy(false); }
+  }
   useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
   useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
@@ -266,6 +290,7 @@ export function TreasureGame() {
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
     {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the Energy maze…</div>}><PacmanHarvestMiniGame avatar={avatar} practice={harvestMaze.round === "practice"} onComplete={finishHarvest} /></Suspense></ClientOnly>}
+    {gardenRound && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening Vernon’s garden…</div>}><DonkeyKongMiniGame avatar={avatar} energy={orchard.energy} onJump={async trace => { await orchard.gardenAction(gardenRound, trace, false); }} onComplete={finishGarden} onExit={() => void leaveGarden()} /></Suspense></ClientOnly>}
 
     <Dialog open={intro} onOpenChange={setIntro}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">The Rescue of the Golden Griffin</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">{INTRO}</DialogDescription><div className="flex items-end justify-center gap-4"><img src={razor} alt="Razor the Hyena" width={768} height={768} className="h-28 w-28 object-contain" /><img src={griffin} alt="The Golden Griffin" width={816} height={816} className="h-24 w-24 object-contain" /></div><Button onClick={() => setIntro(false)}>{state.scrolls.length ? "Continue the rescue" : "Begin the rescue"}<ArrowRight /></Button></DialogContent></Dialog>
 
