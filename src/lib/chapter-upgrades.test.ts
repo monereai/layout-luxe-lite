@@ -5,7 +5,7 @@ import { saveAdventure, loadGuestAdventure, adventureStorageKey } from "./advent
 import { initialAdventure, parseAdventure, sessionDigs, canStep, worldPath, applyAdventure } from "./treasure";
 import { saveHarvestRecord } from "./harvest-records";
 describe("Chapter 1 rules", () => {
-  it("sprint is exactly 1.5 times walking speed", () => expect(advanceAlong({x:0,y:0},{x:1000,y:0},100 * SPRINT_MULTIPLIER,1).x).toBe(150));
+  it("sprint is exactly 1.7 times walking speed", () => expect(advanceAlong({x:0,y:0},{x:1000,y:0},100 * SPRINT_MULTIPLIER,1).x).toBeCloseTo(170));
   it("sprint costs one Energy per second", () => expect(SPRINT_ENERGY_PER_SECOND).toBe(1));
   it("dash costs five Energy", () => expect(DASH_ENERGY).toBe(5));
   it("accelerates and slows without overshooting", () => { const speed=easeVelocity(0,100,.1); expect(speed).toBeGreaterThan(0); expect(speed).toBeLessThan(100); expect(easeVelocity(speed,0,.1)).toBeLessThan(speed); expect(advanceAlong({x:0,y:0},{x:5,y:0},100,1)).toEqual({x:5,y:0}); });

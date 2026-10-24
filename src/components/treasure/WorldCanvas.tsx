@@ -277,7 +277,7 @@ export function WorldCanvas(props: Props) {
           const p = this.player; if (!p) return;
           this.staminaBar ??= this.add.graphics().setDepth(9999);
           const g = this.staminaBar; g.clear();
-          if (this.stamina >= STAMINA_MAX) return;
+          if (this.stamina >= STAMINA_MAX && !this.input.keyboard?.keys?.some((k: any) => k?.keyCode === 16 && k.isDown)) return;
           const w = 44, x = p.x - w / 2, y = p.y - 52;
           g.fillStyle(0x000000, .45).fillRoundedRect(x - 1, y - 1, w + 2, 7, 3);
           g.fillStyle(this.stamina < 25 ? 0xff7a59 : 0x00e5ff, 1).fillRoundedRect(x, y, w * this.stamina / STAMINA_MAX, 5, 2);

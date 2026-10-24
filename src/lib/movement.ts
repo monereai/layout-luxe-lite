@@ -1,4 +1,4 @@
-export const SPRINT_MULTIPLIER = 1.5;
+export const SPRINT_MULTIPLIER = 1.7;
 export const SPRINT_ENERGY_PER_SECOND = 1;
 export const DASH_ENERGY = 5;
 export const CORNER_MARGIN = 10;
