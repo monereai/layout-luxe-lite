@@ -85,5 +85,5 @@ export function useOrchardEnergy() {
     if (finish) { void care.refetch(); void plan.refresh(); }
     return result;
   }
-  return { energy, cool, beginMaze, finishMaze, boost, spendDig, beginGarden, gardenAction, guest: !care.user };
+  return { energy, cool, beginMaze, finishMaze, boost, gainDig, beginGarden, gardenAction, guest: !care.user };
 }
