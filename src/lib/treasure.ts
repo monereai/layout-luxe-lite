@@ -4,7 +4,7 @@ export type ZoneId = "meadow" | "wood" | "ravine" | "lair";
 export type Position = { x: number; y: number };
 export type Gear = "lantern" | "boots" | "goggles";
 export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean;
-  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[]; huntSpots?: number[] | null };
+  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[]; huntSpots?: number[] | null; huntDate?: string };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
 export const ZONES: { id: ZoneId; name: string; subtitle: string; icon: string }[] = [
@@ -128,7 +128,7 @@ export function worldPath(s: AdventureState, target: Position): Position[] | nul
   }
   return null;
 }
-export type AdventureAction = { action: "status" | "restart" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
+export type AdventureAction = { action: "status" | "refresh-hunt" | "restart" | "move" | "collect" | "answer" | "portal" | "duel" | "pick" | "talk" | "deliver" | "dig" | "bell" | "stay" | "switch" | "call"; x?: number; y?: number; id?: string };
 /** Gate riddle for this zone's exit is answerable once the zone's scroll is found and Monere stands at the gate. */
 export function gateHere(s: AdventureState): ZoneId | null {
   if (!s.scrolls.includes(s.zone) || s.gates.includes(s.zone)) return null;
@@ -143,6 +143,7 @@ export function duelLanding(s: AdventureState, lastLanding: string, blocked: boo
 export function applyAdventure(s: AdventureState, a: AdventureAction): AdventureState { return reveal(applyRaw(s, a)); }
 function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "restart") return s.rescued && s.duel === DUEL_ROUNDS ? { ...initialAdventure(), riddles: randomRiddles(Math.random, s.riddles), huntSpots: drawHuntSpots(Math.random, s.huntSpots ?? [], ["meadow"]) } : s;
+  if (a.action === "refresh-hunt") { const today = new Date().toISOString().slice(0, 10); return s.zone === "lair" && near(s, LAIR_DOOR) && s.huntDate !== today ? { ...refreshDailyHunt(s), huntDate: today } : s; }
   if (s.rescued) return s;
   if (a.action === "move") { if (typeof a.x !== "number" || typeof a.y !== "number" || Math.abs(s.x - a.x) + Math.abs(s.y - a.y) !== 1 || !canStep(s, a.x, a.y)) return s; return s.zone === "lair" && isTrap(a.x, a.y) ? { ...s, ...TRAP_RESET } : { ...s, x: a.x, y: a.y }; }
   if (a.action === "pick") { const it = ITEMS.find(i => i.id === a.id); return it && it.zone === s.zone && near(s, it) && itemVisible(s, it) && !s.items.includes(it.id) ? { ...s, items: [...s.items, it.id] } : s; }
@@ -170,7 +171,7 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
 export function questClue(s: AdventureState): string {
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
   if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
-  if (!s.gates.includes(s.zone)) return s.zone === "lair" ? "Scroll found! Go to the carved inner door in the middle of the lair and answer its riddle." : "Scroll found! Walk to the eastern gate and answer the gatekeeper's riddle.";
+  if (!s.gates.includes(s.zone)) return s.zone === "lair" ? "Chapter 1 gateway: visit the carved door, then continue exploring the daily hunts." : "Scroll found! Walk to the eastern gate and answer the gatekeeper's riddle.";
   if (s.zone === "lair") return `Riddle Duel ${s.duel + 1}/3: ${duelRiddle(s).riddle} Hop onto the right tile.`;
   return "The gate is open. Travel onward through the portal!";
 }
@@ -185,7 +186,7 @@ export function parseAdventure(value: unknown): AdventureState {
   const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
   for (const id of ids) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 36); }
   let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
-    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles(), huntSpots: validHuntSpots(s["huntSpots"]) };
+    gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles(), huntSpots: validHuntSpots(s["huntSpots"]), ...(typeof s["huntDate"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s["huntDate"]) ? { huntDate: s["huntDate"] } : {}) };
   const zone = ids.find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
   if (st.zone !== "ravine") st = { ...st, pet: null };
@@ -243,6 +244,9 @@ export function npcClue(s: AdventureState, npc: Npc): string {
   if (npc.id !== "tilly" || !validHuntSpots(s.huntSpots)) return npc.ask;
   const hints = (s.huntSpots ?? []).map(i => HUNT_POOL[i]?.clue).filter(Boolean);
   return `Razor buried my three key fragments ${hints.join("; ")}. Ask your pet to dig them up!`;
+}
+export function refreshDailyHunt(s: AdventureState): AdventureState {
+  return { ...s, huntSpots: drawHuntSpots(Math.random, s.huntSpots ?? [], ["meadow", ...(s.gates.includes("meadow") ? ["wood"] : []), ...(s.gates.includes("wood") ? ["ravine"] : [])]), items: s.items.filter(i => !i.startsWith("fragment-")), dug: s.dug.filter(i => !["m-frag", "r-frag", "l-frag"].includes(i)) };
 }
 export const TREASURES: Record<string, { name: string; icon: string; lore: string }> = {
   "fragment-1": { name: "Key Fragment I", icon: "🗝️", lore: "One third of Tilly's Ancient Key." },

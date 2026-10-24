@@ -691,6 +691,7 @@ export type Database = {
       treasure_draw_hunt: { Args: { s: Json }; Returns: Json }
       treasure_hunt_pool: { Args: never; Returns: Json }
       treasure_movement_boost: { Args: { p_mode: string }; Returns: Json }
+      treasure_refresh_hunt: { Args: never; Returns: Json }
       treasure_restart: { Args: never; Returns: Json }
       treasure_travel: { Args: { p_steps: Json }; Returns: Json }
       treasure_v2_action: {
