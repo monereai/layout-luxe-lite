@@ -15,6 +15,7 @@ import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import shopMark from "@/assets/shop/store-front.png";
 import petShopMark from "@/assets/shop/pet-shop.png";
+import griffinMark from "@/assets/pets/golden-griffin.png";
 import crossAsset from "@/assets/monere-cross.png.asset.json";
 
 import { useWebMCP } from "use-webmcp-tool";
@@ -24,7 +25,6 @@ import { GuestRewardHost, GuestPointsTransfer } from "@/components/GuestSignupMo
 
 const allTabs = [
   { to: "/", label: "talk", icon: BookOpen },
-  { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -33,7 +33,6 @@ const allTabs = [
 
 const allMenuItems = [
   { to: "/", label: "talk", icon: BookOpen },
-  { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -41,10 +40,14 @@ const allMenuItems = [
   { to: "/shop", label: "shop", icon: Coins },
 ] as const;
 
+/** Title of the adventure link shown in the right-hand column, between the two shops. */
+const GRIFFIN_TITLE = "The Golden Griffin · Chapter 1";
+
 export function AppShell({ children, hideCrisisBar = false, adventure = false }: { children: ReactNode; hideCrisisBar?: boolean; adventure?: boolean }) {
   const { tester } = useTreasureAccess();
   const tabs = visibleAdventureNavigation(allTabs, undefined, tester);
   const menuItems = visibleAdventureNavigation(allMenuItems, undefined, tester);
+  const showGriffin = visibleAdventureNavigation([{ to: "/treasure" }], undefined, tester).length > 0;
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
