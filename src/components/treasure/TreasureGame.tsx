@@ -51,6 +51,9 @@ export function TreasureGame() {
   const [busy, setBusy] = useState(false);
   const [sound, setSound] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
+  const [chapter, setChapter] = useState(false);
+  const [support, setSupport] = useState(false);
+  const chapterShown = useRef(false);
   const [side, setSide] = useState<SideZoneId | null>(null);
   const [travelling, setTravelling] = useState(false);
   const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
@@ -74,7 +77,7 @@ export function TreasureGame() {
     return () => { cancelled = true; };
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
-  const blocked = !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
+  const blocked = !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
   useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
   useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
