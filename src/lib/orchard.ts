@@ -38,6 +38,21 @@ export const gateNear = (zone: ZoneId, p: Position) => ELEMENTAL_GATES.find(g =>
 export const mapTreeNear = (zone: ZoneId, p: Position) => MAP_TREES.find(t => t.zone === zone && adjacent(p, t.at));
 export const canOpenGate = (energy: number, zone: SideZoneId = "grove") => energy >= gateEnergyCost(zone);
 export const harvestGain = (energy: number) => Math.max(0, Math.min(TREE_ENERGY, 100 - energy));
+/** Free players may enter the Energy maze this many times per UTC day; Monere Plus members are unlimited (enforced by orchard_maze_start SQL). */
+export const FREE_MAZE_ENTRIES_PER_DAY = 2;
+const GUEST_MAZE_KEY = "monere-maze-entries";
+/** Guest entry counter, keyed by UTC day so device clocks cannot extend it beyond a day rollover. Returns false when the free daily limit is reached. */
+export function takeGuestMazeEntry(day: string, storage?: Pick<Storage, "getItem" | "setItem">): boolean {
+  try {
+    const store = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
+    if (!store) return true;
+    const saved = JSON.parse(store.getItem(GUEST_MAZE_KEY) ?? "null") as { day?: string; count?: number } | null;
+    const count = saved?.day === day ? Number(saved.count) || 0 : 0;
+    if (count >= FREE_MAZE_ENTRIES_PER_DAY) return false;
+    store.setItem(GUEST_MAZE_KEY, JSON.stringify({ day, count: count + 1 }));
+    return true;
+  } catch { return true; }
+}
 /** Side-land walking: inside the grid and never onto a tree. */
 export const sideWalkable = (zone: SideZoneId, p: Position) => p.x >= 0 && p.y >= 0 && p.x < SIDE_COLS && p.y < SIDE_ROWS && ![...SIDE_ZONES[zone].trees, ...SIDE_ZONES[zone].props].some(t => t.at.x === p.x && t.at.y === p.y);
 /** Crystal shards: stepping on one sends Monere back to the entrance (display-only, no penalty). */
