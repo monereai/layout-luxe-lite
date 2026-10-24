@@ -109,7 +109,7 @@ d4("expanded griffin world", () => {
     const seed = at4({ x: 3, y: 14 });
     e4(A4(seed, { action: "pick", id: "seed-1" }).items).toEqual([]);
     e4(A4({ ...seed, met: ["vernon"] }, { action: "pick", id: "seed-1" }).items).toEqual(["seed-1"]);
-    const s = at4({ x: 6, y: 12, items: ["seed-1", "seed-2", "seed-3"] });
+    const s = at4({ x: 11, y: 18, items: ["seed-1", "seed-2", "seed-3"] });
     e4(A4(s, { action: "deliver", id: "vernon" }).quests).toEqual(["vernon"]);
   });
   i4("dark cave needs the Lantern", () => {
