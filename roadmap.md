@@ -1,7 +1,7 @@
 # Vernon’s garden mini-game
-- [ ] Build isolated ladder/barrel overlay and garden entrance transition.
-- [ ] Verify atomic 5-Energy jumps and replay-safe +50 Energy/+20 Coins completion with saved progress.
-- [ ] Run focused tests and preview checks without changing Carl’s account.
+- [x] Build isolated lazy Phaser ladder/barrel overlay on garden entry; world input paused and touch controls included.
+- [x] Verify atomic 5-Energy jumps and one-time +50 Energy/+20 Coins via authenticated replay on separate QA; repeat settlement returns zero; completion reads back through UI after reload.
+- [x] Guest preview entry/jump/exit and desktop/mobile screenshots checked; focused tests pass and build clean; Carl untouched. Full keyboard-driven hopper win was not verified (automated runs collided); authenticated replay settlement and UI readback verified separately.
 
 # Seed pathway visibility
 - [x] Move all three seeds onto clear sand/stone outside Meadow; active v6 pickup positions mirrored by migration 0068, preserving existing collected seeds. Guest preview collected and delivered all three; 32 adventure tests and build pass. Authenticated collection not retested; server coordinates verified and Carl untouched.

@@ -4,7 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen, RotateCcw, Zap } f
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import gardenArt from "@/assets/treasure/garden.jpg";
-import { GARDEN_TICK_MS, LADDERS, PLATFORM_Y, gardenStep, gardenPlayerY, gardenBarrelY, newGarden, type GardenInput } from "@/lib/garden-game";
+import { GARDEN_TICK_MS, LADDERS, PLATFORM_Y, canGardenJump, gardenStep, gardenPlayerY, gardenBarrelY, newGarden, type GardenInput } from "@/lib/garden-game";
 import { playSound } from "@/lib/audio";
 
 /** Isolated browser-only Phaser scene: no shared world controls or collision state. */
@@ -61,7 +61,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
         const input = command.current ?? direction.current; command.current = null;
         const next = gardenStep(state, input);
         if (next.jumps > state.jumps) {
-          if (callbacks.current.energy < 5) { setError("Monere needs 5 Energy to jump."); return; }
+          if (!canGardenJump(callbacks.current.energy)) { setError("Monere needs 5 Energy to jump."); return; }
           working = true; setBusy(true);
           void callbacks.current.onJump([...trace.current, input]).then(() => { if (alive) { state = next; trace.current.push(input); setSnapshot(state); this.player?.setPosition(state.x, gardenPlayerY(state)); playSound("success.mp3", .2); setError(null); } }).catch(() => { if (alive) setError("Jump unavailable. Your Energy was not spent."); }).finally(() => { working = false; if (alive) setBusy(false); });
           return;

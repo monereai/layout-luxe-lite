@@ -1,6 +1,7 @@
 /** Fixed-step rules shared by the isolated renderer and authenticated replay. */
 export const GARDEN_TICK_MS = 50;
 export const JUMP_COST = 5;
+export const canGardenJump = (energy: number) => energy >= JUMP_COST;
 export const GARDEN_ENERGY_REWARD = 50;
 export const GARDEN_COIN_REWARD = 20;
 export const PLATFORM_Y = [450, 330, 210, 90];
