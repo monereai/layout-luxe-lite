@@ -78,21 +78,23 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
     annotations: { readOnlyHint: true },
     execute: () => runWebMCPTool("read_header_status", () => `Page: ${location.pathname}. Shop Points: ${wallet}. ${user ? `Membership: ${tier}. Energy: ${energy == null ? "loading" : `${energy}%`}.` : "Signed out; energy and membership are unavailable."}`),
   });
+  const adventureItem = showGriffin ? [{ to: "/treasure" as const, label: "treasure" as const }] : [];
+  const mcpItems = [...menuItems, ...adventureItem];
   useWebMCP({
     name: "navigate_monere",
-    description: "Open a page allowed by MonereAI's visible menu, or Monere’s Daily Dilemma.",
-    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
+    description: "Open a page allowed by MonereAI's visible menu, The Golden Griffin · Chapter 1, or Monere’s Daily Dilemma.",
+    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...mcpItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
       if (page === "dilemma") {
         setMenuOpen(false);
         await navigate({ to: "/", search: { dilemma: 1 } });
         return `Opened ${t("dailyDilemma")}.`;
       }
-      const item = menuItems.find(item => item.to === page);
+      const item = mcpItems.find(item => item.to === page);
       if (typeof page !== "string" || !item) throw new Error("Choose a page from the visible menu.");
       setMenuOpen(false);
       await navigate({ to: item.to });
-      return `Opened ${t(item.label)}.`;
+      return `Opened ${item.to === "/treasure" ? GRIFFIN_TITLE : t(item.label)}.`;
     }),
   });
   return (
