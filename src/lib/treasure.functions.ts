@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseAdventure } from "./treasure";
 import { TREE_IDS } from "./orchard";
 import { replayMaze, MAZE_TICK_MS } from "./harvest-maze";
+import { replayGarden, type GardenInput } from "./garden-game";
 import { isTreasureTester, TREASURE_MAINTENANCE } from "./treasureGate";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
@@ -19,6 +20,33 @@ async function verifiedTester(client: SupabaseClient<Database>, userId: string) 
 export const getTreasureAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => ({ tester: await verifiedTester(context.supabase, context.userId) }));
+
+export const startGardenGame = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) throw new Error("Monere's adventure is temporarily under construction.");
+    const result = await context.supabase.rpc("garden_barrel_start");
+    if (result.error) throw new Error(result.error.message);
+    return z.object({ id: z.string().uuid() }).parse(result.data);
+  });
+
+export const commitGardenGame = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ round: z.string().uuid(), finish: z.boolean(), trace: z.array(z.enum(["idle", "left", "right", "up", "down", "jump", "reset"])).min(1).max(24000) }))
+  .handler(async ({ data, context }) => {
+    if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) throw new Error("Monere's adventure is temporarily under construction.");
+    const state = replayGarden(data.trace as GardenInput[]);
+    if (data.finish ? !state.won : state.won || data.trace.at(-1) !== "jump" || state.jumps !== replayGarden(data.trace.slice(0, -1)).jumps + 1) throw new Error("Invalid garden result.");
+    const owned = await context.supabase.from("garden_barrel_rounds").select("id").eq("id", data.round).eq("user_id", context.userId).single();
+    if (owned.error || !owned.data) throw new Error("Garden round not found.");
+    const sync = await context.supabase.rpc("care_apply", { p_action: "sync" });
+    if (sync.error) throw new Error(sync.error.message);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const result = await supabaseAdmin.rpc("garden_barrel_commit", { p_user: context.userId, p_round: data.round, p_ticks: state.tick, p_jumps: state.jumps, p_finish: data.finish });
+    if (result.error) throw new Error(result.error.message);
+    const value = z.object({ energy: z.number(), gained: z.number(), points: z.number(), state: z.unknown() }).parse(result.data);
+    return { ...value, state: parseAdventure(value.state) };
+  });
 
 export const adventureAction = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
