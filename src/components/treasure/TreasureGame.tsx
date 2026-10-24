@@ -264,7 +264,7 @@ export function TreasureGame() {
 
     <Dialog open={!!npc} onOpenChange={o => { if (!o) setNpc(null); }}><DialogContent className="max-w-md rounded-lg text-center">{npc && (() => { const done = state.quests.includes(npc.id); const have = npc.need.filter(i => state.items.includes(i)).length; const ready = have === npc.need.length; return <>
       <DialogTitle className="text-2xl text-primary">{npc.icon} {npc.name}</DialogTitle><DialogDescription className="font-body text-base text-foreground">“{done ? npc.thanks : npcClue(state, npc)}”</DialogDescription>
-      {!done && <p className="text-sm text-muted-foreground">Found {have} of {npc.need.length} · Reward: {npc.gear ? `${GEAR[npc.gear].icon} ${GEAR[npc.gear].name}` : `${TREASURES[npc.item!]!.icon} ${TREASURES[npc.item!]!.name}`} + {npc.points} points{game.user ? "" : " (sign in to keep points)"}</p>}
+      {!done && <p className="text-sm text-muted-foreground">Found {have} of {npc.need.length} · Reward: {npc.gear ? `${GEAR[npc.gear].icon} ${GEAR[npc.gear].name} + ` : npc.item ? `${TREASURES[npc.item]!.icon} ${TREASURES[npc.item]!.name} + ` : ""}{npc.points} points{game.user ? "" : " (sign in to keep points)"}</p>}
       {done && <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">💡 A gatekeeper's riddle tip: {gateRiddle(state, npc.zone).hint}</p>}
       {!done && <Button disabled={!ready || busy} onClick={() => void deliver(npc)}>{ready ? "Hand them over" : "Keep searching"}</Button>}
       <Button variant="ghost" onClick={() => setNpc(null)}>Goodbye</Button></>; })()}</DialogContent></Dialog>
