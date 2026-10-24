@@ -1,3 +1,6 @@
+# Barrel game startup repair
+- [ ] Reproduce and fix Vernon’s challenge startup; verify movement and jump controls without changing Carl’s account.
+
 # Griffin developer-only access
 - [x] Close the shared maintenance gate; retain verified Carl developer exception and preserve game saves/code.
 - [x] Visitor browser sees Under Construction with no gameplay or public game link; nine access/server checks pass and build OK. Carl’s existing verified developer exception preserved; his account was not used for QA.
