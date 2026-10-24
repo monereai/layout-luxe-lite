@@ -307,8 +307,9 @@ export function WorldCanvas(props: Props) {
             const body = el.firstElementChild as HTMLElement | null;
             if (body) {
               body.classList.remove("walk-bounce", "idle-breath");
-              const bounce = walkBounce(this.time.now / 1000, walking && !this.reduced);
-              body.style.transform = `translateY(${bounce}px)`;
+              const hop = walkHop(this.time.now / 1000, cycleActive && !this.reduced);
+              const breathe = !cycleActive && !this.reduced ? 1 + Math.sin(this.time.now / 600) * 0.012 : 1;
+              body.style.transform = `translateY(${(hop.y + walkBounce(this.time.now / 1000, false)) * cam.zoom}px) scale(${hop.sx}, ${hop.sy * breathe})`;
             }
           }
           // Companion follows the path Monere walked half a second ago.
@@ -324,11 +325,11 @@ export function WorldCanvas(props: Props) {
             pet.dataset["facing"] = lag.x > p.x + 2 ? "west" : lag.x < p.x - 2 ? "east" : pet.dataset["facing"] ?? "east";
             const body = pet.firstElementChild; body?.classList.toggle("walk-bounce", lag.walking); body?.classList.toggle("idle-breath", !lag.walking);
           }
-          if (walking && this.time.now - this.lastStep > 260) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
+          if ((walking || cycleActive) && !this.reduced && this.time.now - this.lastStep > 220) { this.lastStep = this.time.now; this.dust(p.x, p.y + 6); }
         }
         dust(x: number, y: number) {
-          for (let i = 0; i < 3; i++) {
-            const puff = this.add.circle(x + (Math.random() - .5) * 30, y, 4 + Math.random() * 4, 0xf3e3c3, .55).setDepth(8);
+          for (let i = 0; i < 4; i++) {
+            const puff = this.add.circle(x + (Math.random() - .5) * 30, y, 5 + Math.random() * 5, 0xd9c4a0, .7).setDepth(11);
             this.tweens.add({ targets: puff, x: puff.x - (this.facing === "east" ? 1 : this.facing === "west" ? -1 : 0) * (8 + Math.random() * 10), y: y - 6 - Math.random() * 8, scale: 1.8, alpha: 0, duration: 420, onComplete: () => puff.destroy() });
           }
         }
