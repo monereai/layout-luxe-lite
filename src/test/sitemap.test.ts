@@ -14,9 +14,9 @@ function routeDecision(file: string) {
 }
 
 describe("MonereAI public sitemap", () => {
-  it("excludes the adventure while it is under construction", () => {
-    expect(TreasureRoute.options.staticData?.sitemap).toBe(false);
-    expect(isSitemapRouteIncluded(TreasureRoute as AnyRoute)).toBe(false);
+  it("includes the adventure now it is open to everyone", () => {
+    expect(TreasureRoute.options.staticData?.sitemap).toBe(true);
+    expect(isSitemapRouteIncluded(TreasureRoute as AnyRoute)).toBe(true);
   });
   it.each(["index.tsx", "daily.tsx", "shop.tsx"])("includes public page %s", file => {
     expect(routeDecision(file)).toBe("true");
