@@ -47,6 +47,16 @@ export const orchardHarvest = createServerFn({ method: "POST" })
     return z.object({ energy: z.number().int(), gained: z.number().int(), harvested: z.boolean() }).parse(result.data);
   });
 
+export const spendMovementEnergy = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ mode: z.enum(["sprint", "dash"]) }))
+  .handler(async ({ data, context }) => {
+    if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) throw new Error("Monere's adventure is temporarily under construction.");
+    const result = await context.supabase.rpc("treasure_movement_boost", { p_mode: data.mode });
+    if (result.error) throw new Error(result.error.message);
+    return z.object({ allowed: z.boolean(), energy: z.number().int().min(0).max(100) }).parse(result.data);
+  });
+
 export const startOrchardMaze = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ tree: z.enum(TREE_IDS) }))

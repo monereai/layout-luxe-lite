@@ -414,6 +414,13 @@
       "when": 1792827717088,
       "tag": "0058_maze_free_daily_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1792851927507,
+      "tag": "0059_chapter_one_hunts_and_movement",
+      "breakpoints": true
     }
   ]
 }

@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
-import { startOrchardMaze, settleOrchardMaze } from "@/lib/treasure.functions";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy } from "@/lib/treasure.functions";
+import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
 
@@ -11,7 +12,7 @@ const COOLDOWN = 60_000;
 /** Signed in: Monere's real care Energy (server-capped per tree per day). Guests: a local, display-only bar. */
 export function useOrchardEnergy() {
   const care = useCare(); const client = useQueryClient();
-  const start = useServerFn(startOrchardMaze); const settle = useServerFn(settleOrchardMaze);
+  const start = useServerFn(startOrchardMaze); const settle = useServerFn(settleOrchardMaze); const spend = useServerFn(spendMovementEnergy);
   const [guest, setGuest] = useState(50);
   const [cooling, setCooling] = useState<Record<string, number>>({});
   useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) setGuest(Math.min(100, Math.max(0, v))); } catch { /* optional */ } }, []);
@@ -36,5 +37,16 @@ export function useOrchardEnergy() {
     setCooling(c => ({ ...c, [id]: Date.now() + COOLDOWN })); void care.refetch();
     return result;
   }
-  return { energy, cool, beginMaze, finishMaze, guest: !care.user };
+  async function boost(mode: "sprint" | "dash") {
+    if (!care.user) {
+      const cost = mode === "dash" ? DASH_ENERGY : SPRINT_ENERGY_PER_SECOND;
+      if (guest < cost) return false;
+      const next = guest - cost; setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ }
+      return true;
+    }
+    const result = await spend({ data: { mode } });
+    client.setQueryData(["monere-care", care.user.id], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
+    return result.allowed;
+  }
+  return { energy, cool, beginMaze, finishMaze, boost, guest: !care.user };
 }
