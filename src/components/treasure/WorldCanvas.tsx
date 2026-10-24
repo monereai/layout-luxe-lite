@@ -111,8 +111,21 @@ export function WorldCanvas(props: Props) {
           }
           const rect = (x: number, y: number, w: number, h: number, c: number, a: number, depth = 1) => { const r = this.add.rectangle(x * 64 + w * 32, y * 64 + h * 32, w * 64, h * 64, c, a).setDepth(depth); this.scenery.push(r); return r; };
           if (s.zone === "meadow") {
-            const extension = this.add.image(768, 1792, "meadow-extension").setDisplaySize(1536, 512).setDepth(0); this.scenery.push(extension);
-            for (const p of [{ x: 5, y: 25 }, { x: 18, y: 25 }, { x: 6, y: 28 }, { x: 17, y: 28 }]) text(p, "🌸", 48);
+            // Overlap the original bank with a feathered texture edge so the scenery
+            // stays continuous without stretching the original map or moving its bridge.
+            const key = "meadow-extension-blended";
+            if (!this.textures.exists(key)) {
+              const texture = this.textures.createCanvas(key, 1536, 576);
+              if (texture) {
+                const ctx = texture.getContext();
+                ctx.drawImage(this.textures.get("meadow-extension").getSourceImage() as HTMLImageElement, 0, 0, 1536, 576);
+                ctx.globalCompositeOperation = "destination-in";
+                const edge = ctx.createLinearGradient(0, 0, 0, 64);
+                edge.addColorStop(0, "rgba(0,0,0,0)"); edge.addColorStop(1, "rgba(0,0,0,1)");
+                ctx.fillStyle = edge; ctx.fillRect(0, 0, 1536, 576); texture.refresh();
+              }
+            }
+            const extension = this.add.image(768, 1760, key).setDisplaySize(1536, 576).setDepth(0); this.scenery.push(extension);
           }
           // Map text labels are intentionally disabled: hints live in the quest log and on-tap messages.
           const label = (_p: Position, _t: string) => {};
