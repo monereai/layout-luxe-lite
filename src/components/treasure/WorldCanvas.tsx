@@ -1,5 +1,6 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import type Phaser from "phaser";
+import garden from "@/assets/treasure/garden.jpg";
 import meadow from "@/assets/treasure/meadow.jpg";
 import forest from "@/assets/treasure/forest.jpg";
 import ravine from "@/assets/treasure/ravine.jpg";
@@ -8,7 +9,7 @@ import razor from "@/assets/treasure/razor.png";
 import vernon from "@/assets/treasure/vernon.png";
 import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
-import { PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, sessionDigs, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
+import { worldRows, portalOpen, PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, sessionDigs, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
 
 import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, walkPose, walkBounce, walkHop, sprintActive, SPRINT_MULTIPLIER, stepStamina, STAMINA_MAX } from "@/lib/movement";
 
@@ -36,7 +37,7 @@ export function WorldCanvas(props: Props) {
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
         velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0; stamina = STAMINA_MAX; staminaBar: Phaser.GameObjects.Graphics | null = null;
         pathTarget = false; walkElapsed = 0; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
-        preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("vernon", vernon); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
+        preload() { this.load.image("garden", garden); this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("vernon", vernon); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
           // Oversized base layer so no empty canvas shows past the map edges while the camera eases.
@@ -89,6 +90,7 @@ export function WorldCanvas(props: Props) {
           const changedZone = this.lastState.split(":")[0] !== s.zone || this.lastState.split(":")[1] !== String(live.current.revision);
           this.lastState = key;
           this.background?.setTexture(s.zone);
+          this.cameras.main.setBounds(0, 0, 1536, worldRows(s.zone) * 64);
           const far = this.player && Math.abs(this.player.x - (s.x + .5) * TILE_SIZE) + Math.abs(this.player.y - (s.y + .5) * TILE_SIZE) > TILE_SIZE * 1.5;
           if (changedZone || force || (far && !this.moving)) { this.boostGeneration++; this.turnUntil = 0; this.path = []; this.trail = []; this.direction = { x: 0, y: 0 }; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.target = null; this.velocity = { x: 0, y: 0 }; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.portals.forEach(p => p.destroy()); this.portals = [];
@@ -97,7 +99,7 @@ export function WorldCanvas(props: Props) {
           const color = (token: string) => P.Display.Color.HexStringToColor(hex(token)).color;
           const at = (p: Position) => [(p.x + .5) * 64, (p.y + .5) * 64] as const;
           const text = (p: Position, t: string, size = 36) => { const o = this.add.text(...at(p), t, { fontSize: `${size}px` }).setOrigin(.5).setDepth(3); this.scenery.push(o); return o; };
-          if (!s.scrolls.includes(s.zone)) {
+          if (s.zone !== "garden" && !s.scrolls.includes(s.zone)) {
             // The scroll hides inside a landscape prop; it only peeks out when Monere is right beside it.
             text(SCROLLS[s.zone], SCROLL_COVERS[s.zone], 52);
             if (Math.abs(SCROLLS[s.zone].x - s.x) + Math.abs(SCROLLS[s.zone].y - s.y) <= SCROLL_REVEAL) {
@@ -107,6 +109,12 @@ export function WorldCanvas(props: Props) {
             }
           }
           const rect = (x: number, y: number, w: number, h: number, c: number, a: number, depth = 1) => { const r = this.add.rectangle(x * 64 + w * 32, y * 64 + h * 32, w * 64, h * 64, c, a).setDepth(depth); this.scenery.push(r); return r; };
+          if (s.zone === "meadow") {
+            const extension = this.add.image(768, 1792, "meadow").setDisplaySize(1536, 512).setDepth(0); this.scenery.push(extension);
+            rect(11, 21, 3, 3, color("--adventure-stone"), .8);
+            rect(11, 24, 3, 5, color("--adventure-stone"), .35);
+            for (const p of [{ x: 5, y: 25 }, { x: 18, y: 25 }, { x: 6, y: 28 }, { x: 17, y: 28 }]) text(p, "🌸", 48);
+          }
           // Map text labels are intentionally disabled: hints live in the quest log and on-tap messages.
           const label = (_p: Position, _t: string) => {};
           const bob = (o: Phaser.GameObjects.Text) => { if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); return o; };
@@ -160,15 +168,16 @@ export function WorldCanvas(props: Props) {
           sessionDigs(s).filter(d => d.zone === s.zone).forEach(d => { const done = s.dug.includes(d.id); const m = this.add.ellipse(...at(d), 46, 20, 0x5a3a1c, done ? .35 : .8).setDepth(2); this.scenery.push(m); if (!done) { const x = text(d, "✖", 22); x.setY(x.y - 2); if (!this.reduced) this.tweens.add({ targets: x, alpha: .4, duration: 800, yoyo: true, repeat: -1 }); } });
           // Fog of war: one soft-edged canvas mask over the whole map. Terrain stays faintly visible underneath,
           // and each explored chunk is erased with a radial gradient so edges blend instead of forming dark blocks.
-          const FOG = 384, k = FOG / 1536; const fogTex = (this.textures.exists("fog") ? this.textures.get("fog") : this.textures.createCanvas("fog", FOG, FOG)) as Phaser.Textures.CanvasTexture;
+          const FOG = 512, k = FOG / (worldRows(s.zone) * 64); const fogTex = (this.textures.exists("fog") ? this.textures.get("fog") : this.textures.createCanvas("fog", FOG, FOG)) as Phaser.Textures.CanvasTexture;
           const ctx = fogTex.getContext(); ctx.globalCompositeOperation = "source-over"; ctx.clearRect(0, 0, FOG, FOG); ctx.fillStyle = "rgba(20, 16, 12, 0.8)"; ctx.fillRect(0, 0, FOG, FOG);
           ctx.globalCompositeOperation = "destination-out";
-          for (let cx = 0; cx < 6; cx++) for (let cy = 0; cy < 6; cy++) if (isRevealed(s, s.zone, cx * 4, cy * 4)) {
+          for (let cx = 0; cx < 6; cx++) for (let cy = 0; cy < worldRows(s.zone) / 4; cy++) if (isRevealed(s, s.zone, cx * 4, cy * 4)) {
             const gx = (cx * 4 + 2) * 64 * k, gy = (cy * 4 + 2) * 64 * k, r = 256 * 1.15 * k; const grad = ctx.createRadialGradient(gx, gy, r * .35, gx, gy, r);
             grad.addColorStop(0, "rgba(0,0,0,1)"); grad.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = grad; ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
           }
           ctx.globalCompositeOperation = "source-over"; fogTex.refresh();
-          if (!this.fog) this.fog = this.add.image(768, 768, "fog").setDisplaySize(1536, 1536).setDepth(7);
+          if (!this.fog) this.fog = this.add.image(0, 0, "fog").setOrigin(0).setDepth(7);
+          this.fog.setDisplaySize(worldRows(s.zone) * 64, worldRows(s.zone) * 64);
           if (s.zone === "lair") {
             if (!s.gates.includes("lair")) { const door = this.add.text((LAIR_DOOR.x + .5) * 64, 10 * 64, s.scrolls.includes("lair") ? "❓" : "🔒", { fontSize: "32px" }).setOrigin(.5).setDepth(4); this.scenery.push(door); }
             DUEL_TILES.forEach((t, i) => {
@@ -210,9 +219,9 @@ export function WorldCanvas(props: Props) {
             }
           }
           PORTALS[s.zone].forEach(p => {
-            const open = !p.forward || s.gates.includes(s.zone);
-            const ring = this.add.text(0, 0, open ? "🌀" : s.scrolls.includes(s.zone) ? "❓" : "🔒", { fontSize: "44px" }).setOrigin(.5);
-            const label = this.add.text(0, 34, p.target === "wood" ? "LONELY WOOD" : p.target === "ravine" ? "SHADOW RAVINE" : p.target === "lair" ? "RAZOR'S LAIR" : "MEADOW", { fontFamily: "Nunito", fontSize: "12px", color: getComputedStyle(document.documentElement).getPropertyValue("--foreground").trim(), backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--background").trim(), padding: { x: 8, y: 4 } }).setOrigin(.5);
+            const open = portalOpen(s, p);
+            const ring = this.add.text(0, 0, p.target === "garden" ? open ? "🌸" : "🔒" : open ? "🌀" : s.scrolls.includes(s.zone) ? "❓" : "🔒", { fontSize: "44px" }).setOrigin(.5);
+            const label = this.add.text(0, 34, p.target === "garden" ? "VERNON’S GARDEN" : p.target === "wood" ? "LONELY WOOD" : p.target === "ravine" ? "SHADOW RAVINE" : p.target === "lair" ? "RAZOR'S LAIR" : "MEADOW", { fontFamily: "Nunito", fontSize: "12px", color: getComputedStyle(document.documentElement).getPropertyValue("--foreground").trim(), backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--background").trim(), padding: { x: 8, y: 4 } }).setOrigin(.5);
             const node = this.add.container((p.x + .5) * 64, (p.y + .5) * 64, [ring, label]).setDepth(4); this.portals.push(node);
           });
         }

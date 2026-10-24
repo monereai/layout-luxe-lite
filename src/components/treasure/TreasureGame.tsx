@@ -6,12 +6,13 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { ZONES, PORTALS, SCROLLS, sessionDigs, npcClue, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, DIG_ENERGY, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, worldPath, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
+import { worldRows, gardenOpen, canEnter, portalOpen, ZONES, PORTALS, SCROLLS, sessionDigs, npcClue, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, DIG_ENERGY, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, worldPath, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
 import { playBackgroundMusic, playSound, resumeBackgroundMusic, setMusicMuted, setSoundsMuted, stopBackgroundMusic } from "@/lib/audio";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
 import { clothingFrames, composeCharacterFrame } from "@/lib/character-art";
 import type { WorldControls, WorldEffect } from "./WorldCanvas";
+import garden from "@/assets/treasure/garden.jpg";
 import meadow from "@/assets/treasure/meadow.jpg";
 import forest from "@/assets/treasure/forest.jpg";
 import ravine from "@/assets/treasure/ravine.jpg";
@@ -32,7 +33,7 @@ import { MAP_ENTRANCES, replayMaze, type MazeDirection } from "@/lib/harvest-maz
 
 const PacmanHarvestMiniGame = lazy(() => import("../PacmanHarvestMiniGame").then(m => ({ default: m.PacmanHarvestMiniGame })));
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
-const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair };
+const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair, garden };
 const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin. Along the way, lift the fog, help friendly villagers, earn explorer gear and let your pet dig for buried treasure!";
 
 export function TreasureGame() {
@@ -94,7 +95,7 @@ export function TreasureGame() {
     try { const c = audio.current ?? new AudioContext(); audio.current = c; void c.resume(); notes.forEach((f, i) => { const o = c.createOscillator(); const g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = f; g.gain.setValueAtTime(.07, c.currentTime + i * .1); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + i * .1 + .35); o.start(c.currentTime + i * .1); o.stop(c.currentTime + i * .1 + .36); }); } catch { /* sound optional */ }
   }
   const chime = () => tone([523, 659, 784]);
-  const zone = ZONES.find(z => z.id === state.zone);
+  const zone = state.zone === "garden" ? { id: "garden", name: "Vernon’s Garden", icon: "🌸" } : ZONES.find(z => z.id === state.zone);
   const gate = gateNear(state.zone, state); const tree = mapTreeNear(state.zone, state);
   const here = gate ? { kind: "orchard-gate" as const, label: `Open ${gate.name}`, icon: gate.icon } : tree ? { kind: "orchard-tree" as const, label: "Harvest Energy Tree", icon: "🌳" } : interactionHere(state);
   async function pick(id: TreeId) {
@@ -143,7 +144,7 @@ export function TreasureGame() {
   }, [state.x, state.y, state.duel, state.zone, blocked]);
 
   async function run(action: Parameters<typeof game.act>[0]) { setBusy(true); try { return await game.act(action); } catch { return null; } finally { setBusy(false); } }
-  const landOpen = (id: ZoneId) => { const i = ZONES.findIndex(z => z.id === id); return i === 0 || state.gates.includes(ZONES[i - 1]!.id); };
+  const landOpen = (id: ZoneId) => canEnter(state, id);
   function walkNear(cur: AdventureState, at: { x: number; y: number }): AdventureState | null {
     if (near(cur, at)) return cur;
     const options = [[0, 1], [0, -1], [1, 0], [-1, 0]].map(([dx, dy]) => worldPath(cur, { x: at.x + dx!, y: at.y + dy! })).filter((p): p is NonNullable<typeof p> => !!p).sort((a, b) => a.length - b.length);
@@ -158,7 +159,14 @@ export function TreasureGame() {
     try {
       let cur: AdventureState = state;
       for (let hop = 0; hop < 6 && cur.zone !== target; hop++) {
-        const ci = ZONES.findIndex(z => z.id === cur.zone), ti = ZONES.findIndex(z => z.id === target);
+        if (cur.zone === "garden" || (cur.zone === "meadow" && target === "garden")) {
+          const nextZone = cur.zone === "garden" ? "meadow" : "garden";
+          const exit = PORTALS[cur.zone].find(p => p.target === nextZone);
+          if (!exit || !walkNear(cur, exit)) { setNotice("Monere can't reach the garden path."); return; }
+          cur = await game.act({ action: "portal", id: nextZone });
+          continue;
+        }
+        const ci = ZONES.findIndex(z => z.id === cur.zone), ti = ZONES.findIndex(z => z.id === (target === "garden" ? "meadow" : target));
         const nextZone = ZONES[ci + (ti > ci ? 1 : -1)]!.id;
         const portal = PORTALS[cur.zone].find(p => p.target === nextZone);
         const at = portal && walkNear(cur, portal); if (!portal || !at) { setNotice("Monere can't find a clear path there yet."); return; }
@@ -197,7 +205,8 @@ export function TreasureGame() {
     if (h.kind === "stay") { const next = await run({ action: "stay" }); if (next?.pet) setNotice("Your pet sits on the paw plate. Now step onto the lion plate!"); return; }
     if (h.kind === "switch") { const next = await run({ action: "switch" }); if (next?.quests.includes("vault")) { chime(); setNotice(game.user ? "Click-clunk! The Stone Vault opens: Sun Stone ☀️ + 40 points!" : "Click-clunk! The Stone Vault opens: Sun Stone ☀️! Sign in to earn the points."); } return; }
     if (h.kind === "portal" && portal) {
-      if (portal.forward && !state.gates.includes(state.zone)) { setNotice(state.scrolls.includes(state.zone) ? "Answer the gatekeeper's riddle to open this gate." : "Find this land's hidden scroll first."); return; }
+      if (!portalOpen(state, portal)) {
+        if (portal.target === "garden") { setNotice("Return all three magic seeds to Vernon to open his garden portal."); return; } setNotice(state.scrolls.includes(state.zone) ? "Answer the gatekeeper's riddle to open this gate." : "Find this land's hidden scroll first."); return; }
       await run({ action: "portal", id: portal.target });
     }
   }
@@ -241,7 +250,7 @@ export function TreasureGame() {
       {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} effect={effect} energy={orchard.energy} onBoost={async mode => { await game.prepareHarvest(); return orchard.boost(mode); }} onMove={game.move} onNotice={setNotice} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
       {companion && <div ref={petRef} className="treasure-pet" data-facing="east" aria-hidden="true"><div className="idle-breath"><div className={celebrate ? "spin-360" : undefined}><img src={companion.src} alt="" draggable={false} /></div></div></div>}
       <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" data-walk-frame="0" aria-hidden="true"><div><div className={celebrate ? "spin-360" : undefined}>{[0, 1, 2, 3, 4, 5, 6, 7].flatMap(frame => [0, 1, 2, 3].map(pose => <img key={`${frame}-${pose}`} data-frame={frame} data-walk-frame={pose} src={turn[frame]?.[pose] ?? avatar} alt="" draggable={false} />))}</div></div></div>
-      <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{state.rescued ? "Griffin rescued" : `Land ${ZONES.findIndex(z => z.id === state.zone) + 1} of 4 · Quest`}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Read the story again" onClick={() => setIntro(true)}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{questClue(state)}</p>
+      <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{state.rescued ? "Griffin rescued" : state.zone === "garden" ? "Vernon’s Garden" : `Land ${ZONES.findIndex(z => z.id === state.zone) + 1} of 4 · Quest`}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Read the story again" onClick={() => setIntro(true)}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{questClue(state)}</p>
         {state.zone === "lair" && state.gates.includes("lair") && !state.rescued && <div className="mt-2 grid grid-cols-3 gap-1 text-center text-xs font-bold">{duelRiddle(state).options.map((t, i) => <span key={t} className="rounded-md border border-primary/40 bg-primary/10 px-1 py-1">{"ABC"[i]}: {t}</span>)}</div>}
         <div className="mt-2 flex gap-1" aria-hidden="true">{ZONES.map(z => <span key={z.id} className={`h-1.5 flex-1 rounded-full ${state.scrolls.includes(z.id) ? "bg-primary" : "bg-muted"}`} />)}</div></div>
       <div className="treasure-map-chip"><span>{zone.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
@@ -267,7 +276,7 @@ export function TreasureGame() {
     <Dialog open={!!npc} onOpenChange={o => { if (!o) setNpc(null); }}><DialogContent className="max-w-md rounded-lg text-center">{npc && (() => { const done = state.quests.includes(npc.id); const have = npc.need.filter(i => state.items.includes(i)).length; const ready = have === npc.need.length; return <>
       <DialogTitle className="text-2xl text-primary">{npc.icon} {npc.name}</DialogTitle><DialogDescription className="font-body text-base text-foreground">“{done ? npc.thanks : npcClue(state, npc)}”</DialogDescription>
       {!done && <p className="text-sm text-muted-foreground">Found {have} of {npc.need.length} · Reward: {npc.gear ? `${GEAR[npc.gear].icon} ${GEAR[npc.gear].name} + ` : npc.item ? `${TREASURES[npc.item]!.icon} ${TREASURES[npc.item]!.name} + ` : ""}{npc.points} points{game.user ? "" : " (sign in to keep points)"}</p>}
-      {done && <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">💡 A gatekeeper's riddle tip: {gateRiddle(state, npc.zone).hint}</p>}
+      {done && npc.id !== "vernon" && <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">💡 A gatekeeper's riddle tip: {gateRiddle(state, npc.zone).hint}</p>}
       {!done && <Button disabled={!ready || busy} onClick={() => void deliver(npc)}>{ready ? "Hand them over" : "Keep searching"}</Button>}
       <Button variant="ghost" onClick={() => setNpc(null)}>Goodbye</Button></>; })()}</DialogContent></Dialog>
 
@@ -278,7 +287,7 @@ export function TreasureGame() {
     <Dialog open={victory}><DialogContent showCloseButton={false} onEscapeKeyDown={e => e.preventDefault()} onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()} className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">Quest Complete!</DialogTitle><DialogDescription>Razor dropped the key and ran off. Your wisdom won the Riddle Duel.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-28 w-28"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="Golden Griffin" width={816} height={816} className="treasure-reward h-28 w-28 object-contain" /></div><p className="flex items-center justify-center gap-2 rounded-lg border border-points/40 bg-points/10 p-3 font-display text-points"><Award className="h-5 w-5" />Badge earned: Griffin Savior</p><p className="text-sm">{game.user ? "The Golden Griffin is now in your Pet Shop — equip it as your companion!" : "Sign in and rescue the Griffin on your account to keep it as a pet."}</p><div className="grid grid-cols-2 gap-2"><Button disabled={busy || game.saving} onClick={() => void finish("play")}>Play Again<ArrowRight /></Button><Button variant="secondary" disabled={busy || game.saving} onClick={() => void finish("menu")}>Main Menu</Button></div><Button variant="outline" onClick={() => window.open(SUPPORTER_PAYMENT_URL, "_blank", "noopener,noreferrer")}>⭐ Support Chapter 2 Development</Button><Button variant="ghost" asChild><Link to={game.user ? "/pet-shop" : "/auth"}>{game.user ? "Meet your Griffin" : "Sign in"}<ArrowRight /></Link></Button></DialogContent></Dialog>
 
     <Dialog open={!!panel} onOpenChange={o => { if (!o) setPanel(null); }}><DialogContent className="max-h-[85dvh] max-w-3xl overflow-y-auto rounded-lg"><DialogTitle className="flex items-center gap-2 text-2xl"><Compass className="text-primary" />{panel === "map" ? "The road to Razor's Lair" : "Rescue Logbook"}</DialogTitle><DialogDescription>{panel === "map" ? "Four lands. Four scrolls. One Golden Griffin. Explore to lift the fog." : `${state.scrolls.length} of 4 scrolls · ${state.gates.length} of 4 riddles · ${state.quests.length} of ${NPCS.length + 1} side quests`}</DialogDescription>
-      {panel === "map" ? <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">{[...ZONES.map(z => ({ id: z.id, name: z.name, subtitle: z.subtitle, img: maps[z.id], open: landOpen(z.id), here: !side && state.zone === z.id, go: () => void journey(z.id), lock: "Solve the previous gate riddle" })), ...ELEMENTAL_GATES.map(g => ({ id: g.target, name: SIDE_ZONES[g.target].name, subtitle: `Through the ${g.name}${gateEnergyCost(g.target) ? ` · needs ${gateEnergyCost(g.target)} Energy` : ""}`, img: g.target === "grove" ? groveImg : cavernsImg, open: landOpen(g.zone), here: side === g.target, go: () => void journey(g.zone, g.target), lock: `Reach ${ZONES.find(z => z.id === g.zone)?.name} first` }))].map(n => <button key={n.id} type="button" disabled={!n.open || n.here || travelling} onClick={n.go} className="overflow-hidden rounded-lg border border-border text-left transition hover:border-primary disabled:cursor-default disabled:hover:border-border"><img src={n.img} alt="" width={1536} height={1536} loading="lazy" className={`aspect-square w-full object-cover ${n.open ? "" : "opacity-40 grayscale"}`} /><div className="p-3"><h2 className="text-base">{n.name}</h2><p className="mt-1 text-xs text-muted-foreground">{n.subtitle}</p><p className="mt-2 flex items-center gap-2 text-xs text-primary">{n.open ? <><Check className="h-4 w-4" />{n.here ? "Exploring now" : "Tap to travel"}</> : <><LockKeyhole className="h-4 w-4" />{n.lock}</>}</p></div></button>)}</div>
+      {panel === "map" ? <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">{[...([...ZONES, { id: "garden" as const, name: "Vernon’s Garden", subtitle: "Beyond Meadow’s southern bridge" }]).map(z => ({ id: z.id, name: z.name, subtitle: z.subtitle, img: maps[z.id], open: landOpen(z.id), here: !side && state.zone === z.id, go: () => void journey(z.id), lock: z.id === "garden" ? "Return all three seeds to Vernon" : "Solve the previous gate riddle" })), ...ELEMENTAL_GATES.map(g => ({ id: g.target, name: SIDE_ZONES[g.target].name, subtitle: `Through the ${g.name}${gateEnergyCost(g.target) ? ` · needs ${gateEnergyCost(g.target)} Energy` : ""}`, img: g.target === "grove" ? groveImg : cavernsImg, open: landOpen(g.zone), here: side === g.target, go: () => void journey(g.zone, g.target), lock: `Reach ${ZONES.find(z => z.id === g.zone)?.name} first` }))].map(n => <button key={n.id} type="button" disabled={!n.open || n.here || travelling} onClick={n.go} className="overflow-hidden rounded-lg border border-border text-left transition hover:border-primary disabled:cursor-default disabled:hover:border-border"><img src={n.img} alt="" width={1536} height={1536} loading="lazy" className={`aspect-square w-full object-cover ${n.open ? "" : "opacity-40 grayscale"}`} /><div className="p-3"><h2 className="text-base">{n.name}</h2><p className="mt-1 text-xs text-muted-foreground">{n.subtitle}</p><p className="mt-2 flex items-center gap-2 text-xs text-primary">{n.open ? <><Check className="h-4 w-4" />{n.here ? "Exploring now" : "Tap to travel"}</> : <><LockKeyhole className="h-4 w-4" />{n.lock}</>}</p></div></button>)}</div>
       : <div className="grid gap-3 sm:grid-cols-2">{ZONES.map(z => { const has = state.scrolls.includes(z.id); return <div key={z.id} className={`rounded-lg border p-3 ${has ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30"}`}><span className="mb-2 block text-3xl">{has ? "📜" : "🔒"}</span><h2 className="text-base">{has ? SCROLLS[z.id].name : "Undiscovered scroll"}</h2><p className="mt-1 text-xs text-muted-foreground">{has ? SCROLLS[z.id].lore : z.name}</p>{state.gates.includes(z.id) && <p className="mt-2 text-xs text-primary">Riddle solved ✓</p>}</div>; })}
         <div className={`rounded-lg border p-3 sm:col-span-2 ${state.rescued ? "border-points/40 bg-points/10" : "border-border"}`}><p className="flex items-center gap-2 font-display text-lg"><Award className="h-5 w-5 text-points" />Griffin Savior badge</p><p className="text-sm text-muted-foreground">{state.rescued ? "Earned! You rescued the Golden Griffin." : "Win Razor's Riddle Duel to earn it."}</p></div>
         <div className="rounded-lg border border-primary/30 p-3 sm:col-span-2"><h2 className="font-display text-lg text-primary">Main quest</h2><p className="mt-1 font-body text-sm">{questClue(state)}</p></div>
@@ -292,14 +301,14 @@ export function TreasureGame() {
 
 /** Fog-of-war mini-map of the current land: explored chunks, friends, portals and Monere. */
 function MiniMap({ state, className }: { state: AdventureState; className?: string }) {
-  const chunks = Array.from({ length: 36 }, (_, i) => i);
+  const chunks = Array.from({ length: worldRows(state.zone) / 4 * 6 }, (_, i) => i);
   return <div className={`overflow-hidden rounded-lg border-2 border-primary/50 bg-background/80 shadow-lg ${className ?? ""}`} aria-label="Mini-map">
-    <svg viewBox="0 0 24 24" className="block aspect-square w-full"><image href={maps[state.zone]} x="0" y="0" width="24" height="24" preserveAspectRatio="none" />
+    <svg viewBox={`0 0 24 ${worldRows(state.zone)}`} className="block aspect-square w-full"><image href={maps[state.zone]} x="0" y="0" width="24" height="24" preserveAspectRatio="none" />
       {chunks.map(c => !isRevealed(state, state.zone, (c % 6) * 4, Math.floor(c / 6) * 4) && <rect key={c} x={(c % 6) * 4} y={Math.floor(c / 6) * 4} width="4.05" height="4.05" className="fill-muted" opacity=".92" />)}
       {PORTALS[state.zone].filter(p => isRevealed(state, state.zone, p.x, p.y)).map(p => <circle key={p.target} cx={p.x + .5} cy={p.y + .5} r=".9" className="fill-energy" />)}
       {NPCS.filter(n => n.zone === state.zone && isRevealed(state, state.zone, n.x, n.y)).map(n => <circle key={n.id} cx={n.x + .5} cy={n.y + .5} r=".8" className="fill-points" />)}
       <circle cx={state.x + .5} cy={state.y + .5} r="1.1" className="fill-primary stroke-foreground" strokeWidth=".3" />
     </svg>
-    <p className="bg-background/90 px-2 py-0.5 text-center text-[10px] font-bold uppercase text-primary">{ZONES.find(z => z.id === state.zone)?.name}</p>
+    <p className="bg-background/90 px-2 py-0.5 text-center text-[10px] font-bold uppercase text-primary">{state.zone === "garden" ? "Vernon’s Garden" : ZONES.find(z => z.id === state.zone)?.name}</p>
   </div>;
 }
