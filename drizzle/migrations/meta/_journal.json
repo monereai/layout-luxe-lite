@@ -407,6 +407,13 @@
       "when": 1792781033316,
       "tag": "0057_griffin_bell_in_meadow",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1792827717088,
+      "tag": "0058_maze_free_daily_limit",
+      "breakpoints": true
     }
   ]
 }
