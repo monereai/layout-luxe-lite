@@ -1,3 +1,9 @@
+# Chapter 1 final upgrades
+- [ ] Add fluid validated movement, corner assistance, walking animation, sprint and dash Energy costs.
+- [ ] Save secure session-randomized hunt locations and matching clues without breaking quest dependencies.
+- [ ] Show Chapter 1 completion at Razor's door, daily roaming CTA and external Stripe supporter link.
+- [ ] Persist hunt state and local high scores; verify rules and browser flows with isolated data.
+
 # Orchard harvesting maze
 - [x] Confirmed the user's requests were refused by the daily harvest ledger, not tester access. Exact authenticated Crystal daily-limit refusal now opens no-reward practice; other denials remain blocked. Twenty tests pass and isolated browser verifies real practice maze/closure at both entrances with unchanged Energy. Real signed-in replay remains unverified; Carl's account untouched.
 - [x] Crystal Gate and World Map Crystal entry mount the maze directly and never render the cavern/tree screen, including entry failure and completed harvest. Seventeen tests pass; isolated browser verifies both entrances at zero Energy, real maze canvas and closure back at the gate. Carl's account untouched; signed-in settlement remains unverified.
