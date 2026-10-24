@@ -14,3 +14,4 @@
 - Continue Daily Hunts refreshes only key-fragment targets once per UTC day at the chapter door and preserves equipment, gates and reward-ledger references. Why: renewed exploration must not replay account rewards.
 - Visible quest seeds render above the fog layer while collected-item filtering still removes them; pickup locations and prerequisites stay mirrored in authenticated SQL. Why: visible objectives must remain discoverable without bypassing collection validation.
 - Garden travel uses the main saved adventure and v6 authenticated movement/portal actions; the bridge extension uses zone-specific bounds and Vernon’s completed delivery unlock. Why: a new optional land must preserve progress and cannot bypass quest validation.
+- Feather the Meadow extension over the existing southern bank without rescaling its original terrain; garden artwork retains collision-aligned landmarks. Why: continuous scenery must not move the bridge or change saved paths.
