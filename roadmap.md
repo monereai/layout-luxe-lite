@@ -1,3 +1,6 @@
+# Vernon's scattered seeds
+- [ ] Place exactly three visible seeds outside Meadow, mirror pickups in authenticated rules and verify collection and delivery.
+
 # Vernon by the bridge
 - [x] Vernon the Gardener stands 10% larger beside the Meadow bridge on the north bank, clear of every item, seed, dig and hunt spot; migration 0064 moves his server-verified talk/deliver spot to the same tile.
 - [x] Guest and signed-in QA browsers walk to the bridge, open his seed quest with no server refusal, and the meadow build stays clean.
