@@ -28,14 +28,11 @@ it("keeps Treasure Hunt out of every main menu", () => {
   for (const menu of menus) expect(menu.textContent).not.toContain("Treasure Hunt");
 });
 
-it("offers the adventure as its own link, between the Points Shop and the Pet Shop", () => {
+it("hides the adventure card while the Griffin game is closed", () => {
   render(<AppShell><p>page</p></AppShell>);
   const aside = document.querySelector('aside[aria-label="Points Shop"]');
   expect(aside).not.toBeNull();
   const hrefs = Array.from(aside!.querySelectorAll("a")).map(a => a.getAttribute("href"));
-  expect(hrefs.indexOf("/treasure")).toBeGreaterThan(hrefs.indexOf("/shop"));
-  expect(hrefs.indexOf("/treasure")).toBeLessThan(hrefs.indexOf("/pet-shop"));
-  const griffin = screen.getAllByRole("link", { name: "The Golden Griffin · Chapter 1" });
-  expect(griffin.length).toBeGreaterThan(0);
-  expect(griffin[0]?.getAttribute("href")).toBe("/treasure");
+  expect(hrefs).not.toContain("/treasure");
+  expect(screen.queryAllByRole("link", { name: "The Golden Griffin · Chapter 1" })).toHaveLength(0);
 });

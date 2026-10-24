@@ -63,15 +63,10 @@ export function useOrchardEnergy() {
       return result.allowed;
     } finally { spending.current = false; }
   }
-  /** Pet digs cost Energy too: server-deducted for accounts, mirrored from the local bar for guests. */
-  function spendDig() {
-    if (!care.user) {
-      if (guestBalance.current < DIG_ENERGY) return false;
-      saveGuest(guestBalance.current - DIG_ENERGY);
-      return true;
-    }
+  /** Pet digs reward Energy: server-granted for accounts, mirrored into the local bar for guests. */
+  function gainDig() {
+    if (!care.user) { saveGuest(Math.min(100, guestBalance.current + DIG_ENERGY)); return; }
     void care.refetch();
-    return true;
   }
   async function beginGarden() { return care.user ? (await gardenStart()).id : "guest"; }
   async function gardenAction(round: string, trace: GardenInput[], finish: boolean) {
@@ -90,5 +85,5 @@ export function useOrchardEnergy() {
     if (finish) { void care.refetch(); void plan.refresh(); }
     return result;
   }
-  return { energy, cool, beginMaze, finishMaze, boost, spendDig, beginGarden, gardenAction, guest: !care.user };
+  return { energy, cool, beginMaze, finishMaze, boost, gainDig, beginGarden, gardenAction, guest: !care.user };
 }
