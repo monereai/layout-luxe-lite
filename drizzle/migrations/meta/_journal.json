@@ -449,6 +449,13 @@
       "when": 1792859066901,
       "tag": "0063_griffin_vernon_gardener",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1792860047547,
+      "tag": "0064_vernon_by_the_bridge",
+      "breakpoints": true
     }
   ]
 }
