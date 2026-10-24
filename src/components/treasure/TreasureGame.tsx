@@ -27,6 +27,7 @@ import cavernsImg from "@/assets/treasure/caverns.jpg";
 import petShopMark from "@/assets/shop/pet-shop.png";
 import { saveHarvestRecord } from "@/lib/harvest-records";
 import { SUPPORTER_PAYMENT_URL } from "@/lib/supporter";
+import { createWalkingFrames } from "@/lib/walking-frames";
 import { MAP_ENTRANCES, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 
 const PacmanHarvestMiniGame = lazy(() => import("../PacmanHarvestMiniGame").then(m => ({ default: m.PacmanHarvestMiniGame })));
@@ -63,7 +64,7 @@ export function TreasureGame() {
   const orchard = useOrchardEnergy();
   const audio = useRef<AudioContext | null>(null);
   const [avatar, setAvatar] = useState("/monere/looks/default/0.webp");
-  const [turn, setTurn] = useState<Record<number, string>>({});
+  const [turn, setTurn] = useState<Record<number, string[]>>({});
   const shop = useShop();
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +74,8 @@ export function TreasureGame() {
     else void composeCharacterFrame(src, clothingFrames(extras, 0), 0).then(image => { if (!cancelled) setAvatar(image); }).catch(() => { if (!cancelled) setAvatar(src); });
     void Promise.all([0, 1, 2, 3, 4, 5, 6, 7].map(async frame => {
       const base = `/monere/looks/${look}/${frame}.webp`;
-      return [frame, extras.length ? await composeCharacterFrame(base, clothingFrames(extras, frame), frame).catch(() => base) : base] as const;
+      const source = extras.length ? await composeCharacterFrame(base, clothingFrames(extras, frame), frame).catch(() => base) : base;
+      return [frame, await createWalkingFrames(source).catch(() => [source, source, source, source])] as const;
     })).then(entries => { if (!cancelled) setTurn(Object.fromEntries(entries)); });
     return () => { cancelled = true; };
   }, [shop.equipped]);
@@ -226,7 +228,7 @@ export function TreasureGame() {
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         <span className="treasure-energy" aria-label={`Energy ${orchard.energy} of 100`} title="Energy"><Zap className="h-4 w-4" /><span><span style={{ width: `${orchard.energy}%` }} /></span><span className="hidden text-sm sm:inline">{orchard.energy}</span></span>
         <span className="flex items-center gap-1.5 font-display text-lg text-points" aria-label={`${state.scrolls.length} of 4 scrolls collected`}><ScrollText className="h-4 w-4" />{state.scrolls.length}<span className="text-xs text-muted-foreground">/4</span></span>
-        <Button size="sm" variant="outline" className="gap-1.5 border-points/50 text-points" title="Support Project" aria-label="Support Project" onClick={() => setSupport(true)}><span aria-hidden="true">⭐</span><span className="hidden lg:inline">Support Project</span></Button>
+        <Button size="sm" variant="outline" className="gap-1.5 border-points/50 text-points" title="Support Project" aria-label="Support Project" onClick={() => window.open(SUPPORTER_PAYMENT_URL, "_blank", "noopener,noreferrer")}><span aria-hidden="true">⭐</span><span className="hidden lg:inline">Support Project</span></Button>
         <Button size="icon" variant="ghost" title={music ? "Turn music off" : "Turn music on"} aria-label={music ? "Turn music off" : "Turn music on"} aria-pressed={music} onClick={() => { const next = !music; setMusic(next); setMusicMuted(!next); try { localStorage.setItem("monere-treasure-music", next ? "on" : "off"); } catch { /* storage optional */ } }}>{music ? <Music /> : <Music2 className="opacity-40" />}</Button>
         <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); setSoundsMuted(sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
         <Button size="icon" variant="outline" aria-label="Open world map" title="World map" onClick={() => setPanel("map")}><Map /></Button>
@@ -235,16 +237,16 @@ export function TreasureGame() {
     </header>
     <div className="treasure-viewport">
       <img src={maps[state.zone]} alt="" width={1536} height={1536} className="absolute inset-0 h-full w-full object-cover" />
-      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} effect={effect} onBoost={async mode => { await game.prepareHarvest(); return orchard.boost(mode); }} onMove={game.move} onNotice={setNotice} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
+      {game.loaded ? <ClientOnly><Suspense fallback={<div className="treasure-loading">Preparing your adventure…</div>}><WorldCanvas state={state} revision={game.revision} avatar={avatar} controls={controls} figure={figure} pet={petRef} effect={effect} energy={orchard.energy} onBoost={async mode => { await game.prepareHarvest(); return orchard.boost(mode); }} onMove={game.move} onNotice={setNotice} onInteract={() => void interact()} /></Suspense></ClientOnly> : <div className="treasure-loading">{game.error ? <Button onClick={() => void game.retry()}>Reconnect to your adventure</Button> : "Opening your adventure…"}</div>}
       {companion && <div ref={petRef} className="treasure-pet" data-facing="east" aria-hidden="true"><div className="idle-breath"><div className={celebrate ? "spin-360" : undefined}><img src={companion.src} alt="" draggable={false} /></div></div></div>}
-      <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" aria-hidden="true"><div className="idle-breath"><div className={celebrate ? "spin-360" : undefined}>{[0, 1, 2, 3, 4, 5, 6, 7].map(frame => <img key={frame} data-frame={frame} src={turn[frame] ?? avatar} alt="" draggable={false} />)}</div></div></div>
+      <div ref={figure} className="treasure-monere" data-facing="south" data-moving="false" data-walk-frame="0" aria-hidden="true"><div><div className={celebrate ? "spin-360" : undefined}>{[0, 1, 2, 3, 4, 5, 6, 7].flatMap(frame => [0, 1, 2, 3].map(pose => <img key={`${frame}-${pose}`} data-frame={frame} data-walk-frame={pose} src={turn[frame]?.[pose] ?? avatar} alt="" draggable={false} />))}</div></div></div>
       <div className="treasure-quest"><div className="flex items-center gap-2 text-primary"><ScrollText className="h-5 w-5" /><span className="text-xs font-bold uppercase">{state.rescued ? "Griffin rescued" : `Land ${ZONES.findIndex(z => z.id === state.zone) + 1} of 4 · Quest`}</span><Button size="icon" variant="ghost" className="ml-auto h-7 w-7" aria-label="Read the story again" onClick={() => setIntro(true)}><BookOpen className="h-4 w-4" /></Button></div><p className="mt-1 font-body text-sm leading-relaxed">{questClue(state)}</p>
         {state.zone === "lair" && state.gates.includes("lair") && !state.rescued && <div className="mt-2 grid grid-cols-3 gap-1 text-center text-xs font-bold">{duelRiddle(state).options.map((t, i) => <span key={t} className="rounded-md border border-primary/40 bg-primary/10 px-1 py-1">{"ABC"[i]}: {t}</span>)}</div>}
         <div className="mt-2 flex gap-1" aria-hidden="true">{ZONES.map(z => <span key={z.id} className={`h-1.5 flex-1 rounded-full ${state.scrolls.includes(z.id) ? "bg-primary" : "bg-muted"}`} />)}</div></div>
       <div className="treasure-map-chip"><span>{zone.icon}</span><span>{state.x}, {state.y}</span><span className="text-primary">{game.saving ? "Saving…" : game.user ? "Account saved" : "Guest adventure"}</span></div>
       <MiniMap state={state} className="absolute right-3 top-14 z-20 hidden w-32 sm:block" />
       <Link to="/pet-shop" title="Pet Shop" aria-label="Pet Shop" className="treasure-petshop"><img src={petShopMark} alt="" width={816} height={816} loading="lazy" draggable={false} /><span>Pet Shop</span></Link>
-      {side === "grove" && <SideZone key={`${side}-${sideReset}`} zone={side} avatar={turn[2] ?? avatar} paused={!!harvestMaze || busy} cooling={orchard.cool} onPick={async id => { await pick(id); }} onExit={() => { setSide(null); setNotice("Back on the main path."); }} />}
+      {side === "grove" && <SideZone key={`${side}-${sideReset}`} zone={side} avatar={turn[2]?.[0] ?? avatar} paused={!!harvestMaze || busy} cooling={orchard.cool} onPick={async id => { await pick(id); }} onExit={() => { setSide(null); setNotice("Back on the main path."); }} />}
       {side === "caverns" && !harvestMaze && <div className="treasure-loading" role="status">Opening the Crystal Maze…</div>}
       {notice && <div role="status" className="treasure-notice">{notice}</div>}
       <div className="treasure-controls">

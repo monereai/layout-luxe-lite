@@ -9,5 +9,6 @@
 - Save-specific huntSpots select three key-fragment digs from the shared twelve-coordinate pool; SQL generates and validates account placements while existing progressed saves retain their old positions. Why: replayability must not strand gear quests or invalidate saved collections.
 - Harvest best scores are account-keyed local display records, never a source for Energy or account rewards. Why: local persistence must not become a payment or reward authority.
 - Supporter buttons use the shared SUPPORTER_PAYMENT_URL configuration and open a separate tab without granting benefits. Why: donations remain separate from membership and wallet purchases.
+- Active WorldCanvas drives independent timed walking poses generated from equipped turnaround art, and reads the shared Energy balance before sprinting. Why: directional frames must not masquerade as a walk cycle or allow boosts after Energy runs out.
 
 - Continue Daily Hunts refreshes only key-fragment targets once per UTC day at the chapter door and preserves equipment, gates and reward-ledger references. Why: renewed exploration must not replay account rewards.

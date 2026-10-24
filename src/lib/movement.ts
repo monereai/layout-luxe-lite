@@ -1,4 +1,15 @@
-export const SPRINT_MULTIPLIER = 1.7;
+export const SPRINT_MULTIPLIER = 1.5;
+export const WALK_FRAME_MS = 120;
+/** Pose timing is separate from the eight directional artwork frames. */
+export function walkPose(elapsedMs: number, active: boolean) {
+  return active ? Math.floor(Math.max(0, elapsedMs) / WALK_FRAME_MS) % 4 : 0;
+}
+export function walkBounce(timeSeconds: number, moving: boolean) {
+  return moving ? Math.sin(timeSeconds * 12) * 3 : 0;
+}
+export function sprintActive(shift: boolean, moving: boolean, energy: number, stamina: number, paidUntil: number, now: number) {
+  return shift && moving && energy > 0 && stamina > 0 && now < paidUntil;
+}
 export const SPRINT_ENERGY_PER_SECOND = 1;
 export const DASH_ENERGY = 5;
 export const CORNER_MARGIN = 10;

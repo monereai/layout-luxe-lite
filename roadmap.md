@@ -1,3 +1,7 @@
+# Active player animation fix
+- [x] Active WorldCanvas cycles generated standing/walking poses every 120ms, applies moving-only three-pixel bounce, and uses 1.5x Energy-gated sprint; tile collision helpers unchanged.
+- [x] Guest preview verifies movement, sprint Energy drain/zero-Energy fallback, immediate position/inventory/door reload saves and direct HUD/Razor Stripe actions. All 351 tests pass; preview build OK. Authenticated Energy spending uses the unchanged atomic path; not retested this turn. Carl untouched.
+
 # Chapter 1 finalization checks
 - [x] Refine vector acceleration, release friction, buffered ten-pixel corners and safe stamina boost scheduling with bounded retries.
 - [x] Save accepted progression immediately; verify guest reload, fresh daily targets, preserved equipment/gates and Razor Door completion.

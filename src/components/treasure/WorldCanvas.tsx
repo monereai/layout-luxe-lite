@@ -9,11 +9,11 @@ import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
 import { PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, sessionDigs, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
 
-import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, SPRINT_MULTIPLIER, stepStamina, STAMINA_MAX } from "@/lib/movement";
+import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, walkPose, walkBounce, sprintActive, SPRINT_MULTIPLIER, stepStamina, STAMINA_MAX } from "@/lib/movement";
 
 export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
-type Props = { state: AdventureState; revision: number; avatar: string; controls: MutableRefObject<WorldControls | null>; onBoost: (mode: "sprint" | "dash") => Promise<boolean>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void; onNotice: (message: string) => void; effect: WorldEffect };
+type Props = { state: AdventureState; revision: number; avatar: string; energy: number; controls: MutableRefObject<WorldControls | null>; onBoost: (mode: "sprint" | "dash") => Promise<boolean>; onMove: (position: Position) => void; figure: MutableRefObject<HTMLDivElement | null>; pet: MutableRefObject<HTMLDivElement | null>; onInteract: () => void; onNotice: (message: string) => void; effect: WorldEffect };
 export function WorldCanvas(props: Props) {
   const host = useRef<HTMLDivElement>(null);
   const live = useRef(props); live.current = props;
@@ -34,7 +34,7 @@ export function WorldCanvas(props: Props) {
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
         velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0; stamina = STAMINA_MAX; staminaBar: Phaser.GameObjects.Graphics | null = null;
-        pathTarget = false; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
+        pathTarget = false; walkElapsed = 0; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
         preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
@@ -222,7 +222,7 @@ export function WorldCanvas(props: Props) {
           this.retryAt[mode] = this.time.now + boostRetryDelay(mode);
           const generation = this.boostGeneration;
           this.boosting = true;
-          try { if (await live.current.onBoost(mode) && generation === this.boostGeneration && !this.paused) { if (mode === "dash") this.dashUntil = this.time.now + 220; else this.sprintUntil = this.time.now + 1000; } }
+          try { if (await live.current.onBoost(mode) && generation === this.boostGeneration && !this.paused) { if (mode === "dash") this.dashUntil = this.time.now + 220; else if (this.keys?.['SHIFT']?.isDown) this.sprintUntil = this.time.now + 1000; } }
           catch { /* ordinary movement remains available */ } finally { this.boosting = false; }
         }
         override update(_time: number, delta: number) {
@@ -246,12 +246,13 @@ export function WorldCanvas(props: Props) {
               this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
             }
           }
-          const wantsSprint = !this.paused && !!this.target && !!keys?.['SHIFT']?.isDown && this.stamina > 0;
-          this.stamina = stepStamina(this.stamina, wantsSprint && this.time.now < this.sprintUntil, !this.target && !this.direction.x && !this.direction.y, dt);
-          this.drawStamina();
-          if (wantsSprint && this.time.now >= this.sprintUntil) void this.boost("sprint");
-          const multiplier = this.time.now < this.dashUntil ? 3 : wantsSprint && this.time.now < this.sprintUntil ? SPRINT_MULTIPLIER : 1;
           const intent = !this.paused && (dx || dy || this.pathTarget || this.path.length || this.time.now < this.turnUntil);
+          const wantsSprint = !this.paused && !!this.target && !!intent && !!keys?.['SHIFT']?.isDown && this.stamina > 0 && live.current.energy > 0;
+          const sprinting = sprintActive(wantsSprint, !!this.target, live.current.energy, this.stamina, this.sprintUntil, this.time.now);
+          this.stamina = stepStamina(this.stamina, sprinting, !intent && Math.hypot(this.velocity.x, this.velocity.y) < 2, dt);
+          if (wantsSprint && this.time.now >= this.sprintUntil) void this.boost("sprint");
+          const multiplier = this.time.now < this.dashUntil ? 3 : sprinting && this.stamina > 0 ? SPRINT_MULTIPLIER : 1;
+          live.current.figure.current?.setAttribute("data-speed-multiplier", String(multiplier));
           const speed = this.target && intent ? 305 * multiplier : 0;
           const offset = this.target ? { x: this.target.x - p.x, y: this.target.y - p.y } : { x: 0, y: 0 };
           const distance = Math.hypot(offset.x, offset.y);
@@ -272,12 +273,13 @@ export function WorldCanvas(props: Props) {
           }
           this.moving = !!this.target && Math.hypot(this.velocity.x, this.velocity.y) > 2;
           this.animate();
+          this.drawStamina();
         }
         drawStamina() {
           const p = this.player; if (!p) return;
           this.staminaBar ??= this.add.graphics().setDepth(9999);
           const g = this.staminaBar; g.clear();
-          if (this.stamina >= STAMINA_MAX && !this.input.keyboard?.keys?.some((k: any) => k?.keyCode === 16 && k.isDown)) return;
+          if (this.paused || (this.stamina >= STAMINA_MAX && !this.keys?.['SHIFT']?.isDown)) return;
           const w = 44, x = p.x - w / 2, y = p.y - 52;
           g.fillStyle(0x000000, .45).fillRoundedRect(x - 1, y - 1, w + 2, 7, 3);
           g.fillStyle(this.stamina < 25 ? 0xff7a59 : 0x00e5ff, 1).fillRoundedRect(x, y, w * this.stamina / STAMINA_MAX, 5, 2);
@@ -286,8 +288,9 @@ export function WorldCanvas(props: Props) {
           const p = this.player; const el = live.current.figure.current; if (!p) return;
           const keys = this.keys;
           const held = !!(this.direction.x || this.direction.y || ["LEFT", "RIGHT", "UP", "DOWN", "W", "A", "S", "D"].some(k => keys?.[k]?.isDown));
-          const walking = this.moving;
-          void held;
+          const walking = !this.paused && this.moving;
+          const cycleActive = !this.paused && (walking || held);
+          this.walkElapsed = cycleActive ? this.walkElapsed + this.game.loop.delta : 0;
           const cam = this.cameras.main;
           this.shadow?.setPosition(p.x, p.y + 4);
           if (el) {
@@ -299,13 +302,13 @@ export function WorldCanvas(props: Props) {
             const diff = ((target - this.yaw + 540) % 360) - 180;
             this.yaw = (this.yaw + diff * Math.min(1, this.game.loop.delta / 70) + 360) % 360;
             el.dataset["frame"] = String(Math.round(this.yaw / 45) % 8);
+            el.dataset["walkFrame"] = String(walkPose(this.walkElapsed, cycleActive && !this.reduced));
             el.dataset["moving"] = walking ? "true" : "false";
             const body = el.firstElementChild as HTMLElement | null;
             if (body) {
-              body.classList.remove("walk-bounce"); body.classList.toggle("idle-breath", !walking);
-              this.phase += this.game.loop.delta / 1000 * 14;
-              const wave = walking && !this.reduced ? Math.sin(this.phase) : 0;
-              body.style.transform = walking ? `translateY(${-Math.abs(wave) * 4}px) scale(${1 + wave * .025}, ${1 - wave * .025})` : "";
+              body.classList.remove("walk-bounce", "idle-breath");
+              const bounce = walkBounce(this.time.now / 1000, walking && !this.reduced);
+              body.style.transform = `translateY(${bounce}px)`;
             }
           }
           // Companion follows the path Monere walked half a second ago.
