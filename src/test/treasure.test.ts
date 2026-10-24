@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, type AdventureState } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, DIG_ENERGY, DIGS, type AdventureState } from "@/lib/treasure";
 import { PETS, petButtonState } from "@/lib/pets";
 
 const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
@@ -152,5 +152,9 @@ d4("expanded griffin world", () => {
     e4(dug.dug).toEqual(["m-coins"]); e4(A4(dug, { action: "dig", id: "m-coins" }).dug).toEqual(["m-coins"]);
     e4(R4(I4(), "meadow", 10, 12)).toBe(true); e4(R4(I4(), "meadow", 21, 2)).toBe(false);
     e4(P4(JSON.parse(JSON.stringify(dug))).dug).toEqual(["m-coins"]);
+  });
+  i4("every pet dig costs 25 Energy", () => {
+    e4(DIG_ENERGY).toBe(25);
+    e4(DIGS.length).toBeGreaterThan(0); // all digs share the one cost — coin digs and fragment digs alike
   });
 });

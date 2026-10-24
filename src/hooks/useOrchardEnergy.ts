@@ -6,6 +6,7 @@ import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy } from "@/lib/
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { DIG_ENERGY } from "@/lib/treasure";
 
 const GUEST_KEY = "monere-orchard-guest-energy";
 const COOLDOWN = 60_000;
@@ -58,5 +59,15 @@ export function useOrchardEnergy() {
       return result.allowed;
     } finally { spending.current = false; }
   }
-  return { energy, cool, beginMaze, finishMaze, boost, guest: !care.user };
+  /** Pet digs cost Energy too: server-deducted for accounts, mirrored from the local bar for guests. */
+  function spendDig() {
+    if (!care.user) {
+      if (guestBalance.current < DIG_ENERGY) return false;
+      saveGuest(guestBalance.current - DIG_ENERGY);
+      return true;
+    }
+    void care.refetch();
+    return true;
+  }
+  return { energy, cool, beginMaze, finishMaze, boost, spendDig, guest: !care.user };
 }

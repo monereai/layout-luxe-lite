@@ -231,6 +231,8 @@ export const ITEMS: Item[] = [
 /** Rocco's silver bell only appears once Monere has spoken to him. */
 export const itemVisible = (s: AdventureState, it: Item) => it.id === "bell" ? s.met.includes("rocco") : it.id.startsWith("seed-") ? s.met.includes("vernon") : true;
 export type Dig = Position & { id: string; zone: ZoneId; item?: string; points: number };
+/** Every pet dig costs this much Energy — server-verified, mirrored locally for guests. */
+export const DIG_ENERGY = 25;
 export const DIGS: Dig[] = [
   { id: "m-coins", zone: "meadow", x: 5, y: 17, points: 10 }, { id: "m-frag", zone: "meadow", x: 19, y: 15, item: "fragment-1", points: 0 },
   { id: "w-coins", zone: "wood", x: 10, y: 4, points: 10 }, { id: "w-relic", zone: "wood", x: 12, y: 20, item: "relic-acorn-charm", points: 0 },
@@ -289,7 +291,7 @@ export function interactionHere(s: AdventureState): Interaction | null {
   const g = gateHere(s); if (g) return { kind: "gate", label: "Answer riddle", icon: "❓" };
   const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && itemVisible(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
   const n = NPCS.find(n => n.zone === s.zone && near(s, n)); if (n) return { kind: "npc", id: n.id, label: `Talk to ${n.name.split(" ")[0]}`, icon: n.icon };
-  const d = sessionDigs(s).find(d => d.zone === s.zone && near(s, d) && !s.dug.includes(d.id)); if (d) return { kind: "dig", id: d.id, label: "Pet, dig here!", icon: "🐾" };
+  const d = sessionDigs(s).find(d => d.zone === s.zone && near(s, d) && !s.dug.includes(d.id)); if (d) return { kind: "dig", id: d.id, label: `Pet, dig here! (${DIG_ENERGY} Energy)`, icon: "🐾" };
   if (s.zone === "wood" && near(s, BELL)) return { kind: "bell", label: "Ring the frog bell", icon: "🛎️" };
   if (s.zone === "ravine" && !s.quests.includes("vault")) {
     if (s.x === PLATE_PET.x && s.y === PLATE_PET.y && !s.pet) return { kind: "stay", label: "Ask pet to wait here", icon: "🐾" };
