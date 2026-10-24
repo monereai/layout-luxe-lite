@@ -27,4 +27,10 @@ export function advanceAlong(current: Vector, target: Vector, speed: number, sec
   if (!distance) return { ...target };
   const travel = Math.min(distance, Math.max(0, speed) * Math.max(0, seconds));
   return { x: current.x + dx / distance * travel, y: current.y + dy / distance * travel };
+}export const STAMINA_MAX = 100, STAMINA_DRAIN_PER_SECOND = 35, STAMINA_RECHARGE_PER_SECOND = 25;
+/** Sprint stamina drains while Shift sprinting and recharges only while idle. */
+export function stepStamina(stamina: number, sprinting: boolean, idle: boolean, seconds: number) {
+  const t = Math.max(0, seconds);
+  const next = sprinting ? stamina - STAMINA_DRAIN_PER_SECOND * t : idle ? stamina + STAMINA_RECHARGE_PER_SECOND * t : stamina;
+  return Math.min(STAMINA_MAX, Math.max(0, next));
 }

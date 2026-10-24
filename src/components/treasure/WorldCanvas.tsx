@@ -9,7 +9,7 @@ import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
 import { PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, sessionDigs, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
 
-import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, SPRINT_MULTIPLIER } from "@/lib/movement";
+import { advanceAlong, easeVector, slideDirection, cornerTurn, boostRetryDelay, SPRINT_MULTIPLIER, stepStamina, STAMINA_MAX } from "@/lib/movement";
 
 export type WorldEffect = { kind: "gust" | "victory" | null; n: number };
 export type WorldControls = { direction: (x: number, y: number) => void; release: () => void; pause: (paused: boolean) => void; seek: (position: Position) => void };
@@ -33,7 +33,7 @@ export function WorldCanvas(props: Props) {
         keys: Record<string, Phaser.Input.Keyboard.Key> | undefined;
         direction = { x: 0, y: 0 }; paused = false; moving = false; path: Position[] = []; lastState = ""; avatarKey = "lion"; serial = 0;
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
-        velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0;
+        velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0; stamina = STAMINA_MAX; staminaBar: Phaser.GameObjects.Graphics | null = null;
         pathTarget = false; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
         preload() { this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
@@ -246,7 +246,9 @@ export function WorldCanvas(props: Props) {
               this.facing = next.x > s.x ? "east" : next.x < s.x ? "west" : next.y < s.y ? "north" : "south";
             }
           }
-          const wantsSprint = !this.paused && !!this.target && !!keys?.['SHIFT']?.isDown;
+          const wantsSprint = !this.paused && !!this.target && !!keys?.['SHIFT']?.isDown && this.stamina > 0;
+          this.stamina = stepStamina(this.stamina, wantsSprint && this.time.now < this.sprintUntil, !this.target && !this.direction.x && !this.direction.y, dt);
+          this.drawStamina();
           if (wantsSprint && this.time.now >= this.sprintUntil) void this.boost("sprint");
           const multiplier = this.time.now < this.dashUntil ? 3 : wantsSprint && this.time.now < this.sprintUntil ? SPRINT_MULTIPLIER : 1;
           const intent = !this.paused && (dx || dy || this.pathTarget || this.path.length || this.time.now < this.turnUntil);
@@ -270,6 +272,15 @@ export function WorldCanvas(props: Props) {
           }
           this.moving = !!this.target && Math.hypot(this.velocity.x, this.velocity.y) > 2;
           this.animate();
+        }
+        drawStamina() {
+          const p = this.player; if (!p) return;
+          this.staminaBar ??= this.add.graphics().setDepth(9999);
+          const g = this.staminaBar; g.clear();
+          if (this.stamina >= STAMINA_MAX) return;
+          const w = 44, x = p.x - w / 2, y = p.y - 52;
+          g.fillStyle(0x000000, .45).fillRoundedRect(x - 1, y - 1, w + 2, 7, 3);
+          g.fillStyle(this.stamina < 25 ? 0xff7a59 : 0x00e5ff, 1).fillRoundedRect(x, y, w * this.stamina / STAMINA_MAX, 5, 2);
         }
         animate() {
           const p = this.player; const el = live.current.figure.current; if (!p) return;
