@@ -412,6 +412,8 @@
 .treasure-monere img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .06s linear; }
 .treasure-monere[data-frame="0"] img[data-frame="0"], .treasure-monere[data-frame="1"] img[data-frame="1"], .treasure-monere[data-frame="2"] img[data-frame="2"], .treasure-monere[data-frame="3"] img[data-frame="3"], .treasure-monere[data-frame="4"] img[data-frame="4"], .treasure-monere[data-frame="5"] img[data-frame="5"], .treasure-monere[data-frame="6"] img[data-frame="6"], .treasure-monere[data-frame="7"] img[data-frame="7"] { opacity: 1; }
 .treasure-monere:not([data-frame]) img[data-frame="0"] { opacity: 1; }
+.treasure-monere img[data-walk-frame] { visibility: hidden; }
+.treasure-monere[data-walk-frame="0"] img[data-walk-frame="0"], .treasure-monere[data-walk-frame="1"] img[data-walk-frame="1"], .treasure-monere[data-walk-frame="2"] img[data-walk-frame="2"], .treasure-monere[data-walk-frame="3"] img[data-walk-frame="3"] { visibility: visible; }
 .walk-bounce { animation: walk-bounce .42s ease-in-out infinite; }
 .idle-breath { animation: idle-breath 2.6s ease-in-out infinite; }
 @keyframes walk-bounce { 0% { transform: translateY(0) rotate(-4deg) scale(1.06, .92); } 25% { transform: translateY(-9%) rotate(0deg) scale(.96, 1.06); } 50% { transform: translateY(0) rotate(4deg) scale(1.06, .92); } 75% { transform: translateY(-9%) rotate(0deg) scale(.96, 1.06); } 100% { transform: translateY(0) rotate(-4deg) scale(1.06, .92); } }
