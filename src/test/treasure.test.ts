@@ -105,6 +105,13 @@ d4("expanded griffin world", () => {
     s = { ...s, items: [...s.items, "feather-3"] };
     e4(A4(s, { action: "deliver", id: "barnaby" }).gear).toEqual(["lantern"]);
   });
+  i4("Vernon's seeds appear only after talking to him, and 3 seeds complete his quest", () => {
+    const seed = at4({ x: 3, y: 14 });
+    e4(A4(seed, { action: "pick", id: "seed-1" }).items).toEqual([]);
+    e4(A4({ ...seed, met: ["vernon"] }, { action: "pick", id: "seed-1" }).items).toEqual(["seed-1"]);
+    const s = at4({ x: 6, y: 12, items: ["seed-1", "seed-2", "seed-3"] });
+    e4(A4(s, { action: "deliver", id: "vernon" }).quests).toEqual(["vernon"]);
+  });
   i4("dark cave needs the Lantern", () => {
     e4(C4(at4({ zone: "wood" }), 19, 4)).toBe(false);
     e4(C4(at4({ zone: "wood", gear: ["lantern"] }), 19, 4)).toBe(true);
