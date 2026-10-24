@@ -20,7 +20,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
   const retry = useRef<(() => void) | null>(null);
   useEffect(() => {
     if (!mount) return;
-    let state = newGarden(), elapsed = 0, alive = true, working = false;
+    let state = newGarden(), elapsed = 0, alive = true, working = false, started = false;
     trace.current = []; stopped.current = false;
     const css = getComputedStyle(document.documentElement);
     const token = (name: string) => Phaser.Display.Color.ValueToColor(css.getPropertyValue(name).trim()).color;
@@ -53,6 +53,8 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
       }
       override update(_time: number, dt: number) {
         if (stopped.current || working || document.hidden) return;
+        if (command.current || direction.current !== "idle") started = true;
+        if (!started) return;
         elapsed += Math.min(dt, GARDEN_TICK_MS);
         if (elapsed < GARDEN_TICK_MS) return;
         elapsed -= GARDEN_TICK_MS;
