@@ -1,5 +1,5 @@
 # Seed pathway visibility
-- [ ] Move all three seeds to clear non-green ground outside Meadow, mirror validated pickup positions and verify collection.
+- [x] Move all three seeds onto clear sand/stone outside Meadow; active v6 pickup positions mirrored by migration 0068, preserving existing collected seeds. Guest preview collected and delivered all three; 32 adventure tests and build pass. Authenticated collection not retested; server coordinates verified and Carl untouched.
 
 # New-area graphics
 - [x] Match garden and bridge-extension artwork to Meadow, feather the join and reset texture dimensions on zone changes; guest delivery/entry/reload/return screenshots pass, 31 adventure tests pass and preview build OK.
