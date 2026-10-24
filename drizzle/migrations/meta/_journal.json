@@ -435,6 +435,13 @@
       "when": 1792855293560,
       "tag": "0061_chapter_hunt_fresh_targets",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1792857709497,
+      "tag": "0062_fix_pet_dig_items",
+      "breakpoints": true
     }
   ]
 }
