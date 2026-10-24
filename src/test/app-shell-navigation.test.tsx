@@ -37,5 +37,5 @@ it("offers the adventure as its own link, between the Points Shop and the Pet Sh
   expect(hrefs.indexOf("/treasure")).toBeLessThan(hrefs.indexOf("/pet-shop"));
   const griffin = screen.getAllByRole("link", { name: "The Golden Griffin · Chapter 1" });
   expect(griffin.length).toBeGreaterThan(0);
-  expect(griffin[0].getAttribute("href")).toBe("/treasure");
+  expect(griffin[0]?.getAttribute("href")).toBe("/treasure");
 });
