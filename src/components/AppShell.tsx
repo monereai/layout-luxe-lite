@@ -15,6 +15,7 @@ import { useGame } from "@/lib/game";
 import { usePointsWallet } from "@/hooks/usePointsWallet";
 import shopMark from "@/assets/shop/store-front.png";
 import petShopMark from "@/assets/shop/pet-shop.png";
+import griffinMark from "@/assets/pets/golden-griffin.png";
 import crossAsset from "@/assets/monere-cross.png.asset.json";
 
 import { useWebMCP } from "use-webmcp-tool";
@@ -24,7 +25,6 @@ import { GuestRewardHost, GuestPointsTransfer } from "@/components/GuestSignupMo
 
 const allTabs = [
   { to: "/", label: "talk", icon: BookOpen },
-  { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -33,7 +33,6 @@ const allTabs = [
 
 const allMenuItems = [
   { to: "/", label: "talk", icon: BookOpen },
-  { to: "/treasure", label: "treasure", icon: Compass },
   { to: "/daily", label: "daily", icon: Sun },
   { to: "/journal", label: "journal", icon: BookHeart },
   { to: "/find", label: "game", icon: Search },
@@ -41,10 +40,14 @@ const allMenuItems = [
   { to: "/shop", label: "shop", icon: Coins },
 ] as const;
 
+/** Title of the adventure link shown in the right-hand column, between the two shops. */
+const GRIFFIN_TITLE = "The Golden Griffin · Chapter 1";
+
 export function AppShell({ children, hideCrisisBar = false, adventure = false }: { children: ReactNode; hideCrisisBar?: boolean; adventure?: boolean }) {
   const { tester } = useTreasureAccess();
   const tabs = visibleAdventureNavigation(allTabs, undefined, tester);
   const menuItems = visibleAdventureNavigation(allMenuItems, undefined, tester);
+  const showGriffin = visibleAdventureNavigation([{ to: "/treasure" }], undefined, tester).length > 0;
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -75,21 +78,23 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
     annotations: { readOnlyHint: true },
     execute: () => runWebMCPTool("read_header_status", () => `Page: ${location.pathname}. Shop Points: ${wallet}. ${user ? `Membership: ${tier}. Energy: ${energy == null ? "loading" : `${energy}%`}.` : "Signed out; energy and membership are unavailable."}`),
   });
+  const adventureItem = showGriffin ? [{ to: "/treasure" as const, label: "treasure" as const }] : [];
+  const mcpItems = [...menuItems, ...adventureItem];
   useWebMCP({
     name: "navigate_monere",
-    description: "Open a page allowed by MonereAI's visible menu, or Monere’s Daily Dilemma.",
-    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...menuItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
+    description: "Open a page allowed by MonereAI's visible menu, The Golden Griffin · Chapter 1, or Monere’s Daily Dilemma.",
+    inputSchema: { type: "object", properties: { page: { type: "string", enum: [...mcpItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
       if (page === "dilemma") {
         setMenuOpen(false);
         await navigate({ to: "/", search: { dilemma: 1 } });
         return `Opened ${t("dailyDilemma")}.`;
       }
-      const item = menuItems.find(item => item.to === page);
+      const item = mcpItems.find(item => item.to === page);
       if (typeof page !== "string" || !item) throw new Error("Choose a page from the visible menu.");
       setMenuOpen(false);
       await navigate({ to: item.to });
-      return `Opened ${t(item.label)}.`;
+      return `Opened ${item.to === "/treasure" ? GRIFFIN_TITLE : t(item.label)}.`;
     }),
   });
   return (
@@ -168,6 +173,14 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
                 <span className="text-sm font-semibold text-primary">{t("shop")}</span>
               </Link>
             </div>
+            {showGriffin && (
+              <div className="border-b border-border py-5">
+                <Link to="/treasure" title={GRIFFIN_TITLE} aria-label={GRIFFIN_TITLE} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
+                  <img src={griffinMark} alt="The Golden Griffin" width={816} height={816} loading="lazy" className="h-[11.25rem] w-[11.25rem] max-w-full" />
+                  <span className="text-center text-sm font-semibold text-primary">{GRIFFIN_TITLE}</span>
+                </Link>
+              </div>
+            )}
             {(
               <div className="border-b border-border py-5">
                 <Link to="/pet-shop" title={t("petShop")} aria-label={`${t("petShop")}: ${t("petShopSub")}`} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
@@ -178,6 +191,20 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
               </div>
             )}
           </aside>
+          {showGriffin && (
+            <Link
+              to="/treasure"
+              title={GRIFFIN_TITLE}
+              aria-label={GRIFFIN_TITLE}
+              className="mt-6 flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10 md:hidden"
+            >
+              <img src={griffinMark} alt="The Golden Griffin" width={816} height={816} loading="lazy" className="h-24 w-24 shrink-0 max-w-full" />
+              <span className="min-w-0">
+                <span className="block text-base font-semibold text-primary">{GRIFFIN_TITLE}</span>
+                <span className="mt-1 block text-xs leading-snug text-muted-foreground">Find the hidden scrolls, solve the riddles, rescue the Griffin.</span>
+              </span>
+            </Link>
+          )}
           {(
             <Link
               to="/pet-shop"
