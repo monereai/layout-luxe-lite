@@ -173,6 +173,14 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
                 <span className="text-sm font-semibold text-primary">{t("shop")}</span>
               </Link>
             </div>
+            {showGriffin && (
+              <div className="border-b border-border py-5">
+                <Link to="/treasure" title={GRIFFIN_TITLE} aria-label={GRIFFIN_TITLE} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
+                  <img src={griffinMark} alt="The Golden Griffin" width={816} height={816} loading="lazy" className="h-[11.25rem] w-[11.25rem] max-w-full" />
+                  <span className="text-center text-sm font-semibold text-primary">{GRIFFIN_TITLE}</span>
+                </Link>
+              </div>
+            )}
             {(
               <div className="border-b border-border py-5">
                 <Link to="/pet-shop" title={t("petShop")} aria-label={`${t("petShop")}: ${t("petShopSub")}`} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10">
@@ -183,6 +191,20 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
               </div>
             )}
           </aside>
+          {showGriffin && (
+            <Link
+              to="/treasure"
+              title={GRIFFIN_TITLE}
+              aria-label={GRIFFIN_TITLE}
+              className="mt-6 flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10 md:hidden"
+            >
+              <img src={griffinMark} alt="The Golden Griffin" width={816} height={816} loading="lazy" className="h-24 w-24 shrink-0 max-w-full" />
+              <span className="min-w-0">
+                <span className="block text-base font-semibold text-primary">{GRIFFIN_TITLE}</span>
+                <span className="mt-1 block text-xs leading-snug text-muted-foreground">Find the hidden scrolls, solve the riddles, rescue the Griffin.</span>
+              </span>
+            </Link>
+          )}
           {(
             <Link
               to="/pet-shop"
