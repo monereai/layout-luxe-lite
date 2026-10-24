@@ -1,5 +1,5 @@
 # New-area graphics
-- [ ] Match garden and bridge-extension artwork to Meadow and remove the visible join; verify both in the preview.
+- [x] Match garden and bridge-extension artwork to Meadow, feather the join and reset texture dimensions on zone changes; guest delivery/entry/reload/return screenshots pass, 31 adventure tests pass and preview build OK.
 
 # Vernon's garden portal
 - [x] Extended Meadow beyond its bridge; returning three seeds unlocks Vernon's new garden land with saved, validated v6 travel.
