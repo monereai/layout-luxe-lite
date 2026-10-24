@@ -58,5 +58,15 @@ export function useOrchardEnergy() {
       return result.allowed;
     } finally { spending.current = false; }
   }
-  return { energy, cool, beginMaze, finishMaze, boost, guest: !care.user };
+  /** Pet digs cost Energy too: server-deducted for accounts, mirrored from the local bar for guests. */
+  function spendDig() {
+    if (!care.user) {
+      if (guestBalance.current < DIG_ENERGY) return false;
+      saveGuest(guestBalance.current - DIG_ENERGY);
+      return true;
+    }
+    void care.refetch();
+    return true;
+  }
+  return { energy, cool, beginMaze, finishMaze, boost, spendDig, guest: !care.user };
 }
