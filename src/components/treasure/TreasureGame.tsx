@@ -51,6 +51,9 @@ export function TreasureGame() {
   const [busy, setBusy] = useState(false);
   const [sound, setSound] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
+  const [chapter, setChapter] = useState(false);
+  const [support, setSupport] = useState(false);
+  const chapterShown = useRef(false);
   const [side, setSide] = useState<SideZoneId | null>(null);
   const [travelling, setTravelling] = useState(false);
   const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
@@ -74,7 +77,7 @@ export function TreasureGame() {
     return () => { cancelled = true; };
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
-  const blocked = !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || victory || busy;
+  const blocked = !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
   useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
   useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
@@ -83,6 +86,14 @@ export function TreasureGame() {
   useEffect(() => { const on = (() => { try { return localStorage.getItem("monere-treasure-music") !== "off"; } catch { return true; } })(); setMusic(on); setMusicMuted(!on); const start = () => resumeBackgroundMusic(); window.addEventListener("pointerdown", start); window.addEventListener("keydown", start); return () => { window.removeEventListener("pointerdown", start); window.removeEventListener("keydown", start); stopBackgroundMusic(); }; }, []);
   useEffect(() => { playBackgroundMusic(side ? SIDE_ZONES[side].music : state.zone === "lair" ? "lair_theme.mp3" : state.zone === "ravine" ? "desert_theme.mp3" : "forest_theme.mp3"); }, [state.zone, side]);
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
+  // Chapter 1 ends at Razor's Lair: celebrate the first arrival, once per device.
+  useEffect(() => {
+    if (!game.loaded || state.zone !== "lair" || chapterShown.current) return;
+    chapterShown.current = true;
+    let seen = false;
+    try { seen = localStorage.getItem("monere-ch1-complete") === "seen"; } catch { /* storage optional */ }
+    if (!seen) { setChapter(true); try { localStorage.setItem("monere-ch1-complete", "seen"); } catch { /* storage optional */ } }
+  }, [state.zone, game.loaded]);
   function tone(notes: number[]) {
     if (!sound) return;
     try { const c = audio.current ?? new AudioContext(); audio.current = c; void c.resume(); notes.forEach((f, i) => { const o = c.createOscillator(); const g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value = f; g.gain.setValueAtTime(.07, c.currentTime + i * .1); g.gain.exponentialRampToValueAtTime(.001, c.currentTime + i * .1 + .35); o.start(c.currentTime + i * .1); o.stop(c.currentTime + i * .1 + .36); }); } catch { /* sound optional */ }
@@ -172,7 +183,7 @@ export function TreasureGame() {
     if (tree) { await pick(tree.id); return; }
     const h = interactionHere(state);
     if (!h) {
-      if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
+      if (state.zone === "lair" && near(state, { x: 12, y: 10 }) && !state.gates.includes("lair")) { if (state.scrolls.includes("lair")) setChapter(true); else setNotice("The carved door is locked. Find the Scroll of Wisdom first."); return; }
       setNotice("Nothing here. Explore the fog, talk to friends and follow your quest scroll."); return;
     }
     if (h.kind === "scroll") { const next = await run({ action: "collect" }); if (next?.scrolls.includes(state.zone)) { chime(); setFound(state.zone); } return; }
@@ -220,6 +231,7 @@ export function TreasureGame() {
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         <span className="treasure-energy" aria-label={`Energy ${orchard.energy} of 100`} title="Energy"><Zap className="h-4 w-4" /><span><span style={{ width: `${orchard.energy}%` }} /></span><span className="hidden text-sm sm:inline">{orchard.energy}</span></span>
         <span className="flex items-center gap-1.5 font-display text-lg text-points" aria-label={`${state.scrolls.length} of 4 scrolls collected`}><ScrollText className="h-4 w-4" />{state.scrolls.length}<span className="text-xs text-muted-foreground">/4</span></span>
+        <Button size="sm" variant="outline" className="gap-1.5 border-points/50 text-points" title="Support the project" aria-label="Support the project" onClick={() => setSupport(true)}><span aria-hidden="true">⭐</span><span className="hidden sm:inline">Support</span></Button>
         <Button size="icon" variant="ghost" title={music ? "Turn music off" : "Turn music on"} aria-label={music ? "Turn music off" : "Turn music on"} aria-pressed={music} onClick={() => { const next = !music; setMusic(next); setMusicMuted(!next); try { localStorage.setItem("monere-treasure-music", next ? "on" : "off"); } catch { /* storage optional */ } }}>{music ? <Music /> : <Music2 className="opacity-40" />}</Button>
         <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); setSoundsMuted(sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
         <Button size="icon" variant="outline" aria-label="Open world map" title="World map" onClick={() => setPanel("map")}><Map /></Button>
@@ -260,6 +272,10 @@ export function TreasureGame() {
       {done && <p className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-primary">💡 A gatekeeper's riddle tip: {gateRiddle(state, npc.zone).hint}</p>}
       {!done && <Button disabled={!ready || busy} onClick={() => void deliver(npc)}>{ready ? "Hand them over" : "Keep searching"}</Button>}
       <Button variant="ghost" onClick={() => setNpc(null)}>Goodbye</Button></>; })()}</DialogContent></Dialog>
+
+    <Dialog open={chapter} onOpenChange={setChapter}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">Monere: Chapter 1 Complete!</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">You have successfully navigated the Lost Lands and unlocked the Crystal Caverns! Chapter 2: The Rescue of the Golden Griffin is currently under active development.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-24 w-24"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="The Golden Griffin" width={816} height={816} className="treasure-reward h-24 w-24 object-contain" /></div><div className="grid gap-2"><Button onClick={() => { setChapter(false); setSupport(true); }}>Support Chapter 2 Development<ArrowRight /></Button><Button variant="secondary" onClick={() => setChapter(false)}>Continue Exploring Chapter 1</Button></div></DialogContent></Dialog>
+
+    <Dialog open={support} onOpenChange={setSupport}><DialogContent className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">⭐ Support the Project</DialogTitle><DialogDescription className="font-body text-base leading-relaxed text-foreground">MonereAI is built with love for every young explorer. Your support through Monere Plus or Club keeps the adventure growing — and funds Chapter 2!</DialogDescription><Button asChild><Link to="/shop" onClick={() => setSupport(false)}>Open the Points Shop<ArrowRight /></Link></Button><Button variant="ghost" onClick={() => setSupport(false)}>Maybe later</Button></DialogContent></Dialog>
 
     <Dialog open={victory}><DialogContent showCloseButton={false} onEscapeKeyDown={e => e.preventDefault()} onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()} className="max-w-md rounded-lg text-center"><DialogTitle className="text-2xl text-primary">Quest Complete!</DialogTitle><DialogDescription>Razor dropped the key and ran off. Your wisdom won the Riddle Duel.</DialogDescription><div className="flex items-end justify-center gap-2"><div className="h-28 w-28"><MonereFigure gesture="thumbs" /></div><img src={griffin} alt="Golden Griffin" width={816} height={816} className="treasure-reward h-28 w-28 object-contain" /></div><p className="flex items-center justify-center gap-2 rounded-lg border border-points/40 bg-points/10 p-3 font-display text-points"><Award className="h-5 w-5" />Badge earned: Griffin Savior</p><p className="text-sm">{game.user ? "The Golden Griffin is now in your Pet Shop — equip it as your companion!" : "Sign in and rescue the Griffin on your account to keep it as a pet."}</p><div className="grid grid-cols-2 gap-2"><Button disabled={busy || game.saving} onClick={() => void finish("play")}>Play Again<ArrowRight /></Button><Button variant="secondary" disabled={busy || game.saving} onClick={() => void finish("menu")}>Main Menu</Button></div><Button variant="ghost" asChild><Link to={game.user ? "/pet-shop" : "/auth"}>{game.user ? "Meet your Griffin" : "Sign in"}<ArrowRight /></Link></Button></DialogContent></Dialog>
 
