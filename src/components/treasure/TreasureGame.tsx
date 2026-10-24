@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { worldRows, gardenOpen, canEnter, portalOpen, ZONES, PORTALS, SCROLLS, sessionDigs, npcClue, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, DIG_ENERGY, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, worldPath, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
+import { worldRows, canEnter, portalOpen, ZONES, PORTALS, SCROLLS, sessionDigs, npcClue, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, DIG_ENERGY, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, worldPath, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
 import { playBackgroundMusic, playSound, resumeBackgroundMusic, setMusicMuted, setSoundsMuted, stopBackgroundMusic } from "@/lib/audio";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
@@ -178,7 +178,7 @@ export function TreasureGame() {
         if (!walkNear(cur, g.at)) { setNotice(`Monere can't reach the ${g.name} from here.`); return; }
         if (!canOpenGate(orchard.energy, g.target)) { setNotice(`The ${g.name} is sealed. Monere needs ${gateEnergyCost(g.target)} Energy to open it.`); return; }
         await enterSide(gateTo);
-      } else setNotice(`Welcome to ${ZONES.find(z => z.id === target)?.name}!`);
+      } else setNotice(`Welcome to ${target === "garden" ? "Vernon’s Garden" : ZONES.find(z => z.id === target)?.name}!`);
     } finally { setTravelling(false); }
   }
   async function interact() {
