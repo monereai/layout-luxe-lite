@@ -442,6 +442,13 @@
       "when": 1792857709497,
       "tag": "0062_fix_pet_dig_items",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1792859066901,
+      "tag": "0063_griffin_vernon_gardener",
+      "breakpoints": true
     }
   ]
 }
