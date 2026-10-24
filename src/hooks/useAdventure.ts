@@ -8,8 +8,8 @@ import { applyAdventure, initialAdventure, parseAdventure, randomRiddles, validR
 import { loadPets } from "@/lib/pets";
 import { playSound } from "@/lib/audio";
 import { drawHuntSpots } from "@/lib/chapter-hunts";
+import { saveAdventure, loadGuestAdventure } from "@/lib/adventure-storage";
 
-const GUEST_KEY = "monere-griffin-guest-v1";
 export function useAdventure() {
   const { user, ready, refresh } = usePlan();
   const run = useServerFn(adventureAction);
@@ -25,21 +25,19 @@ export function useAdventure() {
   const queue = useRef<Promise<unknown>>(Promise.resolve());
   const generation = useRef(0);
   const resetting = useRef(false);
-  function update(next: AdventureState) { current.current = next; setState(next); }
+  function update(next: AdventureState) { current.current = next; setState(next); saveAdventure(next, user?.id); }
   useEffect(() => {
     generation.current++; steps.current = []; queue.current = Promise.resolve(); setLoaded(false);
     if (!ready) return;
     if (!user) {
       // New guest playthroughs draw their own riddles and answer order.
-      let raw: unknown = null; try { raw = JSON.parse(localStorage.getItem(GUEST_KEY) ?? "null"); } catch { raw = null; }
-      const parsed = parseAdventure(raw);
+      const { raw, state: parsed } = loadGuestAdventure();
       const next = validRiddles((raw as { riddles?: unknown } | null)?.riddles) ? parsed : { ...parsed, riddles: randomRiddles() };
       update(raw ? next : { ...next, huntSpots: drawHuntSpots(Math.random, [], ["meadow"]) });
       setRevision(v => v + 1); setLoaded(true);
     }
   }, [user?.id, ready]);
   useEffect(() => { if (query.data && user) { update(query.data.state); setLoaded(true); setRevision(v => v + 1); } }, [query.data, user?.id]);
-  useEffect(() => { if (loaded) { try { localStorage.setItem(user ? `monere-treasure-cache-${user.id}` : GUEST_KEY, JSON.stringify(state)); } catch { /* keep playing */ } } }, [state, loaded, user?.id]);
   function enqueue<T>(work: () => Promise<T>): Promise<T> {
     const identity = generation.current;
     const pending = queue.current.catch(() => {}).then(async () => { if (identity !== generation.current) throw new Error("Account changed"); return work(); });
@@ -89,7 +87,7 @@ export function useAdventure() {
       const result = user ? await run({ data: { action: "restart" } }) : { state: applyAdventure(current.current, { action: "restart" }), griffin: false, points: 0 };
       if (identity !== generation.current) return false;
       update(result.state); client.setQueryData(key, result);
-      try { localStorage.setItem(user ? `monere-treasure-cache-${user.id}` : GUEST_KEY, JSON.stringify(result.state)); } catch { /* storage unavailable */ }
+      saveAdventure(result.state, user?.id);
       setRevision(v => v + 1);
       return true;
     } catch (e) { toast.error(e instanceof Error ? e.message : "Could not restart your adventure."); return false; }

@@ -206,7 +206,7 @@ export function TreasureGame() {
     if (!riddle) return;
     if (i !== gateRiddle(state, riddle).answer) { setWrong(i); tone([330, 247]); return; }
     setBusy(true);
-    try { await game.act({ action: "answer", id: riddle, x: i }); playSound("success.mp3", 0.6); setRiddle(null); setNotice(riddle === "lair" ? "The inner door rumbles open. Razor awaits!" : "Correct! The gate swings open."); }
+    try { const next = await game.act({ action: "answer", id: riddle, x: i }); if (!next.gates.includes(riddle)) { setNotice("That answer couldn't be saved. Please try again."); return; } playSound("success.mp3", 0.6); setRiddle(null); setNotice(riddle === "lair" ? "The inner door rumbles open. Razor awaits!" : "Correct! The gate swings open."); }
     catch { setNotice("That answer couldn't be saved. Please try again."); } finally { setBusy(false); }
   }
   const action = here?.label ?? "Search";
