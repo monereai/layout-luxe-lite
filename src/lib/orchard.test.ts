@@ -17,6 +17,22 @@ describe("energy orchards", () => {
   });
 });
 
+describe("free maze entry limit", () => {
+  const fakeStorage = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v) }; };
+  it("allows exactly 2 guest entries per UTC day, then refuses", () => {
+    const s = fakeStorage();
+    expect(takeGuestMazeEntry("2026-10-24", s)).toBe(true);
+    expect(takeGuestMazeEntry("2026-10-24", s)).toBe(true);
+    expect(takeGuestMazeEntry("2026-10-24", s)).toBe(false);
+    expect(FREE_MAZE_ENTRIES_PER_DAY).toBe(2);
+  });
+  it("resets on a new UTC day", () => {
+    const s = fakeStorage();
+    takeGuestMazeEntry("2026-10-24", s); takeGuestMazeEntry("2026-10-24", s);
+    expect(takeGuestMazeEntry("2026-10-25", s)).toBe(true);
+  });
+});
+
 import { SIDE_ZONES as SZ, sideWalkable as sw, sideHazard as sh } from "./orchard";
 test("side land entrances are safe and every tree is reachable", () => {
   for (const z of ["grove", "caverns"] as const) {
