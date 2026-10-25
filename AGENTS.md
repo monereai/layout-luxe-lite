@@ -54,3 +54,4 @@
 - Orchard side lands remain dead ends; maze rewards use authenticated round ownership, deterministic server replay and service-only atomic settlement sharing the UTC tree ledger; client-only Phaser never grants account Energy. Why: prevent forged harvests, replay farming and quest bypass.
 
 - Hunts/boosts use pure rules and protected SQL; saves persist synchronously, caches/high scores are mirrors. Garden barrel rules and safety live in src/components/treasure/AGENTS.md. Why: prevent lost progress or forged rewards.
+- html/body are pinned fixed with overflow hidden for the mobile PWA fullscreen lock; page scrolling lives in each route's outer `body > div` container (styles.css), and scroll-to-top code must scroll that container, not window. Why: the app has no #root, so fixing body would otherwise clip all page content.
