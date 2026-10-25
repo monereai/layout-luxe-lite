@@ -23,14 +23,14 @@ export const Route = createFileRoute("/treasure")({
   component: AdventureHome,
 });
 function AdventureHome() {
-  const { allowed, checking } = useTreasureAccess();
+  const { allowed, checking, tester } = useTreasureAccess();
   usePaymentReturn();
   const { dilemma } = Route.useSearch();
   const [open, setOpen] = useState(false);
   useEffect(() => { if (allowed && dilemma === 1) setOpen(true); }, [dilemma, allowed]);
   return (
     <AppShell adventure>
-      {checking ? <p role="status" className="text-center text-muted-foreground">Checking adventure access…</p> : allowed ? <TreasureGame /> : <TreasureConstructionGate />}
+      {checking ? <p role="status" className="text-center text-muted-foreground">Checking adventure access…</p> : allowed ? <TreasureGame developer={tester} /> : <TreasureConstructionGate />}
       {allowed && <DailyDilemmaModal open={open} onOpenChange={setOpen} />}
     </AppShell>
   );

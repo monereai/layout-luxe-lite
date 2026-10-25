@@ -22,6 +22,16 @@ export const getTreasureAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => ({ tester: await verifiedTester(context.supabase, context.userId) }));
 
+export const resetDeveloperAdventure = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    if (!await verifiedTester(context.supabase, context.userId)) throw new Error("Developer access required.");
+    const result = await context.supabase.rpc("treasure_dev_reset");
+    if (result.error) throw new Error(result.error.message);
+    const value = z.object({ state: z.unknown() }).parse(result.data);
+    return { state: parseAdventure(value.state), griffin: false, points: 0 };
+  });
+
 export const startGardenGame = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {

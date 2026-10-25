@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { usePlan } from "./usePlan";
-import { adventureAction } from "@/lib/treasure.functions";
+import { adventureAction, resetDeveloperAdventure } from "@/lib/treasure.functions";
 import { applyAdventure, initialAdventure, randomRiddles, validRiddles, type AdventureAction, type AdventureState, type Position } from "@/lib/treasure";
 import { loadPets } from "@/lib/pets";
 import { playSound } from "@/lib/audio";
@@ -13,6 +13,7 @@ import { saveAdventure, loadGuestAdventure } from "@/lib/adventure-storage";
 export function useAdventure() {
   const { user, ready, refresh } = usePlan();
   const run = useServerFn(adventureAction);
+  const runDeveloperReset = useServerFn(resetDeveloperAdventure);
   const client = useQueryClient();
   const key = ["treasure", user?.id ?? "guest"];
   const query = useQuery({ queryKey: key, queryFn: () => run({ data: { action: "status" } }), enabled: ready && !!user, staleTime: Infinity, refetchOnWindowFocus: false });
@@ -77,14 +78,14 @@ export function useAdventure() {
       } catch (e) { if (action.action === "answer") throw e; await recover(e); throw e; } finally { setSaving(false); }
     });
   }
-  async function restart() {
-    if (resetting.current || !current.current.rescued) return false;
+  async function restart(developer = false) {
+    if (resetting.current || !loaded || (developer ? !user : !current.current.rescued)) return false;
     resetting.current = true; steps.current = []; setSaving(true);
     const identity = generation.current;
     try {
       await queue.current.catch(() => {});
       if (identity !== generation.current) return false;
-      const result = user ? await run({ data: { action: "restart" } }) : { state: applyAdventure(current.current, { action: "restart" }), griffin: false, points: 0 };
+      const result = developer ? await runDeveloperReset() : user ? await run({ data: { action: "restart" } }) : { state: applyAdventure(current.current, { action: "restart" }), griffin: false, points: 0 };
       if (identity !== generation.current) return false;
       update(result.state); client.setQueryData(key, result);
       saveAdventure(result.state, user?.id);
