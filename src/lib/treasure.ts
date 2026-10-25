@@ -224,9 +224,9 @@ export const NPCS: Npc[] = [
   { id: "barnaby", zone: "meadow", x: 14, y: 8, name: "Barnaby the Owl", icon: "🦉", ask: "Hoo! The wind blew 3 of my golden feathers across the Meadow and into Lonely Wood. Find them and I'll lend you my Lantern.", thanks: "My feathers! Take this Lantern — it lights the dark cave in Lonely Wood.", hint: "A gatekeeper's riddle tip: the answer keeps time, tick-tock!", need: ["feather-1", "feather-2", "feather-3"], gear: "lantern", points: 30 },
   { id: "pippa", zone: "wood", x: 9, y: 9, name: "Pippa the Squirrel", icon: "🐿️", ask: "I lost 3 golden acorns! One rolled back to the Meadow, one is in the dark cave, and one bounced into Shadow Ravine.", thanks: "All my acorns! These Climbing Boots will get you up any cliff.", hint: "Riddle tip: think of what you grab after a bath.", need: ["acorn-1", "acorn-2", "acorn-3"], gear: "boots", points: 30 },
   { id: "rocco", zone: "ravine", x: 12, y: 4, name: "Rocco the Ram", icon: "🐏", ask: "The wind carried my silver bell all the way to Monere's Meadow. Now that I've told you where it landed, fetch it back for me?", thanks: "Ding-ding! Here are my Goggles of Truth — they show what is hidden.", hint: "Riddle tip: you tap on the answer to type.", need: ["bell"], gear: "goggles", points: 30 },
-  { id: "vernon", zone: "meadow", x: 11, y: 19, name: "Vernon the Gardener", icon: "👨‍🌾", ask: "Oh dear, Razor scattered my 3 packets of magic seeds beyond the Meadow! Look for one in Lonely Wood, one in Shadow Ravine, and one in Razor's Lair. Could you bring them back for my flower bed?", thanks: "Splendid! My flower bed will bloom beautifully. Take these points for your trouble, young lion. Cross the bridge behind me and follow the southern path to the flower portal — it leads to my garden!", hint: "Riddle tip: patience grows the best answers.", need: ["seed-1", "seed-2", "seed-3"], points: 40 },
+  { id: "vernon", zone: "meadow", x: 11, y: 19, name: "Vernon the Gardener", icon: "👨‍🌾", ask: "Oh dear, Razor scattered my 3 packets of magic seeds around the Meadow! Look for them among the grass and along the paths. Could you bring them back for my flower bed?", thanks: "Splendid! My flower bed will bloom beautifully. Take these points for your trouble, young lion. Cross the bridge behind me and follow the southern path to the flower portal — it leads to my garden!", hint: "Riddle tip: patience grows the best answers.", need: ["seed-1", "seed-2", "seed-3"], points: 40 },
   { id: "tilly", zone: "lair", x: 17, y: 19, name: "Tilly the Tortoise", icon: "🐢", ask: "Razor broke my Ancient Key into 3 fragments and buried them across the lands. Your pet could dig them up!", thanks: "The key is whole again! Please take the Griffin Feather Crown.", hint: "Riddle tip: everyone calls you by it.", need: ["fragment-1", "fragment-2", "fragment-3"], item: "griffin-crown", points: 50 },
-  { id: "connie", zone: "wood", x: 6, y: 20, name: "Connie the Fruit Picker", icon: "👩‍🌾", ask: "Oh dear, my 3 rosy apples have scattered across the lands — one in Monere's Meadow, one in Lonely Wood, and one in Shadow Ravine. Could you gather them for my basket?", thanks: "My basket is full again, thanks to you! Take these points for your kindness, young lion.", hint: "Riddle tip: kindness is always worth picking up.", need: ["apple-1", "apple-2", "apple-3"], points: 30 },
+  { id: "connie", zone: "wood", x: 6, y: 20, name: "Connie the Fruit Picker", icon: "👩‍🌾", ask: "Oh dear, my 3 rosy apples have scattered around Lonely Wood! Could you gather them for my basket?", thanks: "My basket is full again, thanks to you! Take these points for your kindness, young lion.", hint: "Riddle tip: kindness is always worth picking up.", need: ["apple-1", "apple-2", "apple-3"], points: 30 },
 ];
 export type Item = Position & { id: string; zone: ZoneId; name: string; icon: string };
 export const ITEMS: Item[] = [
@@ -238,12 +238,12 @@ export const ITEMS: Item[] = [
   { id: "acorn-3", zone: "ravine", x: 5, y: 8, name: "Golden Acorn", icon: "🌰" },
   { id: "bell", zone: "meadow", x: 17, y: 17, name: "Rocco's Silver Bell", icon: "🔔" },
   // Clear sandy pathways and bare stone, aligned with the bundled landscape art.
-  { id: "seed-1", zone: "wood", x: 11, y: 11, name: "Magic Seed Packet", icon: "🌱" },
-  { id: "seed-2", zone: "ravine", x: 12, y: 8, name: "Magic Seed Packet", icon: "🌱" },
-  { id: "seed-3", zone: "lair", x: 12, y: 18, name: "Magic Seed Packet", icon: "🌱" },
-  { id: "apple-1", zone: "meadow", x: 12, y: 8, name: "Rosy Apple", icon: "🍎" },
-  { id: "apple-2", zone: "wood", x: 13, y: 11, name: "Rosy Apple", icon: "🍎" },
-  { id: "apple-3", zone: "ravine", x: 11, y: 7, name: "Rosy Apple", icon: "🍎" },
+  { id: "seed-1", zone: "meadow", x: 4, y: 14, name: "Magic Seed Packet", icon: "🌱" },
+  { id: "seed-2", zone: "meadow", x: 18, y: 8, name: "Magic Seed Packet", icon: "🌱" },
+  { id: "seed-3", zone: "meadow", x: 12, y: 26, name: "Magic Seed Packet", icon: "🌱" },
+  { id: "apple-1", zone: "wood", x: 13, y: 11, name: "Rosy Apple", icon: "🍎" },
+  { id: "apple-2", zone: "wood", x: 5, y: 8, name: "Rosy Apple", icon: "🍎" },
+  { id: "apple-3", zone: "wood", x: 19, y: 16, name: "Rosy Apple", icon: "🍎" },
 ];
 /** Rocco's silver bell only appears once Monere has spoken to him. */
 export const itemVisible = (s: AdventureState, it: Item) => it.id === "bell" ? s.met.includes("rocco") : true;
