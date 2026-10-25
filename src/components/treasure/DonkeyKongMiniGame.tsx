@@ -70,9 +70,13 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
         const input = command.current ?? direction.current; command.current = null;
         const next = gardenStep(state, input);
         if (next.jumps > state.jumps) {
-          if (!canGardenJump(callbacks.current.energy)) { setError("Monere needs 5 Energy to jump."); return; }
-          working = true; setBusy(true);
-          void callbacks.current.onJump([...trace.current, input]).then(() => { if (alive) { state = next; trace.current.push(input); setSnapshot(state); this.player?.setPosition(state.x, gardenPlayerY(state)); playSound("success.mp3", .2); setError(null); } }).catch(() => { if (alive) setError("Jump unavailable. Your Energy was not spent."); }).finally(() => { working = false; if (alive) setBusy(false); });
+          if (!canGardenJump(balance)) { setError("Monere needs 5 Energy to jump."); return; }
+          balance -= JUMP_COST;
+          state = next; trace.current.push(input); setSnapshot(state);
+          this.player?.setPosition(state.x, gardenPlayerY(state));
+          playSound("success.mp3", .2); setError(null);
+          const jumpTrace = [...trace.current];
+          chain.current = chain.current.then(() => callbacks.current.onJump(jumpTrace)).catch(() => { if (alive) setError("A jump couldn't be saved yet — it will be checked when you finish."); });
           return;
         }
         if (next.hits > state.hits) playSound("expulsion.mp3", .25);
