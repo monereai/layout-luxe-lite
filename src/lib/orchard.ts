@@ -41,11 +41,12 @@ export const harvestGain = (energy: number) => Math.max(0, Math.min(TREE_ENERGY,
 export const ENERGY_OVERFLOW_POINTS = 5;
 /** Splits a gain into bar Energy (capped at 100) and overflow that feeds the points converter. */
 export function splitEnergyGain(energy: number, gain: number) {
-  const next = energy + gain;
+  const next = Math.min(100, Math.max(0, Number.isFinite(energy) ? energy : 0)) + Math.max(0, Number.isFinite(gain) ? gain : 0);
   return { energy: Math.min(100, next), overflow: Math.max(0, next - 100) };
 }
 /** Every accumulated 100 overflow Energy pays +5 Points; the remainder keeps accumulating. */
 export function overflowPayout(accumulated: number) {
+  accumulated = Math.max(0, Math.floor(Number.isFinite(accumulated) ? accumulated : 0));
   const conversions = Math.floor(accumulated / 100);
   return { overflow: accumulated - conversions * 100, points: conversions * ENERGY_OVERFLOW_POINTS };
 }
