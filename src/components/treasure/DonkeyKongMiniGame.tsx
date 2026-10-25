@@ -4,7 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen, Play, RotateCcw, Z
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import gardenArt from "@/assets/treasure/garden.jpg";
-import { GARDEN_TICK_MS, LADDERS, PLATFORM_Y, canGardenJump, gardenStep, gardenPlayerY, gardenBarrelY, newGarden, type GardenInput } from "@/lib/garden-game";
+import { GARDEN_TICK_MS, JUMP_COST, LADDERS, PLATFORM_Y, canGardenJump, gardenStep, gardenPlayerY, gardenBarrelY, newGarden, type GardenInput } from "@/lib/garden-game";
 import { playSound } from "@/lib/audio";
 
 /** Isolated browser-only Phaser scene: no shared world controls or collision state. */
@@ -17,6 +17,8 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
   const direction = useRef<GardenInput>("idle"), command = useRef<GardenInput | null>(null);
   const callbacks = useRef({ onJump, onComplete, energy }); callbacks.current = { onJump, onComplete, energy };
   const stopped = useRef(false), trace = useRef<GardenInput[]>([]);
+  /** Jump settlements queue in the background so a slow or failed save never freezes the game loop. */
+  const chain = useRef<Promise<unknown>>(Promise.resolve());
   const retry = useRef<(() => void) | null>(null);
   const started = useRef(false);
   const [ready, setReady] = useState(false), [playing, setPlaying] = useState(false);
