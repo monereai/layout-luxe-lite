@@ -34,5 +34,5 @@ it("hides the adventure card while the Griffin game is closed", () => {
   expect(aside).not.toBeNull();
   const hrefs = Array.from(aside!.querySelectorAll("a")).map(a => a.getAttribute("href"));
   expect(hrefs).not.toContain("/treasure");
-  expect(screen.queryAllByRole("link", { name: "The Golden Griffin · Chapter 1" })).toHaveLength(0);
+  expect(screen.queryAllByRole("link", { name: "Golden griffin mini game" })).toHaveLength(0);
 });
