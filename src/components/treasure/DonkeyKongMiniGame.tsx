@@ -9,7 +9,7 @@ import { playSound } from "@/lib/audio";
 
 /** Isolated browser-only Phaser scene: no shared world controls or collision state. */
 export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete, onExit }: {
-  avatar: string; energy: number; onJump: (trace: GardenInput[]) => Promise<void>;
+  avatar: string; energy: number; onJump: (trace: GardenInput[]) => Promise<{ energy: number } | void | undefined>;
   onComplete: (trace: GardenInput[]) => Promise<void>; onExit: () => void;
 }) {
   const [mount, setMount] = useState<HTMLDivElement | null>(null);
@@ -80,7 +80,8 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
           playSound("success.mp3", .2); setError(null);
           const jumpTrace = [...trace.current, input];
           const settleJump = async () => {
-            await callbacks.current.onJump(jumpTrace);
+            const result = await callbacks.current.onJump(jumpTrace);
+            if (result && typeof result.energy === "number") callbacks.current.energy = result.energy;
             pendingJumps.current = Math.max(0, pendingJumps.current - 1);
           };
           chain.current = chain.current.then(settleJump).catch(() => {
