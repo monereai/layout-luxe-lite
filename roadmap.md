@@ -1,3 +1,7 @@
+# Connie’s scattered apples
+- [x] Spread the three apples across Meadow, Lonely Wood and Shadow Ravine; migration 0073 aligns authenticated pickups and preserves collected apples and Connie’s reward.
+- [x] 36 focused tests pass for reachable pickups and delivery; live SQL coordinates verified and build OK. Account gameplay not exercised because access is Carl-only and his progress must not change.
+
 # Pet dig and barrel controls (2026-10-25)
 - [x] Confirm active pet digs award +10 Energy, never deduct 25; historical migrations retained.
 - [x] Verified shared Space/button jumps, 5-Energy cost and 400ms airborne duration with 51 focused tests; maps and general movement untouched. Account gameplay remains untested because only Carl can enter and his progress must not change.

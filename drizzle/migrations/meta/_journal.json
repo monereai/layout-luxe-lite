@@ -512,6 +512,13 @@
       "when": 1792906737162,
       "tag": "0072_connie_fruit_picker",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1792907301232,
+      "tag": "0073_scatter_connie_apples",
+      "breakpoints": true
     }
   ]
 }
