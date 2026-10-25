@@ -189,6 +189,33 @@ export type Database = {
           },
         ]
       }
+      connie_arcade_rounds: {
+        Row: {
+          catches: number
+          id: string
+          settled_at: string | null
+          started_at: string
+          ticks: number
+          user_id: string
+        }
+        Insert: {
+          catches?: number
+          id?: string
+          settled_at?: string | null
+          started_at?: string
+          ticks?: number
+          user_id: string
+        }
+        Update: {
+          catches?: number
+          id?: string
+          settled_at?: string | null
+          started_at?: string
+          ticks?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       garden_barrel_rounds: {
         Row: {
           gained: number
@@ -649,6 +676,16 @@ export type Database = {
       }
       claim_daily_login: { Args: never; Returns: Json }
       claim_guest_points: { Args: { p_points: number }; Returns: number }
+      connie_arcade_commit: {
+        Args: {
+          p_catches: number
+          p_round: string
+          p_ticks: number
+          p_user: string
+        }
+        Returns: Json
+      }
+      connie_arcade_start: { Args: never; Returns: Json }
       consume_advice_quota: { Args: never; Returns: boolean }
       consume_guest_quota: {
         Args: { p_limit: number; p_visitor: string }
