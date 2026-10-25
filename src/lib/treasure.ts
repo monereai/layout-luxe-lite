@@ -97,7 +97,7 @@ export const PORTALS: Record<ZoneId, Portal[]> = {
   lair: [{ x: 12, y: 21, target: "ravine", arrive: { x: 20, y: 17 }, forward: false }],
 };
 export const near = (a: Position, b: Position) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) <= 1;
-export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {}, riddles: defaultRiddles() }); }
+export function initialAdventure(): AdventureState { return reveal({ version: 3, zone: "meadow", x: 10, y: 12, scrolls: [], gates: [], duel: 0, rescued: false, connieMiniGameWon: false, gear: [], items: [], quests: [], met: [], dug: [], lily: 0, pet: null, fog: {}, riddles: defaultRiddles() }); }
 export function walkable(zone: ZoneId, x: number, y: number): boolean {
   if (zone === "meadow" && Number.isInteger(x) && Number.isInteger(y) && y >= 21 && y <= 29) return y <= 23 ? x >= 11 && x <= 13 : x >= 4 && x <= 19;
   if (!Number.isInteger(x) || !Number.isInteger(y) || x < 2 || x > 21 || y < 2 || y > 21) return false;
