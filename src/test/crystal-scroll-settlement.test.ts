@@ -12,7 +12,7 @@ import { settleOrchardMaze } from "@/lib/treasure.functions";
 const settle = settleOrchardMaze as unknown as (input: { data: { round: string; trace: string[] }; context: { userId: string; supabase: unknown } }) => Promise<unknown>;
 const chain = { select: () => chain, eq: () => chain, single: async () => ({ data: mocks.round, error: null }) };
 const context = { userId: "isolated", supabase: { from: () => chain, rpc: async () => ({ error: null }) } };
-beforeEach(() => { vi.clearAllMocks(); mocks.round.tree = "caverns-1"; mocks.round.world_zone = "ravine"; mocks.replay.mockReturnValue({ collected: [], energy: 2, tick: 1, ended: null }); mocks.rpc.mockResolvedValue({ data: { energy: 52, gained: 2, state: {}, scrollAwarded: false }, error: null }); });
+beforeEach(() => { vi.clearAllMocks(); mocks.round.tree = "caverns-1"; mocks.round.world_zone = "ravine"; mocks.replay.mockReturnValue({ collected: [], energy: 2, tick: 1, ended: null }); mocks.rpc.mockResolvedValue({ data: { energy: 52, gained: 2, state: {}, scrollAwarded: false, overflowPoints: 0 }, error: null }); });
 it("does not claim the scroll for entry or harvesting without reaching its cell", async () => {
   await settle({ data: { round: "round", trace: ["left"] }, context });
   expect(mocks.rpc).toHaveBeenCalledWith("orchard_maze_settle_scroll", expect.objectContaining({ p_user: "isolated", p_scroll_reached: false }));

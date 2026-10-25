@@ -247,7 +247,7 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
     if (h.kind === "dig") {
       const d = sessionDigs(state).find(d => d.id === h.id); if (!d) return;
       const next = await run({ action: "dig", id: d.id });
-      if (next?.dug.includes(d.id)) { void orchard.gainDig(); tone([392, 523, 659]); const t = d.item ? TREASURES[d.item] : null; setNotice(t ? `Your pet dug up ${t.name}! ${t.icon} +${DIG_ENERGY} Energy` : game.user ? `Your pet dug up ${d.points} coins! 🪙 +${DIG_ENERGY} Energy` : `Your pet dug up ${d.points} coins! 🪙 +${DIG_ENERGY} Energy. Sign in to keep them as points.`); }
+      if (next?.dug.includes(d.id)) { void orchard.gainDig(); tone([392, 523, 659]); const t = d.item ? TREASURES[d.item] : null; setNotice(t ? `Your pet dug up ${t.name}! ${t.icon} +${DIG_ENERGY} Energy` : game.user ? `Your pet dug up ${d.points} Points! ⭐ +${DIG_ENERGY} Energy` : `Your pet dug up ${d.points} Points! ⭐ +${DIG_ENERGY} Energy. Sign in to keep them.`); }
       return;
     }
     if (h.kind === "bell") { const next = await run({ action: "bell" }); if (next) { playSound("bell.mp3", 0.6); setNotice(next.lily === 1 ? "Ribbit! The lily pads line up — hop across now!" : "Ding! The lily pads drift to new spots…"); } return; }
