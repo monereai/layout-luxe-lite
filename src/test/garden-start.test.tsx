@@ -28,6 +28,10 @@ function open() {
 function step() { act(() => engine.scene?.update(0, 50)); }
 function state() { return JSON.parse(screen.getByRole("img").getAttribute("data-state") ?? "{}"); }
 
+it("offers the first scroll as the prize", () => {
+  open();
+  expect(screen.getByText(/Prize: the first scroll/)).toBeTruthy();
+});
 it("Start activates the waiting scene and barrels spawn after 60 ticks", () => {
   open(); step(); expect(state().tick).toBe(0);
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
