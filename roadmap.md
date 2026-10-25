@@ -1,3 +1,9 @@
+# Preview crash: useContext dispatcher null
+- [x] Investigated: build and dev-server logs clean, headless browser load of the preview renders the home page with no page errors. Crash was a stale hot-reload state in the open tab; a page reload clears it.
+
+# Barrel jump repair
+- [x] Make jumps instant: optimistic local Energy gate, ordered background settlement, and a lag-tolerant server commit that charges any unpaid jumps at finish; Space works via key code and a slow save never freezes the loop. Regression tests cover immediate jump, non-blocking save, button parity and the low-Energy refusal.
+
 # Barrel game startup repair
 - [x] Add a ready Start action and WASD input to the silently waiting barrel scene; disable competing Phaser keyboard capture. Seventeen focused tests pass; isolated real-preview canvas verifies Start, WASD/touch movement, jump and rolling barrels. Database start function exists; Carl’s data read only, never changed. Authenticated garden entrance was not exercised because access is Carl-only; not published.
 

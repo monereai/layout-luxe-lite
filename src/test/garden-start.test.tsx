@@ -45,3 +45,38 @@ it("touch direction starts the scene without needing a keyboard", () => {
   expect(state().x).toBe(66);
   fireEvent.pointerUp(right); step(); expect(state().x).toBe(66);
 });
+it("Space jumps immediately and a slow save never freezes the loop", async () => {
+  const jump = open();
+  let release: (() => void) | null = null;
+  jump.mockImplementationOnce(() => new Promise<void>(resolve => { release = resolve; }));
+  fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
+  fireEvent.keyDown(window, { key: " " });
+  step();
+  expect(state().jumps).toBe(1); expect(state().jump).toBe(12);
+  step(); step();
+  expect(state().tick).toBe(3);
+  await act(async () => { release?.(); });
+  expect(jump).toHaveBeenCalledTimes(1);
+  expect(jump.mock.calls[0]?.[0].at(-1)).toBe("jump");
+});
+it("the Jump button queues a jump exactly like the keyboard", async () => {
+  const jump = open();
+  fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
+  fireEvent.click(screen.getByRole("button", { name: /Jump · 5/ }));
+  step();
+  expect(state().jumps).toBe(1);
+  await act(async () => {});
+  expect(jump).toHaveBeenCalledTimes(1);
+});
+it("jumping with less than 5 Energy is refused with a message", () => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+  const jump = vi.fn().mockResolvedValue(undefined);
+  render(<DonkeyKongMiniGame avatar="/lion.webp" energy={4} onJump={jump} onComplete={vi.fn()} onExit={vi.fn()} />);
+  act(() => engine.scene?.create());
+  fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
+  fireEvent.keyDown(window, { key: " " });
+  step();
+  expect(state().jumps).toBe(0);
+  expect(jump).not.toHaveBeenCalled();
+  expect(screen.getByRole("alert").textContent).toContain("5 Energy");
+});
