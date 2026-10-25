@@ -104,7 +104,7 @@ it("every jump is accepted with no Energy allowance", () => {
   open();
   for (let j = 0; j < 11; j++) {
     fireEvent.click(screen.getByRole("button", { name: "JUMP (Space)" })); step();
-    for (let i = 0; i < 8; i++) step();
+    for (let i = 0; i < 9; i++) step();
   }
-  expect(state().jumps).toBe(10);
+  expect(state().jumps).toBe(11);
 });
