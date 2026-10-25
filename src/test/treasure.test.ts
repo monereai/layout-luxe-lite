@@ -125,7 +125,7 @@ d4("expanded griffin world", () => {
   i4("all three seeds are reachable from the Meadow start", () => {
     const seeds = ITEMS.filter(i => i.id.startsWith("seed-"));
     e4(seeds.map(({ zone, x, y }) => [zone, x, y])).toEqual([
-      ["meadow", 9, 10], ["meadow", 11, 14], ["meadow", 10, 17],
+      ["meadow", 9, 10], ["meadow", 14, 10], ["meadow", 12, 8],
     ]);
     for (const seed of seeds) {
       e4(worldPath(at4({ zone: "meadow", x: 10, y: 12 }), seed)).not.toBeNull();
