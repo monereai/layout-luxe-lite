@@ -26,6 +26,8 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
   useEffect(() => {
     if (!mount) return;
     let state = newGarden(), elapsed = 0, alive = true, working = false;
+    // Optimistic jump allowance: the server stays the authority, but the gate must not wait on it.
+    let balance = callbacks.current.energy;
     started.current = false; setReady(false); setPlaying(false);
     trace.current = []; stopped.current = false;
     const css = getComputedStyle(document.documentElement);
@@ -36,7 +38,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
     async function saveWin() {
       if (working) return;
       working = true; stopped.current = true; setBusy(true); setError(null);
-      try { await callbacks.current.onComplete([...trace.current]); }
+      try { await chain.current; await callbacks.current.onComplete([...trace.current]); }
       catch { if (alive) { setError("The reward couldn’t be saved. Please try again."); retry.current = () => void saveWin(); } }
       finally { working = false; if (alive) setBusy(false); }
     }
