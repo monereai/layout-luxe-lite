@@ -1,10 +1,10 @@
 # Developer adventure reset (2026-10-25)
 - [x] Add a confirmed, server-protected developer reset available before completion; reset quests, items, scrolls and mini-game rounds while preserving account balances, purchases and payout ledgers.
 - [x] Test developer authorization and reset/save behaviour without altering Carl’s account; 17 focused checks pass and preview compiles.
-- [ ] Verify live reset read-back; blocked by rule against altering Carl’s progress. Browser confirmation check did not reach developer access.
+- [ ] Verify live reset read-back; blocked by rule against altering Carl’s progress. Signed-in developer confirmation opened and cancelled successfully without resetting.
 
 # Adventure logic assessment (2026-10-25)
-- [ ] Review quest/gate/mini-game/reward consistency and play through using isolated progress; report confirmed inconsistencies and unverified paths.
+- [x] Review active SQL and client progression; isolated simulation reaches final victory after injected barrel completion, arcade simulation wins (10 catches/1 miss), and maze reaches third scroll (32 ticks). Browser arcade loss/retry verified. Report direct first/second scroll bypass, first-time Crystal daily-cap block, missing arcade save retry, and misleading quest hints. Barrel win and live account reward read-back remain unverified; all 409 tests pass.
 
 # Shadow Ravine crystal scroll (2026-10-25)
 - [x] Remove the old Shadow Ravine scroll rock and disable its map pickup in guest rules and both live action functions; existing scrolls and movement unchanged. All 53 focused tests pass and preview compilation is clean.
