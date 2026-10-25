@@ -3,8 +3,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
-import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame } from "@/lib/treasure.functions";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame } from "@/lib/treasure.functions";
 import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
+import type { ArcadeInput } from "@/lib/arcade-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
@@ -18,6 +19,7 @@ export function useOrchardEnergy() {
   const plan = usePlan();
   const start = useServerFn(startOrchardMaze); const settle = useServerFn(settleOrchardMaze); const spend = useServerFn(spendMovementEnergy);
   const gardenStart = useServerFn(startGardenGame), gardenCommit = useServerFn(commitGardenGame);
+  const arcadeStart = useServerFn(startArcadeGame), arcadeCommit = useServerFn(commitArcadeGame);
   const [guest, setGuest] = useState(50);
   const guestBalance = useRef(50);
   const spending = useRef(false);
@@ -85,5 +87,15 @@ export function useOrchardEnergy() {
     if (finish) { void care.refetch(); void plan.refresh(); }
     return result;
   }
-  return { energy, cool, beginMaze, finishMaze, boost, gainDig, beginGarden, gardenAction, guest: !care.user };
+  async function beginArcade() { return care.user ? (await arcadeStart()).id : "guest"; }
+  /** Connie's arcade prizes the second scroll only — no Energy or points, so guests need no local ledger. */
+  async function finishArcade(round: string, trace: ArcadeInput[]) {
+    if (!care.user) return { state: null };
+    const account = care.user.id;
+    const result = await arcadeCommit({ data: { round, trace } });
+    if (identity.current !== account) throw new Error("Account changed.");
+    void care.refetch();
+    return result;
+  }
+  return { energy, cool, beginMaze, finishMaze, boost, gainDig, beginGarden, gardenAction, beginArcade, finishArcade, guest: !care.user };
 }

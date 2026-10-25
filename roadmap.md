@@ -390,3 +390,8 @@
 # Legendary pets: Thunderbird & Phoenix
 - [x] Add Thunderbird and Phoenix to the Pet Shop Legendary section at 3,000 pts each, with matching artwork and a server-side price entry.
 - [x] Verify the Legendary tab shows exactly Baby Dragon, Unicorn, Thunderbird, Phoenix at 1280px; 237 tests pass, build clean, live purchase check confirmed at 3,000. Not published.
+
+# Connie's 80's arcade mini-game (second scroll prize)
+- [x] After all 3 apples are delivered to Connie, open a NEW 80's-style arcade mini-game (fruit catcher — NOT the barrel game); prize is the second (wood) scroll.
+- [x] Pure deterministic rules module + Phaser dialog, server-verified rounds/commit mirroring garden_barrel_*, guest display-only path.
+- [x] Migration for connie_arcade_rounds + start/commit RPCs granting "wood" scroll idempotently; tests; update AGENTS.md + memory.
