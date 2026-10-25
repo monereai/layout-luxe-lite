@@ -37,12 +37,17 @@ export const gateNear = (zone: ZoneId, p: Position) => ELEMENTAL_GATES.find(g =>
 export const mapTreeNear = (zone: ZoneId, p: Position) => MAP_TREES.find(t => t.zone === zone && adjacent(p, t.at));
 export const canOpenGate = (energy: number, zone: SideZoneId = "grove") => energy >= gateEnergyCost(zone);
 export const harvestGain = (energy: number) => Math.max(0, Math.min(TREE_ENERGY, 100 - energy));
-/** Filling the Energy bar converts each full 100 into bonus points and resets the bar, carrying any remainder. */
+/** The bar stays capped at 100 so daily care remains claimable; Energy gained while full overflows into a points converter. */
 export const ENERGY_OVERFLOW_POINTS = 5;
-export function energyOverflow(energy: number) {
-  if (energy < 100) return { energy, points: 0 };
-  const conversions = Math.floor(energy / 100);
-  return { energy: energy - conversions * 100, points: conversions * ENERGY_OVERFLOW_POINTS };
+/** Splits a gain into bar Energy (capped at 100) and overflow that feeds the points converter. */
+export function splitEnergyGain(energy: number, gain: number) {
+  const next = energy + gain;
+  return { energy: Math.min(100, next), overflow: Math.max(0, next - 100) };
+}
+/** Every accumulated 100 overflow Energy pays +5 Points; the remainder keeps accumulating. */
+export function overflowPayout(accumulated: number) {
+  const conversions = Math.floor(accumulated / 100);
+  return { overflow: accumulated - conversions * 100, points: conversions * ENERGY_OVERFLOW_POINTS };
 }
 /** Free players may enter the Energy maze this many times per UTC day; Monere Plus members are unlimited (enforced by orchard_maze_start SQL). */
 export const FREE_MAZE_ENTRIES_PER_DAY = 2;
