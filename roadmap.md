@@ -1,6 +1,6 @@
 # Connie’s scattered apples
-- [ ] Spread the three apples across the adventure lands and align authenticated pickups, preserving collected apples and Connie’s reward.
-- [ ] Check reachable placements and collect/deliver rules without changing Carl’s progress.
+- [x] Spread the three apples across Meadow, Lonely Wood and Shadow Ravine; migration 0073 aligns authenticated pickups and preserves collected apples and Connie’s reward.
+- [x] 36 focused tests pass for reachable pickups and delivery; live SQL coordinates verified and build OK. Account gameplay not exercised because access is Carl-only and his progress must not change.
 
 # Pet dig and barrel controls (2026-10-25)
 - [x] Confirm active pet digs award +10 Energy, never deduct 25; historical migrations retained.
