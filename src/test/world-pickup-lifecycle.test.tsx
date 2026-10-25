@@ -31,7 +31,7 @@ vi.mock("phaser", () => {
 });
 
 import { WorldCanvas } from "@/components/treasure/WorldCanvas";
-import { collect, initialAdventure, ITEMS } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, ITEMS } from "@/lib/treasure";
 
 afterEach(() => { cleanup(); engine.objects = []; engine.scene = null; vi.unstubAllGlobals(); });
 
@@ -47,7 +47,7 @@ it("removes each collected seed image, keeps uncollected seeds and never duplica
   expect(seeds()).toHaveLength(3);
   for (const [index, seed] of ITEMS.filter(i => i.id.startsWith("seed-")).entries()) {
     const previous = seeds();
-    state = collect({ ...state, x: seed.x, y: seed.y });
+    state = applyAdventure({ ...state, x: seed.x, y: seed.y }, { action: "pick", id: seed.id });
     expect(state.items).toContain(seed.id);
     view.rerender(<WorldCanvas {...props} state={state} />);
     act(() => engine.scene?.sync());
