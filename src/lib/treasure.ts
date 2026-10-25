@@ -4,7 +4,7 @@ export type ZoneId = "meadow" | "wood" | "ravine" | "lair" | "garden";
 export type Position = { x: number; y: number };
 export type Gear = "lantern" | "boots" | "goggles";
 export type AdventureState = Position & { version: 3; zone: ZoneId; scrolls: ZoneId[]; gates: ZoneId[]; duel: number; rescued: boolean;
-  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[]; huntSpots?: number[] | null; huntDate?: string };
+  gear: Gear[]; items: string[]; quests: string[]; met: string[]; dug: string[]; lily: number; pet: Position | null; fog: Partial<Record<ZoneId, number[]>>; riddles: RiddleSlot[]; connieMiniGameWon?: boolean; huntSpots?: number[] | null; huntDate?: string };
 export const WORLD_SIZE = 24;
 export const TILE_SIZE = 64;
 export const GARDEN_PORTAL = { x: 12, y: 28 };
@@ -26,8 +26,8 @@ export const SCROLLS: Record<ZoneId, Position & { name: string; lore: string }> 
 };
 export const SCROLL_CLUES: Record<ZoneId, string> = {
   garden: "Explore Vernon’s garden, then return through the southern arch.",
-  meadow: "Razor tucked a scroll into the meadow's bushes. Search the greenery closely.",
-  wood: "A scroll hides in a hollow log among the trees. Only a close look will reveal it.",
+  meadow: "Seek out Vernon the Farmer at the Barn to earn the first Lost Scroll!",
+  wood: "Bring Connie her three apples, then beat her arcade to earn the second Lost Scroll!",
   ravine: "Enter the Crystal Maze through Shadow Ravine’s Crystal Gate and reach the third scroll.",
   lair: "The last scroll is buried under rubble on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
 };
@@ -167,7 +167,7 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "stay") return s.zone === "ravine" && s.x === PLATE_PET.x && s.y === PLATE_PET.y ? { ...s, pet: { ...PLATE_PET } } : s;
   if (a.action === "switch") { if (s.zone !== "ravine" || s.x !== PLATE_HERO.x || s.y !== PLATE_HERO.y || s.pet?.x !== PLATE_PET.x) return s; return { ...s, pet: null, quests: s.quests.includes("vault") ? s.quests : [...s.quests, "vault"], items: s.items.includes(VAULT_RELIC) ? s.items : [...s.items, VAULT_RELIC] }; }
   if (a.action === "call") return { ...s, pet: null };
-  if (a.action === "collect") return s.zone !== "garden" && s.zone !== "ravine" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
+  if (a.action === "collect") return s.zone === "lair" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
   if (a.action === "answer") return gateHere(s) === a.id && a.x === gateRiddle(s, s.zone).answer ? { ...s, gates: [...s.gates, s.zone] } : s;
   if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && portalOpen(s, p) ? { ...s, zone: p.target, ...p.arrive, pet: null } : s; }
   if (a.action === "duel") {
@@ -182,7 +182,7 @@ export function questClue(s: AdventureState): string {
   if (s.zone === "garden") return "Reach the prize scroll at the top of the garden girders.";
   if (s.zone === "meadow" && gardenOpen(s)) return "Vernon’s garden is open! Cross the southern bridge and follow the path to the flower portal.";
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
-  if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
+  if (!s.scrolls.includes(s.zone)) return s.zone === "meadow" || s.zone === "wood" ? SCROLL_CLUES[s.zone] : `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
   if (!s.gates.includes(s.zone)) return s.zone === "lair" ? "Chapter 1 gateway: visit the carved door, then continue exploring the daily hunts." : "Scroll found! Walk to the eastern gate and answer the gatekeeper's riddle.";
   if (s.zone === "lair") return `Riddle Duel ${s.duel + 1}/3: ${duelRiddle(s).riddle} Hop onto the right tile.`;
   return "The gate is open. Travel onward through the portal!";
@@ -197,7 +197,7 @@ export function parseAdventure(value: unknown): AdventureState {
   const rawPet = s["pet"] as Record<string, unknown> | null | undefined; const pet = rawPet && rawPet["x"] === PLATE_PET.x && rawPet["y"] === PLATE_PET.y ? { ...PLATE_PET } : null;
   const fog: AdventureState["fog"] = {}; const rawFog = (s["fog"] && typeof s["fog"] === "object" ? s["fog"] : {}) as Record<string, unknown>;
   for (const id of [...ids, "garden" as const]) { const v = rawFog[id]; if (Array.isArray(v)) fog[id] = v.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < (worldRows(id) / 4) * 6); }
-  let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true,
+  let st: AdventureState = { ...f, scrolls: list("scrolls"), gates: list("gates"), duel, rescued: duel === 3 && s["rescued"] === true, connieMiniGameWon: s["connieMiniGameWon"] === true,
     gear: strs("gear", ["lantern", "boots", "goggles"]) as Gear[], items: strs("items", ALL_ITEMS), quests: strs("quests", [...NPCS.map(n => n.id), "vault", "vernon-garden"]), met: strs("met", NPCS.map(n => n.id)), dug: strs("dug", DIGS.map(d => d.id)), lily, pet, fog, riddles: validRiddles(s["riddles"]) ?? defaultRiddles(), huntSpots: validHuntSpots(s["huntSpots"]), ...(typeof s["huntDate"] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s["huntDate"]) ? { huntDate: s["huntDate"] } : {}) };
   const zone = [...ids, "garden" as const].find(id => id === s["zone"]) ?? "meadow"; st = { ...st, zone: canEnter(st, zone) ? zone : "meadow" };
   const x = Number(s["x"]); const y = Number(s["y"]);
@@ -207,6 +207,7 @@ export function parseAdventure(value: unknown): AdventureState {
 
 /** Hot/cold hint for the hidden scroll in the current zone. */
 export function scrollWarmth(s: AdventureState): string {
+  if (s.zone === "meadow" || s.zone === "wood") return SCROLL_CLUES[s.zone];
   if (s.zone === "ravine") return "Reach the third scroll in the Crystal Maze.";
   const t = SCROLLS[s.zone]; const d = Math.abs(t.x - s.x) + Math.abs(t.y - s.y);
   return d <= 2 ? "🔥 Burning hot!" : d <= 5 ? "♨️ Warmer…" : d <= 10 ? "🌤️ Getting warm." : "❄️ Cold.";
@@ -305,7 +306,7 @@ export const isRevealed = (s: AdventureState, zone: ZoneId, x: number, y: number
 export type Interaction = { kind: "scroll" | "gate" | "portal" | "npc" | "item" | "dig" | "bell" | "stay" | "switch"; id?: string; label: string; icon: string };
 /** The single thing Monere can do where he stands, in priority order. */
 export function interactionHere(s: AdventureState): Interaction | null {
-  if (s.zone !== "garden" && s.zone !== "ravine" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
+  if (s.zone === "lair" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
   const g = gateHere(s); if (g) return { kind: "gate", label: "Answer riddle", icon: "❓" };
   const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && itemVisible(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
   const n = NPCS.find(n => n.zone === s.zone && near(s, n)); if (n) return { kind: "npc", id: n.id, label: `Talk to ${n.name.split(" ")[0]}`, icon: n.icon };
@@ -323,7 +324,7 @@ export function sideQuests(s: AdventureState): SideQuest[] {
   const list: SideQuest[] = NPCS.map(n => ({ id: n.id, title: n.need.length === 1 ? `Find ${TREASURES[n.need[0]!]?.name ?? ITEMS.find(i => i.id === n.need[0])?.name}` : `Collect ${n.need.length} ${n.id === "tilly" ? "key fragments" : ITEMS.find(i => i.id === n.need[0])?.name.toLowerCase() + "s"}`, giver: n.name, progress: n.need.filter(i => s.items.includes(i)).length, total: n.need.length, done: s.quests.includes(n.id), reward: n.gear ? `${GEAR[n.gear].name} + ${n.points} points` : n.item ? `${TREASURES[n.item]!.name} + ${n.points} points` : `${n.points} points` }));
   list.push({ id: "vault", title: "Open the Stone Vault (paired plates)", giver: "Shadow Ravine", progress: s.quests.includes("vault") ? 1 : 0, total: 1, done: s.quests.includes("vault"), reward: "Sun Stone + 40 points" });
   list.push({ id: "vernon-garden", title: "Win the first scroll", giver: "Vernon the Gardener", progress: s.quests.includes("vernon-garden") ? 1 : 0, total: 1, done: s.quests.includes("vernon-garden"), reward: "First scroll + 50 Energy + 20 Coins" });
-  list.push({ id: "connie-arcade", title: "Win the second scroll", giver: "Connie the Fruit Picker", progress: s.scrolls.includes("wood") ? 1 : 0, total: 1, done: s.scrolls.includes("wood"), reward: "Second scroll" });
+  list.push({ id: "connie-arcade", title: "Win the second scroll", giver: "Connie the Fruit Picker", progress: s.connieMiniGameWon === true ? 1 : 0, total: 1, done: s.connieMiniGameWon === true, reward: "Second scroll" });
   list.push({ id: "digs", title: "Dig up every buried treasure", giver: "Your pet", progress: s.dug.length, total: DIGS.length, done: s.dug.length === DIGS.length, reward: "Points, key fragments and relics" });
   return list;
 }

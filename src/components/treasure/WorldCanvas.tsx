@@ -102,7 +102,7 @@ export function WorldCanvas(props: Props) {
           const color = (token: string) => P.Display.Color.HexStringToColor(hex(token)).color;
           const at = (p: Position) => [(p.x + .5) * 64, (p.y + .5) * 64] as const;
           const text = (p: Position, t: string, size = 36) => { const o = this.add.text(...at(p), t, { fontSize: `${size}px` }).setOrigin(.5).setDepth(3); this.scenery.push(o); return o; };
-          if (s.zone !== "garden" && s.zone !== "ravine" && !s.scrolls.includes(s.zone)) {
+          if (s.zone === "lair" && !s.scrolls.includes(s.zone)) {
             // The scroll hides inside a landscape prop; it only peeks out when Monere is right beside it.
             text(SCROLLS[s.zone], SCROLL_COVERS[s.zone], 52);
             if (Math.abs(SCROLLS[s.zone].x - s.x) + Math.abs(SCROLLS[s.zone].y - s.y) <= SCROLL_REVEAL) {

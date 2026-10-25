@@ -1,3 +1,7 @@
+# Four audit logic fixes (2026-10-25)
+- [ ] Remove first/second map scroll pickups, persist verified Connie wins, add prize-save retry, update Meadow clues, and allow capped Crystal practice without changing movement/physics.
+- [ ] Run focused tests and isolated UI verification; preserve Carl’s account.
+
 # Developer adventure reset (2026-10-25)
 - [x] Add a confirmed, server-protected developer reset available before completion; reset quests, items, scrolls and mini-game rounds while preserving account balances, purchases and payout ledgers.
 - [x] Test developer authorization and reset/save behaviour without altering Carl’s account; 17 focused checks pass and preview compiles.

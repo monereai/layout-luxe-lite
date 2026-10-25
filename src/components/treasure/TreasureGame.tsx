@@ -122,7 +122,7 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
   async function finishArcade(trace: ArcadeInput[]) {
     if (!arcadeRound) return;
     const result = await orchard.finishArcade(arcadeRound, trace);
-    game.harvestReturn(result.state ?? { ...state, scrolls: [...new Set([...state.scrolls, "wood" as const])] });
+    game.harvestReturn(result.state ?? { ...state, connieMiniGameWon: true, scrolls: [...new Set([...state.scrolls, "wood" as const])] });
     setArcadeRound(null);
     setNotice(`Connie’s arcade complete! You won the second scroll 📜${orchard.guest ? " (guest preview)" : ""}.`);
   }
