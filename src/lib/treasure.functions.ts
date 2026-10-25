@@ -55,7 +55,7 @@ export const commitGardenGame = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const result = await supabaseAdmin.rpc("garden_barrel_commit", { p_user: context.userId, p_round: data.round, p_ticks: state.tick, p_jumps: state.jumps, p_finish: data.finish });
     if (result.error) throw new Error(result.error.message);
-    const value = z.object({ energy: z.number(), gained: z.number(), points: z.number(), state: z.unknown() }).parse(result.data);
+    const value = z.object({ energy: z.number(), gained: z.number(), points: z.number(), coins: z.number().nonnegative(), overflowPoints: z.number().nonnegative(), state: z.unknown() }).parse(result.data);
     return { ...value, state: parseAdventure(value.state) };
   });
 
@@ -75,7 +75,7 @@ export const commitArcadeGame = createServerFn({ method: "POST" })
     if (TREASURE_MAINTENANCE && !await verifiedTester(context.supabase, context.userId)) throw new Error("Monere's adventure is temporarily under construction.");
     const state = replayArcade(data.trace as ArcadeInput[]);
     if (!state.won) throw new Error("Invalid arcade result.");
-    const owned = await context.supabase.from("connie_arcade_rounds").select("id").eq("id", data.round).eq("user_id", context.userId).single();
+    const owned = await context.supabase.from("connie_arcade_rounds").select("id,settled_at").eq("id", data.round).eq("user_id", context.userId).single();
     if (owned.error || !owned.data) throw new Error("Arcade round not found.");
     const sync = await context.supabase.rpc("care_apply", { p_action: "sync" });
     if (sync.error) throw new Error(sync.error.message);
@@ -83,7 +83,7 @@ export const commitArcadeGame = createServerFn({ method: "POST" })
     const result = await supabaseAdmin.rpc("connie_arcade_commit", { p_user: context.userId, p_round: data.round, p_ticks: state.tick, p_catches: state.catches });
     if (result.error) throw new Error(result.error.message);
     const value = z.object({ energy: z.number(), state: z.unknown() }).parse(result.data);
-    return { ...value, state: parseAdventure(value.state) };
+    return { ...value, state: parseAdventure(value.state), coins: owned.data.settled_at ? 0 : 20 };
   });
 
 export const adventureAction = createServerFn({ method: "POST" })
@@ -113,14 +113,12 @@ export const orchardHarvest = createServerFn({ method: "POST" })
     return z.object({ energy: z.number().int(), gained: z.number().int(), harvested: z.boolean() }).parse(result.data);
   });
 
-/** Overflow Energy gained while the bar is full: the SQL function accumulates it and credits +5 points per 100. */
+/** Deprecated compatibility endpoint; rewards calculate overflow atomically. */
 export const creditEnergyOverflow = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ amount: z.number().int().min(0).max(100) }))
-  .handler(async ({ data, context }) => {
-    const result = await context.supabase.rpc("energy_overflow_credit", { p_amount: data.amount });
-    if (result.error) throw new Error(result.error.message);
-    return z.object({ overflow: z.number(), points: z.number() }).parse(result.data);
+  .handler(async () => {
+    throw new Error("Overflow is credited only with verified rewards.");
   });
 
 export const spendMovementEnergy = createServerFn({ method: "POST" })

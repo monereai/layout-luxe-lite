@@ -11,6 +11,7 @@ vi.mock("@/lib/shop", () => ({ useShop: () => ({ equipped: {} }), equippedItems:
 vi.mock("@/lib/shop-combinations", () => ({ combinationLook: () => "default", itemsDrawnIn: () => [] }));
 vi.mock("@/lib/audio", () => ({ playSound: vi.fn(), playBackgroundMusic: vi.fn(), resumeBackgroundMusic: vi.fn(), setMusicMuted: vi.fn(), setSoundsMuted: vi.fn(), stopBackgroundMusic: vi.fn() }));
 vi.mock("@/components/MonereFigure", () => ({ MonereFigure: () => null }));
+vi.mock("@/hooks/usePointsWallet", () => ({ usePointsWallet: () => 0 }));
 vi.mock("@/components/treasure/WorldCanvas", () => ({ WorldCanvas: () => null }));
 vi.mock("@/components/treasure/ConnieArcadeMiniGame", () => ({ default: () => <div role="region" aria-label="Connie fruit catcher" /> }));
 import { TreasureGame } from "@/components/treasure/TreasureGame";

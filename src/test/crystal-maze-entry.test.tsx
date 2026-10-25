@@ -11,6 +11,7 @@ vi.mock("@/lib/shop", () => ({ useShop: () => ({ equipped: {} }), equippedItems:
 vi.mock("@/lib/shop-combinations", () => ({ combinationLook: () => "default", itemsDrawnIn: () => [] }));
 vi.mock("@/lib/audio", () => ({ playSound: vi.fn(), playBackgroundMusic: vi.fn(), resumeBackgroundMusic: vi.fn(), setMusicMuted: vi.fn(), setSoundsMuted: vi.fn(), stopBackgroundMusic: vi.fn() }));
 vi.mock("@/components/MonereFigure", () => ({ MonereFigure: () => null }));
+vi.mock("@/hooks/usePointsWallet", () => ({ usePointsWallet: () => 0 }));
 vi.mock("@/components/treasure/WorldCanvas", () => ({ WorldCanvas: () => null }));
 vi.mock("@/components/PacmanHarvestMiniGame", () => ({ PacmanHarvestMiniGame: ({ onComplete }: { onComplete: (energy: number, trace: [], expelled: boolean) => Promise<void> }) => <button onClick={() => void onComplete(0, [], false)}>Finish isolated maze</button> }));
 import { TreasureGame } from "@/components/treasure/TreasureGame";

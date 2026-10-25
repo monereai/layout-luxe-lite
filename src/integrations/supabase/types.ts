@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      adventure_coin_credits: {
+        Row: {
+          coins: number
+          created_at: string
+          id: string
+          reference: string
+          user_id: string
+        }
+        Insert: {
+          coins: number
+          created_at?: string
+          id?: string
+          reference: string
+          user_id: string
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          id?: string
+          reference?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       advice_usage: {
         Row: {
           count: number
@@ -721,6 +745,10 @@ export type Database = {
         Returns: Json
       }
       energy_overflow_credit: { Args: { p_amount: number }; Returns: Json }
+      energy_overflow_internal: {
+        Args: { p_excess: number; p_user: string }
+        Returns: number
+      }
       garden_barrel_commit: {
         Args: {
           p_finish: boolean

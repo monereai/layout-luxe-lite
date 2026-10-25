@@ -7,6 +7,7 @@ import { guestCompleted, markGuestComplete } from "@/lib/guest-preview";
 import { makeSpots } from "@/lib/game";
 import { updateCare, startCareRound, finishCareRound, rewardCareFind } from "@/lib/care.functions";
 import type { CareState } from "@/lib/care";
+import { toast } from "sonner";
 
 
 export function useCare() {
@@ -17,7 +18,9 @@ export function useCare() {
   const query = useQuery({ queryKey: key, queryFn: () => update({ data: { action: "sync" } }), enabled: ready && !!user, refetchInterval: 60_000, refetchOnWindowFocus: "always", staleTime: 15_000, retry: 1 });
   const accept = async (state: CareState) => {
     client.setQueryData(key, state);
-    if (state.pointsAwarded) await refresh();
+    if (user) { try { localStorage.setItem(`monere-energy-cache-${user.id}`, String(state.energy)); } catch { /* mirror */ } }
+    if (state.overflowPoints) toast(`+${state.overflowPoints} Points! Energy Overflow!`);
+    if (state.pointsAwarded || state.overflowPoints) await refresh();
   };
   const action = useMutation({ mutationFn: (action: "claim") => update({ data: { action } }), onSuccess: accept });
   return { ...query, user, ready, action, accept };

@@ -42,6 +42,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     if (!profileError) {
       setBonus(profile?.monere_points ?? 0);
       setTokens(profile?.monere_tokens ?? 0);
+      try { localStorage.setItem(`monere-points-cache-${u.id}`, String(Math.max(0, profile?.monere_points ?? 0))); } catch { /* mirror only */ }
     }
     if (error || profileError) {
       toast.error("Couldn't check your membership. Please try again.", { id: "membership-check-error" });

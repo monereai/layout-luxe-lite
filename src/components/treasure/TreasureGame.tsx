@@ -32,6 +32,8 @@ import { createWalkingFrames } from "@/lib/walking-frames";
 import { MAP_ENTRANCES, replayMaze, crystalScrollEligible, reachedThirdScroll, type MazeDirection } from "@/lib/harvest-maze";
 import type { GardenInput } from "@/lib/garden-game";
 import type { ArcadeInput } from "@/lib/arcade-game";
+import { adventureFruitCount, guestMiniGamePrize, nonnegativeCount } from "@/lib/adventure-economy";
+import { usePointsWallet } from "@/hooks/usePointsWallet";
 
 const PacmanHarvestMiniGame = lazy(() => import("../PacmanHarvestMiniGame").then(m => ({ default: m.PacmanHarvestMiniGame })));
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
@@ -43,6 +45,7 @@ const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop a
 export function TreasureGame({ developer = false }: { developer?: boolean }) {
   const navigate = useNavigate();
   const game = useAdventure(); const { state } = game;
+  const points = usePointsWallet();
   const controls = useRef<WorldControls | null>(null);
   const figure = useRef<HTMLDivElement | null>(null);
   const petRef = useRef<HTMLDivElement | null>(null);
@@ -102,9 +105,9 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
   async function finishGarden(trace: GardenInput[]) {
     if (!gardenRound) return;
     const result = await orchard.gardenAction(gardenRound, trace, true);
-    game.harvestReturn(result.state ?? { ...state, zone: "meadow", x: 12, y: 27, pet: null, quests: [...new Set([...state.quests, "vernon-garden"])], scrolls: [...new Set([...state.scrolls, "meadow" as const])] });
+    game.harvestReturn(result.state ?? guestMiniGamePrize(state, "garden", result.coins));
     setGardenRound(null);
-    setNotice(`Vernon’s garden complete! You won the first scroll 📜 · +${result.gained} Energy · +${result.points} Coins${orchard.guest ? " (guest preview)" : ""}.`);
+    setNotice(`Vernon’s garden complete! You won the first scroll 📜 · +${result.gained} Energy · +${result.coins} Coins${orchard.guest ? " (guest preview)" : ""}.`);
   }
   async function leaveGarden() {
     setBusy(true);
@@ -122,9 +125,9 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
   async function finishArcade(trace: ArcadeInput[]) {
     if (!arcadeRound) return;
     const result = await orchard.finishArcade(arcadeRound, trace);
-    game.harvestReturn(result.state ?? { ...state, connieMiniGameWon: true, scrolls: [...new Set([...state.scrolls, "wood" as const])] });
+    game.harvestReturn(result.state ?? guestMiniGamePrize(state, "arcade", result.coins));
     setArcadeRound(null);
-    setNotice(`Connie’s arcade complete! You won the second scroll 📜${orchard.guest ? " (guest preview)" : ""}.`);
+    setNotice(`Connie’s arcade complete! You won the second scroll 📜 · +${result.coins} Coins${orchard.guest ? " (guest preview)" : ""}.`);
   }
   function leaveArcade() { setArcadeRound(null); }
   useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
@@ -290,7 +293,7 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
   }
   if (!zone) return null;
   return <section className="treasure-game" aria-label="The Rescue of the Golden Griffin">
-    <header className="treasure-hud">
+    <header className="treasure-hud flex-wrap">
       <div className="flex min-w-0 items-center gap-3"><span className="hidden h-10 w-10 items-center justify-center rounded-lg border border-primary/35 bg-primary/10 text-primary sm:flex"><Compass /></span><div className="min-w-0"><p className="text-[10px] font-bold uppercase text-primary">The Rescue of the Golden Griffin</p><h1 className="truncate font-display text-lg sm:text-2xl">{side ? SIDE_ZONES[side].name : zone.name}</h1></div></div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
         <span className="treasure-energy" aria-label={`Energy ${orchard.energy} of 100`} title="Energy"><Zap className="h-4 w-4" /><span><span style={{ width: `${orchard.energy}%` }} /></span><span className="hidden text-sm sm:inline">{orchard.energy}</span></span>
@@ -300,6 +303,11 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
         <Button size="icon" variant="ghost" title={sound ? "Mute sound" : "Enable sound"} aria-label={sound ? "Mute sound" : "Enable sound"} onClick={() => { setSound(!sound); setSoundsMuted(sound); localStorage.setItem("monere-treasure-sound", sound ? "off" : "on"); }}>{sound ? <Volume2 /> : <VolumeX />}</Button>
         <Button size="icon" variant="outline" aria-label="Open world map" title="World map" onClick={() => setPanel("map")}><Map /></Button>
         <Button variant="default" className="gap-2" aria-label="Open logbook" onClick={() => setPanel("logbook")}><Backpack /><span className="hidden sm:inline">Logbook</span></Button>
+      </div>
+      <div className="flex w-full items-center justify-center gap-5 text-sm font-display" aria-label="Adventure balances" aria-live="polite">
+        <span className="text-points" aria-label={`Coins ${nonnegativeCount(state.coins)}`}>🪙 {nonnegativeCount(state.coins)} Coins</span>
+        <span className="text-points" aria-label={`Points ${points}`}>⭐ {points} Points</span>
+        <span className="text-primary" aria-label={`Fruits ${adventureFruitCount(state)}`}>🍎 {adventureFruitCount(state)} Fruits</span>
       </div>
     </header>
     <div className="treasure-viewport">
