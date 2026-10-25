@@ -8,6 +8,7 @@ import ravine from "@/assets/treasure/ravine.jpg";
 import lair from "@/assets/treasure/lair.jpg";
 import razor from "@/assets/treasure/razor.png";
 import vernon from "@/assets/treasure/vernon.png";
+import connie from "@/assets/treasure/connie.png";
 import { ELEMENTAL_GATES, MAP_TREES } from "@/lib/orchard";
 import griffin from "@/assets/pets/golden-griffin.png";
 import { worldRows, portalOpen, PORTALS, SCROLLS, SCROLL_COVERS, DUEL_TILES, DUEL_START, LAIR_DOOR, RAZOR, CAGE, TILE_SIZE, SCROLL_REVEAL, NPCS, ITEMS, DIGS, BELL, LILY_ROWS, PLATE_HERO, PLATE_PET, TRAPS, sessionDigs, canStep, worldPath, inChasm, onPlatform, isRevealed, itemVisible, type AdventureState, type Position } from "@/lib/treasure";
@@ -38,7 +39,7 @@ export function WorldCanvas(props: Props) {
         shadow?: Phaser.GameObjects.Ellipse; base = 1; phase = 0; stride = 0; facing = "south"; depthScale = 1; lastStep = 0; reduced = false; yaw = 0; trail: { t: number; x: number; y: number; walking: boolean }[] = [];
         velocity = { x: 0, y: 0 }; target: Position | null = null; sprintUntil = 0; dashUntil = 0; boosting = false; boostGeneration = 0; retryAt = { sprint: 0, dash: 0 }; lastTap = { key: "", time: 0 }; turnInput = { x: 0, y: 0 }; turnUntil = 0; stamina = STAMINA_MAX; staminaBar: Phaser.GameObjects.Graphics | null = null;
         pathTarget = false; walkElapsed = 0; effectN = 0; lastLily = -1; fog?: Phaser.GameObjects.Image;
-        preload() { this.load.image("meadow-extension", meadowExtension); this.load.image("garden", garden); this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("vernon", vernon); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
+        preload() { this.load.image("meadow-extension", meadowExtension); this.load.image("garden", garden); this.load.image("meadow", meadow); this.load.image("wood", forest); this.load.image("ravine", ravine); this.load.image("lair", lair); this.load.image("razor", razor); this.load.image("vernon", vernon); this.load.image("connie", connie); this.load.image("griffin", griffin); this.load.image("lion", live.current.avatar); }
         create() {
           sceneRef.current = this;
           // Oversized base layer so no empty canvas shows past the map edges while the camera eases.
@@ -168,11 +169,11 @@ export function WorldCanvas(props: Props) {
             void goggles; void onPlatform;
           }
           // Human NPCs are drawn from full-body artwork: emoji people glyphs render as head-and-shoulders busts.
-          const npcSprite: Record<string, string> = { vernon: "vernon" };
+          const npcSprite: Record<string, string> = { vernon: "vernon", connie: "connie" };
           NPCS.filter(n => n.zone === s.zone).forEach(n => {
             const key = npcSprite[n.id];
             if (key && this.textures.exists(key)) {
-              const o = this.add.image(...at(n), key).setDisplaySize(105.6, 105.6).setOrigin(.5, .62).setDepth(3); this.scenery.push(o);
+              const o = this.add.image(...at(n), key).setDisplaySize(n.id === "connie" ? 79.2 : 105.6, 105.6).setOrigin(.5, .62).setDepth(3); this.scenery.push(o);
               if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
             } else bob(text(n, n.icon, 50));
             label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26);
