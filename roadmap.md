@@ -1,3 +1,6 @@
+# Clear Meadow seeds (2026-10-25)
+- [x] Move seeds to clear Meadow paths (9,10 / 11,14 / 10,17), enlarge their markers, and mirror both live action functions. All 37 adventure tests pass; isolated rendered-world browser collected all three and delivered to Vernon. Screenshot confirms all three visible at the starting view. Movement, tiles and Carl's progress unchanged; authenticated collection not exercised because only Carl has access.
+
 # Four audit logic fixes (2026-10-25)
 - [x] Remove first/second map scroll pickups, persist verified Connie wins, add prize-save retry, update Meadow clues, and allow capped Crystal practice without changing movement/physics. Active v5/v6/arcade/maze SQL definitions verified.
 - [x] All 414 tests pass and preview compiles. Isolated browser won Connie’s arcade (10 catches/1 miss), failed the first save, then Retry Save reused the identical winning trace successfully; desktop/phone dialog inspected. Carl’s account unchanged; live authenticated prize read-back remains blocked by account-testing constraints.

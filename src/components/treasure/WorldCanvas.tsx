@@ -181,11 +181,13 @@ export function WorldCanvas(props: Props) {
             label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26);
           });
           ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && itemVisible(s, i) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => {
-            // Connie's apples and Vernon's seeds sit quietly in the scenery instead of drawing attention like quest markers.
-            const quiet = i.id.startsWith("apple-") || i.id.startsWith("seed-");
-            const o = text(i, i.icon, quiet ? 16 : 34);
-            // Quest seeds and apples render above the fog of war so they stay findable in unexplored corners.
-            if (quiet) { o.setDepth(8); return; }
+            // Apples stay subtle; seeds must be easy to spot on the clear Meadow paths.
+            const quiet = i.id.startsWith("apple-");
+            const seed = i.id.startsWith("seed-");
+            const o = text(i, i.icon, quiet ? 16 : seed ? 40 : 34);
+            // Both objectives stay above fog; only seeds regain the visible pickup bob.
+            if (quiet || seed) o.setDepth(8);
+            if (quiet) return;
             bob(o);
             if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 });
           });
