@@ -1,3 +1,7 @@
+# Connie’s scattered apples
+- [ ] Spread the three apples across the adventure lands and align authenticated pickups, preserving collected apples and Connie’s reward.
+- [ ] Check reachable placements and collect/deliver rules without changing Carl’s progress.
+
 # Pet dig and barrel controls (2026-10-25)
 - [x] Confirm active pet digs award +10 Energy, never deduct 25; historical migrations retained.
 - [x] Verified shared Space/button jumps, 5-Energy cost and 400ms airborne duration with 51 focused tests; maps and general movement untouched. Account gameplay remains untested because only Carl can enter and his progress must not change.
