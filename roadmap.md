@@ -1,5 +1,5 @@
 # Clear Meadow seeds (2026-10-25)
-- [ ] Move all three seeds into unobstructed visible Meadow areas, mirror authenticated pickup positions, and verify rendering and collection without changing movement or tiles.
+- [x] Move seeds to clear Meadow paths (9,10 / 11,14 / 10,17), enlarge their markers, and mirror both live action functions. All 37 adventure tests pass; isolated rendered-world browser collected all three and delivered to Vernon. Screenshot confirms all three visible at the starting view. Movement, tiles and Carl's progress unchanged; authenticated collection not exercised because only Carl has access.
 
 # Four audit logic fixes (2026-10-25)
 - [x] Remove first/second map scroll pickups, persist verified Connie wins, add prize-save retry, update Meadow clues, and allow capped Crystal practice without changing movement/physics. Active v5/v6/arcade/maze SQL definitions verified.
