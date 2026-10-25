@@ -1,3 +1,6 @@
+# Free barrel jumps (2026-10-25)
+- [x] Remove the 5-Energy jump cost: shared rules, mini-game gate, guest path and server commit (migration 0074) all treat jumps as free; jump count still recorded for replay checks. Keys legend reads "Jump barrels · free". Tests updated; account gameplay not exercised (Carl-only access).
+
 # Connie’s scattered apples
 - [x] Spread the three apples across Meadow, Lonely Wood and Shadow Ravine; migration 0073 aligns authenticated pickups and preserves collected apples and Connie’s reward.
 - [x] 36 focused tests pass for reachable pickups and delivery; live SQL coordinates verified and build OK. Account gameplay not exercised because access is Carl-only and his progress must not change.
