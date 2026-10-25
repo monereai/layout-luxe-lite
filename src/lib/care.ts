@@ -21,6 +21,6 @@ export const energyGain = (previous: number | null | undefined, current: number 
 export const careSchema = z.object({
   energy: z.number().int().min(0).max(100), lastDrain: z.string(), claimed: z.boolean(),
   claimDate: z.string().nullable(), tokens: z.number().int().nonnegative(),
-  allowance: z.union([z.literal(100), z.literal(200), z.literal(300)]), pointsAwarded: z.number(), energyAwarded: z.number(), today: z.string(), fullBonus: z.number(),
+  allowance: z.union([z.literal(100), z.literal(200), z.literal(300)]), pointsAwarded: z.number(), energyAwarded: z.number(), today: z.string(), fullBonus: z.number(), overflowPoints: z.number().nonnegative().optional(),
 });
 export type CareState = z.infer<typeof careSchema>;
