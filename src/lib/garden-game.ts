@@ -29,7 +29,7 @@ export function gardenStep(old: GardenState, input: GardenInput): GardenState {
     s.climb += Math.sign(s.climb);
     if (Math.abs(s.climb) >= 21) { s.level += Math.sign(s.climb); s.climb = 0; }
   }
-  if (s.tick % 60 === 0) s.barrels.push({ x: 42, level: 3, drop: 0 });
+  if (s.tick % 90 === 0) s.barrels.push({ x: 42, level: 3, drop: 0 });
   for (const b of s.barrels) {
     if (b.drop) { b.drop++; if (b.drop >= 21) { b.level--; b.drop = 0; } }
     else {

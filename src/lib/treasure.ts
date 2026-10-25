@@ -178,8 +178,8 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   return s;
 }
 export function questClue(s: AdventureState): string {
-  if (s.quests.includes("vernon-garden") && s.zone === "meadow") return "Vernon’s seed hopper is filled! His garden challenge is complete.";
-  if (s.zone === "garden") return "Reach Vernon’s seed hopper at the top of the garden girders.";
+  if (s.quests.includes("vernon-garden") && s.zone === "meadow") return "Vernon’s garden challenge is complete — the first scroll is yours!";
+  if (s.zone === "garden") return "Reach the prize scroll at the top of the garden girders.";
   if (s.zone === "meadow" && gardenOpen(s)) return "Vernon’s garden is open! Cross the southern bridge and follow the path to the flower portal.";
   if (s.rescued) return "The Golden Griffin is free! Razor has fled. Well done, brave team.";
   if (!s.scrolls.includes(s.zone)) return `${SCROLL_CLUES[s.zone]} ${scrollWarmth(s)}`;
@@ -321,7 +321,7 @@ export type SideQuest = { id: string; title: string; giver: string; progress: nu
 export function sideQuests(s: AdventureState): SideQuest[] {
   const list: SideQuest[] = NPCS.map(n => ({ id: n.id, title: n.need.length === 1 ? `Find ${TREASURES[n.need[0]!]?.name ?? ITEMS.find(i => i.id === n.need[0])?.name}` : `Collect ${n.need.length} ${n.id === "tilly" ? "key fragments" : ITEMS.find(i => i.id === n.need[0])?.name.toLowerCase() + "s"}`, giver: n.name, progress: n.need.filter(i => s.items.includes(i)).length, total: n.need.length, done: s.quests.includes(n.id), reward: n.gear ? `${GEAR[n.gear].name} + ${n.points} points` : n.item ? `${TREASURES[n.item]!.name} + ${n.points} points` : `${n.points} points` }));
   list.push({ id: "vault", title: "Open the Stone Vault (paired plates)", giver: "Shadow Ravine", progress: s.quests.includes("vault") ? 1 : 0, total: 1, done: s.quests.includes("vault"), reward: "Sun Stone + 40 points" });
-  list.push({ id: "vernon-garden", title: "Fill the seed hopper", giver: "Vernon the Gardener", progress: s.quests.includes("vernon-garden") ? 1 : 0, total: 1, done: s.quests.includes("vernon-garden"), reward: "50 Energy + 20 Coins" });
+  list.push({ id: "vernon-garden", title: "Win the first scroll", giver: "Vernon the Gardener", progress: s.quests.includes("vernon-garden") ? 1 : 0, total: 1, done: s.quests.includes("vernon-garden"), reward: "First scroll + 50 Energy + 20 Coins" });
   list.push({ id: "digs", title: "Dig up every buried treasure", giver: "Your pet", progress: s.dug.length, total: DIGS.length, done: s.dug.length === DIGS.length, reward: "Points, key fragments and relics" });
   return list;
 }
