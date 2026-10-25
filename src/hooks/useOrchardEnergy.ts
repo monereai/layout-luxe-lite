@@ -101,5 +101,5 @@ export function useOrchardEnergy() {
     void care.refetch();
     return result;
   }
-  return { energy, cool, beginMaze, finishMaze, boost, gainDig, beginGarden, gardenAction, beginArcade, finishArcade, guest: !care.user };
+  return { energy, cool, beginMaze, isMazePractice: (round: string) => round === "practice" || practiceRounds.current.has(round), finishMaze, boost, gainDig, beginGarden, gardenAction, beginArcade, finishArcade, guest: !care.user };
 }

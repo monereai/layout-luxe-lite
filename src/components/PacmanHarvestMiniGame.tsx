@@ -3,12 +3,12 @@ import Phaser from "phaser";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen, Sun, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { MAZE, MAZE_TICK_MS, mazeWalkable, cellId, mazeCells, mazeStep, newMaze, powerActive, type MazeDirection } from "@/lib/harvest-maze";
+import { MAZE, MAZE_TICK_MS, THIRD_SCROLL_CELL, reachedThirdScroll, mazeWalkable, cellId, mazeCells, mazeStep, newMaze, powerActive, type MazeDirection } from "@/lib/harvest-maze";
 import { advanceAlong, easeVelocity, CORNER_MARGIN } from "@/lib/movement";
 import { playSound } from "@/lib/audio";
 
 /** Browser-only Phaser maze; the server replays the input trace before depositing rewards. */
-export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false }: { avatar: string; practice?: boolean; onComplete: (collectedEnergy: number, trace: MazeDirection[], expelled: boolean) => Promise<void> }) {
+export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false, thirdScroll = false }: { avatar: string; practice?: boolean; thirdScroll?: boolean; onComplete: (collectedEnergy: number, trace: MazeDirection[], expelled: boolean) => Promise<void> }) {
   const [mount, setMount] = useState<HTMLDivElement | null>(null);
   const direction = useRef<MazeDirection>("idle");
   const trace = useRef<MazeDirection[]>([]), finish = useRef(onComplete), stopped = useRef(false);
@@ -33,6 +33,7 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false }: 
       shadows: Phaser.GameObjects.Image[] = [];
       velocity = 0;
       dots = new Map<number, Phaser.GameObjects.Image>();
+      scroll?: Phaser.GameObjects.Text;
       preload() { this.load.image("monere", avatar); }
       create() {
         const texture = (key: string, draw: (c: CanvasRenderingContext2D) => void) => { const t = this.textures.createCanvas(key, 40, 40); const c = t?.getContext(); if (c) { draw(c); t?.refresh(); } };
@@ -42,6 +43,7 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false }: 
         texture("shadow", c => { c.fillStyle = color("--maze-shadow"); c.strokeStyle = color("--maze-edge"); c.lineWidth = 2; c.beginPath(); c.moveTo(6, 32); c.lineTo(6, 18); c.bezierCurveTo(6, 0, 34, 0, 34, 18); c.lineTo(34, 32); c.lineTo(27, 27); c.lineTo(20, 32); c.lineTo(13, 27); c.closePath(); c.fill(); c.stroke(); c.fillStyle = color("--foreground"); c.fillRect(13, 15, 4, 6); c.fillRect(24, 15, 4, 6); });
         MAZE.forEach((row, y) => [...row].forEach((c, x) => { if (c === "#") this.add.image(x * 40 + 20, y * 40 + 20, "wall"); }));
         mazeCells.forEach(p => { if (!state.collected.includes(cellId(p))) this.dots.set(cellId(p), this.add.image(p.x * 40 + 20, p.y * 40 + 20, p.sun ? "sun" : "dot")); });
+        if (thirdScroll) this.scroll = this.add.text(THIRD_SCROLL_CELL.x * 40 + 20, THIRD_SCROLL_CELL.y * 40 + 20, "📜", { fontSize: "32px" }).setOrigin(.5).setDepth(4);
         this.player = this.add.image(state.player.x * 40 + 20, state.player.y * 40 + 20, "monere").setDisplaySize(38, 38).setDepth(3);
         this.shadows = state.chasers.map(c => this.add.image(c.x * 40 + 20, c.y * 40 + 20, "shadow").setDepth(2));
       }
@@ -67,6 +69,7 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false }: 
         if (this.player && Math.hypot(this.player.x - (state.player.x * 40 + 20), this.player.y - (state.player.y * 40 + 20)) > CORNER_MARGIN) intent = "idle";
         const old = state; state = mazeStep(state, intent); trace.current.push(intent); total.current = state.energy; setSnapshot(state);
         for (const id of state.collected) { this.dots.get(id)?.destroy(); this.dots.delete(id); }
+        if (thirdScroll && reachedThirdScroll(state)) { this.scroll?.destroy(); this.scroll = undefined; if (!reachedThirdScroll(old)) playSound("success.mp3", .5); }
         if (state.energy > old.energy) playSound(state.powerUntil > old.powerUntil ? "success.mp3" : "energy_pickup.mp3", .2);
         if (this.player) { if (direction.current === "left" || direction.current === "right") this.player.setFlipX(direction.current === "left"); }
         this.shadows.forEach((c, i) => { const p = state.chasers[i]; if (p) this.tweens.add({ targets: c, x: p.x * 40 + 20, y: p.y * 40 + 20, alpha: powerActive(state) ? .45 : 1, duration: 180 }); });
@@ -80,10 +83,11 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false }: 
     const blur = () => { direction.current = "idle"; };
     window.addEventListener("keydown", down, true); window.addEventListener("keyup", up, true); window.addEventListener("blur", blur);
     return () => { window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true); window.removeEventListener("blur", blur); game.destroy(true); };
-  }, [avatar, mount]);
+  }, [avatar, mount, thirdScroll]);
   const power = Math.max(0, Math.ceil((snapshot.powerUntil - snapshot.tick) * MAZE_TICK_MS / 1000));
   return <Dialog open onOpenChange={() => { if (!saving) void deposit(snapshot.ended === "expelled"); }}><DialogContent showCloseButton={false} className="harvest-modal" onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()}>
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><DialogTitle className="text-xl text-primary">Monere’s Energy Orchard</DialogTitle><DialogDescription>{practice ? "Practice · today’s Energy already harvested" : "Sunlit harvest"}</DialogDescription></div><span role="status" aria-label={`Collected ${snapshot.energy} Energy`} className="flex items-center gap-1 font-display text-xl text-energy"><Zap />+{snapshot.energy}</span></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div><DialogTitle className="text-xl text-primary">{thirdScroll ? "Shadow Ravine’s Crystal Maze" : "Monere’s Energy Orchard"}</DialogTitle><DialogDescription>{practice ? "Practice · today’s Energy already harvested" : "Sunlit harvest"}</DialogDescription></div><span role="status" aria-label={`Collected ${snapshot.energy} Energy`} className="flex items-center gap-1 font-display text-xl text-energy"><Zap />+{snapshot.energy}</span></div>
+    {thirdScroll && <p role="status" className="text-sm font-display text-points">📜 {reachedThirdScroll(snapshot) ? "Third scroll reached!" : "Prize: the third scroll"}</p>}
     <div className="flex items-center justify-between gap-2 text-sm"><span className="text-muted-foreground">{snapshot.collected.length - 1} / {mazeCells.length - 1}</span><span role="status" className={power ? "text-points" : "text-muted-foreground"}><Sun className="mr-1 inline h-4 w-4" />{power ? `Sun Power · ${power}s` : "Golden Suns"}</span></div>
     <div ref={setMount} className="harvest-board" role="img" aria-label="Orchard maze with Monere, glowing Energy dots, four Golden Suns and three Shadow Chasers" />
     <div className="flex items-end justify-between gap-3"><div className="harvest-pad" aria-label="Maze movement">{[{ d: "up", Icon: ArrowUp, c: "col-start-2" }, { d: "left", Icon: ArrowLeft, c: "row-start-2" }, { d: "down", Icon: ArrowDown, c: "row-start-2 col-start-2" }, { d: "right", Icon: ArrowRight, c: "row-start-2 col-start-3" }].map(({ d, Icon, c }) => <Button key={d} variant="secondary" size="icon" aria-label={`Maze move ${d}`} className={c} disabled={saving || stopped.current} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); direction.current = d as MazeDirection; }} onPointerUp={() => { direction.current = "idle"; }} onPointerCancel={() => { direction.current = "idle"; }} onLostPointerCapture={() => { direction.current = "idle"; }}><Icon /></Button>)}</div><Button disabled={saving} variant="outline" onClick={() => void deposit(snapshot.ended === "expelled")}><DoorOpen />{saving ? "Saving Energy…" : error ? "Retry save" : "Keep harvest"}</Button></div>

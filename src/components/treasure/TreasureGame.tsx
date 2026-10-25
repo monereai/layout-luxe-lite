@@ -29,7 +29,7 @@ import petShopMark from "@/assets/shop/pet-shop.png";
 import { saveHarvestRecord } from "@/lib/harvest-records";
 import { SUPPORTER_PAYMENT_URL } from "@/lib/supporter";
 import { createWalkingFrames } from "@/lib/walking-frames";
-import { MAP_ENTRANCES, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
+import { MAP_ENTRANCES, replayMaze, crystalScrollEligible, reachedThirdScroll, type MazeDirection } from "@/lib/harvest-maze";
 import type { GardenInput } from "@/lib/garden-game";
 import type { ArcadeInput } from "@/lib/arcade-game";
 
@@ -63,7 +63,7 @@ export function TreasureGame() {
   const [support, setSupport] = useState(false);
   const [side, setSide] = useState<SideZoneId | null>(null);
   const [travelling, setTravelling] = useState(false);
-  const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
+  const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string; thirdScroll: boolean } | null>(null);
   const [gardenRound, setGardenRound] = useState<string | null>(null);
   const openingGarden = useRef(false);
   const [arcadeRound, setArcadeRound] = useState<string | null>(null);
@@ -146,7 +146,7 @@ export function TreasureGame() {
     if (harvestMaze || busy || startingHarvest.current) return false;
     startingHarvest.current = true;
     setBusy(true);
-    try { await game.prepareHarvest(); const round = await orchard.beginMaze(id); setHarvestMaze({ tree: id, round }); return true; }
+    try { await game.prepareHarvest(); const round = await orchard.beginMaze(id); setHarvestMaze({ tree: id, round, thirdScroll: crystalScrollEligible(id, state.zone) && !state.scrolls.includes("ravine") && round !== "practice" }); return true; }
     catch (e) { setNotice(e instanceof Error ? e.message : "The harvest couldn't be saved."); return false; }
     finally { startingHarvest.current = false; setBusy(false); }
   }
@@ -158,15 +158,17 @@ export function TreasureGame() {
   }
   async function finishHarvest(collectedEnergy: number, trace: MazeDirection[], expelled: boolean) {
     if (!harvestMaze) return;
-    if (replayMaze(trace).energy !== collectedEnergy) throw new Error("The collected Energy could not be verified.");
+    const replay = replayMaze(trace);
+    if (replay.energy !== collectedEnergy) throw new Error("The collected Energy could not be verified.");
     const result = await orchard.finishMaze(harvestMaze.tree, harvestMaze.round, trace);
+    const wonScroll = harvestMaze.thirdScroll && reachedThirdScroll(replay);
     if (result.state) game.harvestReturn(result.state);
-    else if (expelled && !side) game.harvestReturn({ ...state, ...MAP_ENTRANCES[state.zone], pet: null });
+    else if (orchard.guest || expelled && !side) game.harvestReturn({ ...state, ...(expelled && !side ? { ...MAP_ENTRANCES[state.zone], pet: null } : {}), scrolls: wonScroll && orchard.guest ? [...new Set([...state.scrolls, "ravine" as const])] : state.scrolls });
     if (expelled && side) setSideReset(v => v + 1);
     try { saveHarvestRecord(game.user?.id ?? "guest", collectedEnergy); } catch { /* optional local record */ }
     setHarvestMaze(null);
     if (side === "caverns") setSide(null);
-    setNotice(`${expelled ? "Whoosh! Safely back at the entrance." : "Harvest gathered!"} +${result.gained} Energy${orchard.guest ? " (guest preview)" : ""}.`);
+    setNotice(`${wonScroll ? "Third scroll collected! 📜 " : ""}${expelled ? "Whoosh! Safely back at the entrance." : "Harvest gathered!"} +${result.gained} Energy${orchard.guest ? " (guest preview)" : ""}.`);
   }
   const portal = here?.kind === "portal" ? PORTALS[state.zone].find(p => p.target === here.id) : undefined;
 
@@ -308,7 +310,7 @@ export function TreasureGame() {
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
-    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the Energy maze…</div>}><PacmanHarvestMiniGame avatar={avatar} practice={harvestMaze.round === "practice"} onComplete={finishHarvest} /></Suspense></ClientOnly>}
+    {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the Energy maze…</div>}><PacmanHarvestMiniGame avatar={avatar} practice={orchard.isMazePractice?.(harvestMaze.round) ?? harvestMaze.round === "practice"} thirdScroll={harvestMaze.thirdScroll} onComplete={finishHarvest} /></Suspense></ClientOnly>}
     {gardenRound && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening Vernon’s garden…</div>}><DonkeyKongMiniGame avatar={avatar} energy={orchard.energy} onJump={async trace => { await orchard.gardenAction(gardenRound, trace, false); }} onComplete={finishGarden} onExit={() => void leaveGarden()} /></Suspense></ClientOnly>}
     {arcadeRound && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening Connie’s arcade…</div>}><ConnieArcadeMiniGame avatar={avatar} onComplete={finishArcade} onExit={leaveArcade} /></Suspense></ClientOnly>}
 
