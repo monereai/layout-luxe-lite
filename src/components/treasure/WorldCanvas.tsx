@@ -131,7 +131,7 @@ export function WorldCanvas(props: Props) {
           }
           // Map text labels are intentionally disabled: hints live in the quest log and on-tap messages.
           const label = (_p: Position, _t: string) => {};
-          const bob = (o: Phaser.GameObjects.Text) => { if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); return o; };
+          const bob = (o: Phaser.GameObjects.Text | Phaser.GameObjects.Image) => { if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }); return o; };
           // Energy Orchards: sealed elemental gates and Energy Trees (actionable via the interact button).
           ELEMENTAL_GATES.filter(g => g.zone === s.zone).forEach(g => bob(text(g.at, g.icon, 44)));
           MAP_TREES.filter(t => t.zone === s.zone).forEach(t => { text(t.at, "🌳", 65); text(t.at, "🍎", 11).setPosition(...at(t.at)).setX(at(t.at)[0] - 13).setY(at(t.at)[1] - 12).setDepth(4); text(t.at, "🍐", 10).setX(at(t.at)[0] + 14).setY(at(t.at)[1] - 6).setDepth(4); });
@@ -182,7 +182,20 @@ export function WorldCanvas(props: Props) {
             // Apples stay subtle; seeds must be easy to spot on the clear Meadow paths.
             const quiet = i.id.startsWith("apple-");
             const seed = i.id.startsWith("seed-");
-            const o = text(i, i.icon, quiet ? 16 : seed ? 40 : 34);
+            // Rocco's Silver Bell is drawn as a desaturated bell texture so it reads as silver, not gold.
+            const silverBell = i.id === "bell";
+            if (silverBell && !this.textures.exists("silver-bell")) {
+              const t = this.textures.createCanvas("silver-bell", 64, 64);
+              if (t) {
+                const c = t.getContext();
+                c.filter = "grayscale(100%) brightness(115%)";
+                c.font = "48px serif"; c.textAlign = "center"; c.textBaseline = "middle";
+                c.fillText("🔔", 32, 34); t.refresh();
+              }
+            }
+            const o = silverBell
+              ? this.add.image(...at(i), "silver-bell").setDisplaySize(40, 40)
+              : text(i, i.icon, quiet ? 16 : seed ? 40 : 34);
             // Both objectives stay above fog; only seeds regain the visible pickup bob.
             if (quiet || seed) o.setDepth(8);
             if (quiet) return;
