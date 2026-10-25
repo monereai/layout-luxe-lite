@@ -1,10 +1,11 @@
 /** Fixed-step rules shared by the isolated renderer and authenticated replay. */
 export const GARDEN_TICK_MS = 50;
-export const JUMP_COST = 5;
+/** Jumping is free — no Energy is charged per jump. */
+export const JUMP_COST = 0;
 /** A jump lasts 400ms and peaks high enough to clear a rolling barrel. */
 export const JUMP_TICKS = 8;
 export const JUMP_HEIGHT = 64;
-export const canGardenJump = (energy: number) => energy >= JUMP_COST;
+export const canGardenJump = (_energy: number) => true;
 export const GARDEN_ENERGY_REWARD = 50;
 export const GARDEN_COIN_REWARD = 20;
 export const PLATFORM_Y = [450, 330, 210, 90];

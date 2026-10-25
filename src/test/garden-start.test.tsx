@@ -68,17 +68,18 @@ it("the Jump button queues a jump exactly like the keyboard", async () => {
   await act(async () => {});
   expect(jump).toHaveBeenCalledTimes(1);
 });
-it("jumping with less than 5 Energy is refused with a message", () => {
+it("jumping works even with 0 Energy and is free", async () => {
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
   const jump = vi.fn().mockResolvedValue(undefined);
-  render(<DonkeyKongMiniGame avatar="/lion.webp" energy={4} onJump={jump} onComplete={vi.fn()} onExit={vi.fn()} />);
+  render(<DonkeyKongMiniGame avatar="/lion.webp" energy={0} onJump={jump} onComplete={vi.fn()} onExit={vi.fn()} />);
   act(() => engine.scene?.create());
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
   fireEvent.keyDown(window, { key: " " });
   step();
-  expect(state().jumps).toBe(0);
-  expect(jump).not.toHaveBeenCalled();
-  expect(screen.getByRole("alert").textContent).toContain("5 Energy");
+  expect(state().jumps).toBe(1);
+  await act(async () => {});
+  expect(jump).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole("alert")).toBeNull();
 });
 it("a jump started just before a barrel clears it", async () => {
   const { gardenStep, newGarden } = await import("@/lib/garden-game");
@@ -99,11 +100,11 @@ it("Space cancels scrolling and key repeat does not trigger extra jumps", () => 
   for (let i = 0; i < 8; i++) step();
   expect(state().jumps).toBe(1); expect(state().jump).toBe(0);
 });
-it("each accepted jump consumes exactly 5 Energy from the local allowance", () => {
+it("every jump is accepted with no Energy allowance", () => {
   open();
   for (let j = 0; j < 11; j++) {
     fireEvent.click(screen.getByRole("button", { name: "JUMP (Space)" })); step();
-    for (let i = 0; i < 8; i++) step();
+    for (let i = 0; i < 9; i++) step();
   }
-  expect(state().jumps).toBe(10);
+  expect(state().jumps).toBe(11);
 });

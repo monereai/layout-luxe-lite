@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
 import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame } from "@/lib/treasure.functions";
-import { JUMP_COST, GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
+import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
@@ -71,10 +71,10 @@ export function useOrchardEnergy() {
   async function beginGarden() { return care.user ? (await gardenStart()).id : "guest"; }
   async function gardenAction(round: string, trace: GardenInput[], finish: boolean) {
     if (!care.user) {
-      if (!finish && guestBalance.current < JUMP_COST) throw new Error("Monere needs 5 Energy to jump.");
+      // Jumps are free; only the one-time finish reward touches the guest balance.
       const already = localStorage.getItem("monere-garden-guest-reward") === "claimed";
       const gained = finish && !already ? depositEnergy(guestBalance.current, GARDEN_ENERGY_REWARD) : 0;
-      saveGuest(finish ? guestBalance.current + gained : guestBalance.current - JUMP_COST);
+      if (finish) saveGuest(guestBalance.current + gained);
       if (finish) localStorage.setItem("monere-garden-guest-reward", "claimed");
       return { energy: guestBalance.current, gained, points: finish && !already ? 20 : 0, state: null };
     }

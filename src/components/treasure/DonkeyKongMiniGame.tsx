@@ -4,7 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen, Play, RotateCcw, Z
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import gardenArt from "@/assets/treasure/garden.jpg";
-import { GARDEN_TICK_MS, JUMP_COST, LADDERS, PLATFORM_Y, canGardenJump, gardenStep, gardenPlayerY, gardenBarrelY, newGarden, type GardenInput } from "@/lib/garden-game";
+import { GARDEN_TICK_MS, LADDERS, PLATFORM_Y, gardenStep, gardenPlayerY, gardenBarrelY, newGarden, type GardenInput } from "@/lib/garden-game";
 import { playSound } from "@/lib/audio";
 
 /** Isolated browser-only Phaser scene: no shared world controls or collision state. */
@@ -27,8 +27,6 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
   useEffect(() => {
     if (!mount) return;
     let state = newGarden(), elapsed = 0, alive = true, working = false;
-    // Optimistic jump allowance: the server stays the authority, but the gate must not wait on it.
-    let balance = callbacks.current.energy;
     started.current = false; setReady(false); setPlaying(false);
     trace.current = []; stopped.current = false;
     const css = getComputedStyle(document.documentElement);
@@ -70,11 +68,9 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
         elapsed -= GARDEN_TICK_MS;
         let input = command.current ?? direction.current; command.current = null;
         let next = gardenStep(state, input);
-        if (next.jumps > state.jumps && !canGardenJump(balance)) {
-          // Refused jumps still let the round keep moving, so barrels never freeze.
-          setError("Monere needs 5 Energy to jump."); input = direction.current; next = gardenStep(state, input);
-        } else if (next.jumps > state.jumps) {
-          balance -= JUMP_COST; playSound("success.mp3", .2); setError(null);
+        if (next.jumps > state.jumps) {
+          // Jumps are free; the server still records each one for replay checks.
+          playSound("success.mp3", .2); setError(null);
           const jumpTrace = [...trace.current, input];
           chain.current = chain.current.then(() => callbacks.current.onJump(jumpTrace)).catch(() => { if (alive) setError("A jump couldn't be saved yet — it will be checked when you finish."); });
         }
@@ -100,7 +96,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
     <div ref={setMount} className="garden-game-board" data-tick={snapshot.tick} data-state={JSON.stringify(snapshot)} data-is-jumping={snapshot.jump > 0} role="img" aria-label={`Four girder platforms with ladders and rolling barrels. Monere on platform ${snapshot.level + 1}, position ${snapshot.x}.`} />
     {!playing && <Button disabled={!ready} onClick={start}><Play />{ready ? "Start garden challenge" : "Opening garden…"}</Button>}
     <div className="flex items-center justify-between gap-2"><div className="harvest-pad">{[{ d: "up", Icon: ArrowUp, c: "col-start-2" }, { d: "left", Icon: ArrowLeft, c: "row-start-2" }, { d: "down", Icon: ArrowDown, c: "row-start-2 col-start-2" }, { d: "right", Icon: ArrowRight, c: "row-start-2 col-start-3" }].map(({ d, Icon, c }) => <Button key={d} size="icon" variant="secondary" className={c} aria-label={`Garden move ${d}`} disabled={busy || stopped.current} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); direction.current = d as GardenInput; }} onPointerUp={() => { direction.current = "idle"; }} onPointerCancel={() => { direction.current = "idle"; }} onLostPointerCapture={() => { direction.current = "idle"; }}><Icon /></Button>)}</div><div className="flex flex-wrap justify-end gap-2"><Button disabled={busy || stopped.current} onClick={jump}><ArrowUp />JUMP (Space)</Button><Button size="icon" variant="outline" title="Reset position" aria-label="Reset garden position" disabled={busy || stopped.current} onClick={() => { command.current = "reset"; }}><RotateCcw /></Button><Button size="icon" variant="ghost" title="Return to Meadow" aria-label="Leave garden challenge" disabled={busy} onClick={onExit}><DoorOpen /></Button></div></div>
-    <ul aria-label="Garden controls" className="garden-keys">{[["← →", "A D", "Walk"], ["↑ ↓", "W S", "Climb ladders"], ["Space", "Jump button", `Jump barrels · ${JUMP_COST} Energy`], ["↺", "", "Back to start"]].map(([a, b, label]) => <li key={label}><kbd>{a}</kbd>{b && <kbd>{b}</kbd>}<span>{label}</span></li>)}</ul>
+    <ul aria-label="Garden controls" className="garden-keys">{[["← →", "A D", "Walk"], ["↑ ↓", "W S", "Climb ladders"], ["Space", "Jump button", "Jump barrels · free"], ["↺", "", "Back to start"]].map(([a, b, label]) => <li key={label}><kbd>{a}</kbd>{b && <kbd>{b}</kbd>}<span>{label}</span></li>)}</ul>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}{stopped.current && retry.current && <Button disabled={busy} onClick={() => retry.current?.()}>Save reward</Button>}
   </DialogContent></Dialog>;
 }
