@@ -174,7 +174,7 @@ export function WorldCanvas(props: Props) {
             const key = npcSprite[n.id];
             if (key && this.textures.exists(key)) {
               // Connie is nudged up ~15% so her full body reads at a glance; both sizes keep the artwork's 3:4 aspect.
-              const w = n.id === "connie" ? 91 : 105.6, h = n.id === "connie" ? 121 : 105.6;
+              const w = n.id === "connie" ? 91.08 : 105.6, h = n.id === "connie" ? 121.44 : 105.6;
               const o = this.add.image(...at(n), key).setDisplaySize(w, h).setOrigin(.5, .62).setDepth(3); this.scenery.push(o);
               if (!this.reduced) this.tweens.add({ targets: o, y: o.y - 5, duration: 1100, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
             } else bob(text(n, n.icon, 50));
