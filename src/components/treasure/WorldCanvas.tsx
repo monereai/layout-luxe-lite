@@ -146,8 +146,19 @@ export function WorldCanvas(props: Props) {
           if (s.zone === "ravine") {
             const boots = s.gear.includes("boots"); text({ x: 17, y: 6 }, boots ? "🧗" : "⛰️", 36); label({ x: 17, y: 6 }, boots ? "Cliffs" : "Cliffs · needs Climbing Boots");
             const vault = s.quests.includes("vault");
-            // Plates read as flat carved stone discs in terrain tones: no saturated colour rings over the ravine art.
-            [PLATE_HERO, PLATE_PET].forEach(pl => { const [px, py] = at(pl); const disc = this.add.circle(px, py, 22, 0x5f564c, vault ? .5 : .78).setStrokeStyle(2, 0x3d362e, .8).setDepth(2); this.scenery.push(disc); const inner = this.add.circle(px, py, 13, 0x4a423a, vault ? .35 : .55).setDepth(2); this.scenery.push(inner); });
+            // Plates read as flat carved flagstones flush with the ravine floor: no discs, rings or colour washes.
+            [PLATE_HERO, PLATE_PET].forEach((pl, i) => {
+              const [px, py] = at(pl);
+              const slab = this.add.graphics().setDepth(2); this.scenery.push(slab);
+              const w = 46, h = 34, l = px - w / 2, t = py - h / 2;
+              slab.fillStyle(0x000000, .18).fillRoundedRect(l + 2, t + 3, w, h, 6);
+              slab.fillStyle(0x6b6156, vault ? .55 : .85).fillRoundedRect(l, t, w, h, 6);
+              slab.fillStyle(0xffffff, .14).fillRoundedRect(l, t, w, 6, { tl: 6, tr: 6, bl: 0, br: 0 });
+              slab.fillStyle(0x000000, .2).fillRoundedRect(l, t + h - 5, w, 5, { tl: 0, tr: 0, bl: 6, br: 6 });
+              slab.fillStyle(0x544a41, .5).fillRoundedRect(l + 6, t + 8, w - 12, h - 16, 4);
+              for (let k = 0; k < 9; k++) { const seed = Math.sin((i + 1) * 63.7 + k * 12.9898) * 43758.5453; const fx = seed - Math.floor(seed); const fy = (seed * 7.13) - Math.floor(seed * 7.13); slab.fillStyle(k % 2 ? 0xffffff : 0x000000, k % 2 ? .08 : .14).fillCircle(l + 5 + fx * (w - 10), t + 5 + fy * (h - 10), 1 + (k % 3) * .4); }
+              slab.lineStyle(1, 0x3d362e, .5).strokeRoundedRect(l, t, w, h, 6);
+            });
           }
           if (s.zone === "lair") {
             const goggles = s.gear.includes("goggles");
