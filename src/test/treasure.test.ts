@@ -149,7 +149,7 @@ d4("expanded griffin world", () => {
     e4(apples.every(a => a.zone === "wood")).toBe(true);
     let s = at4({ zone: "wood", x: 6, y: 20, items: ["apple-1", "apple-2"] });
     e4(A4(s, { action: "deliver", id: "connie" }).quests).toEqual([]);
-    for (const a of apples) s = A4(s, { action: "pick", id: a.id });
+    for (const a of apples) s = A4({ ...s, x: a.x, y: a.y }, { action: "pick", id: a.id });
     e4(s.items.filter(i => i.startsWith("apple-"))).toEqual(["apple-1", "apple-2", "apple-3"]);
     e4(A4(s, { action: "deliver", id: "connie" }).quests).toEqual(["connie"]);
   });
