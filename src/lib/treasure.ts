@@ -245,7 +245,7 @@ export const ITEMS: Item[] = [
 export const itemVisible = (s: AdventureState, it: Item) => it.id === "bell" ? s.met.includes("rocco") : true;
 export type Dig = Position & { id: string; zone: ZoneId; item?: string; points: number };
 /** Every pet dig rewards this much Energy — server-verified, mirrored locally for guests. */
-export const DIG_ENERGY = 25;
+export const DIG_ENERGY = 10;
 export const DIGS: Dig[] = [
   { id: "m-coins", zone: "meadow", x: 5, y: 17, points: 10 }, { id: "m-frag", zone: "meadow", x: 19, y: 15, item: "fragment-1", points: 0 },
   { id: "w-coins", zone: "wood", x: 10, y: 4, points: 10 }, { id: "w-relic", zone: "wood", x: 12, y: 20, item: "relic-acorn-charm", points: 0 },
