@@ -139,7 +139,6 @@ export function WorldCanvas(props: Props) {
             // The dark cave overlay and moon marker were removed: the lantern gate for the
             // cave acorn stays in the item-visibility rules, with no tint circle on the map.
 
-            label({ x: 19, y: 6 }, lit ? "Lit cave" : "Dark cave · needs Lantern");
             // Moving lily pads on the river (no flat colour overlay).
             [17, 18].forEach((row, r) => { const pad = text({ x: LILY_ROWS[r]![s.lily]!, y: row }, "🪷", 46); const prev = LILY_ROWS[r]![(s.lily + 2) % 3]!; if (!this.reduced && this.lastLily !== s.lily) { pad.x = (prev + .5) * 64; this.tweens.add({ targets: pad, x: (LILY_ROWS[r]![s.lily]! + .5) * 64, duration: 700, ease: "Sine.easeInOut" }); } });
             this.lastLily = s.lily; text(BELL, "🛎️", 36); label(BELL, "Frog bell");
