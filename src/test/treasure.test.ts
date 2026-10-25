@@ -146,12 +146,29 @@ d4("expanded griffin world", () => {
   i4("Connie's quest needs exactly her 3 rosy apples", () => {
     const apples = ITEMS.filter(i => i.id.startsWith("apple-"));
     e4(apples).toHaveLength(3);
-    e4(apples.every(a => a.zone === "wood")).toBe(true);
     let s = at4({ zone: "wood", x: 6, y: 20, items: ["apple-1", "apple-2"] });
     e4(A4(s, { action: "deliver", id: "connie" }).quests).toEqual([]);
-    for (const a of apples) s = A4({ ...s, x: a.x, y: a.y }, { action: "pick", id: a.id });
+    for (const a of apples) s = A4({ ...s, zone: a.zone, x: a.x, y: a.y - 1 }, { action: "pick", id: a.id });
     e4(s.items.filter(i => i.startsWith("apple-"))).toEqual(["apple-1", "apple-2", "apple-3"]);
-    e4(A4({ ...s, x: 6, y: 20 }, { action: "deliver", id: "connie" }).quests).toEqual(["connie"]);
+    e4(A4({ ...s, zone: "wood", x: 6, y: 20 }, { action: "deliver", id: "connie" }).quests).toEqual(["connie"]);
+  });
+  i4("Connie's apples are scattered across three reachable lands", () => {
+    const apples = ITEMS.filter(i => i.id.startsWith("apple-"));
+    e4(apples.map(({ zone }) => zone)).toEqual(["meadow", "wood", "ravine"]);
+    for (const apple of apples) {
+      const start = at4({ zone: apple.zone, x: apple.zone === "meadow" ? 10 : 3, y: apple.zone === "ravine" ? 6 : 10 });
+      const path = worldPath(start, { x: apple.x, y: apple.y - 1 });
+      e4(path).not.toBeNull();
+      let s = start;
+      for (const step of path ?? []) s = A4(s, { action: "move", ...step });
+      e4(itemVisible(s, apple)).toBe(true);
+      s = A4(s, { action: "pick", id: apple.id });
+      e4(s.items).toContain(apple.id);
+      e4(A4(s, { action: "pick", id: apple.id }).items).toEqual(s.items);
+      e4(A4({ ...s, items: [], zone: "garden" }, { action: "pick", id: apple.id }).items).toEqual([]);
+      e4(NPCS.some(n => n.zone === apple.zone && n.x === apple.x && n.y === apple.y)).toBe(false);
+      e4(ITEMS.some(i => i.id !== apple.id && i.zone === apple.zone && i.x === apple.x && i.y === apple.y)).toBe(false);
+    }
   });
   i4("dark cave needs the Lantern", () => {
     e4(C4(at4({ zone: "wood" }), 19, 4)).toBe(false);
