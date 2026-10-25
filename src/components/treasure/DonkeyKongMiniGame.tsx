@@ -24,6 +24,9 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
   const [ready, setReady] = useState(false), [playing, setPlaying] = useState(false);
   const start = () => { started.current = true; setPlaying(true); };
   const jump = () => { if (!stopped.current) command.current = "jump"; };
+  /** Entry notification shown when Monere enters the garden challenge. */
+  const [entryNotice, setEntryNotice] = useState(true);
+  useEffect(() => { if (!entryNotice) return; const t = setTimeout(() => setEntryNotice(false), 4500); return () => clearTimeout(t); }, [entryNotice]);
   useEffect(() => {
     if (!mount) return;
     let state = newGarden(), elapsed = 0, alive = true, working = false;
