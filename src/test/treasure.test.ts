@@ -137,6 +137,22 @@ d4("expanded griffin world", () => {
     e4(A4({ ...s, items: ["seed-1", "seed-2"] }, { action: "deliver", id: "vernon" }).quests).toEqual([]);
     e4(A4(s, { action: "deliver", id: "vernon" }).quests).toEqual(["vernon"]);
   });
+  i4("Connie stands at the bottom of Lonely Wood", () => {
+    const connie = NPCS.find(n => n.id === "connie")!;
+    e4([connie.zone, connie.x, connie.y]).toEqual(["wood", 6, 20]);
+    e4(C4(at4({ zone: "wood", x: 6, y: 19 }), 6, 20)).toBe(true);
+    e4(C4(at4({ zone: "wood", x: 6, y: 21 }), 6, 20)).toBe(true);
+  });
+  i4("Connie's quest needs exactly her 3 rosy apples", () => {
+    const apples = ITEMS.filter(i => i.id.startsWith("apple-"));
+    e4(apples).toHaveLength(3);
+    e4(apples.every(a => a.zone === "wood")).toBe(true);
+    let s = at4({ zone: "wood", x: 6, y: 20, items: ["apple-1", "apple-2"] });
+    e4(A4(s, { action: "deliver", id: "connie" }).quests).toEqual([]);
+    for (const a of apples) s = A4({ ...s, x: a.x, y: a.y }, { action: "pick", id: a.id });
+    e4(s.items.filter(i => i.startsWith("apple-"))).toEqual(["apple-1", "apple-2", "apple-3"]);
+    e4(A4({ ...s, x: 6, y: 20 }, { action: "deliver", id: "connie" }).quests).toEqual(["connie"]);
+  });
   i4("dark cave needs the Lantern", () => {
     e4(C4(at4({ zone: "wood" }), 19, 4)).toBe(false);
     e4(C4(at4({ zone: "wood", gear: ["lantern"] }), 19, 4)).toBe(true);

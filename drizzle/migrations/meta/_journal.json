@@ -505,6 +505,13 @@
       "when": 1792906426496,
       "tag": "0071_pet_digs_grant_10_energy",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1792906737162,
+      "tag": "0072_connie_fruit_picker",
+      "breakpoints": true
     }
   ]
 }
