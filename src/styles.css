@@ -477,7 +477,7 @@
 
 /* Mobile PWA fullscreen lock: the browser viewport is pinned to the device screen so
    installed home-screen sessions render edge to edge with no address bar or rubber-band.
-   Page scrolling moves into #root so journal, shop and menu pages keep their normal scroll. */
+   Page scrolling moves into each route's outer container so journal/shop/menu pages keep scrolling. */
 html {
   height: 100vh;
   height: -webkit-fill-available;
