@@ -111,7 +111,7 @@ d4("expanded griffin world", () => {
     s = { ...s, items: [...s.items, "feather-3"] };
     e4(A4(s, { action: "deliver", id: "barnaby" }).gear).toEqual(["lantern"]);
   });
-  i4("Vernon has exactly 3 seeds hidden around the Meadow", () => {
+  i4("Vernon has exactly 3 seeds in clear Meadow areas", () => {
     const seeds = ITEMS.filter(i => i.id.startsWith("seed-"));
     e4(seeds).toHaveLength(3);
     e4(seeds.map(i => i.zone)).toEqual(["meadow", "meadow", "meadow"]);
@@ -125,7 +125,7 @@ d4("expanded griffin world", () => {
   i4("all three seeds are reachable from the Meadow start", () => {
     const seeds = ITEMS.filter(i => i.id.startsWith("seed-"));
     e4(seeds.map(({ zone, x, y }) => [zone, x, y])).toEqual([
-      ["meadow", 2, 2], ["meadow", 20, 20], ["meadow", 12, 29],
+      ["meadow", 9, 10], ["meadow", 11, 14], ["meadow", 10, 17],
     ]);
     for (const seed of seeds) {
       e4(worldPath(at4({ zone: "meadow", x: 10, y: 12 }), seed)).not.toBeNull();
@@ -142,6 +142,20 @@ d4("expanded griffin world", () => {
     const s = at4({ x: 11, y: 18, items: ["seed-1", "seed-2", "seed-3"] });
     e4(A4({ ...s, items: ["seed-1", "seed-2"] }, { action: "deliver", id: "vernon" }).quests).toEqual([]);
     e4(A4(s, { action: "deliver", id: "vernon" }).quests).toEqual(["vernon"]);
+  });
+  i4("a player with one saved seed can collect the other two and unlock Vernon", () => {
+    let s = at4({ items: ["seed-1"] });
+    for (const seed of ITEMS.filter(i => i.id === "seed-2" || i.id === "seed-3")) {
+      const path = worldPath(s, seed);
+      e4(path).not.toBeNull();
+      for (const step of path ?? []) s = A4(s, { action: "move", ...step });
+      s = A4(s, { action: "pick", id: seed.id });
+    }
+    e4(s.items).toEqual(["seed-1", "seed-2", "seed-3"]);
+    const path = worldPath(s, { x: 11, y: 18 });
+    e4(path).not.toBeNull();
+    for (const step of path ?? []) s = A4(s, { action: "move", ...step });
+    e4(A4(s, { action: "deliver", id: "vernon" }).quests).toContain("vernon");
   });
   i4("Connie stands at the bottom of Lonely Wood", () => {
     const connie = NPCS.find(n => n.id === "connie")!;

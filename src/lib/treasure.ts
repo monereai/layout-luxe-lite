@@ -239,10 +239,10 @@ export const ITEMS: Item[] = [
   { id: "acorn-2", zone: "wood", x: 20, y: 3, name: "Golden Acorn", icon: "🌰" },
   { id: "acorn-3", zone: "ravine", x: 5, y: 8, name: "Golden Acorn", icon: "🌰" },
   { id: "bell", zone: "meadow", x: 17, y: 17, name: "Rocco's Silver Bell", icon: "🔔" },
-  // Vernon's three seeds hide in far corners of the Meadow, away from paths and landmarks.
-  { id: "seed-1", zone: "meadow", x: 2, y: 2, name: "Magic Seed Packet", icon: "🌱" },
-  { id: "seed-2", zone: "meadow", x: 20, y: 20, name: "Magic Seed Packet", icon: "🌱" },
-  { id: "seed-3", zone: "meadow", x: 12, y: 29, name: "Magic Seed Packet", icon: "🌱" },
+  // Clear sandy path spots near the starting clearing and on the way to Vernon.
+  { id: "seed-1", zone: "meadow", x: 9, y: 10, name: "Magic Seed Packet", icon: "🌱" },
+  { id: "seed-2", zone: "meadow", x: 11, y: 14, name: "Magic Seed Packet", icon: "🌱" },
+  { id: "seed-3", zone: "meadow", x: 10, y: 17, name: "Magic Seed Packet", icon: "🌱" },
   { id: "apple-1", zone: "wood", x: 13, y: 11, name: "Rosy Apple", icon: "🍎" },
   { id: "apple-2", zone: "wood", x: 5, y: 8, name: "Rosy Apple", icon: "🍎" },
   { id: "apple-3", zone: "wood", x: 19, y: 16, name: "Rosy Apple", icon: "🍎" },
