@@ -9,9 +9,8 @@ export const TREE_ENERGY = 25;
 export const TREE_IDS = ["meadow-1", "wood-1", "ravine-1", "lair-1", "grove-1", "grove-2", "grove-3", "caverns-1"] as const;
 export type TreeId = (typeof TREE_IDS)[number];
 
-/** Sealed elemental gates in the main lands; each opens one side land. */
+/** Sealed elemental gates in the main lands; each opens one side land. The Leaf Gate was removed, so the Grove is no longer reachable. */
 export const ELEMENTAL_GATES: { zone: ZoneId; at: Position; target: SideZoneId; icon: string; name: string }[] = [
-  { zone: "meadow", at: { x: 8, y: 12 }, target: "grove", icon: "🌿", name: "Leaf Gate" },
   { zone: "ravine", at: { x: 4, y: 6 }, target: "caverns", icon: "💎", name: "Crystal Gate" },
 ];
 /** Energy Trees standing in the main lands. */
