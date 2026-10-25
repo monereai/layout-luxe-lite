@@ -59,12 +59,13 @@ it("Space jumps immediately and a slow save never freezes the loop", async () =>
   expect(jump).toHaveBeenCalledTimes(1);
   expect(jump.mock.calls[0]?.[0].at(-1)).toBe("jump");
 });
-it("the Jump button queues a jump exactly like the keyboard", () => {
+it("the Jump button queues a jump exactly like the keyboard", async () => {
   const jump = open();
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
   fireEvent.click(screen.getByRole("button", { name: /Jump · 5/ }));
   step();
   expect(state().jumps).toBe(1);
+  await act(async () => {});
   expect(jump).toHaveBeenCalledTimes(1);
 });
 it("jumping with less than 5 Energy is refused with a message", () => {
