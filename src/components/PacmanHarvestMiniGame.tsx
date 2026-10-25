@@ -33,7 +33,7 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false, th
       shadows: Phaser.GameObjects.Image[] = [];
       velocity = 0;
       dots = new Map<number, Phaser.GameObjects.Image>();
-      scroll?: Phaser.GameObjects.Text;
+      scroll: Phaser.GameObjects.Text | undefined;
       preload() { this.load.image("monere", avatar); }
       create() {
         const texture = (key: string, draw: (c: CanvasRenderingContext2D) => void) => { const t = this.textures.createCanvas(key, 40, 40); const c = t?.getContext(); if (c) { draw(c); t?.refresh(); } };
