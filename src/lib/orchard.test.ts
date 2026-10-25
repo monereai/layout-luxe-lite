@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ELEMENTAL_GATES, FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable, takeGuestMazeEntry } from "./orchard";
+import { ELEMENTAL_GATES, ENERGY_OVERFLOW_POINTS, FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, energyOverflow, harvestGain, sideWalkable, takeGuestMazeEntry } from "./orchard";
 import { walkable, ZONES } from "./treasure";
 
 describe("energy orchards", () => {
