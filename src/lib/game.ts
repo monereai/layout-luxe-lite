@@ -66,6 +66,14 @@ export function recordMini(scene?: string) {
   return POINTS_PER_MINI;
 }
 
+/** Energy overflow bonus: local points for guests filling the bar; accounts are credited server-side by energy_overflow_convert. */
+export function recordEnergyOverflow(points: number) {
+  if (points <= 0) return 0;
+  current = { ...current, points: current.points + points };
+  save();
+  return points;
+}
+
 /** Unlocks the badge; round points and energy are credited by care_finish_round. */
 export function recordComplete() {
   current = { ...current, detective: true };
