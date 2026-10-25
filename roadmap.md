@@ -10,4 +10,4 @@
 - [x] Daily Care rule confirmed in SQL: claim requires Energy 100 and is preserved while the bar sits at the cap; snack blocked only at full.
 - [x] 426 regression tests pass; build OK. Publishing withheld per request.
 - [ ] Guest pet-dig overflow and guest Barn victory browser checks: attempted this session but the guest dig did not trigger and the guest arcade run did not finish; needs a cheaper/deterministic pass (pending, cost-limited).
-- [x] Publishing requested earlier did not include the overflow constraint fix (migration 0091) — a re-publish is still pending and waiting for the user's go-ahead.
+- [x] Re-publish requested and scheduled with the overflow constraint fix (migration 0091) plus PWA and touch-control work.
