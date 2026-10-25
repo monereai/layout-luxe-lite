@@ -97,7 +97,7 @@ export function WorldCanvas(props: Props) {
           const far = this.player && Math.abs(this.player.x - (s.x + .5) * TILE_SIZE) + Math.abs(this.player.y - (s.y + .5) * TILE_SIZE) > TILE_SIZE * 1.5;
           if (changedZone || force || (far && !this.moving)) { this.boostGeneration++; this.turnUntil = 0; this.path = []; this.trail = []; this.direction = { x: 0, y: 0 }; if (this.player) this.tweens.killTweensOf(this.player); this.moving = false; this.target = null; this.velocity = { x: 0, y: 0 }; this.player?.setPosition((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); if (changedZone || force) this.cameras.main.centerOn((s.x + .5) * TILE_SIZE, (s.y + .5) * TILE_SIZE); }
           this.portals.forEach(p => p.destroy()); this.portals = [];
-          this.scenery.forEach(item => item.destroy()); this.scenery = [];
+          this.scenery.forEach(item => { this.tweens.killTweensOf(item); item.destroy(); }); this.scenery = [];
           const hex = (token: string) => { const c = document.createElement("canvas").getContext("2d"); if (!c) return "#888888"; c.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(token).trim() || "#888"; c.fillRect(0, 0, 1, 1); const [r, g, b] = c.getImageData(0, 0, 1, 1).data; return `#${[r, g, b].map(v => (v ?? 0).toString(16).padStart(2, "0")).join("")}`; };
           const color = (token: string) => P.Display.Color.HexStringToColor(hex(token)).color;
           const at = (p: Position) => [(p.x + .5) * 64, (p.y + .5) * 64] as const;
@@ -214,6 +214,8 @@ export function WorldCanvas(props: Props) {
               : seed
                 ? this.add.image(...at(i), "seed-packet").setDisplaySize(52, 52)
                 : text(i, i.icon, quiet ? 16 : 34);
+            // Image pickups need the same lifecycle as text pickups: remove them on every state refresh.
+            if (silverBell || seed) this.scenery.push(o);
             // Both objectives stay above fog; only seeds regain the visible pickup bob.
             if (quiet || seed) o.setDepth(8);
             if (quiet) return;
