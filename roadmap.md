@@ -1,3 +1,6 @@
+# Barrel game scroll prize (2026-10-25)
+- [x] Made the first (meadow) scroll the barrel-game prize: scroll shown above the top hopper, granted idempotently by migration 0075 and the guest fallback, completion notice updated; 18 focused tests pass, live function verified. Account gameplay not exercised (Carl-only access).
+
 # Barrel speed and jump timing (2026-10-25)
 - [x] Slowed barrels by 10% (3.6px/tick) and lengthened Monere's jump to 700ms (14 ticks); focused and full suites pass (379), build OK. Account gameplay not exercised (Carl-only access).
 
