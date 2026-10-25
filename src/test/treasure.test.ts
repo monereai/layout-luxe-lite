@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, DIG_ENERGY, DIGS, ITEMS, itemVisible, NPCS, type AdventureState } from "@/lib/treasure";
+import { applyAdventure, initialAdventure, parseAdventure, gateRiddle, randomRiddles, validRiddles, defaultRiddles, canStep, worldPath, SCROLLS, LAIR_DOOR, DUEL_TILES, gateHere, duelLanding, DUEL_START, DIG_ENERGY, DIGS, ITEMS, itemVisible, NPCS, interactionHere, type AdventureState } from "@/lib/treasure";
 import { PETS, petButtonState } from "@/lib/pets";
 
 const at = (s: Partial<AdventureState>): AdventureState => ({ ...initialAdventure(), ...s });
 
 describe("Griffin rescue rules", () => {
+  it("the retired Shadow Ravine rock cannot give the third scroll", () => {
+    const s = at({ zone: "ravine", ...SCROLLS.ravine, gates: ["meadow", "wood"] });
+    expect(applyAdventure(s, { action: "collect" }).scrolls).toEqual([]);
+    expect(interactionHere(s)?.kind).not.toBe("scroll");
+    expect(applyAdventure({ ...s, scrolls: ["ravine"] }, { action: "collect" }).scrolls).toEqual(["ravine"]);
+  });
   it("default riddles keep their correct answers", () => {
     const s = initialAdventure();
     expect(gateRiddle(s, "meadow").options[gateRiddle(s, "meadow").answer]).toBe("A Clock");

@@ -297,6 +297,7 @@ export type Database = {
           expelled: boolean
           gained: number
           id: string
+          practice: boolean
           settled_at: string | null
           started_at: string
           tree: string
@@ -308,6 +309,7 @@ export type Database = {
           expelled?: boolean
           gained?: number
           id?: string
+          practice?: boolean
           settled_at?: string | null
           started_at?: string
           tree: string
@@ -319,6 +321,7 @@ export type Database = {
           expelled?: boolean
           gained?: number
           id?: string
+          practice?: boolean
           settled_at?: string | null
           started_at?: string
           tree?: string
@@ -740,6 +743,17 @@ export type Database = {
           p_energy: number
           p_expelled: boolean
           p_round: string
+          p_ticks: number
+          p_user: string
+        }
+        Returns: Json
+      }
+      orchard_maze_settle_scroll: {
+        Args: {
+          p_energy: number
+          p_expelled: boolean
+          p_round: string
+          p_scroll_reached: boolean
           p_ticks: number
           p_user: string
         }

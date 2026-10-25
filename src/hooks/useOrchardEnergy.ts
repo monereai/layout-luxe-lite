@@ -25,6 +25,7 @@ export function useOrchardEnergy() {
   const spending = useRef(false);
   const identity = useRef(care.user?.id); identity.current = care.user?.id;
   const [cooling, setCooling] = useState<Record<string, number>>({});
+  const practiceRounds = useRef(new Set<string>());
   function saveGuest(next: number) { guestBalance.current = next; setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ } }
   useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) { guestBalance.current = Math.min(100, Math.max(0, v)); setGuest(guestBalance.current); } } catch { /* optional */ } }, []);
   const energy = care.user ? care.data?.energy ?? 0 : guest;
@@ -32,7 +33,10 @@ export function useOrchardEnergy() {
   async function beginMaze(id: TreeId) {
     if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
     if (!care.user && !takeGuestMazeEntry(new Date().toISOString().slice(0, 10))) throw new Error("Free players can enter the Energy maze twice a day. Sign in with Monere Plus to harvest without limits!");
-    return care.user ? (await start({ data: { tree: id } })).id : "guest";
+    if (!care.user) return "guest";
+    const round = await start({ data: { tree: id } });
+    if (round.practice) practiceRounds.current.add(round.id);
+    return round.id;
   }
   async function finishMaze(id: TreeId, round: string, trace: MazeDirection[]) {
     const maze = replayMaze(trace);
@@ -97,5 +101,5 @@ export function useOrchardEnergy() {
     void care.refetch();
     return result;
   }
-  return { energy, cool, beginMaze, finishMaze, boost, gainDig, beginGarden, gardenAction, beginArcade, finishArcade, guest: !care.user };
+  return { energy, cool, beginMaze, isMazePractice: (round: string) => round === "practice" || practiceRounds.current.has(round), finishMaze, boost, gainDig, beginGarden, gardenAction, beginArcade, finishArcade, guest: !care.user };
 }
