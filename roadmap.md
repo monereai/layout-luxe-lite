@@ -1,3 +1,6 @@
+# Connie’s arcade access (2026-10-25)
+- [x] Open the fruit catcher after successful apple delivery even with the wood scroll already collected; keep replay available without requiring the handed-in apples again.
+
 # Small hidden apples (2026-10-25)
 - [x] Make Connie’s existing three Lonely Wood apples small and stationary; preserve pickups, saved collections, quest rewards and map movement.
 
