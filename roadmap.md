@@ -1,4 +1,6 @@
 # Game economy audit (2026-10-25)
+- [ ] Update Monere RPG home-screen metadata and preview-safe existing worker registration.
+- [ ] Add shared arrow-key touch overlays and verify mobile mini-game touch targets without changing physics.
 - [x] Enforce dig +10, jump cost 5, cap 100 and protected atomic overflow (+5 Points per 100); remove client-driven minting.
 - [x] Separate Coins from Points; Barn awards +50 Energy/+20 Coins/first scroll and Connie +20 Coins/wood scroll/strict win flag.
 - [x] Synchronize and persist Energy, Coins, Points and held Fruits counters; prohibit negative balances.
