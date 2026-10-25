@@ -1,3 +1,6 @@
+# Barrel game scroll prize (2026-10-25)
+- [ ] Make the first (meadow) scroll the barrel-game prize: show a scroll at the top hopper, grant it idempotently in garden_barrel_commit (migration 0075) and in the guest fallback, update the completion notice; run tests and check build.
+
 # Barrel speed and jump timing (2026-10-25)
 - [x] Slowed barrels by 10% (3.6px/tick) and lengthened Monere's jump to 700ms (14 ticks); focused and full suites pass (379), build OK. Account gameplay not exercised (Carl-only access).
 

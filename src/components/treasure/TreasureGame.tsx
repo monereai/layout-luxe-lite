@@ -97,9 +97,9 @@ export function TreasureGame() {
   async function finishGarden(trace: GardenInput[]) {
     if (!gardenRound) return;
     const result = await orchard.gardenAction(gardenRound, trace, true);
-    game.harvestReturn(result.state ?? { ...state, zone: "meadow", x: 12, y: 27, pet: null, quests: [...new Set([...state.quests, "vernon-garden"])] });
+    game.harvestReturn(result.state ?? { ...state, zone: "meadow", x: 12, y: 27, pet: null, quests: [...new Set([...state.quests, "vernon-garden"])], scrolls: [...new Set([...state.scrolls, "meadow" as const])] });
     setGardenRound(null);
-    setNotice(`Vernon’s garden complete! +${result.gained} Energy · +${result.points} Coins${orchard.guest ? " (guest preview)" : ""}.`);
+    setNotice(`Vernon’s garden complete! You won the first scroll 📜 · +${result.gained} Energy · +${result.points} Coins${orchard.guest ? " (guest preview)" : ""}.`);
   }
   async function leaveGarden() {
     setBusy(true);

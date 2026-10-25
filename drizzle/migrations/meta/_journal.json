@@ -526,6 +526,13 @@
       "when": 1792907570485,
       "tag": "0074_garden_jumps_free",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1792907887609,
+      "tag": "0075_garden_prize_first_scroll",
+      "breakpoints": true
     }
   ]
 }
