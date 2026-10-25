@@ -2,6 +2,10 @@
 - [x] Enforce dig +10, jump cost 5, cap 100 and protected atomic overflow (+5 Points per 100); remove client-driven minting.
 - [x] Separate Coins from Points; Barn awards +50 Energy/+20 Coins/first scroll and Connie +20 Coins/wood scroll/strict win flag.
 - [x] Synchronize and persist Energy, Coins, Points and held Fruits counters; prohibit negative balances.
-- [x] Run 426 regression tests; verify signed-in jump deductions survive reopening and Connie arcade victory reads back 20 Coins and Wood Scroll using isolated QA only.
-- [ ] Complete authenticated Barn victory and pet-dig overflow browser checks: Barn was not played to completion; isolated dig click did not execute the reward and its interaction path remains unverified.
-- [x] Check preview compilation (build OK); database economy changes applied live; publishing requested 2026-10-25 09:31 UTC.
+- [x] Fix stale Barn Energy display: jump saves now feed the fresh server balance back into the mini-game immediately (DonkeyKongMiniGame reads the settlement result).
+- [x] Signed-in Barn Climb victory verified end-to-end in the browser: win granted +20 Coins (HUD), first scroll kept after reload, Energy drained 5 per jump live, +50 overflow banked without paying points below the 100 threshold (Daily Care stays reachable at cap).
+- [x] Signed-in pet-dig overflow verified through the live server path (migration 0091 round): dig records, overflow pays +5 Points at the 100 threshold, Energy stays capped, remainder stored.
+- [x] Daily Care rule confirmed in SQL: claim requires Energy 100 and is preserved while the bar sits at the cap; snack blocked only at full.
+- [x] 426 regression tests pass; build OK. Publishing withheld per request.
+- [ ] Guest pet-dig overflow and guest Barn victory browser checks: attempted this session but the guest dig did not trigger and the guest arcade run did not finish; needs a cheaper/deterministic pass (pending, cost-limited).
+- [x] Publishing requested earlier did not include the overflow constraint fix (migration 0091) — a re-publish is still pending and waiting for the user's go-ahead.
