@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Phaser from "phaser";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, DoorOpen, Sun, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TouchDirectionButton, type TouchArrow } from "@/components/ui/touch-direction-button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { MAZE, MAZE_TICK_MS, THIRD_SCROLL_CELL, reachedThirdScroll, mazeWalkable, cellId, mazeCells, mazeStep, newMaze, powerActive, type MazeDirection } from "@/lib/harvest-maze";
 import { advanceAlong, easeVelocity, CORNER_MARGIN } from "@/lib/movement";
@@ -93,7 +94,7 @@ export function PacmanHarvestMiniGame({ avatar, onComplete, practice = false, th
     {entryNotice && <p role="status" className="garden-entry-notice">collect the third scroll</p>}
     <div className="flex items-center justify-between gap-2 text-sm"><span className="text-muted-foreground">{snapshot.collected.length - 1} / {mazeCells.length - 1}</span><span role="status" className={power ? "text-points" : "text-muted-foreground"}><Sun className="mr-1 inline h-4 w-4" />{power ? `Sun Power · ${power}s` : "Golden Suns"}</span></div>
     <div ref={setMount} className="harvest-board" role="img" aria-label="Orchard maze with Monere, glowing Energy dots, four Golden Suns and three Shadow Chasers" />
-    <div className="flex items-end justify-between gap-3"><div className="harvest-pad" aria-label="Maze movement">{[{ d: "up", Icon: ArrowUp, c: "col-start-2" }, { d: "left", Icon: ArrowLeft, c: "row-start-2" }, { d: "down", Icon: ArrowDown, c: "row-start-2 col-start-2" }, { d: "right", Icon: ArrowRight, c: "row-start-2 col-start-3" }].map(({ d, Icon, c }) => <Button key={d} variant="secondary" size="icon" aria-label={`Maze move ${d}`} className={c} disabled={saving || stopped.current} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); direction.current = d as MazeDirection; }} onPointerUp={() => { direction.current = "idle"; }} onPointerCancel={() => { direction.current = "idle"; }} onLostPointerCapture={() => { direction.current = "idle"; }}><Icon /></Button>)}</div><Button disabled={saving} variant="outline" onClick={() => void deposit(snapshot.ended === "expelled")}><DoorOpen />{saving ? "Saving Energy…" : error ? "Retry save" : "Keep harvest"}</Button></div>
+    <div className="flex items-end justify-between gap-3"><div className="harvest-pad" aria-label="Maze movement">{[{ d: "up", Icon: ArrowUp, c: "col-start-2" }, { d: "left", Icon: ArrowLeft, c: "row-start-2" }, { d: "down", Icon: ArrowDown, c: "row-start-2 col-start-2" }, { d: "right", Icon: ArrowRight, c: "row-start-2 col-start-3" }].map(({ d, Icon, c }) => <TouchDirectionButton arrow={`Arrow${d.charAt(0).toUpperCase()}${d.slice(1)}` as TouchArrow} key={d} variant="secondary" size="icon" aria-label={`Maze move ${d}`} className={c} disabled={saving || stopped.current}><Icon /></TouchDirectionButton>)}</div><Button disabled={saving} variant="outline" onClick={() => void deposit(snapshot.ended === "expelled")}><DoorOpen />{saving ? "Saving Energy…" : error ? "Retry save" : "Keep harvest"}</Button></div>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
   </DialogContent></Dialog>;
 }

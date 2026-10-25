@@ -34,7 +34,7 @@
 - AI endpoints need sign-in except seekWisdomGuest (first questions, server-capped per hashed visitor/day); guest rewards are display-only.
 - Share mentor facts and MessageResponse.
 
-- Read nested AGENTS.md before edits. Generate game poses from equipped art; separate timing from facing to avoid glide.
+- Read nested AGENTS.md before edits. Touch arrows share TouchDirectionButton keyboard events, releasing on blur/cancel to avoid stuck input.
 
 - Keep MCP reads OAuth caller-scoped in src/lib/mcp; browser tools use owning controls and static fail-open telemetry.
 - Validate same-origin OAuth return paths for every sign-in method.
