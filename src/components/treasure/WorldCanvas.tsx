@@ -182,7 +182,20 @@ export function WorldCanvas(props: Props) {
             // Apples stay subtle; seeds must be easy to spot on the clear Meadow paths.
             const quiet = i.id.startsWith("apple-");
             const seed = i.id.startsWith("seed-");
-            const o = text(i, i.icon, quiet ? 16 : seed ? 40 : 34);
+            // Rocco's Silver Bell is drawn as a desaturated bell texture so it reads as silver, not gold.
+            const silverBell = i.id === "bell";
+            if (silverBell && !this.textures.exists("silver-bell")) {
+              const t = this.textures.createCanvas("silver-bell", 64, 64);
+              if (t) {
+                const c = t.getContext();
+                c.filter = "grayscale(100%) brightness(115%)";
+                c.font = "48px serif"; c.textAlign = "center"; c.textBaseline = "middle";
+                c.fillText("🔔", 32, 34); t.refresh();
+              }
+            }
+            const o = silverBell
+              ? this.add.image(...at(i), "silver-bell").setDisplaySize(40, 40)
+              : text(i, i.icon, quiet ? 16 : seed ? 40 : 34);
             // Both objectives stay above fog; only seeds regain the visible pickup bob.
             if (quiet || seed) o.setDepth(8);
             if (quiet) return;
