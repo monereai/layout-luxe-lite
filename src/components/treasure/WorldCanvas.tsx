@@ -146,8 +146,8 @@ export function WorldCanvas(props: Props) {
           if (s.zone === "ravine") {
             const boots = s.gear.includes("boots"); text({ x: 17, y: 6 }, boots ? "🧗" : "⛰️", 36); label({ x: 17, y: 6 }, boots ? "Cliffs" : "Cliffs · needs Climbing Boots");
             const vault = s.quests.includes("vault");
-            // Plates keep their coloured circles only; decorative emblems (lion head, temple pillar) are hidden.
-            [PLATE_HERO, PLATE_PET].forEach((pl, i) => { const c = this.add.circle(...at(pl), 24, i ? color("--energy") : color("--points"), vault ? .2 : .45).setStrokeStyle(3, i ? color("--energy") : color("--points")).setDepth(2); this.scenery.push(c); });
+            // Plates read as flat carved stone discs in terrain tones: no saturated colour rings over the ravine art.
+            [PLATE_HERO, PLATE_PET].forEach(pl => { const [px, py] = at(pl); const disc = this.add.circle(px, py, 22, 0x5f564c, vault ? .5 : .78).setStrokeStyle(2, 0x3d362e, .8).setDepth(2); this.scenery.push(disc); const inner = this.add.circle(px, py, 13, 0x4a423a, vault ? .35 : .55).setDepth(2); this.scenery.push(inner); });
           }
           if (s.zone === "lair") {
             const goggles = s.gear.includes("goggles");
