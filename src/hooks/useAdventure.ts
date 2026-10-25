@@ -71,7 +71,7 @@ export function useAdventure() {
       try {
         const result = await run({ data: action });
         update(result.state);
-        if (result.overflowPoints > 0) { toast.success(`+${result.overflowPoints} Points! Energy Overflow!`); void refresh().catch(() => false); }
+        if ((result.overflowPoints ?? 0) > 0) { toast.success(`+${result.overflowPoints} Points! Energy Overflow!`); void refresh().catch(() => false); }
         if (result.points > 0) { toast.success(`+${result.points} points added to your balance!`); void refresh().catch(() => false); }
         if (result.griffin) { void loadPets().catch(() => {}); toast.success("The Golden Griffin joined your pets!"); }
         client.setQueryData(key, result);
