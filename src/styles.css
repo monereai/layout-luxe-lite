@@ -474,3 +474,50 @@
 .garden-keys kbd { padding: .05rem .4rem; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--muted); color: var(--foreground); font-family: inherit; font-size: .75rem; }
 .garden-game-board canvas { display: block; }
 .garden-entry-notice { padding: .45rem .75rem; border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent); border-radius: 8px; background: color-mix(in oklab, var(--primary) 10%, transparent); text-align: center; }
+
+/* Mobile PWA fullscreen lock: the browser viewport is pinned to the device screen so
+   installed home-screen sessions render edge to edge with no address bar or rubber-band.
+   Page scrolling moves into #root so journal, shop and menu pages keep their normal scroll. */
+html {
+  height: 100vh;
+  height: -webkit-fill-available;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+}
+body {
+  height: 100vh;
+  height: -webkit-fill-available;
+  width: 100vw;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+}
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe-area top padding so the notch/status bar never covers the top HUD or headers. */
+.adventure-shell header:first-child { padding-top: calc(12px + env(safe-area-inset-top)); }
+.bg-glow.relative.isolate > .relative.mx-auto { padding-top: calc(1.25rem + env(safe-area-inset-top)); }
+@media (min-width: 640px) {
+  .adventure-shell header:first-child { padding-top: calc(12px + env(safe-area-inset-top)); }
+  .bg-glow.relative.isolate > .relative.mx-auto { padding-top: calc(2rem + env(safe-area-inset-top)); }
+}
+@media (min-width: 768px) {
+  .bg-glow.relative.isolate > .relative.mx-auto { padding-top: calc(1.5rem + env(safe-area-inset-top)); }
+}
+@media (max-width: 639px) {
+  .adventure-shell header:first-child { padding-top: calc(9px + env(safe-area-inset-top)); }
+}
