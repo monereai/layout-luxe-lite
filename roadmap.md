@@ -1,5 +1,6 @@
 # Shadow Ravine crystal scroll (2026-10-25)
 - [ ] Show the third scroll only in the crystal maze entered from Shadow Ravine; verify reaching it before saving a replay-safe scroll reward.
+- [ ] Show “collect the third scroll” on entry to the qualifying crystal maze.
 
 # Connie’s arcade access (2026-10-25)
 - [x] Open the fruit catcher after successful apple delivery even with the wood scroll already collected; keep replay available without requiring the handed-in apples again.
