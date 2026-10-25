@@ -41,7 +41,7 @@ const allMenuItems = [
 ] as const;
 
 /** Title of the adventure link shown in the right-hand column, between the two shops. */
-const GRIFFIN_TITLE = "The Golden Griffin · Chapter 1";
+const GRIFFIN_TITLE = "Golden griffin mini game";
 
 export function AppShell({ children, hideCrisisBar = false, adventure = false }: { children: ReactNode; hideCrisisBar?: boolean; adventure?: boolean }) {
   const { tester } = useTreasureAccess();
@@ -82,7 +82,7 @@ export function AppShell({ children, hideCrisisBar = false, adventure = false }:
   const mcpItems = [...menuItems, ...adventureItem];
   useWebMCP({
     name: "navigate_monere",
-    description: "Open a page allowed by MonereAI's visible menu, The Golden Griffin · Chapter 1, or Monere’s Daily Dilemma.",
+    description: "Open a page allowed by MonereAI's visible menu, Golden griffin mini game, or Monere’s Daily Dilemma.",
     inputSchema: { type: "object", properties: { page: { type: "string", enum: [...mcpItems.map(item => item.to), "dilemma"], description: "The menu page path to open, or \"dilemma\" for Monere’s Daily Dilemma story." } }, required: ["page"], additionalProperties: false },
     execute: ({ page }: { page: unknown }) => runWebMCPTool("navigate_monere", async () => {
       if (page === "dilemma") {

@@ -9,7 +9,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/hooks/usePlan", () => ({ usePlan: () => ({ user: null, premium: false, signOut: vi.fn(), tier: "free" }) }));
 vi.mock("@/hooks/useCare", () => ({ useCare: () => ({ data: { energy: 50 } }) }));
 vi.mock("@/hooks/usePointsWallet", () => ({ usePointsWallet: () => 0 }));
-vi.mock("@/hooks/useTreasureAccess", () => ({ useTreasureAccess: () => ({ tester: false }) }));
+vi.mock("@/hooks/useTreasureAccess", () => ({ useTreasureAccess: () => ({ tester: !!(globalThis as { __qaTester?: boolean }).__qaTester }) }));
 vi.mock("@/lib/game", () => ({ useGame: () => ({ detective: false }) }));
 vi.mock("use-webmcp-tool", () => ({ useWebMCP: vi.fn() }));
 vi.mock("@/components/QaPanel", () => ({ QaPanel: () => null }));
@@ -34,5 +34,12 @@ it("hides the adventure card while the Griffin game is closed", () => {
   expect(aside).not.toBeNull();
   const hrefs = Array.from(aside!.querySelectorAll("a")).map(a => a.getAttribute("href"));
   expect(hrefs).not.toContain("/treasure");
-  expect(screen.queryAllByRole("link", { name: "The Golden Griffin · Chapter 1" })).toHaveLength(0);
+  expect(screen.queryAllByRole("link", { name: "Golden griffin mini game" })).toHaveLength(0);
+});
+
+it("labels the tester adventure card with its new title", () => {
+  (globalThis as { __qaTester?: boolean }).__qaTester = true;
+  render(<AppShell><p>page</p></AppShell>);
+  expect(screen.getAllByRole("link", { name: "Golden griffin mini game" }).length).toBeGreaterThan(0);
+  (globalThis as { __qaTester?: boolean }).__qaTester = false;
 });
