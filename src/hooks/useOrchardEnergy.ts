@@ -74,6 +74,7 @@ export function useOrchardEnergy() {
     }
     const result = await settle({ data: { round, trace } });
     acceptEnergy(care.user.id, result.energy);
+    if (result.overflowPoints > 0) toast(`+${result.overflowPoints} Points! Energy Overflow!`);
     void plan.refresh();
     setCooling(c => ({ ...c, [id]: Date.now() + COOLDOWN })); void care.refetch();
     return result;
@@ -104,6 +105,7 @@ export function useOrchardEnergy() {
       return;
     }
     void care.refetch();
+    void plan.refresh();
   }
   const guestJumps = useRef(0);
   async function beginGarden() { guestJumps.current = 0; return care.user ? (await gardenStart()).id : "guest"; }

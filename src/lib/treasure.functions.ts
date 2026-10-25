@@ -82,8 +82,8 @@ export const commitArcadeGame = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const result = await supabaseAdmin.rpc("connie_arcade_commit", { p_user: context.userId, p_round: data.round, p_ticks: state.tick, p_catches: state.catches });
     if (result.error) throw new Error(result.error.message);
-    const value = z.object({ energy: z.number(), state: z.unknown() }).parse(result.data);
-    return { ...value, state: parseAdventure(value.state), coins: owned.data.settled_at ? 0 : 20 };
+    const value = z.object({ energy: z.number(), state: z.unknown(), coins: z.number().nonnegative() }).parse(result.data);
+    return { ...value, state: parseAdventure(value.state) };
   });
 
 export const adventureAction = createServerFn({ method: "POST" })
@@ -159,6 +159,6 @@ export const settleOrchardMaze = createServerFn({ method: "POST" })
     const mainTree = ["meadow-1", "wood-1", "ravine-1", "lair-1"].includes(round.tree);
     const result = await supabaseAdmin.rpc("orchard_maze_settle_scroll", { p_user: context.userId, p_round: data.round, p_energy: maze.energy, p_ticks: maze.tick, p_expelled: maze.ended === "expelled" && mainTree, p_scroll_reached: crystalScrollEligible(round.tree, round.world_zone) && reachedThirdScroll(maze) });
     if (result.error) throw new Error(result.error.message);
-    const value = z.object({ energy: z.number(), gained: z.number(), state: z.unknown(), scrollAwarded: z.boolean() }).parse(result.data);
+    const value = z.object({ energy: z.number(), gained: z.number(), state: z.unknown(), scrollAwarded: z.boolean(), overflowPoints: z.number().nonnegative() }).parse(result.data);
     return { ...value, state: parseAdventure(value.state) };
   });
