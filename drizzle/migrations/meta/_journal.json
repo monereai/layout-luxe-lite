@@ -596,6 +596,13 @@
       "when": 1792914787266,
       "tag": "0084_visible_meadow_seed_paths",
       "breakpoints": true
+    },
+    {
+      "idx": 85,
+      "version": "7",
+      "when": 1792915786456,
+      "tag": "0085_seeds_around_meadow_boulder",
+      "breakpoints": true
     }
   ]
 }
