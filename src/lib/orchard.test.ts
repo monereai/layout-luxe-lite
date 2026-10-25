@@ -40,3 +40,18 @@ test("side land entrances are safe and every tree is reachable", () => {
     for (const t of SZ[z].trees) expect(([[1,0],[-1,0],[0,1],[0,-1]] as const).some(([dx,dy]) => sw(z, { x: t.at.x+dx, y: t.at.y+dy }) && !sh(z, { x: t.at.x+dx, y: t.at.y+dy }))).toBe(true);
   }
 });
+
+describe("energy overflow conversion", () => {
+  it("leaves a partly filled bar untouched", () => {
+    expect(energyOverflow(0)).toEqual({ energy: 0, points: 0 });
+    expect(energyOverflow(99)).toEqual({ energy: 99, points: 0 });
+  });
+  it("a full bar awards +5 points and resets to 0", () => {
+    expect(ENERGY_OVERFLOW_POINTS).toBe(5);
+    expect(energyOverflow(100)).toEqual({ energy: 0, points: 5 });
+  });
+  it("carries any remainder past 100", () => {
+    expect(energyOverflow(130)).toEqual({ energy: 30, points: 5 });
+    expect(energyOverflow(250)).toEqual({ energy: 50, points: 10 });
+  });
+});
