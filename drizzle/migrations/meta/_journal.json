@@ -491,6 +491,13 @@
       "when": 1792864231765,
       "tag": "0069_vernon_garden_barrel_rounds",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1792906053429,
+      "tag": "0070_garden_jumps_settle_lag_tolerant",
+      "breakpoints": true
     }
   ]
 }
