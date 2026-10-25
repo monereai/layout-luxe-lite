@@ -193,9 +193,27 @@ export function WorldCanvas(props: Props) {
                 c.fillText("🔔", 32, 34); t.refresh();
               }
             }
+            // Magic seed packets are drawn as kraft-paper pouches so they never vanish into green grass.
+            if (seed && !this.textures.exists("seed-packet")) {
+              const t = this.textures.createCanvas("seed-packet", 64, 64);
+              if (t) {
+                const c = t.getContext();
+                c.fillStyle = "rgba(0,0,0,.3)"; c.beginPath(); c.ellipse(32, 57, 15, 4, 0, 0, Math.PI * 2); c.fill();
+                c.lineWidth = 3; c.strokeStyle = "#3d2a15"; c.fillStyle = "#9a6630";
+                c.beginPath(); c.moveTo(16, 26); c.lineTo(48, 26); c.lineTo(45, 54); c.lineTo(19, 54); c.closePath(); c.fill(); c.stroke();
+                c.fillStyle = "#f4e3c2"; c.fillRect(21, 34, 22, 12); c.strokeRect(21, 34, 22, 12);
+                c.strokeStyle = "#2f6b1f"; c.beginPath(); c.moveTo(32, 26); c.lineTo(32, 14); c.stroke();
+                c.fillStyle = "#7fc42a";
+                c.beginPath(); c.ellipse(26, 13, 7, 4, -.5, 0, Math.PI * 2); c.fill();
+                c.beginPath(); c.ellipse(38, 13, 7, 4, .5, 0, Math.PI * 2); c.fill();
+                t.refresh();
+              }
+            }
             const o = silverBell
               ? this.add.image(...at(i), "silver-bell").setDisplaySize(40, 40)
-              : text(i, i.icon, quiet ? 16 : seed ? 40 : 34);
+              : seed
+                ? this.add.image(...at(i), "seed-packet").setDisplaySize(52, 52)
+                : text(i, i.icon, quiet ? 16 : 34);
             // Both objectives stay above fog; only seeds regain the visible pickup bob.
             if (quiet || seed) o.setDepth(8);
             if (quiet) return;
