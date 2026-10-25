@@ -97,8 +97,8 @@ export const adventureAction = createServerFn({ method: "POST" })
       ? await context.supabase.rpc("treasure_v6_travel", { p_steps: data.steps ?? [] })
       : await context.supabase.rpc("treasure_v6_action", { p_action: data.action, ...(data.x !== undefined ? { p_x: data.x } : {}), ...(data.y !== undefined ? { p_y: data.y } : {}), ...(data.id ? { p_id: data.id } : {}) });
     if (result.error) throw new Error(result.error.message);
-    const value = result.data as { state?: unknown; griffin?: boolean; points?: number } | null;
-    return { state: parseAdventure(value?.state), griffin: value?.griffin === true, points: typeof value?.points === "number" ? value.points : 0 };
+    const value = result.data as { state?: unknown; griffin?: boolean; points?: number; overflowPoints?: number } | null;
+    return { state: parseAdventure(value?.state), griffin: value?.griffin === true, points: typeof value?.points === "number" ? value.points : 0, ...(data.action === "dig" ? { overflowPoints: typeof value?.overflowPoints === "number" ? value.overflowPoints : 0 } : {}) };
   });
 
 export const orchardHarvest = createServerFn({ method: "POST" })
