@@ -1,3 +1,7 @@
+# Pet dig and barrel controls (2026-10-25)
+- [x] Confirm active pet digs award +10 Energy, never deduct 25; historical migrations retained.
+- [ ] Verify shared Space/button jumps, 5-Energy cost and 400ms airborne duration without map or general movement changes.
+
 # Preview crash: useContext dispatcher null
 - [x] Investigated: build and dev-server logs clean, headless browser load of the preview renders the home page with no page errors. Crash was a stale hot-reload state in the open tab; a page reload clears it.
 

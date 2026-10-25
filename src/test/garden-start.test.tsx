@@ -52,7 +52,7 @@ it("Space jumps immediately and a slow save never freezes the loop", async () =>
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
   fireEvent.keyDown(window, { key: " " });
   step();
-  expect(state().jumps).toBe(1); expect(state().jump).toBe(20);
+  expect(state().jumps).toBe(1); expect(state().jump).toBe(8);
   step(); step();
   expect(state().tick).toBe(3);
   await act(async () => { release?.(); });
@@ -62,7 +62,7 @@ it("Space jumps immediately and a slow save never freezes the loop", async () =>
 it("the Jump button queues a jump exactly like the keyboard", async () => {
   const jump = open();
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
-  fireEvent.click(screen.getByRole("button", { name: /Jump · 5/ }));
+  fireEvent.click(screen.getByRole("button", { name: "JUMP (Space)" }));
   step();
   expect(state().jumps).toBe(1);
   await act(async () => {});
@@ -82,10 +82,28 @@ it("jumping with less than 5 Energy is refused with a message", () => {
 });
 it("a jump started just before a barrel clears it", async () => {
   const { gardenStep, newGarden } = await import("@/lib/garden-game");
-  let s = { ...newGarden(), x: 300, barrels: [{ x: 360, level: 0, drop: 0 }] };
-  for (let i = 0; i < 4; i++) s = gardenStep(s, "idle");
+  let s = { ...newGarden(), x: 300, barrels: [{ x: 348, level: 0, drop: 0 }] };
+  for (let i = 0; i < 2; i++) s = gardenStep(s, "idle");
   s = gardenStep(s, "jump");
-  for (let i = 0; i < 25; i++) s = gardenStep(s, "idle");
+  for (let i = 0; i < 25; i++) s = gardenStep(s, "right");
   expect(s.hits).toBe(0);
-  expect(s.barrels.every(b => b.x < 300)).toBe(true);
+  expect(s.barrels.every(b => b.x < s.x)).toBe(true);
+});
+
+it("Space cancels scrolling and key repeat does not trigger extra jumps", () => {
+  open();
+  const event = new KeyboardEvent("keydown", { key: " ", code: "Space", cancelable: true });
+  act(() => { window.dispatchEvent(event); });
+  expect(event.defaultPrevented).toBe(true); step();
+  fireEvent.keyDown(window, { key: " ", code: "Space", repeat: true });
+  for (let i = 0; i < 8; i++) step();
+  expect(state().jumps).toBe(1); expect(state().jump).toBe(0);
+});
+it("each accepted jump consumes exactly 5 Energy from the local allowance", () => {
+  open();
+  for (let j = 0; j < 11; j++) {
+    fireEvent.click(screen.getByRole("button", { name: "JUMP (Space)" })); step();
+    for (let i = 0; i < 8; i++) step();
+  }
+  expect(state().jumps).toBe(10);
 });
