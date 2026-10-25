@@ -1,6 +1,6 @@
 # Four audit logic fixes (2026-10-25)
-- [ ] Remove first/second map scroll pickups, persist verified Connie wins, add prize-save retry, update Meadow clues, and allow capped Crystal practice without changing movement/physics.
-- [ ] Run focused tests and isolated UI verification; preserve Carl’s account.
+- [x] Remove first/second map scroll pickups, persist verified Connie wins, add prize-save retry, update Meadow clues, and allow capped Crystal practice without changing movement/physics. Active v5/v6/arcade/maze SQL definitions verified.
+- [x] All 414 tests pass and preview compiles. Isolated browser won Connie’s arcade (10 catches/1 miss), failed the first save, then Retry Save reused the identical winning trace successfully; desktop/phone dialog inspected. Carl’s account unchanged; live authenticated prize read-back remains blocked by account-testing constraints.
 
 # Developer adventure reset (2026-10-25)
 - [x] Add a confirmed, server-protected developer reset available before completion; reset quests, items, scrolls and mini-game rounds while preserving account balances, purchases and payout ledgers.
