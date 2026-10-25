@@ -395,3 +395,8 @@
 - [x] After all 3 apples are delivered to Connie, open a NEW 80's-style arcade mini-game (fruit catcher — NOT the barrel game); prize is the second (wood) scroll.
 - [x] Pure deterministic rules module + Phaser dialog, server-verified rounds/commit mirroring garden_barrel_*, guest display-only path.
 - [x] Migration for connie_arcade_rounds + start/commit RPCs granting "wood" scroll idempotently; tests; update AGENTS.md + memory.
+
+# Seeds in Meadow, apples in Lonely Wood
+- [x] Hide Vernon's 3 magic seeds around the Meadow starting area (4,14 / 18,8 / 12,26); update his ask text.
+- [x] Hide Connie's 3 rosy apples around Lonely Wood (13,11 / 5,8 / 19,16); update her ask text.
+- [x] Keep per-land scroll+riddle gates unchanged; patch both treasure_v5_action and treasure_v6_action item coordinates live.
