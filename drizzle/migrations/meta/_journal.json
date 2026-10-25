@@ -547,6 +547,13 @@
       "when": 1792909371213,
       "tag": "0077_connie_arcade_second_scroll",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1792909775928,
+      "tag": "0078_seeds_in_meadow_apples_in_wood",
+      "breakpoints": true
     }
   ]
 }

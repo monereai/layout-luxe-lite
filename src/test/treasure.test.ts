@@ -105,24 +105,24 @@ d4("expanded griffin world", () => {
     s = { ...s, items: [...s.items, "feather-3"] };
     e4(A4(s, { action: "deliver", id: "barnaby" }).gear).toEqual(["lantern"]);
   });
-  i4("Vernon has exactly 3 seeds in separate lands outside Meadow", () => {
+  i4("Vernon has exactly 3 seeds hidden around the Meadow", () => {
     const seeds = ITEMS.filter(i => i.id.startsWith("seed-"));
     e4(seeds).toHaveLength(3);
-    e4(seeds.map(i => i.zone)).toEqual(["wood", "ravine", "lair"]);
+    e4(seeds.map(i => i.zone)).toEqual(["meadow", "meadow", "meadow"]);
     for (const seed of seeds) {
-      const s = at4({ zone: seed.zone, x: seed.x, y: seed.y, gates: ["meadow", "wood", "ravine"] });
+      const s = at4({ zone: seed.zone, x: seed.x, y: seed.y });
       e4(C4(s, seed.x, seed.y)).toBe(true);
       e4(NPCS.some(n => n.zone === seed.zone && n.x === seed.x && n.y === seed.y)).toBe(false);
-      e4(A4(at4({ x: seed.x, y: seed.y }), { action: "pick", id: seed.id }).items).toEqual([]);
+      e4(A4(at4({ zone: "wood", x: seed.x, y: seed.y }), { action: "pick", id: seed.id }).items).toEqual([]);
     }
   });
-  i4("all three seeds use clear non-green pathway or stone tiles", () => {
+  i4("all three seeds are reachable from the Meadow start", () => {
     const seeds = ITEMS.filter(i => i.id.startsWith("seed-"));
     e4(seeds.map(({ zone, x, y }) => [zone, x, y])).toEqual([
-      ["wood", 11, 11], ["ravine", 12, 8], ["lair", 12, 18],
+      ["meadow", 4, 14], ["meadow", 18, 8], ["meadow", 12, 26],
     ]);
     for (const seed of seeds) {
-      e4(worldPath(at4({ zone: seed.zone, x: seed.zone === "lair" ? 12 : 3, y: seed.zone === "lair" ? 19 : seed.zone === "wood" ? 10 : 6 }), seed)).not.toBeNull();
+      e4(worldPath(at4({ zone: "meadow", x: 10, y: 12 }), seed)).not.toBeNull();
     }
   });
   i4("Vernon's seeds are visible and collectable before meeting him", () => {
@@ -152,11 +152,11 @@ d4("expanded griffin world", () => {
     e4(s.items.filter(i => i.startsWith("apple-"))).toEqual(["apple-1", "apple-2", "apple-3"]);
     e4(A4({ ...s, zone: "wood", x: 6, y: 20 }, { action: "deliver", id: "connie" }).quests).toEqual(["connie"]);
   });
-  i4("Connie's apples are scattered across three reachable lands", () => {
+  i4("Connie's apples are hidden around Lonely Wood and reachable", () => {
     const apples = ITEMS.filter(i => i.id.startsWith("apple-"));
-    e4(apples.map(({ zone }) => zone)).toEqual(["meadow", "wood", "ravine"]);
+    e4(apples.map(({ zone }) => zone)).toEqual(["wood", "wood", "wood"]);
     for (const apple of apples) {
-      const start = at4({ zone: apple.zone, x: apple.zone === "meadow" ? 10 : 3, y: apple.zone === "ravine" ? 6 : 10 });
+      const start = at4({ zone: "wood", x: 3, y: 10 });
       const path = worldPath(start, { x: apple.x, y: apple.y - 1 });
       e4(path).not.toBeNull();
       let s = start;
