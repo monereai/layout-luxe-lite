@@ -9,7 +9,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@/hooks/usePlan", () => ({ usePlan: () => ({ user: null, premium: false, signOut: vi.fn(), tier: "free" }) }));
 vi.mock("@/hooks/useCare", () => ({ useCare: () => ({ data: { energy: 50 } }) }));
 vi.mock("@/hooks/usePointsWallet", () => ({ usePointsWallet: () => 0 }));
-vi.mock("@/hooks/useTreasureAccess", () => ({ useTreasureAccess: () => ({ tester: false }) }));
+vi.mock("@/hooks/useTreasureAccess", () => ({ useTreasureAccess: () => ({ tester: !!globalThis.__qaTester }) }));
 vi.mock("@/lib/game", () => ({ useGame: () => ({ detective: false }) }));
 vi.mock("use-webmcp-tool", () => ({ useWebMCP: vi.fn() }));
 vi.mock("@/components/QaPanel", () => ({ QaPanel: () => null }));
