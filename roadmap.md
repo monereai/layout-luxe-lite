@@ -9,5 +9,5 @@
 - [x] Signed-in pet-dig overflow verified through the live server path (migration 0091 round): dig records, overflow pays +5 Points at the 100 threshold, Energy stays capped, remainder stored.
 - [x] Daily Care rule confirmed in SQL: claim requires Energy 100 and is preserved while the bar sits at the cap; snack blocked only at full.
 - [x] 426 regression tests pass; build OK. Publishing withheld per request.
-- [ ] Guest pet-dig overflow and guest Barn victory browser checks: attempted this session but the guest dig did not trigger and the guest arcade run did not finish; needs a cheaper/deterministic pass (pending, cost-limited).
+- [x] Guest pet-dig overflow and Barn victory verified in an isolated signed-out browser using local-only position/prerequisite fixtures: actual dig at Energy 100/overflow 95 yielded +5 Points and remainder 5; actual Barn playthrough used 3 jumps (15 Energy), awarded first scroll/+20 Coins/+50 Energy (15 to cap, 35 overflow), converting overflow 95 to +5 Points/remainder 30. HUD and all saved counters survived reload. 69 focused regression checks pass, including Daily Care eligibility at 100. No account data, movement, tiles or collisions changed; no publishing.
 - [x] Re-publish requested and scheduled with the overflow constraint fix (migration 0091) plus PWA and touch-control work.
