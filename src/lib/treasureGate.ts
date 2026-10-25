@@ -1,6 +1,6 @@
 // Treasure Hunt maintenance gate. Flip to true to close the game everywhere
 // (menus, direct navigation, sitemap). All game code stays intact underneath.
-export const TREASURE_MAINTENANCE = true;
+export const TREASURE_MAINTENANCE = false;
 
 /** Only pass identity and roles validated by the authenticated server. */
 export function isTreasureTester(email: string | undefined, roles: readonly string[]): boolean {
