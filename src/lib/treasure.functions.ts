@@ -113,6 +113,17 @@ export const orchardHarvest = createServerFn({ method: "POST" })
     return z.object({ energy: z.number().int(), gained: z.number().int(), harvested: z.boolean() }).parse(result.data);
   });
 
+/** Full Energy bar conversion: the SQL function atomically resets Energy and credits +5 points per full 100. */
+export const convertEnergyOverflow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sync = await context.supabase.rpc("care_apply", { p_action: "sync" });
+    if (sync.error) throw new Error(sync.error.message);
+    const result = await context.supabase.rpc("energy_overflow_convert");
+    if (result.error) throw new Error(result.error.message);
+    return z.object({ energy: z.number(), points: z.number() }).parse(result.data);
+  });
+
 export const spendMovementEnergy = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ mode: z.enum(["sprint", "dash"]) }))

@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
-import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame } from "@/lib/treasure.functions";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame, convertEnergyOverflow } from "@/lib/treasure.functions";
 import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import type { ArcadeInput } from "@/lib/arcade-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
-import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { energyOverflow, takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { recordEnergyOverflow } from "@/lib/game";
 import { DIG_ENERGY } from "@/lib/treasure";
 
 const GUEST_KEY = "monere-orchard-guest-energy";
@@ -30,6 +32,35 @@ export function useOrchardEnergy() {
   useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) { guestBalance.current = Math.min(100, Math.max(0, v)); setGuest(guestBalance.current); } } catch { /* optional */ } }, []);
   const energy = care.user ? care.data?.energy ?? 0 : guest;
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
+  const convert = useServerFn(convertEnergyOverflow);
+  const converting = useRef(false);
+  const accountId = care.user?.id;
+  // Full bar bonus: every 100 Energy converts to +5 Points and the bar resets, carrying any remainder.
+  useEffect(() => {
+    if (energy < 100 || converting.current) return;
+    converting.current = true;
+    void (async () => {
+      try {
+        if (!accountId) {
+          const overflow = energyOverflow(guestBalance.current);
+          if (overflow.points > 0) {
+            saveGuest(overflow.energy);
+            recordEnergyOverflow(overflow.points);
+            toast(`+${overflow.points} Points! Energy Reset!`);
+          }
+        } else {
+          const result = await convert();
+          if (identity.current !== accountId) return;
+          if (result.points > 0) {
+            client.setQueryData(["monere-care", accountId], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
+            void care.refetch(); void plan.refresh();
+            toast(`+${result.points} Points! Energy Reset!`);
+          }
+        }
+      } catch { /* keep the full bar; conversion retries on the next energy change */ }
+      finally { converting.current = false; }
+    })();
+  }, [energy, accountId, client, convert, care, plan]);
   async function beginMaze(id: TreeId) {
     if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
     if (!care.user && !takeGuestMazeEntry(new Date().toISOString().slice(0, 10))) {
