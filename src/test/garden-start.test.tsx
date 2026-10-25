@@ -30,13 +30,13 @@ function state() { return JSON.parse(screen.getByRole("img").getAttribute("data-
 
 it("offers the first scroll as the prize", () => {
   open();
-  expect(screen.getByText(/Prize: the first scroll/)).toBeTruthy();
+  expect(screen.getByText(/Win the first scroll/)).toBeTruthy();
 });
-it("Start activates the waiting scene and barrels spawn after 60 ticks", () => {
+it("Start activates the waiting scene and barrels spawn after 90 ticks", () => {
   open(); step(); expect(state().tick).toBe(0);
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
-  for (let i = 0; i < 60; i++) step();
-  expect(state().tick).toBe(60); expect(state().barrels).toHaveLength(1);
+  for (let i = 0; i < 90; i++) step();
+  expect(state().tick).toBe(90); expect(state().barrels).toHaveLength(1);
 });
 it("WASD starts movement and releasing the key stops movement", () => {
   open(); fireEvent.keyDown(window, { key: "D" }); step();
