@@ -113,7 +113,7 @@ d4("expanded griffin world", () => {
       const s = at4({ zone: seed.zone, x: seed.x, y: seed.y });
       e4(C4(s, seed.x, seed.y)).toBe(true);
       e4(NPCS.some(n => n.zone === seed.zone && n.x === seed.x && n.y === seed.y)).toBe(false);
-      e4(A4(at4({ x: seed.x, y: seed.y }), { action: "pick", id: seed.id }).items).toEqual([]);
+      e4(A4(at4({ zone: "wood", x: seed.x, y: seed.y }), { action: "pick", id: seed.id }).items).toEqual([]);
     }
   });
   i4("all three seeds are reachable from the Meadow start", () => {
