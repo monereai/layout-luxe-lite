@@ -184,7 +184,8 @@ export function WorldCanvas(props: Props) {
             // Connie's apples and Vernon's seeds sit quietly in the scenery instead of drawing attention like quest markers.
             const quiet = i.id.startsWith("apple-") || i.id.startsWith("seed-");
             const o = text(i, i.icon, quiet ? 16 : 34);
-            if (quiet) return;
+            // Quest seeds and apples render above the fog of war so they stay findable in unexplored corners.
+            if (quiet) { o.setDepth(8); return; }
             bob(o);
             if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 });
           });
