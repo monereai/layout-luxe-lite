@@ -1,5 +1,5 @@
 # Shadow Ravine crystal scroll (2026-10-25)
-- [ ] Remove the old Shadow Ravine scroll rock and disable its map pickup; retain saved scrolls and map movement.
+- [x] Remove the old Shadow Ravine scroll rock and disable its map pickup in guest rules and both live action functions; existing scrolls and movement unchanged. All 53 focused tests pass and preview compilation is clean.
 - [x] Show the third scroll only in the crystal maze entered from Shadow Ravine; server replay verifies its cell before atomic, duplicate-safe settlement. All 402 tests pass; preview compiles cleanly.
 - [x] Show “collect the third scroll” on entry to the qualifying crystal maze; isolated browser verifies the visible scroll, notification, movement and harvest callback.
 - [ ] Verify authenticated scroll reward read-back through the adventure; blocked by Carl-only access and the rule against altering his progress.
