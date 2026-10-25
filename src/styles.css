@@ -465,5 +465,8 @@
 
 :root { --garden-girder: oklch(0.58 0.19 22); --garden-rivet: oklch(0.80 0.08 30); --garden-barrel: oklch(0.48 0.08 65); }
 .garden-game-modal { width: min(650px, calc(100vw - 24px)); max-width: 650px; max-height: calc(100dvh - 24px); overflow-y: auto; padding: 16px; border-radius: 8px; gap: 12px; }
-.garden-game-board { width: 100%; aspect-ratio: 10 / 9; max-height: calc(100dvh - 255px); overflow: hidden; background: var(--background); border: 1px solid var(--border); border-radius: 8px; touch-action: none; }
+.garden-game-board { width: 100%; aspect-ratio: 10 / 9; max-height: calc(100dvh - 295px); overflow: hidden; background: var(--background); border: 1px solid var(--border); border-radius: 8px; touch-action: none; }
+.garden-keys { display: flex; flex-wrap: wrap; gap: .35rem .9rem; font-size: .8rem; color: var(--muted-foreground); }
+.garden-keys li { display: flex; align-items: center; gap: .3rem; }
+.garden-keys kbd { padding: .05rem .4rem; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--muted); color: var(--foreground); font-family: inherit; font-size: .75rem; }
 .garden-game-board canvas { display: block; }

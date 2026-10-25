@@ -52,7 +52,7 @@ it("Space jumps immediately and a slow save never freezes the loop", async () =>
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
   fireEvent.keyDown(window, { key: " " });
   step();
-  expect(state().jumps).toBe(1); expect(state().jump).toBe(12);
+  expect(state().jumps).toBe(1); expect(state().jump).toBe(20);
   step(); step();
   expect(state().tick).toBe(3);
   await act(async () => { release?.(); });
@@ -79,4 +79,13 @@ it("jumping with less than 5 Energy is refused with a message", () => {
   expect(state().jumps).toBe(0);
   expect(jump).not.toHaveBeenCalled();
   expect(screen.getByRole("alert").textContent).toContain("5 Energy");
+});
+it("a jump started just before a barrel clears it", async () => {
+  const { gardenStep, newGarden } = await import("@/lib/garden-game");
+  let s = { ...newGarden(), x: 300, barrels: [{ x: 360, level: 0, drop: 0 }] };
+  for (let i = 0; i < 4; i++) s = gardenStep(s, "idle");
+  s = gardenStep(s, "jump");
+  for (let i = 0; i < 25; i++) s = gardenStep(s, "idle");
+  expect(s.hits).toBe(0);
+  expect(s.barrels.every(b => b.x < 300)).toBe(true);
 });
