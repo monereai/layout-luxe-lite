@@ -4,8 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
-import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame, creditEnergyOverflow } from "@/lib/treasure.functions";
-import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame } from "@/lib/treasure.functions";
+import { GARDEN_ENERGY_REWARD, GARDEN_COIN_REWARD, JUMP_COST, replayGarden, type GardenInput } from "@/lib/garden-game";
+import { CONNIE_COIN_REWARD } from "@/lib/adventure-economy";
 import type { ArcadeInput } from "@/lib/arcade-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
@@ -28,30 +29,27 @@ export function useOrchardEnergy() {
   const identity = useRef(care.user?.id); identity.current = care.user?.id;
   const [cooling, setCooling] = useState<Record<string, number>>({});
   const practiceRounds = useRef(new Set<string>());
-  function saveGuest(next: number) { guestBalance.current = next; setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ } }
+  function saveGuest(next: number) { next = Math.min(100, Math.max(0, next)); guestBalance.current = next; setGuest(next); try { localStorage.setItem(GUEST_KEY, String(next)); } catch { /* optional */ } }
   useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) { guestBalance.current = Math.min(100, Math.max(0, v)); setGuest(guestBalance.current); } } catch { /* optional */ } }, []);
   const energy = care.user ? care.data?.energy ?? 0 : guest;
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
-  const creditOverflowFn = useServerFn(creditEnergyOverflow);
-  const accountId = care.user?.id;
   const overflowBalance = useRef(0);
   const OVERFLOW_KEY = "monere-orchard-guest-overflow";
   useEffect(() => { try { const v = Number(localStorage.getItem(OVERFLOW_KEY)); if (Number.isFinite(v)) overflowBalance.current = Math.max(0, v); } catch { /* optional */ } }, []);
   /** The bar stays capped at 100 (daily care remains claimable); Energy gained while full accumulates and pays +5 Points per 100. */
   async function creditOverflow(amount: number) {
     if (amount <= 0) return;
-    if (!accountId) {
+    if (!care.user) {
       const payout = overflowPayout(overflowBalance.current + amount);
       overflowBalance.current = payout.overflow;
       try { localStorage.setItem(OVERFLOW_KEY, String(payout.overflow)); } catch { /* optional */ }
       if (payout.points > 0) { recordEnergyOverflow(payout.points); toast(`+${payout.points} Points! Energy Overflow!`); }
       return;
     }
-    try {
-      const result = await creditOverflowFn({ data: { amount } });
-      if (identity.current !== accountId) return;
-      if (result.points > 0) { void plan.refresh(); toast(`+${result.points} Points! Energy Overflow!`); }
-    } catch { /* overflow is a bonus; a failed credit never blocks the gain itself */ }
+  }
+  function acceptEnergy(account: string, next: number) {
+    client.setQueryData(["monere-care", account], (old: Record<string, unknown> | undefined) => ({ ...old, energy: next }));
+    try { localStorage.setItem(`monere-energy-cache-${account}`, String(next)); } catch { /* mirror only */ }
   }
   async function beginMaze(id: TreeId) {
     if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
@@ -75,8 +73,8 @@ export function useOrchardEnergy() {
       return { gained, state: null };
     }
     const result = await settle({ data: { round, trace } });
-    void creditOverflow(maze.energy - result.gained);
-    client.setQueryData(["monere-care", care.user.id], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
+    acceptEnergy(care.user.id, result.energy);
+    void plan.refresh();
     setCooling(c => ({ ...c, [id]: Date.now() + COOLDOWN })); void care.refetch();
     return result;
   }
@@ -93,7 +91,7 @@ export function useOrchardEnergy() {
     try {
       const result = await spend({ data: { mode } });
       if (identity.current !== account) return false;
-      client.setQueryData(["monere-care", account], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
+      acceptEnergy(account, result.energy);
       return result.allowed;
     } finally { spending.current = false; }
   }
@@ -105,30 +103,38 @@ export function useOrchardEnergy() {
       void creditOverflow(split.overflow);
       return;
     }
-    void creditOverflow(splitEnergyGain(care.data?.energy ?? 0, DIG_ENERGY).overflow);
     void care.refetch();
   }
-  async function beginGarden() { return care.user ? (await gardenStart()).id : "guest"; }
+  const guestJumps = useRef(0);
+  async function beginGarden() { guestJumps.current = 0; return care.user ? (await gardenStart()).id : "guest"; }
   async function gardenAction(round: string, trace: GardenInput[], finish: boolean) {
     if (!care.user) {
-      // Jumps are free; only the one-time finish reward touches the guest balance.
+      const jumps = replayGarden(trace).jumps;
+      const cost = Math.max(0, jumps - guestJumps.current) * JUMP_COST;
+      if (guestBalance.current < cost) throw new Error("Each jump needs 5 Energy.");
+      saveGuest(guestBalance.current - cost); guestJumps.current = Math.max(guestJumps.current, jumps);
       const already = localStorage.getItem("monere-garden-guest-reward") === "claimed";
       const gained = finish && !already ? depositEnergy(guestBalance.current, GARDEN_ENERGY_REWARD) : 0;
-      if (finish) { saveGuest(guestBalance.current + gained); void creditOverflow(GARDEN_ENERGY_REWARD - gained); }
+      if (finish && !already) { saveGuest(guestBalance.current + gained); void creditOverflow(GARDEN_ENERGY_REWARD - gained); }
       if (finish) localStorage.setItem("monere-garden-guest-reward", "claimed");
-      return { energy: guestBalance.current, gained, points: finish && !already ? 20 : 0, state: null };
+      return { energy: guestBalance.current, gained, points: 0, coins: finish && !already ? GARDEN_COIN_REWARD : 0, state: null };
     }
     const account = care.user.id;
     const result = await gardenCommit({ data: { round, trace, finish } });
     if (identity.current !== account) throw new Error("Account changed.");
-    client.setQueryData(["monere-care", account], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
-    if (finish) { void creditOverflow(GARDEN_ENERGY_REWARD - result.gained); void care.refetch(); void plan.refresh(); }
+    acceptEnergy(account, result.energy);
+    if (result.overflowPoints > 0) toast(`+${result.overflowPoints} Points! Energy Overflow!`);
+    if (finish) { void care.refetch(); void plan.refresh(); }
     return result;
   }
   async function beginArcade() { return care.user ? (await arcadeStart()).id : "guest"; }
-  /** Connie's arcade prizes the second scroll only — no Energy or points, so guests need no local ledger. */
+  /** Connie's Coins are distinct from Shop Points and awarded once. */
   async function finishArcade(round: string, trace: ArcadeInput[]) {
-    if (!care.user) return { state: null };
+    if (!care.user) {
+      const already = localStorage.getItem("monere-arcade-guest-reward") === "claimed";
+      localStorage.setItem("monere-arcade-guest-reward", "claimed");
+      return { state: null, coins: already ? 0 : CONNIE_COIN_REWARD };
+    }
     const account = care.user.id;
     const result = await arcadeCommit({ data: { round, trace } });
     if (identity.current !== account) throw new Error("Account changed.");
