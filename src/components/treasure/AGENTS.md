@@ -1,4 +1,5 @@
 # Treasure adventure rules
+- Touch overlays share TouchDirectionButton arrow-key events with Phaser-compatible key codes and release on blur, cancellation, disable and unmount. Why: reuse existing keyboard engines without changing physics or leaving held inputs stuck.
 - Human map NPCs use bundled full-body artwork rather than bust emoji; preserve each sprite's aspect ratio. Why: quest characters must show their legs and feet without distortion.
 - Quest completion derives from saved rescued state and pauses gameplay; explicit restart serializes pending actions, resets adventure/cache/canvas state via authenticated treasure_restart, and never clears reward ledgers or account inventory. Why: completion and replay must not loop or duplicate rewards.
 - Developer reset uses a separate verified-identity/protected-role self-only SQL action, serializes pending movement, invalidates unfinished mini-game rounds and replaces saved/local/canvas progress without clearing payouts or account possessions. Why: anytime testing must not grant public reset privileges or replay rewards.
