@@ -94,12 +94,18 @@ function Home() {
     if (window.localStorage.getItem(ONBOARDED_KEY) !== "true") setOnboarding(true);
   }, []);
 
+  function scrollAppToTop() {
+    const app = document.querySelector<HTMLElement>(".bg-glow");
+    if (app) app.scrollTo({ top: 0, behavior: "smooth" });
+    else window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   async function run() {
     const text = situation;
     if (text.trim().length < 3) { toast("Tell us a little about what's going on first."); return; }
     if (detectCrisis(text)) {
       setWisdom(null); setSafety(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollAppToTop();
       return;
     }
     if (!ready) return;
@@ -115,7 +121,7 @@ function Home() {
     setWisdom(res.wisdom);
     setChat([]);
     setSaved(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollAppToTop();
     return;
   }
 
@@ -124,7 +130,7 @@ function Home() {
     if (!user && !detectCrisis(q)) { openGuestReward(); return; }
     if (detectCrisis(q)) {
       setWisdom(null); setChat([]); setSafety(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollAppToTop();
       return;
     }
     const history: ChatMsg[] = [...chat, { role: "user", content: q }];

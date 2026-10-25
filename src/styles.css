@@ -500,12 +500,15 @@ body {
   padding: 0;
   overscroll-behavior: none;
 }
-#root {
+/* The app mounts directly into body (no #root): each route's outer div becomes the
+   scroll container, keeping journal/shop/menu scrolling while body stays locked. */
+body > div {
   height: 100%;
   width: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
 }
 
 /* Safe-area top padding so the notch/status bar never covers the top HUD or headers. */
