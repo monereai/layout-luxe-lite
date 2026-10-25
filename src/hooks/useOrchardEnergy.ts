@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
 import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame } from "@/lib/treasure.functions";
-import { JUMP_COST, GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
+import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
