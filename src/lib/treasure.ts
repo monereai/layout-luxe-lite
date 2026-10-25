@@ -322,6 +322,7 @@ export function sideQuests(s: AdventureState): SideQuest[] {
   const list: SideQuest[] = NPCS.map(n => ({ id: n.id, title: n.need.length === 1 ? `Find ${TREASURES[n.need[0]!]?.name ?? ITEMS.find(i => i.id === n.need[0])?.name}` : `Collect ${n.need.length} ${n.id === "tilly" ? "key fragments" : ITEMS.find(i => i.id === n.need[0])?.name.toLowerCase() + "s"}`, giver: n.name, progress: n.need.filter(i => s.items.includes(i)).length, total: n.need.length, done: s.quests.includes(n.id), reward: n.gear ? `${GEAR[n.gear].name} + ${n.points} points` : n.item ? `${TREASURES[n.item]!.name} + ${n.points} points` : `${n.points} points` }));
   list.push({ id: "vault", title: "Open the Stone Vault (paired plates)", giver: "Shadow Ravine", progress: s.quests.includes("vault") ? 1 : 0, total: 1, done: s.quests.includes("vault"), reward: "Sun Stone + 40 points" });
   list.push({ id: "vernon-garden", title: "Win the first scroll", giver: "Vernon the Gardener", progress: s.quests.includes("vernon-garden") ? 1 : 0, total: 1, done: s.quests.includes("vernon-garden"), reward: "First scroll + 50 Energy + 20 Coins" });
+  list.push({ id: "connie-arcade", title: "Win the second scroll", giver: "Connie the Fruit Picker", progress: s.scrolls.includes("wood") ? 1 : 0, total: 1, done: s.scrolls.includes("wood"), reward: "Second scroll" });
   list.push({ id: "digs", title: "Dig up every buried treasure", giver: "Your pet", progress: s.dug.length, total: DIGS.length, done: s.dug.length === DIGS.length, reward: "Points, key fragments and relics" });
   return list;
 }
