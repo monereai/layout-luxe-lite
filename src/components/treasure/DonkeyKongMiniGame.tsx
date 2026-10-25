@@ -67,21 +67,19 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
         elapsed += Math.min(dt, GARDEN_TICK_MS);
         if (elapsed < GARDEN_TICK_MS) return;
         elapsed -= GARDEN_TICK_MS;
-        const input = command.current ?? direction.current; command.current = null;
-        const next = gardenStep(state, input);
-        if (next.jumps > state.jumps) {
-          if (!canGardenJump(balance)) { setError("Monere needs 5 Energy to jump."); return; }
-          balance -= JUMP_COST;
-          state = next; trace.current.push(input); setSnapshot(state);
-          this.player?.setPosition(state.x, gardenPlayerY(state));
-          playSound("success.mp3", .2); setError(null);
-          const jumpTrace = [...trace.current];
+        let input = command.current ?? direction.current; command.current = null;
+        let next = gardenStep(state, input);
+        if (next.jumps > state.jumps && !canGardenJump(balance)) {
+          // Refused jumps still let the round keep moving, so barrels never freeze.
+          setError("Monere needs 5 Energy to jump."); input = direction.current; next = gardenStep(state, input);
+        } else if (next.jumps > state.jumps) {
+          balance -= JUMP_COST; playSound("success.mp3", .2); setError(null);
+          const jumpTrace = [...trace.current, input];
           chain.current = chain.current.then(() => callbacks.current.onJump(jumpTrace)).catch(() => { if (alive) setError("A jump couldn't be saved yet — it will be checked when you finish."); });
-          return;
         }
         if (next.hits > state.hits) playSound("expulsion.mp3", .25);
         state = next; trace.current.push(input); setSnapshot(state);
-        this.player?.setPosition(state.x, gardenPlayerY(state)).setFlipX(input === "left");
+        this.player?.setPosition(state.x, gardenPlayerY(state)); if (input === "left" || input === "right") this.player?.setFlipX(input === "left");
         this.hazards.forEach(b => b.destroy());
         this.hazards = state.barrels.map(b => { const circle = this.add.circle(b.x, gardenBarrelY(b) - 6, 14, color("--garden-barrel")).setStrokeStyle(4, color("--points")); return circle; });
         if (state.won) { playSound("victory.mp3", .5); void saveWin(); }
@@ -101,6 +99,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
     <div ref={setMount} className="garden-game-board" data-tick={snapshot.tick} data-state={JSON.stringify(snapshot)} role="img" aria-label={`Four girder platforms with ladders and rolling barrels. Monere on platform ${snapshot.level + 1}, position ${snapshot.x}.`} />
     {!playing && <Button disabled={!ready} onClick={start}><Play />{ready ? "Start garden challenge" : "Opening garden…"}</Button>}
     <div className="flex items-center justify-between gap-2"><div className="harvest-pad">{[{ d: "up", Icon: ArrowUp, c: "col-start-2" }, { d: "left", Icon: ArrowLeft, c: "row-start-2" }, { d: "down", Icon: ArrowDown, c: "row-start-2 col-start-2" }, { d: "right", Icon: ArrowRight, c: "row-start-2 col-start-3" }].map(({ d, Icon, c }) => <Button key={d} size="icon" variant="secondary" className={c} aria-label={`Garden move ${d}`} disabled={busy || stopped.current} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); direction.current = d as GardenInput; }} onPointerUp={() => { direction.current = "idle"; }} onPointerCancel={() => { direction.current = "idle"; }} onLostPointerCapture={() => { direction.current = "idle"; }}><Icon /></Button>)}</div><div className="flex flex-wrap justify-end gap-2"><Button disabled={busy || stopped.current} onClick={() => { command.current = "jump"; }}><ArrowUp />Jump · 5<Zap size={14} /></Button><Button size="icon" variant="outline" title="Reset position" aria-label="Reset garden position" disabled={busy || stopped.current} onClick={() => { command.current = "reset"; }}><RotateCcw /></Button><Button size="icon" variant="ghost" title="Return to Meadow" aria-label="Leave garden challenge" disabled={busy} onClick={onExit}><DoorOpen /></Button></div></div>
+    <ul aria-label="Garden controls" className="garden-keys">{[["← →", "A D", "Walk"], ["↑ ↓", "W S", "Climb ladders"], ["Space", "Jump button", `Jump barrels · ${JUMP_COST} Energy`], ["↺", "", "Back to start"]].map(([a, b, label]) => <li key={label}><kbd>{a}</kbd>{b && <kbd>{b}</kbd>}<span>{label}</span></li>)}</ul>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}{stopped.current && retry.current && <Button disabled={busy} onClick={() => retry.current?.()}>Save reward</Button>}
   </DialogContent></Dialog>;
 }

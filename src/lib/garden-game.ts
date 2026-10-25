@@ -1,6 +1,9 @@
 /** Fixed-step rules shared by the isolated renderer and authenticated replay. */
 export const GARDEN_TICK_MS = 50;
 export const JUMP_COST = 5;
+/** A jump lasts one second and peaks high enough to clear a rolling barrel. */
+export const JUMP_TICKS = 20;
+export const JUMP_HEIGHT = 64;
 export const canGardenJump = (energy: number) => energy >= JUMP_COST;
 export const GARDEN_ENERGY_REWARD = 50;
 export const GARDEN_COIN_REWARD = 20;
@@ -14,7 +17,7 @@ export function gardenStep(old: GardenState, input: GardenInput): GardenState {
   if (old.won) return old;
   const s = { ...old, tick: old.tick + 1, barrels: old.barrels.map(b => ({ ...b })) };
   if (input === "reset") { s.x = 60; s.level = 0; s.climb = 0; s.jump = 0; }
-  if (input === "jump" && !s.jump && !s.climb) { s.jump = 12; s.jumps++; }
+  if (input === "jump" && !s.jump && !s.climb) { s.jump = JUMP_TICKS; s.jumps++; }
   else s.jump = Math.max(0, s.jump - 1);
   if (!s.climb) {
     if (input === "left") s.x = Math.max(40, s.x - 6);
@@ -36,12 +39,12 @@ export function gardenStep(old: GardenState, input: GardenInput): GardenState {
   }
   s.barrels = s.barrels.filter(b => b.x >= 20 && b.x <= 580);
   const py = gardenPlayerY(s);
-  if (s.barrels.some(b => Math.abs(b.x - s.x) < 22 && Math.abs(gardenBarrelY(b) - py) < 22)) {
+  if (s.barrels.some(b => Math.abs(b.x - s.x) < 18 && Math.abs(gardenBarrelY(b) - py) < 22)) {
     s.x = 60; s.level = 0; s.climb = 0; s.jump = 0; s.hits++;
   }
   s.won = s.level === 3 && !s.climb && s.x <= 85;
   return s;
 }
-export function gardenPlayerY(s: GardenState) { return (PLATFORM_Y[s.level] ?? 450) - Math.sign(s.climb) * Math.abs(s.climb) * 6 - (s.jump ? Math.sin(s.jump / 12 * Math.PI) * 55 : 0); }
+export function gardenPlayerY(s: GardenState) { return (PLATFORM_Y[s.level] ?? 450) - Math.sign(s.climb) * Math.abs(s.climb) * 6 - (s.jump ? Math.sin(s.jump / JUMP_TICKS * Math.PI) * JUMP_HEIGHT : 0); }
 export function gardenBarrelY(b: Barrel) { return (PLATFORM_Y[b.level] ?? 450) + b.drop * 6; }
 export function replayGarden(trace: GardenInput[]) { return trace.reduce(gardenStep, newGarden()); }
