@@ -1,3 +1,6 @@
+# Small hidden apples (2026-10-25)
+- [x] Make Connie’s existing three Lonely Wood apples small and stationary; preserve pickups, saved collections, quest rewards and map movement.
+
 # Barrel game scroll prize (2026-10-25)
 - [x] Made the first (meadow) scroll the barrel-game prize: scroll shown above the top hopper, granted idempotently by migration 0075 and the guest fallback, completion notice updated; 18 focused tests pass, live function verified. Account gameplay not exercised (Carl-only access).
 
