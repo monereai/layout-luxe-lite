@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
-import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame } from "@/lib/treasure.functions";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame, convertEnergyOverflow } from "@/lib/treasure.functions";
 import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import type { ArcadeInput } from "@/lib/arcade-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
-import { takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { energyOverflow, takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { recordEnergyOverflow } from "@/lib/game";
 import { DIG_ENERGY } from "@/lib/treasure";
 
 const GUEST_KEY = "monere-orchard-guest-energy";
