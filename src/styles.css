@@ -470,3 +470,4 @@
 .garden-keys li { display: flex; align-items: center; gap: .3rem; }
 .garden-keys kbd { padding: .05rem .4rem; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--muted); color: var(--foreground); font-family: inherit; font-size: .75rem; }
 .garden-game-board canvas { display: block; }
+.garden-entry-notice { padding: .45rem .75rem; border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent); border-radius: 8px; background: color-mix(in oklab, var(--primary) 10%, transparent); text-align: center; }

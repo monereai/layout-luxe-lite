@@ -24,6 +24,9 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
   const [ready, setReady] = useState(false), [playing, setPlaying] = useState(false);
   const start = () => { started.current = true; setPlaying(true); };
   const jump = () => { if (!stopped.current) command.current = "jump"; };
+  /** Entry notification shown when Monere enters the garden challenge. */
+  const [entryNotice, setEntryNotice] = useState(true);
+  useEffect(() => { if (!entryNotice) return; const t = setTimeout(() => setEntryNotice(false), 4500); return () => clearTimeout(t); }, [entryNotice]);
   useEffect(() => {
     if (!mount) return;
     let state = newGarden(), elapsed = 0, alive = true, working = false;
@@ -97,6 +100,7 @@ export default function DonkeyKongMiniGame({ avatar, energy, onJump, onComplete,
     <div ref={setMount} className="garden-game-board" data-tick={snapshot.tick} data-state={JSON.stringify(snapshot)} data-is-jumping={snapshot.jump > 0} role="img" aria-label={`Four girder platforms with ladders and rolling barrels. Monere on platform ${snapshot.level + 1}, position ${snapshot.x}.`} />
     {!playing && <Button disabled={!ready} onClick={start}><Play />{ready ? "Start garden challenge" : "Opening garden…"}</Button>}
     <div className="flex items-center justify-between gap-2"><div className="harvest-pad">{[{ d: "up", Icon: ArrowUp, c: "col-start-2" }, { d: "left", Icon: ArrowLeft, c: "row-start-2" }, { d: "down", Icon: ArrowDown, c: "row-start-2 col-start-2" }, { d: "right", Icon: ArrowRight, c: "row-start-2 col-start-3" }].map(({ d, Icon, c }) => <Button key={d} size="icon" variant="secondary" className={c} aria-label={`Garden move ${d}`} disabled={busy || stopped.current} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); direction.current = d as GardenInput; }} onPointerUp={() => { direction.current = "idle"; }} onPointerCancel={() => { direction.current = "idle"; }} onLostPointerCapture={() => { direction.current = "idle"; }}><Icon /></Button>)}</div><div className="flex flex-wrap justify-end gap-2"><Button disabled={busy || stopped.current} onClick={jump}><ArrowUp />JUMP (Space)</Button><Button size="icon" variant="outline" title="Reset position" aria-label="Reset garden position" disabled={busy || stopped.current} onClick={() => { command.current = "reset"; }}><RotateCcw /></Button><Button size="icon" variant="ghost" title="Return to Meadow" aria-label="Leave garden challenge" disabled={busy} onClick={onExit}><DoorOpen /></Button></div></div>
+    {entryNotice && <p role="status" aria-live="polite" className="garden-entry-notice text-sm font-bold text-primary">📜 Collect the scroll and begin your quest!</p>}
     <ul aria-label="Garden controls" className="garden-keys">{[["← →", "A D", "Walk"], ["↑ ↓", "W S", "Climb ladders"], ["Space", "Jump button", "Jump barrels · free"], ["↺", "", "Back to start"]].map(([a, b, label]) => <li key={label}><kbd>{a}</kbd>{b && <kbd>{b}</kbd>}<span>{label}</span></li>)}</ul>
     {error && <p role="alert" className="text-sm text-destructive">{error}</p>}{stopped.current && retry.current && <Button disabled={busy} onClick={() => retry.current?.()}>Save reward</Button>}
   </DialogContent></Dialog>;

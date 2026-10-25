@@ -32,6 +32,10 @@ it("offers the first scroll as the prize", () => {
   open();
   expect(screen.getByText(/Win the first scroll/)).toBeTruthy();
 });
+it("shows the entry notification when Monere enters the garden", () => {
+  open();
+  expect(screen.getByText(/Collect the scroll and begin your quest/i)).toBeTruthy();
+});
 it("Start activates the waiting scene and barrels spawn after 90 ticks", () => {
   open(); step(); expect(state().tick).toBe(0);
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
