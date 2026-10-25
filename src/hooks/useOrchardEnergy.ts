@@ -32,6 +32,35 @@ export function useOrchardEnergy() {
   useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) { guestBalance.current = Math.min(100, Math.max(0, v)); setGuest(guestBalance.current); } } catch { /* optional */ } }, []);
   const energy = care.user ? care.data?.energy ?? 0 : guest;
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
+  const convert = useServerFn(convertEnergyOverflow);
+  const converting = useRef(false);
+  const accountId = care.user?.id;
+  // Full bar bonus: every 100 Energy converts to +5 Points and the bar resets, carrying any remainder.
+  useEffect(() => {
+    if (energy < 100 || converting.current) return;
+    converting.current = true;
+    void (async () => {
+      try {
+        if (!accountId) {
+          const overflow = energyOverflow(guestBalance.current);
+          if (overflow.points > 0) {
+            saveGuest(overflow.energy);
+            recordEnergyOverflow(overflow.points);
+            toast(`+${overflow.points} Points! Energy Reset!`);
+          }
+        } else {
+          const result = await convert();
+          if (identity.current !== accountId) return;
+          if (result.points > 0) {
+            client.setQueryData(["monere-care", accountId], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
+            void care.refetch(); void plan.refresh();
+            toast(`+${result.points} Points! Energy Reset!`);
+          }
+        }
+      } catch { /* keep the full bar; conversion retries on the next energy change */ }
+      finally { converting.current = false; }
+    })();
+  }, [energy, accountId, client, convert, care, plan]);
   async function beginMaze(id: TreeId) {
     if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
     if (!care.user && !takeGuestMazeEntry(new Date().toISOString().slice(0, 10))) {

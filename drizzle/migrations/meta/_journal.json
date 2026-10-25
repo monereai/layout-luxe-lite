@@ -603,6 +603,13 @@
       "when": 1792915786456,
       "tag": "0085_seeds_around_meadow_boulder",
       "breakpoints": true
+    },
+    {
+      "idx": 86,
+      "version": "7",
+      "when": 1792918865025,
+      "tag": "0086_energy_overflow_convert",
+      "breakpoints": true
     }
   ]
 }

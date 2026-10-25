@@ -717,6 +717,7 @@ export type Database = {
         Args: { p_action?: string; p_choice?: number; p_day?: string }
         Returns: Json
       }
+      energy_overflow_convert: { Args: never; Returns: Json }
       garden_barrel_commit: {
         Args: {
           p_finish: boolean
