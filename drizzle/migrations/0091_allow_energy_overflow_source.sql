@@ -1,0 +1,2 @@
+ALTER TABLE public.point_credits DROP CONSTRAINT IF EXISTS point_credits_source_check;
+ALTER TABLE public.point_credits ADD CONSTRAINT point_credits_source_check CHECK (source = ANY (ARRAY['pack'::text,'subscription'::text,'daily_care'::text,'game_round'::text,'energy_full'::text,'daily_login'::text,'daily_dilemma'::text,'biblical_snap'::text,'guest_preview'::text,'energy_overflow'::text]));
