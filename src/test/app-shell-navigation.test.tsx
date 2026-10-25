@@ -28,13 +28,12 @@ it("keeps Treasure Hunt out of every main menu", () => {
   for (const menu of menus) expect(menu.textContent).not.toContain("Treasure Hunt");
 });
 
-it("hides the adventure card while the Griffin game is closed", () => {
+it("shows the adventure card to public visitors", () => {
   render(<AppShell><p>page</p></AppShell>);
   const aside = document.querySelector('aside[aria-label="Points Shop"]');
-  expect(aside).not.toBeNull();
-  const hrefs = Array.from(aside!.querySelectorAll("a")).map(a => a.getAttribute("href"));
-  expect(hrefs).not.toContain("/treasure");
-  expect(screen.queryAllByRole("link", { name: "Golden griffin mini game" })).toHaveLength(0);
+  if (!aside) throw new Error("Shop navigation is missing");
+  const hrefs = Array.from(aside.querySelectorAll("a")).map(a => a.getAttribute("href"));
+  expect(hrefs).toContain("/treasure");
 });
 
 it("labels the tester adventure card with its new title", () => {
