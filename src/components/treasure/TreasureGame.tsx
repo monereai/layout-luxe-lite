@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ClientOnly, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Award, Backpack, BookOpen, Check, Compass, Flag, LockKeyhole, Map, Music, Music2, ScrollText, Volume2, VolumeX } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Award, Backpack, BookOpen, Check, Compass, Flag, LockKeyhole, Map, Music, Music2, RotateCcw, ScrollText, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { MonereFigure } from "@/components/MonereFigure";
@@ -40,7 +40,7 @@ const ConnieArcadeMiniGame = lazy(() => import("./ConnieArcadeMiniGame"));
 const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair, garden };
 const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin. Along the way, lift the fog, help friendly villagers, earn explorer gear and let your pet dig for buried treasure!";
 
-export function TreasureGame() {
+export function TreasureGame({ developer = false }: { developer?: boolean }) {
   const navigate = useNavigate();
   const game = useAdventure(); const { state } = game;
   const controls = useRef<WorldControls | null>(null);
@@ -57,6 +57,7 @@ export function TreasureGame() {
   const [celebrate, setCelebrate] = useState(false);
   const [effect, setEffect] = useState<WorldEffect>({ kind: null, n: 0 });
   const [busy, setBusy] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
   const [sound, setSound] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [chapter, setChapter] = useState(false);
@@ -89,7 +90,7 @@ export function TreasureGame() {
     return () => { cancelled = true; };
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
-  const blocked = state.zone === "garden" || !!gardenRound || !!arcadeRound || !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
+  const blocked = resetConfirm || state.zone === "garden" || !!gardenRound || !!arcadeRound || !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
   useEffect(() => {
     if (!game.loaded || state.zone !== "garden" || gardenRound || openingGarden.current) return;
     openingGarden.current = true; setIntro(false); setPanel(null); setBusy(true);
@@ -267,6 +268,17 @@ export function TreasureGame() {
     catch { setNotice("That answer couldn't be saved. Please try again."); } finally { setBusy(false); }
   }
   const action = here?.label ?? "Search";
+  async function developerReset() {
+    if (!developer || busy) return;
+    setBusy(true); controls.current?.pause(true);
+    try {
+      if (!await game.restart(true)) return;
+      settled.current = ""; setPanel(null); setNpc(null); setFound(null); setRiddle(null); setWrong(null);
+      setCelebrate(false); setEffect({ kind: null, n: 0 }); setChapter(false); setSupport(false);
+      setGardenRound(null); setArcadeRound(null); setHarvestMaze(null); setSide(null); setSideReset(v => v + 1);
+      setResetConfirm(false); setIntro(true); setNotice("Developer reset complete — adventure restarted.");
+    } finally { setBusy(false); }
+  }
   async function finish(destination: "play" | "menu") {
     if (busy) return;
     setBusy(true); controls.current?.pause(true);
@@ -310,6 +322,8 @@ export function TreasureGame() {
       </div>
     </div>
     <footer className="treasure-footer"><span className="flex items-center gap-2"><Flag className="h-3.5 w-3.5 text-primary" /><span className="hidden sm:inline">A journey of courage, kindness & wisdom</span><span className="sm:hidden">Your brave adventure</span></span><Link to="/" className="flex items-center gap-1.5 text-primary"><BookOpen className="h-4 w-4" />Talk to Monere<ArrowRight className="h-3.5 w-3.5" /></Link></footer>
+    {developer && <Button className="fixed right-3 top-20 z-[60] gap-2" size="sm" variant="destructive" title="Reset developer adventure" aria-label="Reset developer adventure" disabled={!game.loaded || busy || game.saving} onClick={() => setResetConfirm(true)}><RotateCcw className="h-4 w-4" />Dev reset</Button>}
+    <Dialog open={resetConfirm} onOpenChange={o => { if (!busy) setResetConfirm(o); }}><DialogContent className="z-[80] max-w-md rounded-lg"><DialogTitle>Reset developer adventure?</DialogTitle><DialogDescription>Start again in Monere’s Meadow. Scrolls, quests, finds, explored areas and unfinished mini-games will reset. Your Energy, points, purchases and owned pets stay unchanged. Previously paid rewards cannot be earned twice.</DialogDescription><div className="flex justify-end gap-2"><Button variant="secondary" disabled={busy} onClick={() => setResetConfirm(false)}>Cancel</Button><Button variant="destructive" disabled={busy} onClick={() => void developerReset()}><RotateCcw />{busy ? "Resetting…" : "Reset adventure"}</Button></div></DialogContent></Dialog>
     {harvestMaze && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening the Energy maze…</div>}><PacmanHarvestMiniGame avatar={avatar} practice={orchard.isMazePractice?.(harvestMaze.round) ?? harvestMaze.round === "practice"} thirdScroll={harvestMaze.thirdScroll} onComplete={finishHarvest} /></Suspense></ClientOnly>}
     {gardenRound && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening Vernon’s garden…</div>}><DonkeyKongMiniGame avatar={avatar} energy={orchard.energy} onJump={async trace => { await orchard.gardenAction(gardenRound, trace, false); }} onComplete={finishGarden} onExit={() => void leaveGarden()} /></Suspense></ClientOnly>}
     {arcadeRound && <ClientOnly><Suspense fallback={<div className="treasure-loading">Opening Connie’s arcade…</div>}><ConnieArcadeMiniGame avatar={avatar} onComplete={finishArcade} onExit={leaveArcade} /></Suspense></ClientOnly>}
