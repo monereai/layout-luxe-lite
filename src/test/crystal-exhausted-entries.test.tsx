@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn }));
-vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: vi.fn(), settleOrchardMaze: vi.fn(), spendMovementEnergy: vi.fn(), startGardenGame: vi.fn(), commitGardenGame: vi.fn(), startArcadeGame: vi.fn(), commitArcadeGame: vi.fn(), convertEnergyOverflow: vi.fn() }));
+vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: vi.fn(), settleOrchardMaze: vi.fn(), spendMovementEnergy: vi.fn(), startGardenGame: vi.fn(), commitGardenGame: vi.fn(), startArcadeGame: vi.fn(), commitArcadeGame: vi.fn(), creditEnergyOverflow: vi.fn() }));
 vi.mock("@/hooks/useCare", () => ({ useCare: () => ({ user: null }) }));
 vi.mock("@/hooks/usePlan", () => ({ usePlan: () => ({}) }));
 import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
