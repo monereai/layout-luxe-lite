@@ -31,10 +31,12 @@ import { SUPPORTER_PAYMENT_URL } from "@/lib/supporter";
 import { createWalkingFrames } from "@/lib/walking-frames";
 import { MAP_ENTRANCES, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
 import type { GardenInput } from "@/lib/garden-game";
+import type { ArcadeInput } from "@/lib/arcade-game";
 
 const PacmanHarvestMiniGame = lazy(() => import("../PacmanHarvestMiniGame").then(m => ({ default: m.PacmanHarvestMiniGame })));
 const WorldCanvas = lazy(() => import("./WorldCanvas").then(m => ({ default: m.WorldCanvas })));
 const DonkeyKongMiniGame = lazy(() => import("./DonkeyKongMiniGame"));
+const ConnieArcadeMiniGame = lazy(() => import("./ConnieArcadeMiniGame"));
 const maps: Record<ZoneId, string> = { meadow, wood: forest, ravine, lair, garden };
 const INTRO = "Razor the Hyena has stolen the Golden Griffin from the Pet Shop and fled to Lonely Wood! Help Monere and his companion collect the 4 hidden scrolls, solve the ancient gatekeeper riddles, and outsmart Razor in a final Riddle Duel to rescue the Griffin. Along the way, lift the fog, help friendly villagers, earn explorer gear and let your pet dig for buried treasure!";
 
@@ -64,6 +66,8 @@ export function TreasureGame() {
   const [harvestMaze, setHarvestMaze] = useState<{ tree: TreeId; round: string } | null>(null);
   const [gardenRound, setGardenRound] = useState<string | null>(null);
   const openingGarden = useRef(false);
+  const [arcadeRound, setArcadeRound] = useState<string | null>(null);
+  const openingArcade = useRef(false);
   const [sideReset, setSideReset] = useState(0);
   const startingHarvest = useRef(false);
   const orchard = useOrchardEnergy();
@@ -85,7 +89,7 @@ export function TreasureGame() {
     return () => { cancelled = true; };
   }, [shop.equipped]);
   const victory = game.loaded && state.rescued;
-  const blocked = state.zone === "garden" || !!gardenRound || !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
+  const blocked = state.zone === "garden" || !!gardenRound || !!arcadeRound || !!harvestMaze || !!side || !!panel || !!npc || intro || !!found || !!riddle || chapter || support || victory || busy;
   useEffect(() => {
     if (!game.loaded || state.zone !== "garden" || gardenRound || openingGarden.current) return;
     openingGarden.current = true; setIntro(false); setPanel(null); setBusy(true);
@@ -106,6 +110,22 @@ export function TreasureGame() {
     try { await game.act({ action: "portal", id: "meadow" }); setGardenRound(null); }
     finally { setBusy(false); }
   }
+  /** Connie's 80's arcade opens once her apples are delivered; the second scroll is its prize. */
+  async function openArcade() {
+    if (arcadeRound || openingArcade.current) return;
+    openingArcade.current = true; setNpc(null); setBusy(true);
+    try { await game.prepareHarvest(); setArcadeRound(await orchard.beginArcade()); }
+    catch { setNotice("Connie’s arcade couldn’t open. Please try again."); }
+    finally { openingArcade.current = false; setBusy(false); }
+  }
+  async function finishArcade(trace: ArcadeInput[]) {
+    if (!arcadeRound) return;
+    const result = await orchard.finishArcade(arcadeRound, trace);
+    game.harvestReturn(result.state ?? { ...state, scrolls: [...new Set([...state.scrolls, "wood" as const])] });
+    setArcadeRound(null);
+    setNotice(`Connie’s arcade complete! You won the second scroll 📜${orchard.guest ? " (guest preview)" : ""}.`);
+  }
+  function leaveArcade() { setArcadeRound(null); }
   useEffect(() => { if (victory) { setIntro(false); setPanel(null); setNpc(null); setFound(null); setRiddle(null); playSound("victory.mp3", 0.7); } }, [victory]);
   useEffect(() => { if (!celebrate) return; const timer = setTimeout(() => setCelebrate(false), 2300); return () => clearTimeout(timer); }, [celebrate]);
   useEffect(() => { controls.current?.pause(blocked); }, [blocked]);
