@@ -28,7 +28,7 @@ export const SCROLL_CLUES: Record<ZoneId, string> = {
   garden: "Explore Vernon’s garden, then return through the southern arch.",
   meadow: "Razor tucked a scroll into the meadow's bushes. Search the greenery closely.",
   wood: "A scroll hides in a hollow log among the trees. Only a close look will reveal it.",
-  ravine: "The canyon's scroll lies beneath a pile of rocks. Search carefully on both sides of the bridge.",
+  ravine: "Enter the Crystal Maze through Shadow Ravine’s Crystal Gate and reach the third scroll.",
   lair: "The last scroll is buried under rubble on a ledge across the chasm. Only the Goggles of Truth reveal the invisible path to it.",
 };
 /** Landscape prop that conceals each zone's scroll until Monere is close. */
@@ -167,7 +167,7 @@ function applyRaw(s: AdventureState, a: AdventureAction): AdventureState {
   if (a.action === "stay") return s.zone === "ravine" && s.x === PLATE_PET.x && s.y === PLATE_PET.y ? { ...s, pet: { ...PLATE_PET } } : s;
   if (a.action === "switch") { if (s.zone !== "ravine" || s.x !== PLATE_HERO.x || s.y !== PLATE_HERO.y || s.pet?.x !== PLATE_PET.x) return s; return { ...s, pet: null, quests: s.quests.includes("vault") ? s.quests : [...s.quests, "vault"], items: s.items.includes(VAULT_RELIC) ? s.items : [...s.items, VAULT_RELIC] }; }
   if (a.action === "call") return { ...s, pet: null };
-  if (a.action === "collect") return s.zone !== "garden" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
+  if (a.action === "collect") return s.zone !== "garden" && s.zone !== "ravine" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone]) ? { ...s, scrolls: [...s.scrolls, s.zone] } : s;
   if (a.action === "answer") return gateHere(s) === a.id && a.x === gateRiddle(s, s.zone).answer ? { ...s, gates: [...s.gates, s.zone] } : s;
   if (a.action === "portal") { const p = PORTALS[s.zone].find(p => p.target === a.id && near(s, p)); return p && portalOpen(s, p) ? { ...s, zone: p.target, ...p.arrive, pet: null } : s; }
   if (a.action === "duel") {
@@ -207,6 +207,7 @@ export function parseAdventure(value: unknown): AdventureState {
 
 /** Hot/cold hint for the hidden scroll in the current zone. */
 export function scrollWarmth(s: AdventureState): string {
+  if (s.zone === "ravine") return "Reach the third scroll in the Crystal Maze.";
   const t = SCROLLS[s.zone]; const d = Math.abs(t.x - s.x) + Math.abs(t.y - s.y);
   return d <= 2 ? "🔥 Burning hot!" : d <= 5 ? "♨️ Warmer…" : d <= 10 ? "🌤️ Getting warm." : "❄️ Cold.";
 }
@@ -304,7 +305,7 @@ export const isRevealed = (s: AdventureState, zone: ZoneId, x: number, y: number
 export type Interaction = { kind: "scroll" | "gate" | "portal" | "npc" | "item" | "dig" | "bell" | "stay" | "switch"; id?: string; label: string; icon: string };
 /** The single thing Monere can do where he stands, in priority order. */
 export function interactionHere(s: AdventureState): Interaction | null {
-  if (s.zone !== "garden" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
+  if (s.zone !== "garden" && s.zone !== "ravine" && !s.scrolls.includes(s.zone) && near(s, SCROLLS[s.zone])) return { kind: "scroll", label: "Pick up scroll", icon: "📜" };
   const g = gateHere(s); if (g) return { kind: "gate", label: "Answer riddle", icon: "❓" };
   const it = ITEMS.find(i => i.zone === s.zone && near(s, i) && itemVisible(s, i) && !s.items.includes(i.id)); if (it) return { kind: "item", id: it.id, label: `Pick up ${it.name}`, icon: it.icon };
   const n = NPCS.find(n => n.zone === s.zone && near(s, n)); if (n) return { kind: "npc", id: n.id, label: `Talk to ${n.name.split(" ")[0]}`, icon: n.icon };
