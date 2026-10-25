@@ -9,3 +9,12 @@ describe("Vernon’s garden rules", () => {
   it("a hit resets position without resetting stats", () => { const s = gardenStep({ ...newGarden(), x: 300, jumps: 2, barrels: [{ x: 304, level: 0, drop: 0 }] }, "idle"); expect(s.x).toBe(60); expect(s.level).toBe(0); expect(s.jumps).toBe(2); expect(s.hits).toBe(1); });
   it("only the top hopper wins", () => { expect(gardenStep(newGarden(), "idle").won).toBe(false); expect(gardenStep({ ...newGarden(), level: 3, x: 60 }, "idle").won).toBe(true); });
 });
+it("jump raises Monere over hazards and lands after exactly 400ms", async () => {
+  const { gardenPlayerY, GARDEN_TICK_MS } = await import("./garden-game");
+  let s = gardenStep(newGarden(), "jump");
+  expect(s.jump * GARDEN_TICK_MS).toBe(400);
+  for (let i = 0; i < 4; i++) s = gardenStep(s, "idle");
+  expect(gardenPlayerY(s)).toBe(386);
+  for (let i = 0; i < 4; i++) s = gardenStep(s, "idle");
+  expect(s.jump).toBe(0); expect(gardenPlayerY(s)).toBe(450);
+});

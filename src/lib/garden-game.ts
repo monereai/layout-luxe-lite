@@ -1,8 +1,8 @@
 /** Fixed-step rules shared by the isolated renderer and authenticated replay. */
 export const GARDEN_TICK_MS = 50;
 export const JUMP_COST = 5;
-/** A jump lasts one second and peaks high enough to clear a rolling barrel. */
-export const JUMP_TICKS = 20;
+/** A jump lasts 400ms and peaks high enough to clear a rolling barrel. */
+export const JUMP_TICKS = 8;
 export const JUMP_HEIGHT = 64;
 export const canGardenJump = (energy: number) => energy >= JUMP_COST;
 export const GARDEN_ENERGY_REWARD = 50;
