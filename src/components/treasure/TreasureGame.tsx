@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { MonereFigure } from "@/components/MonereFigure";
 import { PETS, usePets } from "@/lib/pets";
 import { useAdventure } from "@/hooks/useAdventure";
-import { worldRows, canEnter, portalOpen, ZONES, PORTALS, SCROLLS, sessionDigs, npcClue, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, DIG_ENERGY, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, worldPath, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
+import { worldRows, canEnter, portalOpen, ZONES, PORTALS, SCROLLS, SCROLL_CLUES, sessionDigs, npcClue, gateRiddle, duelRiddle, NPCS, ITEMS, DIGS, DIG_ENERGY, GEAR, TREASURES, near, questClue, duelTileAt, duelLanding, interactionHere, sideQuests, isRevealed, worldPath, type ZoneId, type Npc, type AdventureState } from "@/lib/treasure";
 import { equippedItems, useShop } from "@/lib/shop";
 import { playBackgroundMusic, playSound, resumeBackgroundMusic, setMusicMuted, setSoundsMuted, stopBackgroundMusic } from "@/lib/audio";
 import { combinationLook, itemsDrawnIn } from "@/lib/shop-combinations";
@@ -122,7 +122,7 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
   async function finishArcade(trace: ArcadeInput[]) {
     if (!arcadeRound) return;
     const result = await orchard.finishArcade(arcadeRound, trace);
-    game.harvestReturn(result.state ?? { ...state, scrolls: [...new Set([...state.scrolls, "wood" as const])] });
+    game.harvestReturn(result.state ?? { ...state, connieMiniGameWon: true, scrolls: [...new Set([...state.scrolls, "wood" as const])] });
     setArcadeRound(null);
     setNotice(`Connie’s arcade complete! You won the second scroll 📜${orchard.guest ? " (guest preview)" : ""}.`);
   }
@@ -252,7 +252,7 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
     if (h.kind === "switch") { const next = await run({ action: "switch" }); if (next?.quests.includes("vault")) { chime(); setNotice(game.user ? "Click-clunk! The Stone Vault opens: Sun Stone ☀️ + 40 points!" : "Click-clunk! The Stone Vault opens: Sun Stone ☀️! Sign in to earn the points."); } return; }
     if (h.kind === "portal" && portal) {
       if (!portalOpen(state, portal)) {
-        if (portal.target === "garden") { setNotice("Return all three magic seeds to Vernon to open his garden portal."); return; } setNotice(state.scrolls.includes(state.zone) ? "Answer the gatekeeper's riddle to open this gate." : "Find this land's hidden scroll first."); return; }
+        if (portal.target === "garden") { setNotice("Return all three magic seeds to Vernon to open his garden portal."); return; } setNotice(state.scrolls.includes(state.zone) ? "Answer the gatekeeper's riddle to open this gate." : SCROLL_CLUES[state.zone]); return; }
       await run({ action: "portal", id: portal.target });
     }
   }

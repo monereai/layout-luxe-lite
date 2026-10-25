@@ -575,6 +575,13 @@
       "when": 1792910872453,
       "tag": "0081_developer_adventure_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1792911365491,
+      "tag": "0082_audit_scroll_prizes_crystal_practice",
+      "breakpoints": true
     }
   ]
 }

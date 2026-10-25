@@ -32,7 +32,10 @@ export function useOrchardEnergy() {
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
   async function beginMaze(id: TreeId) {
     if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
-    if (!care.user && !takeGuestMazeEntry(new Date().toISOString().slice(0, 10))) throw new Error("Free players can enter the Energy maze twice a day. Sign in with Monere Plus to harvest without limits!");
+    if (!care.user && !takeGuestMazeEntry(new Date().toISOString().slice(0, 10))) {
+      if (id === "caverns-1") return "guest-practice";
+      throw new Error("Free players can enter the Energy maze twice a day. Sign in with Monere Plus to harvest without limits!");
+    }
     if (!care.user) return "guest";
     const round = await start({ data: { tree: id } });
     if (round.practice) practiceRounds.current.add(round.id);
@@ -40,7 +43,7 @@ export function useOrchardEnergy() {
   }
   async function finishMaze(id: TreeId, round: string, trace: MazeDirection[]) {
     const maze = replayMaze(trace);
-    if (round === "practice") return { gained: 0, state: null };
+    if (round === "practice" || round === "guest-practice") return { gained: 0, state: null };
     if (!care.user) {
       const gained = depositEnergy(guestBalance.current, maze.energy), next = guestBalance.current + gained;
       saveGuest(next);
@@ -101,5 +104,5 @@ export function useOrchardEnergy() {
     void care.refetch();
     return result;
   }
-  return { energy, cool, beginMaze, isMazePractice: (round: string) => round === "practice" || practiceRounds.current.has(round), finishMaze, boost, gainDig, beginGarden, gardenAction, beginArcade, finishArcade, guest: !care.user };
+  return { energy, cool, beginMaze, isMazePractice: (round: string) => round === "practice" || round === "guest-practice" || practiceRounds.current.has(round), finishMaze, boost, gainDig, beginGarden, gardenAction, beginArcade, finishArcade, guest: !care.user };
 }

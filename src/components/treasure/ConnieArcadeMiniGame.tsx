@@ -18,6 +18,7 @@ export default function ConnieArcadeMiniGame({ avatar, onComplete, onExit }: {
   const callbacks = useRef({ onComplete }); callbacks.current = { onComplete };
   const stopped = useRef(false), trace = useRef<ArcadeInput[]>([]);
   const started = useRef(false);
+  const retrySave = useRef<(() => Promise<void>) | null>(null);
   const [ready, setReady] = useState(false), [playing, setPlaying] = useState(false);
   const [round, setRound] = useState(0);
   const start = () => { started.current = true; setPlaying(true); };
@@ -40,6 +41,7 @@ export default function ConnieArcadeMiniGame({ avatar, onComplete, onExit }: {
       catch { if (alive) setError("The prize couldn’t be saved. Please try again."); }
       finally { working = false; if (alive) setBusy(false); }
     }
+    retrySave.current = saveWin;
     class ArcadeScene extends Phaser.Scene {
       player?: Phaser.GameObjects.Image;
       fruits: Phaser.GameObjects.Text[] = [];
@@ -82,7 +84,7 @@ export default function ConnieArcadeMiniGame({ avatar, onComplete, onExit }: {
     const up = (e: KeyboardEvent) => { const d = keys[e.key.toLowerCase()]; if (!d) return; e.preventDefault(); e.stopImmediatePropagation(); if (direction.current === d) direction.current = "idle"; };
     const blur = () => { direction.current = "idle"; };
     window.addEventListener("keydown", down, true); window.addEventListener("keyup", up, true); window.addEventListener("blur", blur);
-    return () => { alive = false; window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true); window.removeEventListener("blur", blur); game.destroy(true); };
+    return () => { alive = false; retrySave.current = null; window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true); window.removeEventListener("blur", blur); game.destroy(true); };
   }, [mount, avatar, round]);
   return <Dialog open><DialogContent showCloseButton={false} className="garden-game-modal" onEscapeKeyDown={e => e.preventDefault()} onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()}>
     <div className="flex flex-wrap items-center justify-between gap-2"><div><DialogTitle className="text-xl text-primary">Connie’s 80’s Arcade</DialogTitle><DialogDescription>Win the second scroll 📜 · catch {ARCADE_WIN_CATCHES} fruits · {ARCADE_MAX_MISSES} misses ends the round</DialogDescription></div><span className="flex items-center gap-1 font-display text-points" aria-label={`Caught ${snapshot.catches} of ${ARCADE_WIN_CATCHES} fruits`}><ScrollText size={18} />{snapshot.catches}/{ARCADE_WIN_CATCHES}</span></div>
@@ -91,7 +93,7 @@ export default function ConnieArcadeMiniGame({ avatar, onComplete, onExit }: {
     <div className="flex items-center justify-between gap-2"><div className="harvest-pad">{[{ d: "left", Icon: ArrowLeft, c: "" }, { d: "right", Icon: ArrowRight, c: "" }].map(({ d, Icon, c }) => <Button key={d} size="icon" variant="secondary" className={c} aria-label={`Arcade move ${d}`} disabled={busy || stopped.current} onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); direction.current = d as ArcadeInput; }} onPointerUp={() => { direction.current = "idle"; }} onPointerCancel={() => { direction.current = "idle"; }} onLostPointerCapture={() => { direction.current = "idle"; }}><Icon /></Button>)}</div><div className="flex flex-wrap justify-end gap-2"><Button size="icon" variant="ghost" title="Return to Connie" aria-label="Leave arcade game" disabled={busy} onClick={onExit}><DoorOpen /></Button></div></div>
     {entryNotice && <p role="status" aria-live="polite" className="garden-entry-notice text-sm font-bold text-primary">🕹️ Catch {ARCADE_WIN_CATCHES} fruits to win the second scroll!</p>}
     <ul aria-label="Arcade controls" className="garden-keys">{[["← →", "A D", "Move Monere"], ["📜", "", `Catch ${ARCADE_WIN_CATCHES} fruits to win`], ["🍎", "", `${ARCADE_MAX_MISSES} misses ends the round`]].map(([a, b, label]) => <li key={label}><kbd>{a}</kbd>{b && <kbd>{b}</kbd>}<span>{label}</span></li>)}</ul>
-    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    {error && <div className="flex flex-wrap items-center gap-3"><p role="alert" className="text-sm text-destructive">{error}</p>{snapshot.won && <Button disabled={busy} onClick={() => void retrySave.current?.()}><RotateCcw />Retry Save</Button>}</div>}
     {stopped.current && !snapshot.won && <Button disabled={busy} onClick={() => { setError(null); setRound(r => r + 1); }}><RotateCcw />Play again</Button>}
   </DialogContent></Dialog>;
 }
