@@ -136,10 +136,9 @@ export function WorldCanvas(props: Props) {
           ELEMENTAL_GATES.filter(g => g.zone === s.zone).forEach(g => bob(text(g.at, g.icon, 44)));
           MAP_TREES.filter(t => t.zone === s.zone).forEach(t => { text(t.at, "🌳", 65); text(t.at, "🍎", 11).setPosition(...at(t.at)).setX(at(t.at)[0] - 13).setY(at(t.at)[1] - 12).setDepth(4); text(t.at, "🍐", 10).setX(at(t.at)[0] + 14).setY(at(t.at)[1] - 6).setDepth(4); });
           if (s.zone === "wood") {
-            // Dark cave (north-east): a soft radial shadow, never a rectangular tint box.
-            const lit = s.gear.includes("lantern");
-            const cave = this.add.circle(20 * 64, 4.5 * 64, 150, 0x05040a, lit ? .18 : .55).setDepth(2); this.scenery.push(cave);
-            if (lit) { const glow = this.add.circle(20 * 64, 4 * 64, 150, color("--points"), .12).setDepth(2); this.scenery.push(glow); } else text({ x: 19, y: 4 }, "🌑", 40);
+            // The dark cave overlay and moon marker were removed: the lantern gate for the
+            // cave acorn stays in the item-visibility rules, with no tint circle on the map.
+
             label({ x: 19, y: 6 }, lit ? "Lit cave" : "Dark cave · needs Lantern");
             // Moving lily pads on the river (no flat colour overlay).
             [17, 18].forEach((row, r) => { const pad = text({ x: LILY_ROWS[r]![s.lily]!, y: row }, "🪷", 46); const prev = LILY_ROWS[r]![(s.lily + 2) % 3]!; if (!this.reduced && this.lastLily !== s.lily) { pad.x = (prev + .5) * 64; this.tweens.add({ targets: pad, x: (LILY_ROWS[r]![s.lily]! + .5) * 64, duration: 700, ease: "Sine.easeInOut" }); } });
