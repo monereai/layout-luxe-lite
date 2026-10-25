@@ -1,4 +1,6 @@
-# Energy overflow conversion (2026-10-25)
-- [x] Revised per Carl: bar stays capped at 100 so daily care stays claimable; Energy gained while full accumulates as overflow and pays +5 Points per 100 (remainder carries). Guests: localStorage accumulator + local points; accounts: `profiles.energy_overflow` + atomic `energy_overflow_credit` SQL (migration 0087, replacing 0086's reset approach). Wired into digs, maze harvests and garden completion. All 419 tests pass, build OK.
-- [x] Refreshed stale test mocks (new server function export) and the sitemap test (adventure is public again).
-- [ ] Publish when Carl says "publish".
+# Game economy audit (2026-10-25)
+- [ ] Audit every Energy gain/spend; enforce dig +10, jump cost 5, cap 100 and atomic replay-safe overflow (+5 Points per 100).
+- [ ] Separate Coins from Points; Barn awards +50 Energy/+20 Coins/first scroll and Connie +20 Coins/wood scroll/strict win flag.
+- [ ] Synchronize and persist Energy, Coins, Points and Fruits counters; prohibit negative balances.
+- [ ] Run economy regression tests and isolated end-to-end checks without modifying Carl's account or map movement/tiles/physics.
+- [ ] Check preview compilation; do not publish without a new request.
