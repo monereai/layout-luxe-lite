@@ -1,3 +1,6 @@
+# Barrel speed and jump timing (2026-10-25)
+- [x] Slowed barrels by 10% (3.6px/tick) and lengthened Monere's jump to 700ms (14 ticks); focused and full suites pass (379), build OK. Account gameplay not exercised (Carl-only access).
+
 # Free barrel jumps (2026-10-25)
 - [x] Remove the 5-Energy jump cost: shared rules, mini-game gate, guest path and server commit (migration 0074) all treat jumps as free; jump count still recorded for replay checks. Keys legend reads "Jump barrels · free". Tests updated; account gameplay not exercised (Carl-only access).
 

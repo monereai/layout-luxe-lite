@@ -2,8 +2,8 @@
 export const GARDEN_TICK_MS = 50;
 /** Jumping is free — no Energy is charged per jump. */
 export const JUMP_COST = 0;
-/** A jump lasts 400ms and peaks high enough to clear a rolling barrel. */
-export const JUMP_TICKS = 8;
+/** A jump lasts 700ms and peaks high enough to clear a rolling barrel. */
+export const JUMP_TICKS = 14;
 export const JUMP_HEIGHT = 64;
 export const canGardenJump = (_energy: number) => true;
 export const GARDEN_ENERGY_REWARD = 50;
@@ -34,7 +34,7 @@ export function gardenStep(old: GardenState, input: GardenInput): GardenState {
     if (b.drop) { b.drop++; if (b.drop >= 21) { b.level--; b.drop = 0; } }
     else {
       const dir = b.level % 2 ? 1 : -1;
-      b.x += dir * 4;
+      b.x += dir * 3.6;
       if (b.level > 0 && Math.abs(b.x - (LADDERS[b.level - 1] ?? 0)) <= 4) { b.x = LADDERS[b.level - 1] ?? b.x; b.drop = 1; }
     }
   }

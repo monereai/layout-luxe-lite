@@ -52,7 +52,7 @@ it("Space jumps immediately and a slow save never freezes the loop", async () =>
   fireEvent.click(screen.getByRole("button", { name: "Start garden challenge" }));
   fireEvent.keyDown(window, { key: " " });
   step();
-  expect(state().jumps).toBe(1); expect(state().jump).toBe(8);
+  expect(state().jumps).toBe(1); expect(state().jump).toBe(14);
   step(); step();
   expect(state().tick).toBe(3);
   await act(async () => { release?.(); });
@@ -97,14 +97,14 @@ it("Space cancels scrolling and key repeat does not trigger extra jumps", () => 
   act(() => { window.dispatchEvent(event); });
   expect(event.defaultPrevented).toBe(true); step();
   fireEvent.keyDown(window, { key: " ", code: "Space", repeat: true });
-  for (let i = 0; i < 8; i++) step();
+  for (let i = 0; i < 15; i++) step();
   expect(state().jumps).toBe(1); expect(state().jump).toBe(0);
 });
 it("every jump is accepted with no Energy allowance", () => {
   open();
   for (let j = 0; j < 11; j++) {
     fireEvent.click(screen.getByRole("button", { name: "JUMP (Space)" })); step();
-    for (let i = 0; i < 9; i++) step();
+    for (let i = 0; i < 15; i++) step();
   }
   expect(state().jumps).toBe(11);
 });
