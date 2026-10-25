@@ -4,12 +4,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
-import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame, convertEnergyOverflow } from "@/lib/treasure.functions";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame, creditEnergyOverflow } from "@/lib/treasure.functions";
 import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import type { ArcadeInput } from "@/lib/arcade-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
-import { energyOverflow, takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { overflowPayout, splitEnergyGain, takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
 import { recordEnergyOverflow } from "@/lib/game";
 import { DIG_ENERGY } from "@/lib/treasure";
 
