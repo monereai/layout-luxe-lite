@@ -151,7 +151,7 @@ d4("expanded griffin world", () => {
     e4(A4(s, { action: "deliver", id: "connie" }).quests).toEqual([]);
     for (const a of apples) s = A4({ ...s, x: a.x, y: a.y }, { action: "pick", id: a.id });
     e4(s.items.filter(i => i.startsWith("apple-"))).toEqual(["apple-1", "apple-2", "apple-3"]);
-    e4(A4(s, { action: "deliver", id: "connie" }).quests).toEqual(["connie"]);
+    e4(A4({ ...s, x: 6, y: 20 }, { action: "deliver", id: "connie" }).quests).toEqual(["connie"]);
   });
   i4("dark cave needs the Lantern", () => {
     e4(C4(at4({ zone: "wood" }), 19, 4)).toBe(false);
