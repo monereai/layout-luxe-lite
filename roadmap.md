@@ -1,6 +1,7 @@
 # Shadow Ravine crystal scroll (2026-10-25)
-- [ ] Show the third scroll only in the crystal maze entered from Shadow Ravine; verify reaching it before saving a replay-safe scroll reward.
-- [ ] Show “collect the third scroll” on entry to the qualifying crystal maze.
+- [x] Show the third scroll only in the crystal maze entered from Shadow Ravine; server replay verifies its cell before atomic, duplicate-safe settlement. All 402 tests pass; preview compiles cleanly.
+- [x] Show “collect the third scroll” on entry to the qualifying crystal maze; isolated browser verifies the visible scroll, notification, movement and harvest callback.
+- [ ] Verify authenticated scroll reward read-back through the adventure; blocked by Carl-only access and the rule against altering his progress.
 
 # Connie’s arcade access (2026-10-25)
 - [x] Open the fruit catcher after successful apple delivery even with the wood scroll already collected; keep replay available without requiring the handed-in apples again.
