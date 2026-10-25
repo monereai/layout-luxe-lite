@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ELEMENTAL_GATES, ENERGY_OVERFLOW_POINTS, FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, energyOverflow, harvestGain, sideWalkable, takeGuestMazeEntry } from "./orchard";
+import { ELEMENTAL_GATES, ENERGY_OVERFLOW_POINTS, FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, harvestGain, overflowPayout, sideWalkable, splitEnergyGain, takeGuestMazeEntry } from "./orchard";
 import { walkable, ZONES } from "./treasure";
 
 describe("energy orchards", () => {
@@ -42,16 +42,16 @@ test("side land entrances are safe and every tree is reachable", () => {
 });
 
 describe("energy overflow conversion", () => {
-  it("leaves a partly filled bar untouched", () => {
-    expect(energyOverflow(0)).toEqual({ energy: 0, points: 0 });
-    expect(energyOverflow(99)).toEqual({ energy: 99, points: 0 });
+  it("keeps the bar capped at 100 so daily care stays claimable", () => {
+    expect(splitEnergyGain(40, 25)).toEqual({ energy: 65, overflow: 0 });
+    expect(splitEnergyGain(90, 25)).toEqual({ energy: 100, overflow: 15 });
+    expect(splitEnergyGain(100, 10)).toEqual({ energy: 100, overflow: 10 });
   });
-  it("a full bar awards +5 points and resets to 0", () => {
+  it("pays +5 points per accumulated 100 overflow and keeps the remainder", () => {
     expect(ENERGY_OVERFLOW_POINTS).toBe(5);
-    expect(energyOverflow(100)).toEqual({ energy: 0, points: 5 });
-  });
-  it("carries any remainder past 100", () => {
-    expect(energyOverflow(130)).toEqual({ energy: 30, points: 5 });
-    expect(energyOverflow(250)).toEqual({ energy: 50, points: 10 });
+    expect(overflowPayout(99)).toEqual({ overflow: 99, points: 0 });
+    expect(overflowPayout(100)).toEqual({ overflow: 0, points: 5 });
+    expect(overflowPayout(115)).toEqual({ overflow: 15, points: 5 });
+    expect(overflowPayout(250)).toEqual({ overflow: 50, points: 10 });
   });
 });

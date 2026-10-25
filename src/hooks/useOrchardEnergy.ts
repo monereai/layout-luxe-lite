@@ -4,12 +4,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { useCare } from "./useCare";
 import { usePlan } from "./usePlan";
-import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame, convertEnergyOverflow } from "@/lib/treasure.functions";
+import { startOrchardMaze, settleOrchardMaze, spendMovementEnergy, startGardenGame, commitGardenGame, startArcadeGame, commitArcadeGame, creditEnergyOverflow } from "@/lib/treasure.functions";
 import { GARDEN_ENERGY_REWARD, type GardenInput } from "@/lib/garden-game";
 import type { ArcadeInput } from "@/lib/arcade-game";
 import { DASH_ENERGY, SPRINT_ENERGY_PER_SECOND } from "@/lib/movement";
 import { depositEnergy, replayMaze, type MazeDirection } from "@/lib/harvest-maze";
-import { energyOverflow, takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
+import { overflowPayout, splitEnergyGain, takeGuestMazeEntry, type TreeId } from "@/lib/orchard";
 import { recordEnergyOverflow } from "@/lib/game";
 import { DIG_ENERGY } from "@/lib/treasure";
 
@@ -32,35 +32,27 @@ export function useOrchardEnergy() {
   useEffect(() => { try { const v = Number(localStorage.getItem(GUEST_KEY)); if (Number.isFinite(v) && localStorage.getItem(GUEST_KEY) !== null) { guestBalance.current = Math.min(100, Math.max(0, v)); setGuest(guestBalance.current); } } catch { /* optional */ } }, []);
   const energy = care.user ? care.data?.energy ?? 0 : guest;
   const cool = (id: TreeId) => (cooling[id] ?? 0) > Date.now();
-  const convert = useServerFn(convertEnergyOverflow);
-  const converting = useRef(false);
+  const creditOverflowFn = useServerFn(creditEnergyOverflow);
   const accountId = care.user?.id;
-  // Full bar bonus: every 100 Energy converts to +5 Points and the bar resets, carrying any remainder.
-  useEffect(() => {
-    if (energy < 100 || converting.current) return;
-    converting.current = true;
-    void (async () => {
-      try {
-        if (!accountId) {
-          const overflow = energyOverflow(guestBalance.current);
-          if (overflow.points > 0) {
-            saveGuest(overflow.energy);
-            recordEnergyOverflow(overflow.points);
-            toast(`+${overflow.points} Points! Energy Reset!`);
-          }
-        } else {
-          const result = await convert();
-          if (identity.current !== accountId) return;
-          if (result.points > 0) {
-            client.setQueryData(["monere-care", accountId], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
-            void care.refetch(); void plan.refresh();
-            toast(`+${result.points} Points! Energy Reset!`);
-          }
-        }
-      } catch { /* keep the full bar; conversion retries on the next energy change */ }
-      finally { converting.current = false; }
-    })();
-  }, [energy, accountId, client, convert, care, plan]);
+  const overflowBalance = useRef(0);
+  const OVERFLOW_KEY = "monere-orchard-guest-overflow";
+  useEffect(() => { try { const v = Number(localStorage.getItem(OVERFLOW_KEY)); if (Number.isFinite(v)) overflowBalance.current = Math.max(0, v); } catch { /* optional */ } }, []);
+  /** The bar stays capped at 100 (daily care remains claimable); Energy gained while full accumulates and pays +5 Points per 100. */
+  async function creditOverflow(amount: number) {
+    if (amount <= 0) return;
+    if (!accountId) {
+      const payout = overflowPayout(overflowBalance.current + amount);
+      overflowBalance.current = payout.overflow;
+      try { localStorage.setItem(OVERFLOW_KEY, String(payout.overflow)); } catch { /* optional */ }
+      if (payout.points > 0) { recordEnergyOverflow(payout.points); toast(`+${payout.points} Points! Energy Overflow!`); }
+      return;
+    }
+    try {
+      const result = await creditOverflowFn({ data: { amount } });
+      if (identity.current !== accountId) return;
+      if (result.points > 0) { void plan.refresh(); toast(`+${result.points} Points! Energy Overflow!`); }
+    } catch { /* overflow is a bonus; a failed credit never blocks the gain itself */ }
+  }
   async function beginMaze(id: TreeId) {
     if (id !== "caverns-1" && cool(id)) throw new Error("This tree is regrowing its fruit.");
     if (!care.user && !takeGuestMazeEntry(new Date().toISOString().slice(0, 10))) {
@@ -78,10 +70,12 @@ export function useOrchardEnergy() {
     if (!care.user) {
       const gained = depositEnergy(guestBalance.current, maze.energy), next = guestBalance.current + gained;
       saveGuest(next);
+      void creditOverflow(maze.energy - gained);
       setCooling(c => ({ ...c, [id]: Date.now() + COOLDOWN }));
       return { gained, state: null };
     }
     const result = await settle({ data: { round, trace } });
+    void creditOverflow(maze.energy - result.gained);
     client.setQueryData(["monere-care", care.user.id], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
     setCooling(c => ({ ...c, [id]: Date.now() + COOLDOWN })); void care.refetch();
     return result;
@@ -105,7 +99,13 @@ export function useOrchardEnergy() {
   }
   /** Pet digs reward Energy: server-granted for accounts, mirrored into the local bar for guests. */
   function gainDig() {
-    if (!care.user) { saveGuest(Math.min(100, guestBalance.current + DIG_ENERGY)); return; }
+    if (!care.user) {
+      const split = splitEnergyGain(guestBalance.current, DIG_ENERGY);
+      saveGuest(split.energy);
+      void creditOverflow(split.overflow);
+      return;
+    }
+    void creditOverflow(splitEnergyGain(care.data?.energy ?? 0, DIG_ENERGY).overflow);
     void care.refetch();
   }
   async function beginGarden() { return care.user ? (await gardenStart()).id : "guest"; }
@@ -114,7 +114,7 @@ export function useOrchardEnergy() {
       // Jumps are free; only the one-time finish reward touches the guest balance.
       const already = localStorage.getItem("monere-garden-guest-reward") === "claimed";
       const gained = finish && !already ? depositEnergy(guestBalance.current, GARDEN_ENERGY_REWARD) : 0;
-      if (finish) saveGuest(guestBalance.current + gained);
+      if (finish) { saveGuest(guestBalance.current + gained); void creditOverflow(GARDEN_ENERGY_REWARD - gained); }
       if (finish) localStorage.setItem("monere-garden-guest-reward", "claimed");
       return { energy: guestBalance.current, gained, points: finish && !already ? 20 : 0, state: null };
     }
@@ -122,7 +122,7 @@ export function useOrchardEnergy() {
     const result = await gardenCommit({ data: { round, trace, finish } });
     if (identity.current !== account) throw new Error("Account changed.");
     client.setQueryData(["monere-care", account], (old: Record<string, unknown> | undefined) => old ? { ...old, energy: result.energy } : old);
-    if (finish) { void care.refetch(); void plan.refresh(); }
+    if (finish) { void creditOverflow(GARDEN_ENERGY_REWARD - result.gained); void care.refetch(); void plan.refresh(); }
     return result;
   }
   async function beginArcade() { return care.user ? (await arcadeStart()).id : "guest"; }

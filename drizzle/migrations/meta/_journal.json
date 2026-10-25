@@ -610,6 +610,13 @@
       "when": 1792918865025,
       "tag": "0086_energy_overflow_convert",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1792919069193,
+      "tag": "0087_energy_overflow_credit",
+      "breakpoints": true
     }
   ]
 }

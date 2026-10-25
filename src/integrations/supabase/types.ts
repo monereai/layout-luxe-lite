@@ -399,6 +399,7 @@ export type Database = {
       profiles: {
         Row: {
           daily_care_claimed: boolean
+          energy_overflow: number
           equipped_pet_id: string | null
           full_energy_bonus: boolean
           last_biblical_snap: string | null
@@ -416,6 +417,7 @@ export type Database = {
         }
         Insert: {
           daily_care_claimed?: boolean
+          energy_overflow?: number
           equipped_pet_id?: string | null
           full_energy_bonus?: boolean
           last_biblical_snap?: string | null
@@ -433,6 +435,7 @@ export type Database = {
         }
         Update: {
           daily_care_claimed?: boolean
+          energy_overflow?: number
           equipped_pet_id?: string | null
           full_energy_bonus?: boolean
           last_biblical_snap?: string | null
@@ -717,7 +720,7 @@ export type Database = {
         Args: { p_action?: string; p_choice?: number; p_day?: string }
         Returns: Json
       }
-      energy_overflow_convert: { Args: never; Returns: Json }
+      energy_overflow_credit: { Args: { p_amount: number }; Returns: Json }
       garden_barrel_commit: {
         Args: {
           p_finish: boolean
