@@ -139,6 +139,19 @@ export function TreasureGame({ developer = false }: { developer?: boolean }) {
   const [music, setMusic] = useState(true);
   useEffect(() => { const on = (() => { try { return localStorage.getItem("monere-treasure-music") !== "off"; } catch { return true; } })(); setMusic(on); setMusicMuted(!on); const start = () => resumeBackgroundMusic(); window.addEventListener("pointerdown", start); window.addEventListener("keydown", start); return () => { window.removeEventListener("pointerdown", start); window.removeEventListener("keydown", start); stopBackgroundMusic(); }; }, []);
   useEffect(() => { playBackgroundMusic(side ? SIDE_ZONES[side].music : state.zone === "lair" ? "lair_theme.mp3" : state.zone === "ravine" ? "desert_theme.mp3" : "forest_theme.mp3"); }, [state.zone, side]);
+  const [fullscreen, setFullscreen] = useState(false);
+  useEffect(() => {
+    const sync = () => setFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+  function toggleFullscreen() {
+    const element = document.documentElement;
+    const request = (element as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> | void }).requestFullscreen ?? (element as HTMLElement & { webkitRequestFullscreen?: () => Promise<void> | void }).webkitRequestFullscreen;
+    if (!request) { toast("To play full screen on iOS, tap Share -> Add to Home Screen!"); return; }
+    if (!document.fullscreenElement) request.call(element).catch((err: unknown) => console.log(err));
+    else void document.exitFullscreen();
+  }
   useEffect(() => { if (!notice) return; const t = setTimeout(() => setNotice(null), 4500); return () => clearTimeout(t); }, [notice]);
   function tone(notes: number[]) {
     if (!sound) return;
