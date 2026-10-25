@@ -1,6 +1,10 @@
 # Developer adventure reset (2026-10-25)
-- [ ] Add a confirmed, server-protected developer reset available before completion; reset quests, items, scrolls and mini-game rounds while preserving account balances, purchases and payout ledgers.
-- [ ] Test developer authorization and reset/save behaviour without altering Carl’s account.
+- [x] Add a confirmed, server-protected developer reset available before completion; reset quests, items, scrolls and mini-game rounds while preserving account balances, purchases and payout ledgers.
+- [x] Test developer authorization and reset/save behaviour without altering Carl’s account; 17 focused checks pass and preview compiles.
+- [ ] Verify live reset read-back; blocked by rule against altering Carl’s progress. Browser confirmation check did not reach developer access.
+
+# Adventure logic assessment (2026-10-25)
+- [ ] Review quest/gate/mini-game/reward consistency and play through using isolated progress; report confirmed inconsistencies and unverified paths.
 
 # Shadow Ravine crystal scroll (2026-10-25)
 - [x] Remove the old Shadow Ravine scroll rock and disable its map pickup in guest rules and both live action functions; existing scrolls and movement unchanged. All 53 focused tests pass and preview compilation is clean.
