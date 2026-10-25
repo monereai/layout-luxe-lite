@@ -25,14 +25,14 @@ it("fruits spawn on a fixed cadence at deterministic lanes", () => {
 });
 
 it("a fruit is caught when Monere stands under it at the catch line", () => {
-  let s = { ...newArcade(), x: 300, fruits: [{ x: 310, y: 440, kind: 0 }] };
+  let s = { ...newArcade(), x: 300, fruits: [{ x: 310, y: 446, kind: 0 }] };
   s = arcadeStep(s, "idle");
   expect(s.catches).toBe(1);
   expect(s.fruits).toHaveLength(0);
 });
 
 it("a fruit is missed when it falls past away from Monere", () => {
-  let s = { ...newArcade(), x: 60, fruits: [{ x: 500, y: 500, kind: 0 }] };
+  let s = { ...newArcade(), x: 60, fruits: [{ x: 500, y: 506, kind: 0 }] };
   s = arcadeStep(s, "idle");
   expect(s.misses).toBe(1);
 });
