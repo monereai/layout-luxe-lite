@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ user: null as {id:string} | null, energy: 10, spend: vi.fn() }));
 vi.mock("@tanstack/react-start", () => ({ useServerFn: (fn: unknown) => fn, createMiddleware: () => ({ server: (fn: unknown) => fn }), createServerFn: () => { const chain = { middleware: () => chain, inputValidator: () => chain, handler: (fn: unknown) => fn, server: (fn: unknown) => fn }; return chain; } }));
-vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: vi.fn(), settleOrchardMaze: vi.fn(), spendMovementEnergy: mocks.spend, startGardenGame: vi.fn(), commitGardenGame: vi.fn() }));
+vi.mock("@/lib/treasure.functions", () => ({ startOrchardMaze: vi.fn(), settleOrchardMaze: vi.fn(), spendMovementEnergy: mocks.spend, startGardenGame: vi.fn(), commitGardenGame: vi.fn(), startArcadeGame: vi.fn(), commitArcadeGame: vi.fn() }));
 vi.mock("@/hooks/useCare", () => ({ useCare: () => ({ user: mocks.user, data: { energy: mocks.energy }, refetch: vi.fn() }) }));
 import { useOrchardEnergy } from "@/hooks/useOrchardEnergy";
 beforeEach(() => { localStorage.clear(); mocks.user = null; mocks.energy = 10; mocks.spend.mockReset(); });
