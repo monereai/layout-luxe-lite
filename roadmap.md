@@ -1,3 +1,6 @@
+# Preview crash: useContext dispatcher null
+- [ ] Investigate "can't access property useContext, dispatcher is null" crash reported in preview after barrel jump edits; check build/dev-server logs and reproduce.
+
 # Barrel jump repair
 - [x] Make jumps instant: optimistic local Energy gate, ordered background settlement, and a lag-tolerant server commit that charges any unpaid jumps at finish; Space works via key code and a slow save never freezes the loop. Regression tests cover immediate jump, non-blocking save, button parity and the low-Energy refusal.
 
