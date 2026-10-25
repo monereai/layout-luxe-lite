@@ -783,6 +783,7 @@ export type Database = {
         }
         Returns: Json
       }
+      treasure_dev_reset: { Args: never; Returns: Json }
       treasure_draw_hunt: { Args: { s: Json }; Returns: Json }
       treasure_hunt_pool: { Args: never; Returns: Json }
       treasure_movement_boost: { Args: { p_mode: string }; Returns: Json }
