@@ -181,12 +181,11 @@ export function WorldCanvas(props: Props) {
             label(n, n.name.split(" ")[0]!); if (!s.quests.includes(n.id)) text({ x: n.x, y: n.y - 1 }, s.met.includes(n.id) ? "💬" : "❗", 26);
           });
           ITEMS.filter(i => i.zone === s.zone && !s.items.includes(i.id) && itemVisible(s, i) && (s.zone !== "wood" || i.id !== "acorn-2" || s.gear.includes("lantern"))).forEach(i => {
-            // Connie's three apples sit quietly in the scenery instead of drawing attention like quest markers.
-            const apple = i.id.startsWith("apple-");
-            const o = text(i, i.icon, apple ? 16 : 34);
-            if (apple) return;
+            // Connie's apples and Vernon's seeds sit quietly in the scenery instead of drawing attention like quest markers.
+            const quiet = i.id.startsWith("apple-") || i.id.startsWith("seed-");
+            const o = text(i, i.icon, quiet ? 16 : 34);
+            if (quiet) return;
             bob(o);
-            if (i.id.startsWith("seed-")) o.setDepth(8);
             if (!this.reduced) this.tweens.add({ targets: o, angle: 8, duration: 700, yoyo: true, repeat: -1 });
           });
           sessionDigs(s).filter(d => d.zone === s.zone).forEach(d => { const done = s.dug.includes(d.id); const m = this.add.ellipse(...at(d), 46, 20, 0x5a3a1c, done ? .35 : .8).setDepth(2); this.scenery.push(m); if (!done) { const x = text(d, "✖", 22); x.setY(x.y - 2); if (!this.reduced) this.tweens.add({ targets: x, alpha: .4, duration: 800, yoyo: true, repeat: -1 }); } });

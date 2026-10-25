@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable, takeGuestMazeEntry } from "./orchard";
+import { ELEMENTAL_GATES, FREE_MAZE_ENTRIES_PER_DAY, MAP_TREES, TREE_IDS, canOpenGate, harvestGain, sideWalkable, takeGuestMazeEntry } from "./orchard";
 import { walkable, ZONES } from "./treasure";
 
 describe("energy orchards", () => {
   it("Crystal maze entry needs no Energy", () => { expect(canOpenGate(0, "caverns")).toBe(true); expect(canOpenGate(49, "caverns")).toBe(true); });
-  it("the Leaf Gate still needs 50 energy", () => { expect(canOpenGate(49, "grove")).toBe(false); expect(canOpenGate(50, "grove")).toBe(true); });
+  it("the Leaf Gate is removed, so no elemental gate leads to the grove", () => { expect(ELEMENTAL_GATES.some(g => g.target === "grove")).toBe(false); expect(ELEMENTAL_GATES.map(g => g.target)).toEqual(["caverns"]); });
   it("trees give 25 energy capped at 100", () => { expect(harvestGain(10)).toBe(25); expect(harvestGain(90)).toBe(10); expect(harvestGain(100)).toBe(0); });
   it("trees block walking", () => { expect(sideWalkable("grove", { x: 3, y: 1 })).toBe(false); expect(sideWalkable("grove", { x: 2, y: 1 })).toBe(true); });
   it("every main land has a harvestable tree on a walkable tile", () => {
